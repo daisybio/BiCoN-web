@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags <meta http-equiv="refresh" content="3" > -->
+
+    <title>Quirin's Master Thesis test page</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+
+<script type="text/javascript" charset="utf8" src="http://code.jquery.com/jquery-3.3.1.js"></script>
+<!--<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.css">-->
+<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+ 
+<script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>-->
+<!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/dataTables.jqueryui.min.js"></script>-->
+<!--<script type="text/javascript" charset="utf8" src="
+https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js "></script>-->
+<script type="text/javascript" charset="utf8">
+$(document).ready(function() {
+    //alert("bsfbaisdfbajsidf");
+
+//var table = $('#ctable').removeAttr('width').DataTable( {
+//      scrollY:        "550px",
+//      scrollX:        false,
+//      scrollCollapse: false,
+//      paging:         true,
+//        columnDefs: [
+//            { width: '20%', targets: 0 }
+//        ],
+//        fixedColumns: true
+//    } );
+    $('#ctable').dataTable();
+    $('#ctable2').dataTable();
+    $('#ctable3').dataTable();
+} );
+</script>
+       {% load staticfiles %}
+
+
+<script src="{% static 'src/sigma.core.js' %}"></script>
+<script src="{% static 'src/conrad.js' %}"></script>
+<script src="{% static 'src/utils/sigma.utils.js' %}"></script>
+<script src="{% static 'src/utils/sigma.polyfills.js' %}"></script>
+<script src="{% static 'src/sigma.settings.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.dispatcher.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.configurable.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.graph.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.camera.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.quad.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.edgequad.js' %}"></script>
+<script src="{% static 'src/captors/sigma.captors.mouse.js' %}"></script>
+<script src="{% static 'src/captors/sigma.captors.touch.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.canvas.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.webgl.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.svg.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.nodes.fast.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.fast.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.labels.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.hovers.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.curve.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.curvedArrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.curve.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.curvedArrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.extremities.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.utils.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.edges.curve.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.labels.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.hovers.def.js' %}"></script>
+<script src="{% static 'src/middlewares/sigma.middlewares.rescale.js' %}"></script>
+<script src="{% static 'src/middlewares/sigma.middlewares.copy.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.animation.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.bindEvents.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.bindDOMEvents.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.drawHovers.js' %}"></script>
+<script src="{% static 'shape-library.js' %}"></script>
+<script src="{% static 'sigma.renderers.customShapes.js' %}"></script>
+
+
+     
+<!-- <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script> -->
+<!---<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.3.1.js"></script>-->
+
+
+<!-- END SIGMA IMPORTS -->
+<script src="{% static 'plugins/sigma.parsers.json/sigma.parsers.json.js' %}"></script>
+<!--<script src="http://code.jquery.com/jquery-latest.js"></script>-->
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'bootstrap.min.css'%}" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="{% static 'custom.css'%}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<style>.wrap-collabsible {
+  margin-bottom: 1.2rem 0;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: block;
+
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  text-align: center;
+
+  padding: 1rem;
+
+  color: #000000;
+  background: #FFFFFF;
+
+  cursor: pointer;
+
+  border-radius: 7px;
+  transition: all 0.25s ease-out;
+}
+
+.lbl-toggle:hover {
+  color: #000000;
+}
+
+.lbl-toggle::before {
+  content: ' ';
+  display: inline-block;
+
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid currentColor;
+  vertical-align: middle;
+  margin-right: .7rem;
+  transform: translateY(-2px);
+
+  transition: transform .2s ease-out;
+}
+
+.toggle:checked + .lbl-toggle::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: 350px;
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.collapsible-content .content-inner {
+  /*background: rgba(250, 224, 66, .2);*/
+  background: rgba(255, 255, 255, .2);
+  border-bottom: 1px solid rgba(255, 255, 255, .2);
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  padding: .5rem 1rem;
+}
+.message_1 {
+    display:none;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.dataTable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+.collapsible {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+.active, .collapsible:hover {
+  background-color: #ccc;
+}
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    width: 150px;
+}
+.tab button:hover {
+    background-color: #ddd;
+}
+.tab button.active {
+    background-color: #ccc;
+}
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+.tabcontent3 {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+#ctable{
+width:500px;}
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    display: block;
+    float: left;
+    clear: both;
+}
+.tab-content{
+    background-color: #FFFFFF;
+}
+.paging-nav {
+  text-align: right;
+  padding-top: 2px;
+}
+.paging-nav a {
+  text-decoration: none;
+  margin: auto 1px;
+  display: inline-block;
+  padding: 1px 7px;
+  background: #91b9e6;
+  color: white;
+  border-radius: 3px;
+}
+.paging-nav .selected-page {
+  background: #187ed5;
+  font-weight: bold;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+</head>
+
+<body>
+<div id="container">
+  <style>
+    #graph-container {
+	width: 1000px;
+    height: 600px;
+    margin: auto;
+border:1px solid black;
+      top: 100;
+      bottom: 100;
+      left: 100;
+      right: 100;
+      position:
+    }
+    #sigma-container {
+	width: 700px;
+      height: 400px;
+    margin: auto;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      position: absolute;
+    }
+  </style>
+		
+</div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                	Quirin's Master Thesis
+                </a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#">Home</a>
+                    </li>
+                    <li>
+                        <a href="#">Analysis</a>
+                    </li>
+                    <li>
+                        <a href="clustering.html">Old analysis site</a>
+                    </li>
+                    <li>
+                        <a href="predictions_3.html">Prediction</a>
+                    </li>
+			<li>
+                        <a>Logged in?</a>
+			{% if user.is_authenticated %}
+    			User: {{ user.get_username }}
+			<form action="logout.html" method="post" enctype="multipart/form-data">
+              	  	{% csrf_token %}
+                	<input type="submit" value="Logout"/>
+			</form>
+   			{% else %}
+			<a href="login.html">Login</a>
+   			{% endif %} 
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+	<div class="jumbotron feature">
+		<div class="container">
+			<h1> Quirin's Master Thesis Test Page</h1>
+			<p>Vizualise Gene Expression and PPI data. </p>
+		</div>
+	</div>
+
+    <!-- Content -->
+    <div class="container">
+
+<a name="Content"></a>
+        <!-- Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Analysis
+                    <small>Gene Expression & PPI</small>
+                </h1>
+                
+            </div>
+        </div>    
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;  display:inline;">
+        <h1>Run Algorithm:</h1>
+	<a href="infopage.html"  target="_blank">How to</a><br><br>
+		<form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<b>Upload file with expression data:</b><br>
+	<input class="input" type="file" name="myfile">
+	<b>Upload file with PPI:     </b><label for="l_box1"><input type="radio" name="predef_file" value="predef_file" id="l_box1">   Use predefined input files:</label>
+	<input class="input" type="file" name="protfile"> 
+	<br><select name="cancer_type" size="1">	
+	        <option value="1">Lung Cancer</option>
+	        <option value="2">Breast Cancer</option>
+       	</select>
+{% if user.is_authenticated %}
+    	<label for="l_box1"><input type="radio" name="save_data" value="save_data" id="l_box1">  Save data</label>	
+   	{% endif %}
+ <div class="wrap-collabsible" style="width:200px; display:inline;">
+  <input id="collapsible_2" class="toggle" type="checkbox">
+  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
+  <div class="collapsible-content">
+    <div class="content-inner">
+	<!--<label for="l_box1"><input type="radio" name="ndex_file" value="ndex_file" id="ndex_file">Import network from Ndex:</label>-->
+	<label for="l_box1"><input type="radio" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file">Parse Ndex file:</label>
+	<!--<input class="input" type="file" name="ndex_file_input">-->
+	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1" onchange="recalctotals()">	
+	        <option value="1" selected="selected">APID</option>
+	        <option value="2">STRING</option>
+	        <option value="3">BioGrid</option>
+	        <option value="4">HPRD (Human Protein Reference Database)</option>
+		<option value="5">Ulitsky</option>
+       		<option value="6">I2D</option>
+      	 	<option value="7">BioGrid (C.Elegans)</option>
+      	 	<option value="8">BioGrid (A.Thal.)</option>
+      	 	<option value="9">BioGrid (Mus Mus.)</option>
+      	 	<option value="10">BioGrid (D Mel.)</option>
+      	 	<option value="11">BioGrid (E. Coli)</option>
+      	 	<option value="12">BioGrid (Sacch. C.)</option>
+      	 	<option value="13">BioGrid (Dan.R.)</option>
+       	</select><br><br>
+<span class="message_1"  style="display:block;">Human interactome extracted from <a href="http://apid.dep.usal.es">APID</a>, only human proteins, no inter-species interactions.</span>
+       	<span class="message_2" style="display:none;">PPI from <a href="https://string-db.org/">String Database</a>. This network contains high confidence human protein links. All interactions with Score lower than 0.7 were filtered out.</span>
+       	<span class="message_3" style="display:none;">PPI from <a href="https://thebiogrid.org/">BIOGRID</a></span>
+	<span class="message_4" style="display:none;">This network belongs to an NDEx Network Set associated with the 2018 Huang and Carlin et al. Cell Systems paper.</span>
+	<span class="message_5" style="display:none;">PPI network from Ulitsky et al. 2008</span>
+	<span class="message_6" style="display:none;">PPI from the <a href="http://ophid.utoronto.ca/ophidv2.204/">I2D</a> project.</span>
+	
+</div>
+  </div>
+</div>
+<script>
+var coll2 = document.getElementsByClassName("collapsible_2");
+var i;
+
+for (i = 0; i < coll2.length; i++) {
+  coll2[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+} 
+</script>
+       	
+<script>
+$(document).ready(function() {
+
+    $('#ndex_name_2').change(function() {
+
+        var selectedValue = $(this).val();
+
+        if ( selectedValue == '1' ) {
+            $('.message_1').show();
+        } else {
+            $('.message_1').hide();
+        }
+        if ( selectedValue == '2' ) {
+            $('.message_2').show();
+        } else {
+            $('.message_2').hide();
+        }
+        if ( selectedValue == '3' || selectedValue =='7' || selectedValue =='8' || selectedValue =='9' || selectedValue =='10' || selectedValue =='11' || selectedValue =='12'|| selectedValue =='13' ) {
+            $('.message_3').show();
+        } else {
+            $('.message_3').hide();
+        }
+	if ( selectedValue == '4' ) {
+            $('.message_4').show();
+        } else {
+            $('.message_4').hide();
+        }if ( selectedValue == '5' ) {
+            $('.message_5').show();
+        } else {
+            $('.message_5').hide();
+        }if ( selectedValue == '6' ) {
+            $('.message_6').show();
+        } else {
+            $('.message_6').hide();
+        }
+
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+
+    $('#ndex_name').change(function() {
+
+        var selectedValue = $(this).val();
+
+        if ( selectedValue == '1' ) {
+            $('.message_1').show();
+        } else {
+            $('.message_1').hide();
+        }
+        if ( selectedValue == '2' ) {
+            $('.message_2').show();
+        } else {
+            $('.message_2').hide();
+        }
+        if ( selectedValue == '3' || selectedValue =='7' || selectedValue =='8' || selectedValue =='9' || selectedValue =='10' || selectedValue =='11' || selectedValue =='12'|| selectedValue =='13' ) {
+            $('.message_3').show();
+        } else {
+            $('.message_3').hide();
+        }
+	if ( selectedValue == '4' ) {
+            $('.message_4').show();
+        } else {
+            $('.message_4').hide();
+        }if ( selectedValue == '5' ) {
+            $('.message_5').show();
+        } else {
+            $('.message_5').hide();
+        }if ( selectedValue == '6' ) {
+            $('.message_6').show();
+        } else {
+            $('.message_6').hide();
+        }
+
+    });
+});
+</script>
+<br>
+	<label for="l_box1"><input type="radio" name="analyze_metadata" value="analyze_metadata" id="l_box1">Analyze Patient Metadata</label>
+	<br><b>Upload file with Patient Data:</b><br>
+	<input class="input" type="file" name="patientdata">
+	Name of "survival" column: <input class="input" type="text" name="survival_col"><br>
+        
+	{% if user.is_authenticated %}
+		<label for="l_box1"><input type="radio" name="own_file" value="own_file" id="l_box1">Use own files:</label>
+		<br><br><h3>Use own uploaded files:</h3>
+	<select name="input_own_file" size="1"style="width:500px">	
+		{% for filename in list_of_files %}
+	        <option value="{{filename.f1}}">Filename:{{filename.f1}}</option>
+		{% endfor %}
+       	</select><br>
+	<label for="l_box1"><input type="radio" name="redo_analysis" value="redo_analysis" id="l_box1">Redo analysis:</label>
+	<select name="input_own_file_redo" size="1"style="width:500px">	
+		{% for filename2 in list_of_files_2 %}
+	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
+		{% endfor %}
+       	</select>
+		
+	{% endif %}
+	<p><b>Enter minimum and maximum number of genes per cluster and run the algorithm:</b></p>
+       Minimal:
+	<input class="input" type="text" name="L_g_min">
+	Maximal:
+    	<input class="input" type="text" name="L_g_max">
+	<br>
+	Maximum number of iterations:
+	<select name="nbr_iter" size="1">	
+	        <option value="2">2</option>
+	        <option value="5">5</option>
+	        <option value="10">10</option>
+	        <option value="20">20</option>
+	        <option value="45">45</option>
+       	</select>
+	<!-- was moved to below (inside collapsible) -->	
+	 <div class="wrap-collabsible">
+  <input id="collapsible" class="toggle" type="checkbox">
+  <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
+  <div class="collapsible-content">
+    <div class="content-inner">
+      <p>
+       Number of ants:
+	<select name="nbr_ants" size="1">	
+	        <option value="10">10</option>
+	        <option value="20">20</option>
+	        <option value="30" selected="selected">30</option>
+	        <option value="40">40</option>
+	        <option value="50">50</option>
+       	</select>
+	Evaporation rate:
+	<select name="evap" size="1">	
+	        <option value="0.1">0.1</option>
+	        <option value="0.25">0.25</option>
+	        <option value="0.5" selected="selected">0.5</option>
+	        <option value="0.6">0.6</option>
+	        <option value="0.7">0.7</option>
+       	</select><br>
+Pheromone significance:
+	<select name="pher" size="1">	
+	        <option value="0.5">0.5</option>
+	        <option value="0.75">0.75</option>
+	        <option value="1" selected="selected">1</option>
+	        <option value="1.5">1.5</option>
+	        <option value="2">2</option>
+       	</select>
+HI significance:
+	<select name="hisig" size="1">	
+	        <option value="0.5">0.5</option>
+	        <option value="0.75">0.75</option>
+	        <option value="1" selected="selected">1</option>
+	        <option value="1.5">1.5</option>
+	        <option value="2">2</option>
+       	</select><br>
+Stop criteria: score_max - score_av <
+	<select name="stopcr" size="1">	
+	        <option value="0.005">0.005</option>
+	        <option value="0.01">0.01</option>
+	        <option value="0.02" selected="selected">0.02</option>
+	        <option value="0.03">0.03</option>
+	        <option value="0.05">0.05</option>
+       	</select>
+	
+	</p>
+    </div>
+  </div>
+</div>
+	        <input type="submit" value="Submit" />
+<!-- this was new-->
+   		</form>
+<br><br><br><br>
+</div>
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+} 
+</script>
+       {% load staticfiles %}
+        <!-- /.row -->
+        <!-- Feature Row -->
+<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
+</object><br><br><img src={% static 'progress.png' %} width="400" height="400">
+	
+	</div>
+
+<div class="tab">
+  <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
+  <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
+  <button class="tablinks" onclick="openTab(event, 'survival')">Survival Data</button>
+  <button class="tablinks" onclick="openTab(event, 'patient_metadata')">Patient Information</button>
+  <button class="tablinks" onclick="openTab(event, 'convergence')">Convergence</button>
+  <button class="tablinks" onclick="openTab(event, 'kegg_enrichment')">Enrichment</button>
+</div>
+
+
+<div class="row" id="ppi">
+            <article class="col-md-8 article-intro">
+
+		
+                <h1>PPI Graph</h1>
+                <h3>
+                    <a href="#">Visualize Protein-Protein Interactions</a>
+                </h3>
+		
+       {% load staticfiles %}
+		<div id="graph-container" style="display: block"><script>
+sigma.utils.pkg('sigma.canvas.nodes');
+/**
+ * 
+ * Here is just a basic example on how to properly display a graph
+ * exported from Gephi in the GEXF format.
+ *
+ * The plugin sigma.parsers.gexf can load and parse the GEXF graph file,
+ * and instantiate sigma when the graph is received.
+ *
+ * The object given as the second parameter is the base of the instance
+ * configuration object. The plugin will just add the "graph" key to it
+ * before the instanciation.
+ */
+
+  sigma.classes.graph.addMethod('neighbors', function(nodeId) {
+    var k,
+        neighbors = {},
+        index = this.allNeighborsIndex[nodeId] || {};
+
+    for (k in index)
+      neighbors[k] = this.nodesIndex[k];
+
+    return neighbors;
+  });
+
+ sigma.parsers.json('{% static 'test15.json' %}', {
+  container: 'graph-container', renderer: {
+		type: 'canvas',
+container: 'graph-container'
+	},        settings: {sideMargin:0.05}
+},function(s) {
+      // We first need to save the original colors of our
+      // nodes and edges, like this:
+      s.graph.nodes().forEach(function(n) {
+        n.originalColor = n.color;
+      });
+      s.graph.edges().forEach(function(e) {
+        e.originalColor = e.color;
+      });
+s.bind('clickNode', function(e) {
+        var nodeId = e.data.node.id,
+            toKeep = s.graph.neighbors(nodeId);
+        toKeep[nodeId] = e.data.node;
+
+        s.graph.nodes().forEach(function(n) {
+          if (toKeep[n.id])
+            n.color = n.originalColor;
+          else
+            n.color = '#eee';
+        });
+
+        s.graph.edges().forEach(function(e) {
+          if (toKeep[e.source] && toKeep[e.target])
+            e.color = e.originalColor;
+          else
+            e.color = '#eee';
+        });
+
+        // Since the data has been modified, we need to
+        // call the refresh method to make the colors
+        // update effective.
+        s.refresh();
+      });
+
+      // When the stage is clicked, we just color each
+      // node and edge with its original color.
+      s.bind('clickStage', function(e) {
+        s.graph.nodes().forEach(function(n) {
+          n.color = n.originalColor;
+        });
+
+        s.graph.edges().forEach(function(e) {
+          e.color = e.originalColor;
+        });
+
+        // Same as in the previous event:
+        s.refresh();
+      });
+});
+CustomShapes.init(s);
+s.refresh();
+</script><img src={% static 'legend.png' %} width="132" height="218"> </div>	
+		<!--<div id="graph-container"><img src={% static 'legend.png' %} width="198" height="327"> </div>-->
+                <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>
+         
+{% if user.is_authenticated %}
+     <br><br>
+	Download the network 
+     <a href={% static 'ntw.png' %} download> as png </a> or
+     <a href={% static 'test15.json' %} download> as json file </a>
+   {% else %}
+	Download the network 
+     <a href={% static 'ntw.png' %} download> as png </a> or
+     <a href={% static 'test15.json' %} download> as json file </a>
+   {% endif %} 
+
+</article>
+            
+        </div>
+<div class="tabcontent" id="heatmap">
+            
+<h3></h3>           
+            <article class="col-md-8 article-intro">
+
+                <h1>Heatmap</h1>
+       {% load staticfiles %}
+
+        <!-- <img src={% static plot2 %}> -->
+	
+        <img src={% static "test.png" %}><h3>
+                    <a href="#">Heatmap</a>
+                </h3>
+                <p>The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.</p>
+		
+<br><br>
+
+            </article>
+        </div>
+       {% load staticfiles %}
+
+<div class="tabcontent" id="survival">
+            <article class="col-md-12 article-intro">
+                <h1>Survival Information</h1>
+<object type="text/html" data="{% static 'output_plotly.html' %}" width="800" height="500" ></object>
+                <h3>
+                    <a href="#">Survival of patients</a>
+                </h3>
+                <p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p>    
+</article> 
+        </div>
+
+<div class="tabcontent" id="patient_metadata">
+            <article class="col-md-12 article-intro">
+                <h1>Patient Data</h1>
+		<h3>
+                    <a href="#">Metadata of patients</a>
+                </h3>
+                <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients in Cluster 1 has a lung metastasis).</p>
+            
+{{ret_metadata}}
+<table>
+<tr>
+<th>Group</th>
+{% for key,value in ret_metadata1.items %}
+  <th> {{value}} </th>
+{% endfor %}
+</tr>
+<tr>
+<th>Group 1</th>
+{% for key,value in ret_metadata2.items %}
+  <th> {{value}}</th>
+{% endfor %}
+</tr> 
+
+<tr>
+<th>Group 2</th>
+{% for key,value in ret_metadata3.items  %}
+  <th>{{value}}</th>
+{% endfor %}
+</tr> 
+</table>       
+</article> 
+        </div>
+	<div class="tabcontent" id="convergence">
+            <article class="col-md-8 article-intro">
+                <h1>Convergence Behaviour</h1>
+   		
+                <h3>
+                    <a href="#">Algorithm Convergence</a>
+                </h3>
+		
+       {% load staticfiles %}
+		        <img src={% static 'conv.png' %} width ="500" height ="500">
+
+                <p>Convergence behaviour of the algorithm.</p>
+            </article>
+           
+            
+        </div>
+	<div class="tabcontent" id="kegg_enrichment">
+            <article class="col-md-12 article-intro">
+                <h1>Enrichment</h1>
+		<h3>
+                    <a href="#">Run Enrichment Analysis</a>
+                </h3>
+                <p></p><br>
+		Run an Enrichment for the genes used in the analysis. Select for which terms you want to run the enrichment and display the results for genes either in both clusters, in cluster 1 or in cluster 2.<br>
+            <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+		<label for="l_box1"><input type="radio" name="kegg_enrichment" value="kegg_enrichment" id="l_box1">Run KEGG Enrichment:</label>
+		<label for="l_box1"><input type="radio" name="go_enrichment" value="go_enrichment" id="l_box1">Run GO Enrichment:</label>
+		<label for="l_box1"><input type="radio" name="go_molecular" value="go_molecular" id="l_box1">Run GO Enrichment (Molecular Function):</label>
+		<label for="l_box1"><input type="radio" name="reac_enrichment" value="reac_enrichment" id="l_box1">Run Reactome Enrichment:</label>
+<!--<br>Gene Clusters for Enrichment:-->
+<!--<select name="group_for_enr" size="1">	-->
+	        <!--<option value="1">Cluster 1</option>-->
+	        <!--<option value="2">Cluster 2</option>-->
+	        <!--<option value="both">Both Clusters</option>-->
+       	<!--</select>-->
+<br>P-value cutoff:
+<select name="pval_enr" size="1">	
+	        <option value="0.01">0.01</option>
+	        <option value="0.05">0.05</option>
+	        <option value="0.10">0.1</option>
+	        <option value="0.20">0.2</option>
+	        <option value="0.50" selected="selected">0.5</option>
+       	</select>
+		<input type="submit" value="Submit" />
+	<!--<table id="example" class="display">-->
+<br><br>Show Enrichment for Genes of:<br>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#home">Both Groups</a></li>
+  <li><a data-toggle="tab" href="#menu1">Group 1</a></li>
+  <li><a data-toggle="tab" href="#menu2">Group 2</a></li>
+</ul>
+
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active" style="background-color: #FFFFFF;">
+    <h3>Both Groups</h3>
+    <p><table id="ctable" class="display" style="width: 1200px;">
+
+<thead>
+<tr>
+<th>Gene_set</th>
+<th>Term</th>
+<th>Overlap</th>
+<th>P-value</th>
+<th>Adjusted P-Value</th>
+<th>Old P-Value</th>
+<th>Old Adjusted P-value</th>
+<th>Z-score</th>
+<th>Combined Score</th>
+<th>Genes</th>
+</tr>
+</thead>
+<tbody>
+{% for element in enrichment_dict %}
+<tr>
+{% for key,value in element.items %}
+  <th> {{value}} </th>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+
+</table> </p>
+  </div>
+  <div id="menu1" class="tab-pane fade" style="background-color: #FFFFFF;">
+    <h3>Group 1</h3>
+    <p><table id="ctable2" class="display"  style="width: 1200px;">
+
+<thead>
+<tr>
+<th>Gene_set</th>
+<th>Term</th>
+<th>Overlap</th>
+<th>P-value</th>
+<th>Adjusted P-Value</th>
+<th>Old P-Value</th>
+<th>Old Adjusted P-value</th>
+<th>Z-score</th>
+<th>Combined Score</th>
+<th>Genes</th>
+</tr>
+</thead>
+<tbody>
+{% for element in enrichment_dict_2 %}
+<tr>
+{% for key,value in element.items %}
+  <th> {{value}} </th>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+
+</table></p>
+  </div>
+  <div id="menu2" class="tab-pane fade" style="background-color: #FFFFFF;">
+    <h3>Group 2</h3>
+    <p><table id="ctable3" class="display" width="100%">
+
+<thead>
+<tr>
+<th>Gene_set</th>
+<th>Term</th>
+<th>Overlap</th>
+<th>P-value</th>
+<th>Adjusted P-Value</th>
+<th>Old P-Value</th>
+<th>Old Adjusted P-value</th>
+<th>Z-score</th>
+<th>Combined Score</th>
+<th>Genes</th>
+</tr>
+</thead>
+<tbody>
+{% for element in enrichment_dict_3 %}
+<tr>
+{% for key,value in element.items %}
+  <th> {{value}} </th>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+
+</table></p>
+  </div>
+</div>
+	
+
+</article> 
+        </div>
+        <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+
+</div>  
+
+<script type="text/javascript"> <![CDATA[
+        function loading(){
+            $("#loading").show();      
+        }
+ ]]></script>
+       {% load staticfiles %}
+<script>
+function openTab(evt, cityName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById('ppi').style.display = "none";
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+} 
+function openTab2(evt, cityName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById('ppi').style.display = "block";
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+} 
+
+function openTab3(evt, cityName) {
+    // Declare all variables
+    var i, tabcontent, tabcontent2, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    //tabcontent = document.getElementsByClassName("tabcontent3");
+    //for (i = 0; i < tabcontent.length; i++) {
+    //    tabcontent[i].style.display = "none";
+    //}
+    tabcontent2 = document.getElementsByClassName("tabcontent");
+ for (i = 0; i < tabcontent2.length; i++) {
+        tabcontent2[i].style.display = "none";
+    }
+
+    //Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById('ppi').style.display = "none";
+    document.getElementById('kegg_enrichment').style.display = "block";
+    //Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+} 
+</script>
+	<footer>
+		<div class="footer-blurb" style="display:none">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-4 footer-blurb-item">
+						<h3><img src={% static 'survivorship_mini.png' %} height="100"><br><br>Survivorship Prediction</h3>
+						<p>Use a Random Forest to predict survivorship for a test dataset and check the accuracy</p>
+						<p><a class="btn btn-default" href="predictions_3.html">Show me more</a></p>
+					</div>
+
+				</div>
+				<!-- /.row -->	
+			</div>
+        </div>
+        
+        <div class="small-print">
+        	<div class="container">
+        		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
+        		<p>Copyright &copy; Example.com 2015 </p>
+        	</div>
+        </div>
+	</footer>
+
+	
+    <!-- jQuery -->
+    <!-- <script src="{% static 'jquery-1.11.3.min.js'%}"></script> -->
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{%static 'bootstrap.min.js'%}"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="{%static 'ie10-viewport-bug-workaround.js'%}"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="{%static 'holder.min.js'%}"></script>
+	
+</body>
+
+</html>
+
+

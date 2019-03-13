@@ -1,0 +1,26 @@
+<table>
+<tr>
+  <th>Patient Group</th>
+  <th>Lung Metastasis</th>
+  <th>Breast Metastasis</th>
+  <th>Lymph nodes affected</th>
+  <th>Metastasis</th>
+  <th>Path. ER</th>
+  <th>Path. PR</th>
+  <th>Good Prognosis</th>
+</tr>
+{{ result_99 }}
+{% for result in ret_metadata %}
+<tr>
+  <th> {{ result.group }}</th>
+  <th> {{ result.lm }}</th>
+  <th> {{ result.bm }}</th>
+  <th> {{ result.lymph }}</th>
+  <th> {{ result.metastasis }}</th>
+  <th> {{ result.path_er }}</th>
+  <th> {{ result.path_pr }}</th>
+  <th> {{ result.prognosis_good }}</th>
+</tr> 
+{% endfor %}
+</table>       
+

@@ -1,0 +1,49 @@
+if(float(len(group1_in_metadata) + len(group2_in_metadata)) / nbr_patients > 0.8):
+			metas_jac = lib.jac(group1_in_metadata,metastasis)
+			metas_jac_2 = lib.jac(group2_in_metadata,metastasis)
+		else:
+			metas_jac = "NA"
+			metas_jac_2 = "NA"
+		if(float(len(group1_has_lm) + len(group2_has_lm)) / nbr_patients > 0.8):
+			lm_jac = lib.jac(group1_has_lm,lm)
+			lm_jac_2 = lib.jac(group2_has_lm,lm)
+		else:
+			lm_jac = "NA"
+			lm_jac_2 = "NA"
+		if(float(len(group1_has_bm) + len(group2_has_bm)) / nbr_patients > 0.8):
+			bm_jac = lib.jac(group1_has_bm,bm)
+			bm_jac_2 = lib.jac(group2_has_bm,bm)
+		else:
+			bm_jac = "NA"
+			bm_jac_2 = "NA"
+		if(float(len(group1_has_lymph) + len(group2_has_lymph)) / nbr_patients > 0.8):
+			lymph_jac = lib.jac(group1_has_lymph,lymph)
+			lymph_jac_2 = lib.jac(group2_has_lymph,lymph)
+		else:
+			lymph_jac = "NA"
+			lymph_jac_2 = "NA"
+		if(float(len(group1_has_path_er) + len(group2_has_path_er)) / nbr_patients > 0.8):
+			path_er_jac = lib.jac(group1_has_path_er,path_er)
+			path_er_jac_2 = lib.jac(group2_has_path_er,path_er)
+		else:
+			path_er_jac = "NA"
+			path_er_jac_2 = "NA"
+		if(float(len(group1_has_path_er) + len(group2_has_path_er)) / nbr_patients > 0.8):
+			path_pr_jac = lib.jac(group1_has_path_pr,path_pr)
+			path_pr_jac_2 = lib.jac(group2_has_path_pr,path_pr)
+		else:
+			path_pr_jac = "NA"
+			path_pr_jac_2 = "NA"
+		if(float(len(group1_has_prognosis) + len(group2_has_prognosis)) / nbr_patients > 0.8):
+			prognosis_jac = lib.jac(group1_has_prognosis,prognosis_good)
+			prognosis_jac_2 = lib.jac(group2_has_prognosis,prognosis_good)
+		else:
+			prognosis_jac = "NA"
+			prognosis_jac_2 = "NA"
+		
+ret_metadata.append({'group':"Group 1",'lm':lm_jac,'bm':bm_jac,'lymph':lymph_jac,'metastasis':metas_jac,'path_er':path_er_jac,'path_pr':path_pr_jac,'good_prognosis':prognosis_jac})
+		ret_metadata.append({'group':"Group 2",'lm':lm_jac_2,'bm':bm_jac_2,'lymph':lymph_jac_2,'metastasis':metas_jac_2,'path_er':path_er_jac_2,'path_pr':path_pr_jac_2,'good_prognosis':prognosis_jac_2})
+		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':survival_mean_1,'age':mean_age_1,'metastasis':metas_mean_1,'size':mean_size_1})
+		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':survival_mean_2,'age':mean_age_2,'metastasis':metas_mean_2,'size':mean_size_2})
+		print(survival_mean_1)
+		

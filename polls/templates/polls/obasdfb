@@ -1,0 +1,11 @@
+
+	<table>
+	{% if user.is_authenticated %}
+		<br><br><h3>Use own uploaded files:</h3>	
+		<input 
+		<tr><th> File 1 </th><th> File 2 </th></tr>
+		{% for filename in list_of_files %}
+		<tr><th> {{filename.f1}} </th><th> {{filename.f2}}</th></tr>
+		{% endfor %}
+    	{% endif %}
+	</table>
