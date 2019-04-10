@@ -33,7 +33,7 @@ from polls.forms import DocumentForm
 #from polls.models import Upload,UploadForm
 import numpy as np
 import matplotlib.pyplot as plt
-import mpld3
+#import mpld3
 
 import seaborn as sns
 import pandas as pd

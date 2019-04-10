@@ -24,7 +24,7 @@ from polls.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
 from polls.script3 import run_algo,algo_output,algo_output_ownfile,algo_output_ownfile_2,algo_output_ownfile_3
 #from polls.tasks import make_empty_figure,algo_output_task,script_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,script_output_task_3,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,read_ndex_file,read_ndex_file_2,read_ndex_file_3,list_metadata_2,list_metadata,script_output_task_7,script_output_task_8,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
-from polls.tasks import make_empty_figure,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,list_metadata_2,list_metadata,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
+from polls.tasks import make_empty_figure,algo_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,list_metadata_2,list_metadata,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
 import os.path
 
 ### *ACTUAL* imports (that have dependencies other than django and my own stuff) ####
@@ -1538,7 +1538,7 @@ def clustering_6_part_1(request):
 						if('survival_col' in request.POST):
 							#print("barabsfrbasdb")
 							if(request.POST['survival_col']):
-							survival_col_name = request.POST['survival_col']
+								survival_col_name = request.POST['survival_col']
 				#if save_data in ["save_data"]:
 	                	#	if request.user.is_authenticated:
 	                	#		savedata_param = "true"

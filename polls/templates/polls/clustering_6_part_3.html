@@ -21,8 +21,26 @@
 <!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/dataTables.jqueryui.min.js"></script>-->
 <!--<script type="text/javascript" charset="utf8" src="
 https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js "></script>-->
+       {% load staticfiles %}
+<script>
+var jsonpath2 = "/home/quirin/testproject/polls" + static_url + jsonpath;
+</script>
 <script type="text/javascript" charset="utf8">
 $(document).ready(function() {
+//var jsonpath = {% static '{{json_path}}' %};
+//var jsonpath = "polls/static/{{json_path}}";
+
+//var jsonpath =  "{{json_path}}";
+var static_url = "{{ STATIC_URL }}";
+
+var jsonpath =  "{{json_path}}";
+var static_url = {%static ""%};
+//jsonpath2 = static_url + jsonpath;
+//var jsonpath2 = '{{STATIC_URL}}' + jsonpath;
+var jsonpath2 = '{% static "{{jsonpath}}" %}'
+//document.getElementById('division').innerHTML= jsonpath2;
+//alert(String("{{json_path}}"));
+//alert(jsonpath2);
     //alert("bsfbaisdfbajsidf");
 
 //var table = $('#ctable').removeAttr('width').DataTable( {
@@ -40,7 +58,13 @@ $(document).ready(function() {
     $('#ctable3').dataTable();
     $('#ctable4').dataTable();
     $('#ctable5').dataTable();
+
 } );
+</script>
+<script>
+$(document).ready(function() {
+//alert(jsonpath2);
+}
 </script>
        {% load staticfiles %}
 
@@ -1238,11 +1262,20 @@ function fixStepIndicator(n) {
                     <a href="#">Visualize Protein-Protein Interactions</a>
                 </h3>
 
-
+<div id="division">bla{{STATIC_URL}}</div>
        {% load staticfiles %}
-		<div id="graph-container" style="display: block"><script>
+		<div id="graph-container" style="display: block">
+<script>
 
-var jsonpath = {% static '{{json_path}}' %};
+var jsonpath =  {{json_path}};
+//var static_url = {%static ""%};
+var jsonpath2 = static_url + jsonpath;
+//var jsonpath2 = '{{STATIC_URL}}' + jsonpath;
+//var jsonpath = {% static '{{json_path}}' %};
+//jsonpath = "{{json_path}}";
+var jsonpath2 = "/home/quirin/testproject/polls/" + static_url + jsonpath;
+</script><script>
+//alert('polls/static/{{json_path}}');
 //var jsonpath= document.getElementById("myvar").innerHTML;
 sigma.utils.pkg('sigma.canvas.nodes');
 /**
@@ -1268,9 +1301,16 @@ sigma.utils.pkg('sigma.canvas.nodes');
 
     return neighbors;
   });
+ //sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
+ sigma.parsers.json('{% static ""%}/{{json_path}}', {
+ //sigma.parsers.json('{% static "{{json_path}}" %}', {
+ //sigma.parsers.json(jsonpath, {1
+ //sigma.parsers.json('{% static 'jsonpath' %}', {
+ //sigma.parsers.json(jsonpath2, { 
+
  //sigma.parsers.json('{% static 'test15.json' %}', {
- //sigma.parsers.json('{% static '{{json_path}}' %}', {
- sigma.parsers.json('{% static 'jsonpath' %}', {
+//sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
+//sigma.parsers.json('{% static '{{json_path}}' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
 container: 'graph-container'

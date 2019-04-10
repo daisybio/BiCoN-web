@@ -121,10 +121,6 @@ $(document).ready(function() {
   margin-bottom: 1.2rem 0;
 }
 
-input[type='checkbox'] {
-  display: none;
-}
-
 .lbl-toggle {
   display: block;
 
@@ -288,10 +284,23 @@ tr:nth-child(even) {
   opacity: 1;
 }
 
+
+/* Mark the steps that are finished and valid: */
+/*.step.finish {*/
+  /*background-color: #4CAF50;*/
+ /* background-color: #bbbbbb;*/
+/*}*/
+
 /* Mark the steps that are finished and valid: */
 .step.finish {
   /*background-color: #4CAF50;*/
-  background-color: #bbbbbb;
+  color: #D8D8D8;
+  background-color: #404040;
+}
+
+
+.step.finish a{
+    color:#D8D8D8;
 }
 
 .arrow-right {
@@ -492,17 +501,17 @@ border:1px solid black;
 
 	<input class="input" id="myfile_input" type="file" name="myfile" style="float:left">
 {% if user.is_authenticated %}
-    	<label for="l_box1"><input type="radio" name="save_data" value="save_data" id="l_box1">  Save data</label>	
+    	<label for="l_box1"><input type="checkbox" name="save_data" value="save_data" id="l_box1">  Save data</label>	
    	{% endif %}
 <br><br>
 	<!---<div id="predef_upload" style="display:block">-->
-<label for="l_box1"><input type="radio" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
+<label for="l_box1"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
 <select name="cancer_type" id="predef_input" size="1">	
 	        <option value="1">Lung Cancer</option>
 	        <option value="2">Breast Cancer</option>
        	</select><br><br>
 	{% if user.is_authenticated %}
-	<label for="l_box1"><input type="radio" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
+	<label for="l_box1"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
 	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
@@ -517,12 +526,12 @@ border:1px solid black;
 	<input class="input" id="protfile_input" type="file" name="protfile"   style="float: left;"> 
 
  <div class="wrap-collabsible" style="width:200px; display:inline;" id="ndex_div">
-  <input id="collapsible_2" class="toggle" type="checkbox">
+  <input id="collapsible_2" class="toggle" type="checkbox" style="display:none">
   <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
   <div class="collapsible-content">
     <div class="content-inner">
 	<!--<label for="l_box1"><input type="radio" name="ndex_file" value="ndex_file" id="ndex_file">Import network from Ndex:</label>-->
-	<label for="l_box1"><input type="radio" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file">Parse Ndex file:</label>
+	<label for="l_box1"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
 	<!--<input class="input" type="file" name="ndex_file_input">-->
 	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1" onchange="recalctotals()">	
 	        <option value="1" selected="selected">APID</option>
@@ -551,6 +560,17 @@ border:1px solid black;
 </div>
 </div>
 	
+<script>
+$('#collapsible_2').change(function () {
+    if ($(this).prop('checked')) {
+    //alert("bla");
+       $('#parse_ndex_file').prop('checked', true);
+    } else {
+       $('#parse_ndex_file').prop('checked', false);
+    }
+});
+$('#selectall').trigger('change');
+</script>
 <script>
 function myFunction3() {
   // Get the checkbox
@@ -673,7 +693,7 @@ $(document).ready(function() {
 <!---<br>-->
 
 <div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
-	<label for="l_box1"><input type="radio" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
+	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
@@ -684,7 +704,7 @@ $(document).ready(function() {
 	<div class="tab4" style="width:500px; height:300px" id="metad_upload">
 	<b>This step is optional.</b><br> If you do not want to upload metadata, you can
     	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
-	<label for="l_box1"><input type="radio" name="analyze_metadata" value="analyze_metadata" id="l_box1">Analyze Patient Metadata</label>
+	<label for="l_box1"><input type="checkbox" name="analyze_metadata" value="analyze_metadata" id="l_box1">Analyze Patient Metadata</label>
 	<br>
 	<b>Upload file with Patient Data:</b> <br>
 	<input class="input" type="file" name="patientdata"><br> <b>Name of "survival" column:</b> <input class="input" type="text" name="survival_col"><br>
@@ -725,7 +745,7 @@ $(document).ready(function() {
        	</select>
 	<!-- was moved to below (inside collapsible) -->	
 	 <div class="wrap-collabsible">
-  <input id="collapsible" class="toggle" type="checkbox">
+  <input id="collapsible" class="toggle" type="checkbox" style="display:none">
   <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
   <div class="collapsible-content">
     <div class="content-inner">
@@ -1257,7 +1277,8 @@ sigma.utils.pkg('sigma.canvas.nodes');
     return neighbors;
   });
 
- sigma.parsers.json('{% static 'test15.json' %}', {
+ //sigma.parsers.json('{% static 'test15.json' %}', {
+ sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
 container: 'graph-container'

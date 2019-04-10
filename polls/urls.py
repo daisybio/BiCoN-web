@@ -3,7 +3,7 @@ from django.urls import path
 
 from django.conf.urls import include, url
 from . import views
-from . import views_2
+#from . import views_2
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 app_name = 'polls'
 urlpatterns = [
@@ -12,7 +12,7 @@ urlpatterns = [
 	#path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
 	#path('<int:question_id>/vote/', views.vote, name='vote'),
 #	url(r'home.html', views.home),
-	url(r'homepage.html', views_2.homepage),
+#	url(r'homepage.html', views_2.homepage),
 	#url(r'predictions_3.html', views_2.prediction),
 #	url(r'list.html', views.list_2),
 	url(r'infopage.html', views.infopage),
