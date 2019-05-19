@@ -260,13 +260,19 @@ tr:nth-child(even) {
   display: inline-block;
 }
 
+.step a{
+    color:#000000;
+}
 .step2 {
   border: solid 0px #d3d3d3;
-  width: 70px;
+  width: 100px;
   height: 70px;
   background-color: #d3d3d3;
   display: none;
   float: left;
+}
+.step2 a{
+    color:#000000;
 }
 .step3 {
   height: 50px;
@@ -281,16 +287,14 @@ tr:nth-child(even) {
 
 /* Mark the active step: */
 .step.active {
+  background-color: #787878;
   opacity: 1;
 }
 
 
-/* Mark the steps that are finished and valid: */
-/*.step.finish {*/
-  /*background-color: #4CAF50;*/
- /* background-color: #bbbbbb;*/
-/*}*/
-
+.step.active a{
+    color:#D8D8D8;
+}
 /* Mark the steps that are finished and valid: */
 .step.finish {
   /*background-color: #4CAF50;*/
@@ -484,18 +488,18 @@ border:1px solid black;
                 
             </div>
         </div>    
-	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;  display:inline;">
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;  display:inline;height:620px" id="input_data_div">
         <h1>Run Algorithm:</h1>
 	<a href="infopage.html"  target="_blank">How to</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 	<!---<div id="expr_upload" style="display:block">-->
+
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button"><h3>Start new analysis</h3></button>
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button"><h3>Show old results</h3></button>
 	<!---<button type="button" onclick="redoOldAnalysisTab()" id="redo_old_analysis_button"><h3>Redo old analysis</h3></button>-->
 	</div>
-	
 	<div class="tab4" style="width:500px; height:300px" id="expr_upload">
 	<b>Upload expression data:    </b><br>
 
@@ -798,17 +802,17 @@ Stop criteria: score_max - score_av <
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 <!-- this was new-->
 	</div>
-<div style="overflow:auto;">
+<div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
-    <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none">Previous</button>
-    <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
-    <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
-    <button type="submit" id="submitBtn" onclick="nextPrev(1)" onclick="hideAll()" onclick="showProgressTab(0)">Submit</button>
+    <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
+    <button type="button" id="prevBtn" onclick="nextPrev(-1)" style="font-size: 24px;">Previous</button>
+    <button type="button" id="nextBtn" onclick="nextPrev(1)" style="font-size: 24px;">Next</button>
+    <button type="submit" id="submitBtn" onclick="nextPrev(1)" onclick="hideAll()" onclick="showProgressTab(0)" style="font-size: 24px;">Submit</button>
     <!---<button type="submit" id="submitBtn" onclick="nextPrev(1)">Submit</button>-->
   </div>
 </div>
 
-<div style="text-align:center;margin-top:40px;" id="showtabs">
+<div style="text-align:center;margin-top:40px;position:absolute;bottom:50px;" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
 <!---<div class="arrow-right" style="display:inline"></div>-->
   <span class="step"><a id="myLink" href="#" onclick="showTab2(1);">2.<br>Expression Data</a></span>
@@ -872,7 +876,9 @@ for (i = 0; i < coll.length; i++) {
        {% load staticfiles %}
         <!-- /.row -->
         <!-- Feature Row -->
-<div class="tab5" style="width:500px; height:300px; float:left; display:inline" id="progress_tab">
+
+<div class="tab5" style="width:500px; height:600px; float:left;display:inline;position:absolute;right:400px" id="progress_tab">
+<!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
 <!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
 <img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
@@ -880,7 +886,19 @@ for (i = 0; i < coll.length; i++) {
 </object><br><br><img src={% static 'progress.png' %} width="400" height="400">
 	
 	</div>
+<script>
+//$.get("home/quirin/testproject/polls/static/loading_1.gif")
+$.get("/static/loading_1.gif")
+    .done(function() { 
+	//$('#input_data_div').hide();
+        // Do something now you know the image exists.
 
+    }).fail(function() { 
+	//$('#progress_tab').hide();
+        // Image doesn't exist - do something else.
+
+    })
+</script>
 
 
 <script>
@@ -958,6 +976,7 @@ function showTab2(n) {
 if (n == 1) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
+    document.getElementsByClassName("step")[0].className += " finish";
   }
  if (n == 0) {
     document.getElementById("nextBtn").style.display = "none";
@@ -1148,6 +1167,7 @@ function hideAll() {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
 	document.getElementById("start_new_analysis").style = "width:0px";
+	document.getElementById("start_new_analysis_wrapper").style = "width:0px";
   //} else {
   //document.getElementById("prevBtn").style.display = "inline";
   //}
@@ -1184,7 +1204,12 @@ function nextPrev(n) {
 
   var j,y = document.getElementsByClassName("step2");
   y[0].style.display = "none";
-
+if(currentTab==1){
+if(n==1){
+    document.getElementsByClassName("step")[0].className += " finish";
+    document.getElementById('start_new_analysis_wrapper').display = "none";
+}
+}
 if (currentTab == 2) {
 if (n == 1) {
 if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false )){
@@ -1241,7 +1266,11 @@ function fixStepIndicator(n) {
 </div>
 
 
+{% if enrichment_open %}
+<div class="tabcontent" id="ppi">
+{% else %}
 <div class="row" id="ppi">
+{% endif %}
             <article class="col-md-8 article-intro">
 
 		
@@ -1277,8 +1306,8 @@ sigma.utils.pkg('sigma.canvas.nodes');
     return neighbors;
   });
 
- //sigma.parsers.json('{% static 'test15.json' %}', {
- sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
+sigma.parsers.json('{% static 'test15.json' %}', {
+// sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
 container: 'graph-container'
@@ -1376,11 +1405,16 @@ s.refresh();
 <div class="tabcontent" id="survival">
             <article class="col-md-12 article-intro">
                 <h1>Survival Information</h1>
-<object type="text/html" data="{% static 'output_plotly.html' %}" width="800" height="500" ></object>
+<object type="text/html" data="{% static 'output_plotly.html' %}" width="800" height="500"></object>
                 <h3>
                     <a href="#">Survival of patients</a>
                 </h3>
-                <p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p>    
+                <p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p> 
+{% if pval is None %}
+<object type="text/html" data="{% static 'pvalue.txt' %}" width="400" height="100"></object>
+{% else %}
+The log-rank test gives a p-value of: {{pval}}
+{% endif %}
 </article> 
         </div>
 
@@ -1432,7 +1466,11 @@ s.refresh();
            
             
         </div>
+	{% if enrichment_open %}
+	<div class="row" id="kegg_enrichment">
+	{% else %}
 	<div class="tabcontent" id="kegg_enrichment">
+	{% endif %}
             <article class="col-md-12 article-intro">
                 <h1>Enrichment</h1>
 		<h3>
@@ -1650,8 +1688,19 @@ s.refresh();
         }
  ]]></script>
        {% load staticfiles %}
+
+{%  if enrichment_open  %}
+    <script>var js_enrichment_open = true; </script>
+{% else %}
+      <script>var js_enrichment_open = false; </script>
+{% endif %}
+
 <script>
 function openTab(evt, cityName) {
+    //var a = "{{enrichment_open}}";
+    if(js_enrichment_open === true){
+    document.getElementById('kegg_enrichment').style.display = "none";
+    }
     // Declare all variables
     var i, tabcontent, tablinks;
 

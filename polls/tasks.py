@@ -46,7 +46,7 @@ from celery import shared_task
 import numpy as np
 import matplotlib.pyplot as plt
 import mpld3
-
+from lifelines.statistics import logrank_test
 import math
 
 import gseapy as gp
@@ -168,6 +168,12 @@ def make_empty_figure():
 	plt.savefig("polls/static/progress.png")
 	plt.close(fig)
 
+
+@shared_task(name="write_pval")
+def write_pval(pval,filename):
+    text_file = open(filename, "w")
+    text_file.write("The log-rank test gives a p-value of: " + str(pval))
+    text_file.close()
 
 
 #######################################################################
@@ -942,6 +948,77 @@ def sim_data(genes1,genes2,background,patients1,patients2,dens):
 #### the *actual* algorithm ############################
 ########################################################
 
+
+
+@shared_task(name="preprocess_file")
+def preprocess_file(expr_str):
+	if(len(expr_str.split("\n")[0].split("\t")) > 2):
+		print(expr_str.split("\n")[0])	
+		return(expr_str)
+	elif(0 == 1):
+		if("\t" not in expr_str.split("\n")[0]):
+			expr_str = expr_str.replace(",","\t")
+			#print(expr_str)
+			expr_str = expr_str.replace("status","cancer_type")
+			#expr_str = expr_str.replace("-0.","0.")
+			print(expr_str.split("\n")[0])
+			#expr_stringio = StringIO(expr_str)
+			expr_str = expr_str.replace("CTL","MCI")
+			#exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#print(list(set(exprdf["cancer_type"])))
+			return(expr_str)
+	elif("," in expr_str):
+		if("\t" not in expr_str.split("\n")[0]):
+			expr_str = expr_str.replace(",","\t")
+			#print(expr_str)
+			#expr_str = expr_str.replace("status","cancer_type")
+			#expr_str = expr_str.replace("-0.","0.")
+			print(expr_str.split("\n")[0])
+			expr_str_split = expr_str.split("\n")
+			if(len(expr_str_split) > 300):
+				expr_str = "\n".join(expr_str_split[:200])
+			else:
+				expr_str = "\n".join(expr_str_split)
+			expr_stringio = StringIO(expr_str)
+			expr_str = expr_str.replace("MCI","CTL")
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#done1 = "false"
+			#for column_name, column in exprdf.transpose().iterrows():
+			#	if(not column_name.isdigit()):
+			#		if(len(column.unique()) < 5):
+			#			print(column_name)
+			#			expr_str = expr_str.replace(column_name,"cancer_type")	
+			#			expr_str_split[0] = expr_str_split[0].replace(column_name,"cancer_type")
+			#			print(list(column))
+			#			if(len(column.unique()) > 2 and done1 == "false"):
+			#				print(column)
+			#				expr_str_split_2 = []
+			#				expr_str_split_2.append(expr_str_split[0])
+			#				type1 = column.value_counts().index.tolist()[0]	
+			#				type2 = column.value_counts().index.tolist()[1]
+			#				print(type1)
+			#				print(type2)
+			#				print(len(list(column)))
+			#				for i in range(0,len(list(column))-1):
+			#					if(list(column)[i] == type1 or list(column)[i] == type2):
+			#						print(column[i])	
+			#						print(expr_str_split[i+1])
+			#						print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
+			#						expr_str_split_2.append(expr_str_split[i+1])
+			#				expr_str = "\n".join(expr_str_split_2)
+			#				done1 = "true"
+			#expr_stringio = StringIO(expr_str)
+			#exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#print(list(set(exprdf["cancer_type"])))
+			#column.fillna("NA",inplace=True)
+			#print(column_name)
+			#print(column)
+			#coluniq = column.unique()
+			#for 
+			#print(expr_str)
+			return(expr_str)
+
+
 @shared_task(name="add_loading_image")
 def add_loading_image():
 	copyfile("polls/static/loading.gif","polls/static/loading_1.gif")
@@ -1597,6 +1674,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
+
 		#print(clinicaldf["relapse (event=1; no event=0):ch1"])
 		param_names = []
 		param_values = []
@@ -1800,11 +1878,16 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			print("survival col")
 			print(survival_col_nbr)
 			print(list(clinicaldf.iloc[:,survival_col_nbr]))
+		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
+			patient_id_list = list(clinicaldf.index)
+		else:
+			patient_id_list = list(clinicaldf.iloc[:,0])
+		
 		#clinical_stringio = StringIO(clinicalstr)
 		#print("finished stringio")		
 		#print(clinicaldf)
 		#print(clinicalLines[0])
-		patient_id_list = list(clinicaldf.iloc[:,0])
+		#patient_id_list = list(clinicaldf.iloc[:,0])
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
 		for i in range(0,len(patient_id_list)):
@@ -1820,7 +1903,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				#print(bababa2[63])
 				#print(bababa2[72])
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
-					patientData.update({patient_id_list[i]:survivalcol_list[i]})
+					if("month" in survival_col):
+						print("month")
+						print(patient_id_list[i])
+						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
+						patientData.update({patient_id_list[i]:survivalcol_list_temp})
+					else:
+						patientData.update({patient_id_list[i]:survivalcol_list[i]})
+					
+					#patientData.update({patient_id_list[i]:survivalcol_list[i]})
 					print(survivalcol_list[i])
 				#	print(patientData)
 			#if(len(bababa2) > 71):
@@ -1859,6 +1950,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
+		print(survival_1)
+		surv_results = logrank_test(survival_1,survival_2)
+		p_val = surv_results.p_value
+		print("p value" + str(p_val))
+		
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
 			ctr_surv_1 = ctr_surv_1 + 1
@@ -1924,8 +2020,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		data99 = [trace1,trace2]
 		layout = dict(
 		legend=dict(
-		y=0.5,
+		yanchor="bottom",
 		traceorder='reversed',
+		orientation="h",
 		font=dict(size=16)))
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
@@ -1936,7 +2033,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	with open("polls/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
 	print(ret_metadata)
-	return(script,div,plot_1,plot_div,ret_metadata)
+	return(script,div,plot_1,plot_div,ret_metadata,p_val)
 
 @shared_task(name="script_output_task_10")
 def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
@@ -2380,6 +2477,15 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#print("finished stringio")		
 		#print(clinicaldf)
 		#print(clinicalLines[0])
+		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
+			patient_id_list = list(clinicaldf.index)
+		else:
+			patient_id_list = list(clinicaldf.iloc[:,0])
+		
+		#clinical_stringio = StringIO(clinicalstr)
+		#print("finished stringio")		
+		#print(clinicaldf)
+		#print(clinicalLines[0])
 		patient_id_list = list(clinicaldf.iloc[:,0])
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
@@ -2396,7 +2502,15 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				#print(bababa2[63])
 				#print(bababa2[72])
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
-					patientData.update({patient_id_list[i]:survivalcol_list[i]})
+					if("month" in survival_col):
+						print("month")
+						print(patient_id_list[i])
+						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
+						patientData.update({patient_id_list[i]:survivalcol_list_temp})
+					else:
+						patientData.update({patient_id_list[i]:survivalcol_list[i]})
+					
+					#patientData.update({patient_id_list[i]:survivalcol_list[i]})
 					print(survivalcol_list[i])
 				#	print(patientData)
 			#if(len(bababa2) > 71):
@@ -2435,6 +2549,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
+		surv_results = logrank_test(survival_1,survival_2)
+		p_val = surv_results.p_value
+		print("p value" + str(p_val))
+		
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
 			ctr_surv_1 = ctr_surv_1 + 1
@@ -2649,7 +2767,6 @@ def read_kegg_enrichment(path,pval_enr):
 		ctr = ctr + 1
 	return(ret_dict)
 
-
 @shared_task(name="read_kegg_enrichment_2")
 def read_kegg_enrichment_2(path1,path2,pval_enr):
 	result_file_1 = open(path1)
@@ -2690,18 +2807,16 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
 				temp_dict_2.update({lineSplit[0]:tmp})
-		ctr = ctr + 1
+		ctr2 = ctr2 + 1
 	for key in temp_dict:
 		if(key not in temp_dict_2):
 			ret_dict.append(temp_dict[key])
 	for key in temp_dict_2:
 		if(key not in temp_dict):
-			ret_dict_2.append(temp_dict[key])
+			ret_dict_2.append(temp_dict_2[key])
 
 	return(ret_dict,ret_dict_2)
-		
-
-
+	
 	
 ############################################################
 #### check input files / convert stuff #####################
