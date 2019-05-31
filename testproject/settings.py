@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+#BASE_DIR = os.path.dirname(__file__)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -25,7 +25,7 @@ SECRET_KEY = '9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0','172.18.0.6','localhost']
 
 # Application definition
 
@@ -52,7 +52,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'testproject.urls'
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
+#CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
@@ -134,5 +135,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'polls/static')
+
+#STATIC_URL = '/static/'
+STATIC_URL = '/code/polls/static/'
+#STATIC_URL = '/'
+STATIC_ROOT = os.path.join(BASE_DIR, '../code/polls/static')
+#STATIC_URL = '/static/'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'polls/static')

@@ -24,7 +24,7 @@ from polls.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
 from polls.script3 import run_algo,algo_output,algo_output_ownfile,algo_output_ownfile_2,algo_output_ownfile_3
 #from polls.tasks import make_empty_figure,algo_output_task,script_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,script_output_task_3,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,read_ndex_file,read_ndex_file_2,read_ndex_file_3,list_metadata_2,list_metadata,script_output_task_7,script_output_task_8,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
-from polls.tasks import make_empty_figure,algo_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,list_metadata_2,list_metadata,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval
+from polls.tasks import make_empty_figure,algo_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,list_metadata_2,list_metadata,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new
 
 import os.path
 
@@ -70,6 +70,1025 @@ def login_2(request):
 	else:
 		return render(request,'polls/login.html')
 		#return redirect('polls/clustering.html')
+
+
+
+
+
+
+def clustering_6_new(request):
+	#print("in clustering")
+	ret_metadata1 = {}
+	ret_metadata2 = {}
+	ret_metadata3 = {}
+	metadata_dict = []
+	enrichment_dict = []
+	pval_enr = 0.5
+	list_of_files = ""
+	list_of_files_2 = ""
+	save_data = request.POST.get("save_data", None)
+	nbr_iter = request.POST.get("nbr_iter",45)
+	nbr_ants = request.POST.get("nbr_ants",30)
+	evap = request.POST.get("evap",0.3)
+	epsilon = request.POST.get("stopcr",0.02) 
+	hi_sig = request.POST.get("hisig",1)
+	pher_sig = request.POST.get("pher",1)
+	savedata_param = "false"
+	#fig = plt.figure(figsize=(10,8))
+	#plt.savefig("polls/static/progress.png")
+	#plt.close(fig)
+	#for key, value in request.POST.items():
+	#	print(key)
+	#	print(value)
+	#if(('myfile' in request.POST) or ('predef_file' in request.POST)):
+	#	print("in request")
+	#if(('protfile' in request.POST) or (('parse_ndex_file' in request.POST) and ('ndex_name_2' in request.POST))):
+	#	print("in request 2")
+	if(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
+		if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])
+				clinicalstr = ""
+				clinicaldf = ""
+				add_loading_image.delay()
+				with open("polls/static/output_console.txt", "w") as text_file:
+   					text_file.write("Your request is being processed...")
+   					text_file.close()
+				make_empty_figure.delay()
+				clinicalstr = "empty"
+				clinicaldf = ""
+				survival_col_name = ""
+				if('myfile' in request.FILES):
+					exprstr = request.FILES['myfile'].read().decode('utf-8')
+					result10 = preprocess_file.delay(exprstr)
+					exprstr = result10.get()
+				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
+					cancer_type = request.POST.get("cancer_type")
+					if(cancer_type == "1"):
+						print("babababababa")
+						fh1 = open("polls/data/lung_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/lung_cancer_clinical.csv")
+						fh4 = open("polls/data/lung_cancer_clinical.csv")
+						#fh4 = open("polls/data/breast_cancer_clinical.csv")
+						is_lungc = "true"
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "disease free survival in months:ch1"
+					else:
+						fh1 = open("polls/data/breast_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/breast_cancer_clinical.csv")
+						fh4 = open("polls/data/breast_cancer_clinical.csv")
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "mfs (yr):ch1"
+				if('protfile' in request.FILES):
+					ppistr = request.FILES['protfile'].read().decode('utf-8')
+					result4 = check_input_files.delay(ppistr,exprstr)
+					errstr = result4.get()
+					if(errstr != ""):
+						request.session['errors'] = errstr
+						return render(request,'polls/errorpage.html',{'errors':errstr})
+				elif('ndex_name_2' in request.POST):
+					ndex_file_id = request.POST.get("ndex_name_2")
+					if(ndex_file_id == "1"):
+						result_ndex = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "2"):
+						result_ndex = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "3"):
+						result_ndex = import_ndex.delay("becec556-86d4-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "4"):
+						result_ndex = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+				if('analyze_metadata' in request.POST):
+					if(request.FILES['patientdata']):
+						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
+						clinical_stringio = StringIO(clinicalstr)
+						clinicaldf = pd.read_csv(clinical_stringio)
+						if('survival_col' in request.POST):
+							#print("barabsfrbasdb")
+							if(request.POST['survival_col']):
+								survival_col_name = request.POST['survival_col']
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
+				(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+				metd = list_metadata_3.apply_async(countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				#print(adjlist)
+				convert_gene_list.delay(adjlist,"/code/polls/static/genelist_temp.txt")
+				#print("iasdfasdfsf")
+				#print(ret_metadata1)
+				write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)	
+				#(div,script,plot1) = result2.get()			
+				plot2 = "test.png"
+				if save_data in ["save_data"]:
+	                		if request.user.is_authenticated:
+	                			#print("save data")
+	                			savedata_param = "true"
+	                			username = str(request.user)
+	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+						#GraphForm.save_results(username)
+				if request.user.is_authenticated:
+			        	username = str(request.user)
+			        	list_of_files = GraphForm.list_user_data_2(username)	
+			        	list_of_files_2 = GraphForm.list_user_data(username)              
+				#else:
+				remove_loading_image.delay()
+				cache.clear()				
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				
+				#list_metadata.apply_async(countdown=0)
+				with open("polls/static/plotly_output_2.html", "w") as text_file_3:
+   					text_file_3.write(plot_div)
+				return render(request, 'polls/clustering_6.html', {'form':"",'images':"",'plot_div':plot_div,'script':script,'plot2':plot2, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
+	if('redo_analysis' in request.POST and request.user.is_authenticated):
+		if(request.POST['redo_analysis']):
+			with open("polls/static/output_console.txt", "w") as text_file:
+   				text_file.write("Your request is being processed...")
+			add_loading_image.delay()
+			filename1 = request.POST.get("input_own_file_redo")
+			fh1 = open(filename1)
+			exprstr = fh1.read()
+			filename2 = filename1.split("_expr.txt")[0] + "_prot.txt"
+			fh2 = open(filename2)
+			filename3 = filename1.split("_expr.txt")[0] + "_clin.txt"
+			has_clin_data = "false"
+			if(os.path.isfile(filename3)):
+				fh3 = open(filename3)
+				has_clin_data = "true"
+				clinicalstr = fh3.read()
+			#path_json = filename1
+			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
+			ppistr = fh2.read()
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				make_empty_figure.delay()
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])	
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids) =result1.get()				
+				if(has_clin_data == "true"):
+					result2 = script_output_task_3.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr)
+					(div,script,plot1,plot_div,ret_metadata) = result2.get()
+				else:
+					result2 = script_output_task.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1)
+					(div,script,plot1) = result2.get()
+					ret_metadata = ""
+				plot2 = "test.png"
+				cache.clear()			
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)      
+				remove_loading_image.delay()
+				return render(request, 'polls/clustering_6.html', {'form':"",'images':"",'div':"",'script':"",'plot2':plot2, 'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
+	elif('enrichment_type' in request.POST):
+		enr_type = request.POST.get("enrichment_type")
+		group_for_enr = "both"
+		if('pval_enr' in request.POST):
+			pval_enr = request.POST.get('pval_enr')
+			print(pval_enr)
+		if('group_for_enr' in request.POST):
+			group_for_enr = request.POST.get('group_for_enr')
+			#print(pval_enr)
+		print("enrichment type")
+		enrichment_dict = {}
+		enrichment_dict_2 = {}
+		enrichment_dict_3 = {}
+		enrichment_dict_4 = {}
+		enrichment_dict_5 = {}
+		if(enr_type == "kegg_enrichment"):
+			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_kegg")
+			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_kegg")
+			result3 = run_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_kegg")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_enrichment"):	
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()	
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_molecular"):
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "reactome_enrichment"):
+			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
+			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"polls/data/test2/enrichr_reactome")
+			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
+			#enr_results = result1.get()
+			enr_results_2 = result2.get()
+			#enr_results_3 = result3.get()
+			print("enr")
+			#result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_reactome/Reactome_2016.test_name.enrichr.reports.txt",pval_enr)
+			#result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			#enrichment_dict = result4.get()
+			enrichment_dict = {}
+			enrichment_dict_2 = result5.get()
+			#enrichment_dict_3 = result6.get()
+			enrichment_dict_3 = {}		
+		#print(request.POST.get("newAnalysis"))
+		#print(request.POST['newAnalysis'])
+		if('enr' not in request.POST):
+			mutable = request.POST._mutable
+			request.POST._mutable = True
+			request.POST['enr'] = "true"
+			request.POST._mutable = mutable
+		if('enr' in request.POST):
+			print("enr in request")
+		#return clustering_6(request)
+		#return HttpResponseRedirect('polls/clustering_6.html')
+		return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+	else:		
+		#remove_loading_image.delay()
+		ret_metadata = ""
+		if not (request.user.is_authenticated):
+			cache.clear()
+		else:
+			username = str(request.user)
+			list_of_files = GraphForm.list_user_data_2(username)
+			list_of_files_2 = GraphForm.list_user_data(username)
+			cache.clear()
+			#metd = list_metadata.apply_async(countdown=0)
+			metd = list_metadata_3.apply_async(countdown=0)
+			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
+			print(ret_metadata1) 
+			print("iubaerb")
+			metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
+			result2 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			#result2 = read_kegg_enrichment.delay("data/test/enrichr_kegg")	
+			enrichment_dict = result2.get()
+			#(ret_metadata,is_lungc) = metd.get()  
+			#return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'is_lungc':is_lungc})
+		#make_empty_figure.apply_async(countdown=2)
+		#empty_log_file.apply_async(countdown=2)	 				
+		return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
+
+
+
+def clustering_6_4_part_2(request):
+	if('newAnalysis' in request.POST):
+		print(request.POST.get("newAnalysis"))
+		print(request.POST['newAnalysis'])
+		request.POST._mutable = True
+		if(request.POST['newAnalysis'] != "false"):
+			if('done' in request.session):
+				if(request.session['done'] == "true"):
+					request.session['done'] = "False"
+			request.POST['newAnalysis'] = "false"
+	#if(request.session['done'] == "true"):
+	if('done' in request.session):
+		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
+		print("done")
+	if('session_id' in request.POST):
+		print(request.POST['session_id'])
+	#print("in clustering")
+	ret_metadata1 = {}
+	ret_metadata2 = {}
+	ret_metadata3 = {}
+	metadata_dict = []
+	enrichment_dict = []
+	pval_enr = 0.5
+	list_of_files = ""
+	list_of_files_2 = ""
+	save_data = request.POST.get("save_data", None)
+	nbr_iter = request.POST.get("nbr_iter",45)
+	nbr_ants = request.POST.get("nbr_ants",30)
+	evap = request.POST.get("evap",0.3)
+	epsilon = request.POST.get("stopcr",0.02) 
+	hi_sig = request.POST.get("hisig",1)
+	pher_sig = request.POST.get("pher",1)
+	savedata_param = "false"
+	#fig = plt.figure(figsize=(10,8))
+	#plt.savefig("polls/static/progress.png")
+	#plt.close(fig)
+	#for key, value in request.POST.items():
+	#	print(key)
+	#	print(value)
+	#if(('myfile' in request.POST) or ('predef_file' in request.POST)):
+	#	print("in request")
+	#if(('protfile' in request.POST) or (('parse_ndex_file' in request.POST) and ('ndex_name_2' in request.POST))):
+	#	print("in request 2")
+	if(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
+		if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])
+				clinicalstr = ""
+				clinicaldf = ""
+				add_loading_image.delay()
+				with open("/code/polls/static/output_console.txt", "w") as text_file:
+   					text_file.write("Your request is being processed...")
+   					text_file.close()
+				make_empty_figure.delay()
+				clinicalstr = "empty"
+				clinicaldf = ""
+				survival_col_name = ""
+				if('myfile' in request.FILES):
+					exprstr = request.FILES['myfile'].read().decode('utf-8')
+					result10 = preprocess_file.delay(exprstr)
+					exprstr = result10.get()
+				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
+					cancer_type = request.POST.get("cancer_type")
+					if(cancer_type == "1"):
+						print("babababababa")
+						fh1 = open("polls/data/lung_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/lung_cancer_clinical.csv")
+						fh4 = open("polls/data/lung_cancer_clinical.csv")
+						#fh4 = open("polls/data/breast_cancer_clinical.csv")
+						is_lungc = "true"
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "disease free survival in months:ch1"
+					else:
+						fh1 = open("polls/data/breast_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/breast_cancer_clinical.csv")
+						fh4 = open("polls/data/breast_cancer_clinical.csv")
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "mfs (yr):ch1"
+				if('protfile' in request.FILES):
+					ppistr = request.FILES['protfile'].read().decode('utf-8')
+					result4 = check_input_files.delay(ppistr,exprstr)
+					errstr = result4.get()
+					if(errstr != ""):
+						request.session['errors'] = errstr
+						return render(request,'polls/errorpage.html',{'errors':errstr})
+				elif('ndex_name_2' in request.POST):
+					ndex_file_id = request.POST.get("ndex_name_2")
+					if(ndex_file_id == "1"):
+						result_ndex = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "2"):
+						result_ndex = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "3"):
+						result_ndex = import_ndex.delay("becec556-86d4-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "4"):
+						result_ndex = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+				if('analyze_metadata' in request.POST):
+					if(request.FILES['patientdata']):
+						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
+						clinical_stringio = StringIO(clinicalstr)
+						clinicaldf = pd.read_csv(clinical_stringio)
+						if('survival_col' in request.POST):
+							#print("barabsfrbasdb")
+							if(request.POST['survival_col']):
+								survival_col_name = request.POST['survival_col']
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+				session_id = request.session._get_or_create_session_key()
+				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+				(div,script,plot1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path) = result2.get()
+				metd = list_metadata_3.apply_async(countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				json_path = "test15_" + session_id + ".json"
+				#metd = list_metadata_3.apply_async(countdown=0)
+				path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
+				
+				#print(adjlist)
+				convert_gene_list.delay(adjlist,"/code/polls/static/genelist_temp.txt")
+				#print("iasdfasdfsf")
+				#print(ret_metadata1)
+				write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)	
+				#(div,script,plot1) = result2.get()			
+				plot2 = "test.png"
+				if save_data in ["save_data"]:
+	                		if request.user.is_authenticated:
+	                			#print("save data")
+	                			savedata_param = "true"
+	                			username = str(request.user)
+	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+						#GraphForm.save_results(username)
+				if request.user.is_authenticated:
+			        	username = str(request.user)
+			        	list_of_files = GraphForm.list_user_data_2(username)	
+			        	list_of_files_2 = GraphForm.list_user_data(username)              
+				#else:
+				remove_loading_image.delay()
+				cache.clear()				
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				#list_metadata.apply_async(countdown=0)
+				with open("/code/polls/static/plotly_output_2.html", "w") as text_file_3:
+   					text_file_3.write(plot_div)
+				with open("/code/polls/static/metadata_test.txt","w") as text_file_4:
+					text_file_4.write("bla")
+				metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				print("iasdfasdfsf")
+				print(ret_metadata1) 	
+				#return HttpResponseRedirect(reverse('polls/clustering_6_part_2_2/'),args=(exprstr,ppistr))
+				#return clustering_6_part_2_2(request,exprstr,ppistr)
+				#(div,script,plot1) = result2.get()			
+				plot2 = "test.png"
+				if save_data in ["save_data"]:
+	                		if request.user.is_authenticated:
+	                			savedata_param = "true"
+	                			username = str(request.user)
+	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+						#GraphForm.save_results(username)
+				#else:
+					#cache.clear()
+				if request.user.is_authenticated:
+			        	username = str(request.user)
+			        	list_of_files = GraphForm.list_user_data_2(username)	
+			        	list_of_files_2 = GraphForm.list_user_data(username)              
+				#else:
+				if request.user.is_authenticated:
+					request.session['done'] = "true"
+				else:
+					request.POST._mutable = True
+					request.POST['session_id'] = session_id
+				remove_loading_image.delay()
+				cache.clear()				
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				#session_id = request.session._get_or_create_session_key()
+				#print(session_id)
+				#request.session['done'] = "true"
+				path99 = "test_" + session_id + ".png"
+				return render(request, 'polls/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':plot_div,'script':script,'plot2':plot2, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
+	if('redo_analysis' in request.POST and request.user.is_authenticated):
+		if(request.POST['redo_analysis']):
+			with open("polls/static/output_console.txt", "w") as text_file:
+   				text_file.write("Your request is being processed...")
+			add_loading_image.delay()
+			filename1 = request.POST.get("input_own_file_redo")
+			fh1 = open(filename1)
+			exprstr = fh1.read()
+			filename2 = filename1.split("_expr.txt")[0] + "_prot.txt"
+			fh2 = open(filename2)
+			filename3 = filename1.split("_expr.txt")[0] + "_clin.txt"
+			has_clin_data = "false"
+			if(os.path.isfile(filename3)):
+				fh3 = open(filename3)
+				has_clin_data = "true"
+				clinicalstr = fh3.read()
+			#path_json = filename1
+			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
+			ppistr = fh2.read()
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				make_empty_figure.delay()
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])	
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids) =result1.get()				
+				if(has_clin_data == "true"):
+					result2 = script_output_task_3.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr)
+					(div,script,plot1,plot_div,ret_metadata) = result2.get()
+				else:
+					result2 = script_output_task.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1)
+					(div,script,plot1) = result2.get()
+					ret_metadata = ""
+				plot2 = "test.png"
+				cache.clear()			
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)  	 	   
+				remove_loading_image.delay()	
+				return render(request, 'polls/clustering_6.html', {'form':"",'images':"",'div':"",'script':"",'plot2':plot2, 'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
+
+	elif('enrichment_type' in request.POST):
+		enr_type = request.POST.get("enrichment_type")
+		group_for_enr = "both"
+		if('pval_enr' in request.POST):
+			pval_enr = request.POST.get('pval_enr')
+			print(pval_enr)
+		if('group_for_enr' in request.POST):
+			group_for_enr = request.POST.get('group_for_enr')
+			#print(pval_enr)
+		print("enrichment type")
+		enrichment_dict = {}
+		enrichment_dict_2 = {}
+		enrichment_dict_3 = {}
+		enrichment_dict_4 = {}
+		enrichment_dict_5 = {}
+		if(enr_type == "kegg_enrichment"):
+			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_kegg")
+			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_kegg")
+			result3 = run_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_kegg")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_enrichment"):	
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()	
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_molecular"):
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "reactome_enrichment"):
+			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
+			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"polls/data/test2/enrichr_reactome")
+			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
+			#enr_results = result1.get()
+			enr_results_2 = result2.get()
+			#enr_results_3 = result3.get()
+			print("enr")
+			#result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_reactome/Reactome_2016.test_name.enrichr.reports.txt",pval_enr)
+			#result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			#enrichment_dict = result4.get()
+			enrichment_dict = {}
+			enrichment_dict_2 = result5.get()
+			#enrichment_dict_3 = result6.get()
+			enrichment_dict_3 = {}		
+		#print(request.POST.get("newAnalysis"))
+		#print(request.POST['newAnalysis'])
+		if('enr' not in request.POST):
+			mutable = request.POST._mutable
+			request.POST._mutable = True
+			request.POST['enr'] = "true"
+			request.POST._mutable = mutable
+		if('enr' in request.POST):
+			print("enr in request")
+		#return clustering_6(request)
+		#return HttpResponseRedirect('polls/clustering_6.html')
+		return render(request,'polls/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+	else:		
+		#remove_loading_image.delay()
+		ret_metadata = ""
+		if not (request.user.is_authenticated):
+			cache.clear()
+		else:
+			username = str(request.user)
+			list_of_files = GraphForm.list_user_data_2(username)
+			list_of_files_2 = GraphForm.list_user_data(username)
+			cache.clear()
+			#metd = list_metadata.apply_async(countdown=0)
+			metd = list_metadata_3.apply_async(countdown=0)
+			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
+			print(ret_metadata1) 
+			print("iubaerb")
+			metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
+			result2 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			#result2 = read_kegg_enrichment.delay("data/test/enrichr_kegg")	
+			enrichment_dict = result2.get()
+			#(ret_metadata,is_lungc) = metd.get()  
+			#return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'is_lungc':is_lungc})
+		#make_empty_figure.apply_async(countdown=2)
+		#empty_log_file.apply_async(countdown=2)	
+		if('done' in request.session):
+			print("clustering 6 part 3")
+			print(request.session['done'])
+			if(request.session['done'] == "true"): 
+				session_id = request.session._get_or_create_session_key()
+				path99 = "test_" + session_id + ".png"
+				json_path = "test15_" + session_id + ".json"
+				path_metadata = "metadata_" + session_id + ".txt"
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})		
+		return render(request,'polls/clustering_6_part_1.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
+
+
+
+def clustering_6_4(request):
+	if('newAnalysis' in request.POST):
+		print(request.POST.get("newAnalysis"))
+		print(request.POST['newAnalysis'])
+		request.POST._mutable = True
+		if(request.POST['newAnalysis'] != "false"):
+			if('done' in request.session):
+				if(request.session['done'] == "true"):
+					request.session['done'] = "False"
+			request.POST['newAnalysis'] = "false"
+	#if(request.session['done'] == "true"):
+	if('done' in request.session):
+		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
+		print("done")
+	if('session_id' in request.POST):
+		print(request.POST['session_id'])
+	#print("in clustering")
+	ret_metadata1 = {}
+	ret_metadata2 = {}
+	ret_metadata3 = {}
+	metadata_dict = []
+	enrichment_dict = []
+	pval_enr = 0.5
+	list_of_files = ""
+	list_of_files_2 = ""
+	save_data = request.POST.get("save_data", None)
+	nbr_iter = request.POST.get("nbr_iter",45)
+	nbr_ants = request.POST.get("nbr_ants",30)
+	evap = request.POST.get("evap",0.3)
+	epsilon = request.POST.get("stopcr",0.02) 
+	hi_sig = request.POST.get("hisig",1)
+	pher_sig = request.POST.get("pher",1)
+	savedata_param = "false"
+	#fig = plt.figure(figsize=(10,8))
+	#plt.savefig("polls/static/progress.png")
+	#plt.close(fig)
+	#for key, value in request.POST.items():
+	#	print(key)
+	#	print(value)
+	#if(('myfile' in request.POST) or ('predef_file' in request.POST)):
+	#	print("in request")
+	#if(('protfile' in request.POST) or (('parse_ndex_file' in request.POST) and ('ndex_name_2' in request.POST))):
+	#	print("in request 2")
+	if(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
+		if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])
+				clinicalstr = ""
+				clinicaldf = ""
+				add_loading_image.delay()
+				with open("/code/polls/static/output_console.txt", "w") as text_file:
+   					text_file.write("Your request is being processed...")
+   					text_file.close()
+				make_empty_figure.delay()
+				clinicalstr = "empty"
+				clinicaldf = ""
+				survival_col_name = ""
+				if('myfile' in request.FILES):
+					exprstr = request.FILES['myfile'].read().decode('utf-8')
+					result10 = preprocess_file.delay(exprstr)
+					exprstr = result10.get()
+				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
+					cancer_type = request.POST.get("cancer_type")
+					if(cancer_type == "1"):
+						print("babababababa")
+						fh1 = open("polls/data/lung_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/lung_cancer_clinical.csv")
+						fh4 = open("polls/data/lung_cancer_clinical.csv")
+						#fh4 = open("polls/data/breast_cancer_clinical.csv")
+						is_lungc = "true"
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "disease free survival in months:ch1"
+					else:
+						fh1 = open("polls/data/breast_cancer_expr.csv")
+						exprstr = fh1.read()
+						clinicaldf = pd.read_csv("polls/data/breast_cancer_clinical.csv")
+						fh4 = open("polls/data/breast_cancer_clinical.csv")
+						clinicalstr = fh4.read()
+						fh4.flush()
+						fh4.close()
+						survival_col_name = "mfs (yr):ch1"
+				if('protfile' in request.FILES):
+					ppistr = request.FILES['protfile'].read().decode('utf-8')
+					result4 = check_input_files.delay(ppistr,exprstr)
+					errstr = result4.get()
+					if(errstr != ""):
+						request.session['errors'] = errstr
+						return render(request,'polls/errorpage.html',{'errors':errstr})
+				elif('ndex_name_2' in request.POST):
+					ndex_file_id = request.POST.get("ndex_name_2")
+					if(ndex_file_id == "1"):
+						result_ndex = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "2"):
+						result_ndex = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "3"):
+						result_ndex = import_ndex.delay("becec556-86d4-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+					elif(ndex_file_id == "4"):
+						result_ndex = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf")
+						ppistr = result_ndex.get()
+				if('analyze_metadata' in request.POST):
+					if(request.FILES['patientdata']):
+						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
+						clinical_stringio = StringIO(clinicalstr)
+						clinicaldf = pd.read_csv(clinical_stringio)
+						if('survival_col' in request.POST):
+							#print("barabsfrbasdb")
+							if(request.POST['survival_col']):
+								survival_col_name = request.POST['survival_col']
+				session_id = ""
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+				session_id = request.session._get_or_create_session_key()
+				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+				(div,script,plot1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path) = result2.get()
+				metd = list_metadata_3.apply_async(countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				json_path = "test15_" + session_id + ".json"
+				#metd = list_metadata_3.apply_async(countdown=0)
+				path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
+				
+				#print(adjlist)
+				convert_gene_list.delay(adjlist,"/code/polls/static/genelist_temp.txt")
+				#print("iasdfasdfsf")
+				#print(ret_metadata1)
+				write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)	
+				#(div,script,plot1) = result2.get()			
+				plot2 = "test.png"
+				if save_data in ["save_data"]:
+	                		if request.user.is_authenticated:
+	                			#print("save data")
+	                			savedata_param = "true"
+	                			username = str(request.user)
+	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+						#GraphForm.save_results(username)
+				if request.user.is_authenticated:
+			        	username = str(request.user)
+			        	list_of_files = GraphForm.list_user_data_2(username)	
+			        	list_of_files_2 = GraphForm.list_user_data(username)              
+				#else:
+				remove_loading_image.delay()
+				cache.clear()				
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				#list_metadata.apply_async(countdown=0)
+				with open("/code/polls/static/plotly_output_2.html", "w") as text_file_3:
+   					text_file_3.write(plot_div)
+				with open("/code/polls/static/metadata_test.txt","w") as text_file_4:
+					text_file_4.write("bla")
+				metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				print("iasdfasdfsf")
+				print(ret_metadata1) 	
+				#return HttpResponseRedirect(reverse('polls/clustering_6_part_2_2/'),args=(exprstr,ppistr))
+				#return clustering_6_part_2_2(request,exprstr,ppistr)
+				#(div,script,plot1) = result2.get()			
+				plot2 = "test.png"
+				if save_data in ["save_data"]:
+	                		if request.user.is_authenticated:
+	                			savedata_param = "true"
+	                			username = str(request.user)
+	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+						#GraphForm.save_results(username)
+				#else:
+					#cache.clear()
+				if request.user.is_authenticated:
+			        	username = str(request.user)
+			        	list_of_files = GraphForm.list_user_data_2(username)	
+			        	list_of_files_2 = GraphForm.list_user_data(username)              
+				#else:
+				if request.user.is_authenticated:
+					request.session['done'] = "true"
+				else:
+					request.POST._mutable = True
+					request.POST['session_id'] = session_id
+				remove_loading_image.delay()
+				cache.clear()				
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				#session_id = request.session._get_or_create_session_key()
+				#print(session_id)
+				#request.session['done'] = "true"
+				path99 = "test_" + session_id + ".png"
+				#pval = ""
+				return render(request, 'polls/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':plot_div,'script':script,'plot2':plot2, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
+	if('redo_analysis' in request.POST and request.user.is_authenticated):
+		if(request.POST['redo_analysis']):
+			with open("polls/static/output_console.txt", "w") as text_file:
+   				text_file.write("Your request is being processed...")
+			add_loading_image.delay()
+			filename1 = request.POST.get("input_own_file_redo")
+			fh1 = open(filename1)
+			exprstr = fh1.read()
+			filename2 = filename1.split("_expr.txt")[0] + "_prot.txt"
+			fh2 = open(filename2)
+			filename3 = filename1.split("_expr.txt")[0] + "_clin.txt"
+			has_clin_data = "false"
+			if(os.path.isfile(filename3)):
+				fh3 = open(filename3)
+				has_clin_data = "true"
+				clinicalstr = fh3.read()
+			#path_json = filename1
+			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
+			ppistr = fh2.read()
+			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				make_empty_figure.delay()
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])	
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids) =result1.get()				
+				if(has_clin_data == "true"):
+					result2 = script_output_task_3.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr)
+					(div,script,plot1,plot_div,ret_metadata) = result2.get()
+				else:
+					result2 = script_output_task.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1)
+					(div,script,plot1) = result2.get()
+					ret_metadata = ""
+				plot2 = "test.png"
+				cache.clear()			
+				make_empty_figure.apply_async(countdown=10)
+				empty_log_file.apply_async(countdown=10)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)  	 	   
+				remove_loading_image.delay()	
+				return render(request, 'polls/clustering_6.html', {'form':"",'images':"",'div':"",'script':"",'plot2':plot2, 'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
+
+	elif('enrichment_type' in request.POST):
+		enr_type = request.POST.get("enrichment_type")
+		group_for_enr = "both"
+		if('pval_enr' in request.POST):
+			pval_enr = request.POST.get('pval_enr')
+			print(pval_enr)
+		if('group_for_enr' in request.POST):
+			group_for_enr = request.POST.get('group_for_enr')
+			#print(pval_enr)
+		print("enrichment type")
+		enrichment_dict = {}
+		enrichment_dict_2 = {}
+		enrichment_dict_3 = {}
+		enrichment_dict_4 = {}
+		enrichment_dict_5 = {}
+		if(enr_type == "kegg_enrichment"):
+			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_kegg")
+			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_kegg")
+			result3 = run_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_kegg")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_enrichment"):	
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()	
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "go_molecular"):
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			enr_results = result1.get()
+			enr_results_2 = result2.get()
+			enr_results_3 = result3.get()
+			print("enr")
+			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			enrichment_dict = result4.get()
+			enrichment_dict_2 = result5.get()
+			enrichment_dict_3 = result6.get()
+			(enrichment_dict_4,enrichment_dict_5) = result7.get()
+		elif(enr_type == "reactome_enrichment"):
+			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
+			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"polls/data/test2/enrichr_reactome")
+			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
+			#enr_results = result1.get()
+			enr_results_2 = result2.get()
+			#enr_results_3 = result3.get()
+			print("enr")
+			#result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_reactome/Reactome_2016.test_name.enrichr.reports.txt",pval_enr)
+			#result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			#enrichment_dict = result4.get()
+			enrichment_dict = {}
+			enrichment_dict_2 = result5.get()
+			#enrichment_dict_3 = result6.get()
+			enrichment_dict_3 = {}		
+		#print(request.POST.get("newAnalysis"))
+		#print(request.POST['newAnalysis'])
+		if('enr' not in request.POST):
+			mutable = request.POST._mutable
+			request.POST._mutable = True
+			request.POST['enr'] = "true"
+			request.POST._mutable = mutable
+		if('enr' in request.POST):
+			print("enr in request")
+		#return clustering_6(request)
+		#return HttpResponseRedirect('polls/clustering_6.html')
+		return render(request,'polls/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+	else:		
+		#remove_loading_image.delay()
+		ret_metadata = ""
+		if not (request.user.is_authenticated):
+			cache.clear()
+		else:
+			username = str(request.user)
+			list_of_files = GraphForm.list_user_data_2(username)
+			list_of_files_2 = GraphForm.list_user_data(username)
+			cache.clear()
+			#metd = list_metadata.apply_async(countdown=0)
+			metd = list_metadata_3.apply_async(countdown=0)
+			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
+			print(ret_metadata1) 
+			print("iubaerb")
+			metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
+			result2 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			#result2 = read_kegg_enrichment.delay("data/test/enrichr_kegg")	
+			enrichment_dict = result2.get()
+			#(ret_metadata,is_lungc) = metd.get()  
+			#return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'is_lungc':is_lungc})
+		#make_empty_figure.apply_async(countdown=2)
+		#empty_log_file.apply_async(countdown=2)	
+		#if('done' in request.session):
+		#	print("clustering 6 part 3")
+		#	print(request.session['done'])
+		#	if(request.session['done'] == "true"): 
+		#		session_id = request.session._get_or_create_session_key()
+		#		path99 = "test_" + session_id + ".png"
+		#		json_path = "test15_" + session_id + ".json"
+		#		path_metadata = "metadata_" + session_id + ".txt"
+		#		output_plot_path = "output_plotly_" + session_id + ".html"
+		#		return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})		
+		return render(request,'polls/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
 
 
 
@@ -1117,7 +2136,8 @@ def clustering_6(request):
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
 				add_loading_image.delay()
-				with open("polls/static/output_console.txt", "w") as text_file:
+				#with open("polls/static/output_console.txt", "w") as text_file:
+				with open("/code/polls/static/output_console.txt", "w") as text_file:
    					text_file.write("Your request is being processed...")
    					text_file.close()
 				make_empty_figure.delay()
@@ -1148,7 +2168,7 @@ def clustering_6(request):
 					result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
 					(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()	
 					
-					write_pval.apply_async([p_val,"polls/static/pvalue.txt"],countdown=0)
+					write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)
 					#result2 = script_output_task_4.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2)
 					#(div,script,plot1,plot_div,ret_metadata) = result2.get()
 				plot2 = "test.png"
@@ -1156,7 +2176,7 @@ def clustering_6(request):
 	                		if request.user.is_authenticated:
 	                			savedata_param = "true"
 	                			username = str(request.user)
-	                			foobar = "user_uploaded_files/" + username
+	                			foobar = "/code/user_uploaded_files/" + username
 	                			if not(os.path.isdir(foobar)):
 	                				os.mkdir(foobar)
 	                			filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
@@ -1368,64 +2388,64 @@ def clustering_6(request):
 		enrichment_dict_4 = {}
 		enrichment_dict_5 = {}
 		if(enr_type == "kegg_enrichment"):
-			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_kegg")
-			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_kegg")
-			result3 = run_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_kegg")
+			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"/code/polls/data/test/enrichr_kegg")
+			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"/code/polls/data/test2/enrichr_kegg")
+			result3 = run_enrichment_2.delay("genelist_2.txt",pval_enr,"/code/polls/data/test3/enrichr_kegg")
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
 			print("enr")
-			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result4 = read_kegg_enrichment.delay("/code/polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("/code/polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("/code/polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("/code/polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
 			enrichment_dict = result4.get()
 			enrichment_dict_2 = result5.get()
 			enrichment_dict_3 = result6.get()
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_enrichment"):	
-			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
-			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
-			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"/code/polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"/code/polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"/code/polls/data/test3/enrichr_go")
 			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
 			print("enr")
-			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
-			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
-			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
-			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result4 = read_kegg_enrichment.delay("/code/polls/data/test/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("/code/polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("/code/polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("/code/polls/data/test2/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt","/code/polls/data/test3/enrichr_go/GO_Biological_Process_2018.test_name.enrichr.reports.txt",pval_enr)
 			enrichment_dict = result4.get()
 			enrichment_dict_2 = result5.get()
 			enrichment_dict_3 = result6.get()	
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_molecular"):
-			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"polls/data/test/enrichr_go")
-			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"polls/data/test2/enrichr_go")
-			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"polls/data/test3/enrichr_go")
+			result1 = run_go_enrichment_2.delay("genelist.txt",pval_enr,"/code/polls/data/test/enrichr_go")
+			result2 = run_go_enrichment_2.delay("genelist_1.txt",pval_enr,"/code/polls/data/test2/enrichr_go")
+			result3 = run_go_enrichment_2.delay("genelist_2.txt",pval_enr,"/code/polls/data/test3/enrichr_go")
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
 			print("enr")
-			result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
-			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
-			result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
-			result7 = read_kegg_enrichment_2.delay("polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt","polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result4 = read_kegg_enrichment.delay("/code/polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("/code/polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result6 = read_kegg_enrichment.delay("/code/polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("/code/polls/data/test2/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt","/code/polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
 			enrichment_dict = result4.get()
 			enrichment_dict_2 = result5.get()
 			enrichment_dict_3 = result6.get()
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "reactome_enrichment"):
 			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
-			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"polls/data/test2/enrichr_reactome")
+			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"/code/polls/data/test2/enrichr_reactome")
 			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
 			#enr_results = result1.get()
 			enr_results_2 = result2.get()
 			#enr_results_3 = result3.get()
 			print("enr")
 			#result4 = read_kegg_enrichment.delay("polls/data/test/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
-			result5 = read_kegg_enrichment.delay("polls/data/test2/enrichr_reactome/Reactome_2016.test_name.enrichr.reports.txt",pval_enr)
+			result5 = read_kegg_enrichment.delay("/code/polls/data/test2/enrichr_reactome/Reactome_2016.test_name.enrichr.reports.txt",pval_enr)
 			#result6 = read_kegg_enrichment.delay("polls/data/test3/enrichr_go/GO_Molecular_Function_2018.test_name.enrichr.reports.txt",pval_enr)
 			#enrichment_dict = result4.get()
 			enrichment_dict = {}
@@ -1568,6 +2588,8 @@ def clustering_6_part_1(request):
 	if('done' in request.session):
 		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
 		print("done")
+	if('session_id' in request.POST):
+		print(request.POST['session_id'])
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -1926,7 +2948,7 @@ def clustering_6_part_1(request):
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
 				add_loading_image.delay()
-				with open("polls/static/output_console.txt", "w") as text_file:
+				with open("/code/polls/static/output_console.txt", "w") as text_file:
    					text_file.write("Your request is being processed...")
    					text_file.close()
 				make_empty_figure.delay()
@@ -1949,9 +2971,8 @@ def clustering_6_part_1(request):
 				result4 = check_input_files.delay(ppistr,exprstr)
 				errstr = result4.get()
 				if(errstr != ""):
-					request.session['errors'] = errstr
+					#request.session['errors'] = errstr
 					return render(request,'polls/errorpage.html',{'errors':errstr})
-				
 				#return HttpResponseRedirect('clustering_6_part_2_2',exprstr_par=exprstr,ppistr_par=ppistr)
 				#return HttpResponseRedirect('polls/clustering_6_part_2_2.html',exprstr,ppistr)
 				#return HttpResponseRedirect('polls/clustering_6_part_2_2.html',args={'exprstr_par':exprstr,'ppistr_par':ppistr})
@@ -1960,17 +2981,22 @@ def clustering_6_part_1(request):
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				#result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
 				session_id = request.session._get_or_create_session_key()
-				output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
-				json_path = "polls/static/test15_" + session_id + ".json"
+				#print(session_id)
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				json_path = "test15_" + session_id + ".json"
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(div,script,plot1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path) = result2.get()
 				#metd = list_metadata_3.apply_async(countdown=0)
-				path_metadata = "polls/static/metadata_" + session_id + ".txt"
+				json_path = "test15_" + session_id + ".json"
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
+				with open("/code/polls/static/metadata_test.txt","w") as text_file_4:
+					text_file_4.write("bla")
 				metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
 				print("iasdfasdfsf")
 				print(ret_metadata1) 	
-				request.session['ppistr'] = ppistr
+				#request.session['ppistr'] = ppistr
 				#return HttpResponseRedirect(reverse('polls/clustering_6_part_2_2/'),args=(exprstr,ppistr))
 				#return clustering_6_part_2_2(request,exprstr,ppistr)
 				#(div,script,plot1) = result2.get()			
@@ -1993,11 +3019,16 @@ def clustering_6_part_1(request):
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
 				#session_id = request.session._get_or_create_session_key()
-				print(session_id)
-				request.session['done'] = "true"
+				#print(session_id)
+				if request.user.is_authenticated:
+					request.session['done'] = "true"
+				else:
+					request.POST._mutable = True
+					request.POST['session_id'] = session_id
+				path99 = "test_" + session_id + ".png"
 				#request.session.modified = True
-				print(request.session['done'])
-				with open("polls/static/plotly_output_2.html", "w") as text_file_3:
+				#print(request.session['done'])
+				with open("/code/polls/static/plotly_output_2.html", "w") as text_file_3:
    					text_file_3.write(plot_div)
 				return render(request, 'polls/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':plot_div,'script':script,'plot2':plot2,'plot4':path99,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 				#return render(request, 'polls/clustering_6_part_1.html')
@@ -2326,7 +3357,9 @@ def clustering_6_part_1(request):
 	else:		
 		#remove_loading_image.delay()
 		ret_metadata = ""
-		if not (request.user.is_authenticated):
+		#if not (request.user.is_authenticated):
+		if not (1 == 0):
+
 			cache.clear()
 		else:
 			username = str(request.user)
@@ -2336,13 +3369,13 @@ def clustering_6_part_1(request):
 			#metd = list_metadata.apply_async(countdown=0)			
 			#metd = list_metadata_3.apply_async(countdown=0)
 			session_id = request.session._get_or_create_session_key()
-			path_metadata = "polls/static/metadata_" + session_id + ".txt"
+			path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
 			metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
 			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
 			print(ret_metadata1) 
 			print("iubaerb")
 			metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
-			result2 = read_kegg_enrichment.delay("polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result2 = read_kegg_enrichment.delay("/code/polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
 			#result2 = read_kegg_enrichment.delay("data/test/enrichr_kegg")	
 			enrichment_dict = result2.get()
 			#(ret_metadata,is_lungc) = metd.get()  
@@ -2359,10 +3392,11 @@ def clustering_6_part_1(request):
 			print(request.session['done'])
 			if(request.session['done'] == "true"): 
 				session_id = request.session._get_or_create_session_key()
-				path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
-				path_metadata = "polls/static/metadata_" + session_id + ".txt"
-				output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
-				return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
+				path99 = "test_" + session_id + ".png"
+				json_path = "test15_" + session_id + ".json"
+				path_metadata = "metadata_" + session_id + ".txt"
+				output_plot_path = "output_plotly_" + session_id + ".html"
+				return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
 
 		return render(request,'polls/clustering_6_part_1.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
 
@@ -2705,6 +3739,8 @@ def errorpage(request):
 		#return(clustering_6_part_3_2(request))
 
 def clustering_6_part_3_2(request):
+	if('session_id' in request.POST):
+		print(request.POST['session_id'])
 	print("basdbasdbasdbasdbs")
 	ret_metadata1 = {}
 	ret_metadata2 = {}
@@ -2791,7 +3827,7 @@ def clustering_6_part_3_2(request):
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
 				session_id = request.session._get_or_create_session_key()
-				path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
+				path99 = "polls/static/test_" + session_id + ".png"
 				path_metadata = "polls/static/metadata_" + session_id + ".txt"
 				output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
 				#list_metadata.apply_async(countdown=0)
@@ -2900,7 +3936,109 @@ def clustering_6_part_3_2(request):
 			#enrichment_dict_3 = result6.get()
 			enrichment_dict_3 = {}		
 		return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5})
-
+	elif('enrichment_type' in request.POST):
+		enr_type = request.POST.get("enrichment_type")
+		group_for_enr = "both"
+		if('pval_enr' in request.POST):
+			pval_enr = request.POST.get('pval_enr')
+			print(pval_enr)
+		if('group_for_enr' in request.POST):
+			group_for_enr = request.POST.get('group_for_enr')
+			#print(pval_enr)
+		enrichment_dict = {}
+		enrichment_dict_2 = {}
+		enrichment_dict_3 = {}
+		enrichment_dict_4 = {}
+		enrichment_dict_5 = {}
+		if(request.user.is_authenticated):
+			session_id = request.session._get_or_create_session_key()
+			genelist = "genelist_" + session_id + ".txt"
+			genelist1 = "genelist_1_" + session_id + ".txt"
+			genelist2 = "genelist_2_" + session_id + ".txt"
+			kegg_dir = "polls/data/test/enrichr_kegg/" + session_id
+			kegg_dir_2 = "polls/data/test2/enrichr_kegg/" + session_id
+			kegg_dir_3 = "polls/data/test3/enrichr_kegg/" + session_id
+			kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
+			kegg_output_dir_2 = kegg_dir_2 + "/KEGG_2013.test_name.enrichr.reports.txt"
+			kegg_output_dir_3 = kegg_dir_3 + "/KEGG_2013.test_name.enrichr.reports.txt"
+			if(enr_type == "kegg_enrichment"):
+				result1 = run_enrichment_2.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test/enrichr_kegg/" + session_id))
+				result2 = run_enrichment_2.delay(("genelist_1_" + session_id + ".txt"),pval_enr,("polls/data/test2/enrichr_kegg/" + session_id))
+				result3 = run_enrichment_2.delay(("genelist_2_" + session_id + ".txt"),pval_enr,("polls/data/test3/enrichr_kegg/" + session_id))
+				enr_results = result1.get()
+				enr_results_2 = result2.get()
+				enr_results_3 = result3.get()
+				print("enr")
+				result4 = read_kegg_enrichment.delay(("polls/data/test/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
+				result5 = read_kegg_enrichment.delay(("polls/data/test2/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
+				result6 = read_kegg_enrichment.delay(("polls/data/test3/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
+				result7 = read_kegg_enrichment_2.delay(("polls/data/test2/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),("polls/data/test3/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
+				enrichment_dict = result4.get()
+				enrichment_dict_2 = result5.get()
+				enrichment_dict_3 = result6.get()
+				(enrichment_dict_4,enrichment_dict_5) = result7.get()
+			elif(enr_type == "go_enrichment"):	
+				result1 = run_go_enrichment_2.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test/enrichr_go/" + session_id))
+				result2 = run_go_enrichment_2.delay(("genelist_1_" + session_id + ".txt"),pval_enr,("polls/data/test2/enrichr_go/" + session_id))
+				result3 = run_go_enrichment_2.delay(("genelist_2_" + session_id + ".txt"),pval_enr,("polls/data/test3/enrichr_go/" + session_id))
+				#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
+				enr_results = result1.get()
+				enr_results_2 = result2.get()
+				enr_results_3 = result3.get()
+				print("enr")
+				result4 = read_kegg_enrichment.delay(("polls/data/test/enrichr_go/" + session_id + "/GO_Biological_Process_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result5 = read_kegg_enrichment.delay(("polls/data/test2/enrichr_go/" + session_id + "/GO_Biological_Process_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result6 = read_kegg_enrichment.delay(("polls/data/test3/enrichr_go/" + session_id + "/GO_Biological_Process_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result7 = read_kegg_enrichment_2.delay(("polls/data/test2/enrichr_go/" + session_id + "/GO_Biological_Process_2018.test_name.enrichr.reports.txt"),("polls/data/test3/enrichr_go/" + session_id + "/GO_Biological_Process_2018.test_name.enrichr.reports.txt"),pval_enr)
+				enrichment_dict = result4.get()
+				enrichment_dict_2 = result5.get()
+				enrichment_dict_3 = result6.get()	
+				(enrichment_dict_4,enrichment_dict_5) = result7.get()
+			elif(enr_type == "go_molecular"):
+				result1 = run_go_enrichment_2.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test/enrichr_go/" + session_id))
+				result2 = run_go_enrichment_2.delay(("genelist_1_" + session_id + ".txt"),pval_enr,("polls/data/test2/enrichr_go/" + session_id))
+				result3 = run_go_enrichment_2.delay(("genelist_2_" + session_id + ".txt"),pval_enr,("polls/data/test3/enrichr_go/" + session_id))
+				enr_results = result1.get()
+				enr_results_2 = result2.get()
+				enr_results_3 = result3.get()
+				print("enr")
+				result4 = read_kegg_enrichment.delay(("polls/data/test/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result5 = read_kegg_enrichment.delay(("polls/data/test2/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result6 = read_kegg_enrichment.delay(("polls/data/test3/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result7 = read_kegg_enrichment_2.delay(("polls/data/test2/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),("polls/data/test3/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				enrichment_dict = result4.get()
+				enrichment_dict_2 = result5.get()
+				enrichment_dict_3 = result6.get()
+				(enrichment_dict_4,enrichment_dict_5) = result7.get()
+			elif(enr_type == "reactome_enrichment"):
+				result1 = run_reac_enrichment.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test/enrichr_reactome/" + session_id))
+				result2 = run_reac_enrichment.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test2/enrichr_reactome/" + session_id))
+				result3 = run_reac_enrichment.delay(("genelist_" + session_id + ".txt"),pval_enr,("polls/data/test3/enrichr_reactome/" + session_id))
+				enr_results = result1.get()
+				enr_results_2 = result2.get()
+				enr_results_3 = result3.get()
+				print("enr")
+				result4 = read_kegg_enrichment.delay(("polls/data/test/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				result5 = read_kegg_enrichment.delay(("polls/data/test2/enrichr_reactome/" + session_id + "/Reactome_2016.test_name.enrichr.reports.txt"),pval_enr)
+				result6 = read_kegg_enrichment.delay(("polls/data/test3/enrichr_go/" + session_id + "/GO_Molecular_Function_2018.test_name.enrichr.reports.txt"),pval_enr)
+				enrichment_dict = result4.get()
+				#enrichment_dict = {}
+				enrichment_dict_2 = result5.get()
+				enrichment_dict_3 = result6.get()
+				#enrichment_dict_3 = {}		
+				#return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5})
+			#path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
+			path99 = "test_" + session_id + ".png"
+			json_path = "test15_" + session_id + ".json"
+			#path_metadata = "polls/static/metadata_" + session_id + ".txt"
+			path_metadata = "polls/static/metadata_" + session_id + ".txt"
+			metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
+			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 			
+			#output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
+			output_plot_path = "output_plotly_" + session_id + ".html"
+			return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path4':path99,
+'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+		
 	elif('go_enrichment' in request.POST):
 		if('pval_enr' in request.POST):
 			pval_enr = request.POST.get('pval_enr')
@@ -3009,9 +4147,9 @@ def clustering_6_part_3_2(request):
 			#return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'is_lungc':is_lungc})
 			print("clustering_6_part_3_2")
 		session_id = request.session._get_or_create_session_key()
-		path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
-		path_metadata = "polls/static/metadata_" + session_id + ".txt"
-		output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
+		path99 = "test_" + session_id + ".png"
+		path_metadata = "metadata_" + session_id + ".txt"
+		output_plot_path = "output_plotly_" + session_id + ".html"
 		return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
 
 			#return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})

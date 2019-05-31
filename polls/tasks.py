@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 from networkx.algorithms import bipartite
 import scipy.sparse as sparse
 from scipy.sparse import csr_matrix
-from IPython.display import Audio, display
+#from scipy.misc import logsumexp
+#from IPython.display import Audio, display
 from sklearn.cluster.bicluster import SpectralCoclustering
 from collections import Counter
 import collections
@@ -165,7 +166,7 @@ def hi(A_j,n,m):
 @shared_task(name="make_empty_figure")
 def make_empty_figure():
 	fig = plt.figure(figsize=(10,8))
-	plt.savefig("polls/static/progress.png")
+	plt.savefig("/code/polls/static/progress.png")
 	plt.close(fig)
 
 
@@ -251,7 +252,7 @@ def ants_2(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,e
         print("best round score: " + str(round(max_round_score,3)))
         print("average score: " + str(round(av_score/K,3)))
         print("foobar")
-        with open("/home/quirin/testproject/polls/static/output_console.txt", "w") as text_file:
+        with open("/code/polls/static/output_console.txt", "w") as text_file:
         	#print("foobar")
         	text_file.write("Iteration # "+ str(count_big+1) + " completed. \n" + "Best round score: " + str(round(max_round_score,3)) + "\n" + "Average score: " + str(round(av_score/K,3)))
         	text_file.close()
@@ -288,7 +289,7 @@ def ants_2(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,e
             #plt.ylim((0,1))
             #plt.legend()
             #this was not commented before #plt.show(block=False)
-            plt.savefig("/home/quirin/testproject/polls/static/progress.png")
+            plt.savefig("/code/polls/static/progress.png")
             plt.close(fig)
         if len(set(score_change[:3])) ==1 and len(score_change)>3:
             flag = True
@@ -1021,11 +1022,11 @@ def preprocess_file(expr_str):
 
 @shared_task(name="add_loading_image")
 def add_loading_image():
-	copyfile("polls/static/loading.gif","polls/static/loading_1.gif")
+	copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
 
 @shared_task(name="remove_loading_image")
 def remove_loading_image():
-	os.unlink("polls/static/loading_1.gif")
+	os.unlink("/code/polls/static/loading_1.gif")
 
 @shared_task(name="write_to_file_1")
 def write_to_file_1(text,pth):
@@ -1036,7 +1037,7 @@ def write_to_file_1(text,pth):
 
 @shared_task(name="write_metadata_to_file")
 def write_metadata_to_file(metadata):
-    text_file = open("polls/static/metadata.txt", "w")
+    text_file = open("/code/polls/static/metadata.txt", "w")
     text_file.write("<table style=\"font-family: arial, sans-serif;border-collapse: collapse;width: 100%;\"><tr><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">Patient Group</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">Mean Survival</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">mean age at diagnosis</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">mean tumor size</th></tr>")
     for elem in metadata:
     	text_file.write("<tr>")
@@ -1049,7 +1050,7 @@ def write_metadata_to_file(metadata):
     text_file.close()
 @shared_task(name="empty_log_file")
 def empty_log_file():
-    text_file = open("/home/quirin/testproject/polls/static/output_console.txt", "w")
+    text_file = open("/code/polls/static/output_console.txt", "w")
     text_file.write("")
     text_file.close()
 
@@ -1068,7 +1069,7 @@ def metadata_to_string(metadata):
 
 @shared_task(name="list_metadata")
 def list_metadata():
-    fh1 = open("polls/static/metadata.txt")
+    fh1 = open("/code/polls/static/metadata.txt")
     lines = fh1.read()
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
@@ -1090,7 +1091,7 @@ def list_metadata():
 
 @shared_task(name="list_metadata_3")
 def list_metadata_3():
-    fh1 = open("polls/static/metadata.txt")
+    fh1 = open("/code/polls/static/metadata.txt")
     lines = fh1.read()
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
@@ -1147,7 +1148,7 @@ def list_metadata_3():
     return(dict0,dict1,dict2)
 @shared_task(name="list_metadata_2")
 def list_metadata_2():
-    fh1 = open("polls/static/metadata.txt")
+    fh1 = open("/code/polls/static/metadata.txt")
     lines = fh1.read()
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
@@ -1228,7 +1229,7 @@ def list_metadata_4(path):
     return(dict0,dict1,dict2)
 @shared_task(name="list_metadata_2")
 def list_metadata_2():
-    fh1 = open("polls/static/metadata.txt")
+    fh1 = open("/code/polls/static/metadata.txt")
     lines = fh1.read()
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
@@ -1253,17 +1254,18 @@ def list_metadata_2():
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
 
-@shared_task(name="algo_output_task")
-def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig):
+
+@shared_task(name="algo_output_task_new")
+def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id):
 	col = "cancer_type"
 	size = 2000
 	log2 = True
-	with open("polls/static/output_console.txt", "w") as text_file:
+	with open(("/code/polls/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = size, sample= None)
 	print(group1_ids)	
-	with open("polls/static/output_console.txt", "w") as text_file:
+	with open(("/code/polls/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
 	#L_g_min = int(input())
@@ -1308,7 +1310,196 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	#print(clusters)
 	
 	
-	with open("polls/static/output_console.txt", "w") as text_file:	
+	with open(("/code/polls/static/output_console_" + session_id + ".txt"), "w") as text_file:	
+		text_file.write("Progress of the algorithm is shown below...")
+	start = time.time()
+	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
+	#result_99= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = True, save 	= None, show_nets = False)
+	#print(result_99.get())
+	#solution,t_best,sc,conv= result_99.get()
+	#solution,t_best,sc,conv= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
+	end = time.time()
+	
+	
+	
+	
+	print("######################################################################")
+	print("RESULTS ANALYSIS")
+	print("total time " + str(round((end - start)/60,2))+ " minutes")
+	print("jaccard indexes:")
+	jacindices = lib.jac_matrix(solution[1],[group1,group2])
+	print(jacindices)
+	jac_1_ret = jacindices[0]
+	jac_2_ret = jacindices[1]
+	if lib.jac(group1,solution[1][0])>lib.jac(group1,solution[1][1]):
+	    values = [val1,val2]
+	else:
+	    values = [val2,val1]
+	# mapping to gene names (for now with API)
+	mg = mygene.MyGeneInfo()
+	new_genes = solution[0][0]+solution[0][1]
+	new_genes_entrez = [labels_B[x] for x in new_genes]
+	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
+	mapping =dict()
+	for line in out:
+	    mapping[rev_labels_B[line["query"]]] = line["symbol"]
+	###m plotting networks
+	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
+	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
+	
+	genes1,genes2 = solution[0]
+	patients1, patients2 = solution[1]
+	#print(patients1)
+	#print(group1)
+	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
+	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
+	
+	G_small = nx.subgraph(G,genes1+genes2)
+	G_small = nx.relabel_nodes(G_small,mapping)
+	
+	plt.figure(figsize=(15,15))
+	cmap=plt.cm.RdYlGn
+	vmin = -2
+	vmax = 2
+	pos = nx.spring_layout(G_small)
+	ec = nx.draw_networkx_edges(G_small,pos)
+	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,
+	                             vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
+	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,
+	                             alpha=1.0,
+	                             vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	nx.draw_networkx_labels(G_small,pos,font_size = 15,font_weight='bold')
+	ret2 = means1 + means2
+	ret3 = new_genes1 + new_genes2
+	adjlist = []
+	for line99 in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line99.split()
+		adjlist.append([lineSplit[0],lineSplit[1]])
+	plt.legend(frameon  = True)
+	plt.colorbar(nc1)
+	plt.axis('off')
+	print(list(G_small.nodes()))
+	### plotting expression data
+	plt.rc('font', size=30)          # controls default text sizes
+	plt.rc('axes', titlesize=20)     # fontsize of the axes title
+	plt.rc('axes', labelsize=20)    # fontsize of the x and y labels
+	plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
+	plt.rc('ytick', labelsize=10)    # fontsize of the tick labels
+	plt.rc('legend', fontsize=30)
+	
+	
+	grouping_p = []
+	p_num = list(GE.columns)
+	for p in p_num:
+	    if p in solution[1][0]:
+	        grouping_p.append(values[0])
+	    else:
+	        grouping_p.append(values[1])
+	grouping_p = pd.DataFrame(grouping_p,index = p_num)
+	grouping_g = []
+	
+	GE_small = GE.T[genes1+genes2]
+	GE_small. rename(columns=mapping, inplace=True)
+	GE_small = GE_small.T
+	g_num = list(GE_small.index)
+	for g in g_num:
+	    if g in new_genes1 :
+	        grouping_g.append(values[0])
+	    elif  g in new_genes2 :
+	        grouping_g.append(values[1])
+	    else:
+	        grouping_g.append(3)
+	        
+	grouping_g = pd.DataFrame(grouping_g,index = g_num)
+	
+	species = grouping_g[grouping_g[0]!=3][0]
+	lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
+	col_colors = species.map(lut)
+	
+	species = grouping_p[0]
+	lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
+	row_colors = species.map(lut)
+	plt.savefig("/code/polls/static/ntw_" + session_id + ".png")
+	#g = sns.clustermap(GE_small.T, row_colors=row_colors,col_colors = col_colors,figsize=(15, 10))
+	#for label in values:
+	#    g.ax_col_dendrogram.bar(0, 0, color=lut[label],
+	#                            label=label, linewidth=0)
+	#g.ax_col_dendrogram.legend(loc="upper center", ncol=2,bbox_to_anchor=(0.55, 1.5),
+	#                            borderaxespad=0.)
+	#ax = g.ax_heatmap
+	#ax.set_xlabel("Genes")
+	#ax.set_ylabel("Patients")
+	
+	#plotting convergence
+	#fig, ax = plt.subplots(figsize=(10, 7))
+	plt.clf()
+	plt.boxplot(conv/2,
+	                        vert=True,  # vertical box alignment
+	                        patch_artist=True)  # will be used to label x-ticks
+	
+	plt.xlabel("iterations")
+	plt.ylabel("score per subnetwork")
+	#plt.show(bplot1)
+	plt.savefig("/code/polls/static/conv_" + session_id + ".png")
+	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
+
+
+@shared_task(name="algo_output_task")
+def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig):
+	col = "cancer_type"
+	size = 2000
+	log2 = True
+	with open("/code/polls/static/output_console.txt", "w") as text_file:
+   		text_file.write("Your files are being processed...")
+	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
+	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = size, sample= None)
+	print(group1_ids)	
+	with open("/code/polls/static/output_console.txt", "w") as text_file:
+   		text_file.write("Starting model run...")	
+	print("How many genes you want per cluster (minimum):")
+	#L_g_min = int(input())
+	print("How many genes you want per cluster (maximum):")
+	#L_g_max = int(input())
+	imp.reload(lib)
+	
+	# =============================================================================
+	# #GENERAL PARAMETERS:
+	# =============================================================================
+	clusters = 2 # other options are currently unavailable
+	K = int(nbr_ants) # number of ants
+	eps = float(epsilon) # stopping criteria: score_max-score_av<eps
+	b = float(hi_sig) #HI significance
+	evaporation  = float(evap)
+	a = float(pher_sig) #pheramone significance
+	times =int(nbr_iter) #max amount of iterations
+	#times =45 #max amount of iterations
+	# =============================================================================
+	# #NETWORK SIZE PARAMETERS:
+	# =============================================================================
+	cost_limit = 20 # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
+	#L_g_min = 10 # minimum # of genes per group
+	#L_g_max = 20 # minimum # of genes per group
+	
+	th = 1# the coefficient to define the search radipus which is supposed to be bigger than 
+	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
+	#bigger th - less genes are considered (can lead to empty paths if th is too high)
+	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
+	#print(a)
+	#print(type(a))
+	#print(type(b))
+	#print(type(n))
+	#print(type(m))
+	#print(type(H))
+	#print(H)
+	#print(type(GE))	
+	#print(GE)
+	#print(type(G))
+	#print(G)
+	#print(type(clusters))
+	#print(clusters)
+	
+	
+	with open("/code/polls/static/output_console.txt", "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
 	solution,t_best,sc,conv= lib.ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
@@ -1417,7 +1608,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	species = grouping_p[0]
 	lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
 	row_colors = species.map(lut)
-	plt.savefig("/home/quirin/testproject/polls/static/ntw.png")
+	plt.savefig("/code/polls/static/ntw.png")
 	#g = sns.clustermap(GE_small.T, row_colors=row_colors,col_colors = col_colors,figsize=(15, 10))
 	#for label in values:
 	#    g.ax_col_dendrogram.bar(0, 0, color=lut[label],
@@ -1438,7 +1629,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
 	#plt.show(bplot1)
-	plt.savefig("/home/quirin/testproject/polls/static/conv.png")
+	plt.savefig("/code/polls/static/conv.png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
 
@@ -1532,7 +1723,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
 	#print(jsn3)
-	with open("polls/static/test15.json", "w") as text_file:
+	with open("/code/polls/static/test15.json", "w") as text_file:
 		text_file.write(jsn3)		
 	#nx.write_gexf(G,"test.gexf")
 	output_notebook()
@@ -1576,7 +1767,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("/home/quirin/testproject/polls/static/test.png")
+	plt.savefig("/code/polls/static/test.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
@@ -1631,7 +1822,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
 		ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
 		ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		text_file_3 = open("polls/static/metadata.txt", "w")
+		text_file_3 = open("/code/polls/static/metadata.txt", "w")
 		text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
 		text_file_3.write("<tr><th>Group1</th></tr>")
 		text_file_3.write("</table>")
@@ -1649,7 +1840,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		#text_file_3.write("</table>")
 		text_file_3.close()	
 		plot_div = ""
-		with open("polls/static/output_plotly.html", "w") as text_file_2:
+		with open("/code/polls/static/output_plotly.html", "w") as text_file_2:
         		text_file_2.write("")
 	
 	else:
@@ -1969,7 +2160,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
-		text_file_3 = open("polls/static/metadata.txt", "w")
+		text_file_3 = open("/code/polls/static/metadata.txt", "w")
 		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Correlation with clinical Group</th><th>Mean Survival</th><th>mean age at diagnosis</th><th>mean tumor size</th></tr>")
 		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
 		text_file_3.write("<table><tr>")
@@ -2027,10 +2218,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		with open("polls/static/output_plotly.html", "w") as text_file_2:
+		with open("/code/polls/static/output_plotly.html", "w") as text_file_2:
         		text_file_2.write(plot_div)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
-	with open("polls/static/output_console.txt", "w") as text_file:
+	with open("/code/polls/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
 	print(ret_metadata)
 	return(script,div,plot_1,plot_div,ret_metadata,p_val)
@@ -2050,7 +2241,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		if(v > 3):
 			tmp98 = 3
 		return(cmap_custom[tmp98])
-	
+	dirpath = os.getcwd()
+	print("current directory is : " + dirpath)
+	foldername = os.path.basename(dirpath)
+	print("Directory name is : " + foldername)
+	with open("../code/polls/static/metadata_test_2.txt","w") as text_file_4:
+		text_file_4.write("bla")		
+	with open("/code/polls/static/metadata_test_3.txt","w") as text_file_5:
+		text_file_5.write("bla")		
 	nodes = []
 	nodecolors = []
 	names = []
@@ -2120,7 +2318,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
 	#print(jsn3)
-	json_path = "polls/static/test15_" + session_id + ".json"
+	json_path = "/code/polls/static/test15_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)		
 	#nx.write_gexf(G,"test.gexf")
@@ -2166,7 +2364,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax.set_ylabel("Patients")
 	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
 	#plt.savefig("/home/quirin/testproject/polls/static/test.png")
-	path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
+	path99 = "/code/polls/static/test_" + session_id + ".png"
 	plt.savefig(path99)
 	script, div = components(plot)	
 	plot_1=plt.gcf()
@@ -2219,7 +2417,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
-	path_metadata = "polls/static/metadata_" + session_id + ".txt"
+	path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
+	print(path_genelist)
 	if(clinicalstr == "empty"):
 		ret_metadata = []
 		ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
@@ -2244,7 +2443,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#text_file_3.write("</table>")
 		text_file_3.close()	
 		plot_div = ""	
-		output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
+		output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write("")
 	
@@ -2502,14 +2701,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				#print(bababa2[63])
 				#print(bababa2[72])
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
-					if("month" in survival_col):
-						print("month")
-						print(patient_id_list[i])
-						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
-						patientData.update({patient_id_list[i]:survivalcol_list_temp})
-					else:
-						patientData.update({patient_id_list[i]:survivalcol_list[i]})
-					
+				if("month" in survival_col):
+					print("month")
+					print(patient_id_list[i])
+					survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
+					patientData.update({patient_id_list[i]:survivalcol_list_temp})
+				else:
+					patientData.update({patient_id_list[i]:survivalcol_list[i]})		
 					#patientData.update({patient_id_list[i]:survivalcol_list[i]})
 					print(survivalcol_list[i])
 				#	print(patientData)
@@ -2549,10 +2747,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
-		surv_results = logrank_test(survival_1,survival_2)
-		p_val = surv_results.p_value
-		print("p value" + str(p_val))
-		
+		print(survival_1)
+		#surv_results = logrank_test(survival_1,survival_2)
+		#p_val = surv_results.p_value
+		#print("p value" + str(p_val))
+		p_val = 0.1
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
 			ctr_surv_1 = ctr_surv_1 + 1
@@ -2624,11 +2823,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
+		output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
+		print(output_plot_path)
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write(plot_div)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
-	with open("polls/static/output_console.txt", "w") as text_file:
+	with open("/code/polls/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
 	print(ret_metadata)
 	return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
@@ -2652,7 +2852,7 @@ def run_enrichment(path,pval_enr):
                  # gene_sets='KEGG_2016',
                  # or gene_sets='KEGG_2016,KEGG_2013',
                  gene_sets=['KEGG_2016','KEGG_2013'],
-                 outdir="polls/data/test/enrichr_kegg",
+                 outdir="/code/polls/data/test/enrichr_kegg",
                  cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
                 )
 	print(enr.results)
@@ -2695,7 +2895,7 @@ def run_go_enrichment(path,pval_enr):
                  # gene_sets='KEGG_2016',
                  # or gene_sets='KEGG_2016,KEGG_2013',
                  gene_sets=['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'],
-                 outdir="polls/data/test/enrichr_go",
+                 outdir="/code/polls/data/test/enrichr_go",
                  cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
                 )
 	print(type(enr.results))
@@ -3062,8 +3262,8 @@ def import_ndex(name):
 def show_old_data(path_json,path_heatmap):
 	#G = nx.Graph()
 	#G_2 = nx.Graph()
-	copyfile(path_heatmap,"polls/static/test.png")
-	copyfile(path_json,"polls/static/test15.json")
+	copyfile(path_heatmap,"/code/polls/static/test.png")
+	copyfile(path_json,"/code/polls/static/test15.json")
 	
 
 #########################################################################
@@ -3199,7 +3399,7 @@ def script_output_task_2(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("/home/quirin/testproject/polls/static/test.png")
+	plt.savefig("polls/static/test.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
@@ -3345,7 +3545,7 @@ def script_output_task_4(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("/home/quirin/testproject/polls/static/test.png")
+	plt.savefig("polls/static/test.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
@@ -3797,7 +3997,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("/home/quirin/testproject/polls/static/test.png")
+	plt.savefig("polls/static/test.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
