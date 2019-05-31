@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+  livereload:
+    build: .
+    command: bash -c "python3 manage.py livereload"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    container_name: testproject_2
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:latest
+    environment:
+        - RABBITMQ_DEFAULT_USER=admin
+        - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+        - "5672:5672"
+  celery:
+    environment: 
+        - C_FORCE_ROOT=true
+    build: .
+    container_name: celery_container
+    command: bash -c "celery -A testproject worker -l info"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - rabbit
+  
