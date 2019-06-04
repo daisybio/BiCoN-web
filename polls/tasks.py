@@ -2228,9 +2228,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 
 @shared_task(name="script_output_task_10")
 def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	print("basdbrasdbawrubaerbsrbjsdb")
+	#print("basdbrasdbawrubaerbsrbjsdb")
+	# define colors depending on z-score differences of genes in graph
 	def color_for_graph(v):
 		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
 		v = v*2
@@ -2241,14 +2240,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		if(v > 3):
 			tmp98 = 3
 		return(cmap_custom[tmp98])
-	dirpath = os.getcwd()
-	print("current directory is : " + dirpath)
-	foldername = os.path.basename(dirpath)
-	print("Directory name is : " + foldername)
-	with open("../code/polls/static/metadata_test_2.txt","w") as text_file_4:
-		text_file_4.write("bla")		
-	with open("/code/polls/static/metadata_test_3.txt","w") as text_file_5:
-		text_file_5.write("bla")		
+	#dirpath = os.getcwd()
+	#print("current directory is : " + dirpath)
+	#foldername = os.path.basename(dirpath)
+	#print("Directory name is : " + foldername)
+	#with open("../code/polls/static/metadata_test_2.txt","w") as text_file_4:
+	#	text_file_4.write("bla")		
+	#with open("/code/polls/static/metadata_test_3.txt","w") as text_file_5:
+	#	text_file_5.write("bla")		
 	nodes = []
 	nodecolors = []
 	names = []
@@ -2261,31 +2260,19 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	G = nx.Graph()
 	print(G_list)
 	print(genes1)
-	#for G_tmp in G_list:
-	#	genes.update({G_tmp:0})	
-	#	tp = "circle"
-	#	if(G_tmp in genes1):
-	#		tp = "square"
-	#	G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-	#	nodecolors.append(color_for_graph(means[ctr]))
-	#	ctr = ctr + 1
-	#	names.append(G_tmp)
 	genelist_ret = []
+	# make node objects for genes
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
 		tp = "circle"
 		if(G_tmp in genes1):
 			tp = "square"
 		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
 		nodecolors.append(color_for_graph(means[ctr]))
-		#genelist_ret.append({'gene_name':G_tmp,'diff':float(means[ctr])})
 		ctr = ctr + 1
 		names.append(G_tmp)
 	ctr = 0
+	# make edge objects for PPI
 	for edg in adjlist:
 		G.add_edge(edg[0],edg[1],id=ctr,color="rgb(0,0,0)")
 		ctr = ctr + 1
@@ -2293,24 +2280,18 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	#print(pos)
 	x_pos = {}
 	y_pos = {}
+	# take y and x positions from the given networkx layout
 	for k in pos:	
 		x_pos[k] = pos[k][0]
 		y_pos[k] = pos[k][1]
 	#print(x_pos)
 	edgl = {}
 	ctr = 0
-	
-	#nodecolors = [color_for_graph(i) for i in means]
-	#for edg in G.edges():
-	#	edgl[edg] = ctr
-	#	ctr = ctr + 1
+	# write json object of genes and interactions
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
-	#nx.set_edge_attributes(G,edgl,'id')
 	nx.set_node_attributes(G,10,'size')
-	#nx.set_node_attributes(G,nodecolors,'color')
-	#print(json_graph.node_link_data(G))
 	jsn = json_graph.node_link_data(G)
 	jsn2 = str(json.dumps(jsn))
 	jsn33 = jsn2.replace('links','edges')
@@ -2323,19 +2304,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file.write(jsn3)		
 	#nx.write_gexf(G,"test.gexf")
 	output_notebook()
+	# configure plot
 	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
 	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	# create bokeh graph
-	#graph = from_networkx(G, nx.spring_layout, iterations=1000, scale=1, center=(0,0))
 	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	#graph = from_networkx(G, nx.circular_layout, scale=1, center=(0,0))
 	# add name to node data
-	
-	
 	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
-	
-	# add name to node data
+	# configure graph
 	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
 	graph.selection_policy = NodesAndLinkedEdges()
 	graph.inspection_policy = EdgesAndLinkedNodes()
@@ -2354,22 +2330,17 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
 	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
-	#sns.clustermap(T,method="average", figsize=(13, 13),robust=True,col_colors=col_colors1,row_colors=row_colors1,col_cluster=False)
-	#sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)		
-	#plt.xlabel('Genes')
-	#plt.ylabel('Patients')
+	# make heatmap
 	g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	#plt.savefig("/home/quirin/testproject/polls/static/test.png")
 	path99 = "/code/polls/static/test_" + session_id + ".png"
 	plt.savefig(path99)
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
-	print("in method")
+	#print("in method")
 	patientData = {}
 	patientData_misc = {}
 	group1_in_metadata = []
@@ -2400,6 +2371,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	group2_has_prognosis = []
 	prognosis_good = []
 	prognosis_bad = []
+	# write lists of genes in files, needed for enrichment analysis
 	path_genelist = "genelist_" + session_id + ".txt"
 	path_genelist_1 = "genelist_1_" + session_id + ".txt"
 	path_genelist_2 = "genelist_2_" + session_id + ".txt"
@@ -2419,6 +2391,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	text_file_6.close()
 	path_metadata = "/code/polls/static/metadata_" + session_id + ".txt"
 	print(path_genelist)
+	# if no metadata given, write an empty metadata file
 	if(clinicalstr == "empty"):
 		ret_metadata = []
 		ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
@@ -2429,18 +2402,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
 		text_file_3.write("<tr><th>Group1</th></tr>")
 		text_file_3.write("</table>")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
-		#for elem in ret_metadata:
-		#	text_file_3.write("<tr>")
-		#	text_file_3.write("<th>" + str(elem['lm']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['bm']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['lymph']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['metastasis']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['path_er']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['path_pr']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['good_prognosis']) + "</th>")
-		#	text_file_3.write("</tr>")
-		#text_file_3.write("</table>")
 		text_file_3.close()	
 		plot_div = ""	
 		output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
@@ -2448,28 +2409,24 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
         		text_file_2.write("")
 	
 	else:
-		print("barfbasdbhasdb")
 		clinicalLines = clinicalstr.split("\n")
 		title_col = clinicalLines[0].split(",")
-		print(title_col)
 		survival_col_nbr = 64
+		# replace all type of NA in dataframe by standard pandas-NA
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		#print(clinicaldf.index)
-		print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
 		print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
+		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
-			print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
 			print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
-		#print(clinicaldf["relapse (event=1; no event=0):ch1"])
 		param_names = []
 		param_values = []
 		param_cols = []
@@ -2479,48 +2436,33 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		patients_1 = []
 		group1_has = []
 		group2_has = []
+		# iterate over columns of metadata, get all unique entries
 		for column_name, column in clinicaldf.transpose().iterrows():
 			column.fillna("NA",inplace=True)
-			#print(column_name)
-			#print(column)
 			coluniq = column.unique()
-			#print(coluniq)
-			#print(column_name)
-			#print(list(column))
+			# replace all instances of NA by pandas-standard NA
 			for elem in coluniq:
-				#print(elem)
 				if ": " in str(elem):
 					elem = elem.split(": ")[1]
 			for elem in column:
-				#print(elem)
 				if ": " in str(elem):
 					elem = elem.split(": ")[1]
-					#print(elem)
 			for elem in column:
 				if(str(elem) == "nan" or elem == np.nan or pd.isna(elem)):
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-				#elif(type(elem) == float):
-				#	if(math.isnan(elem)):
-				#		elem = "NA"
 			for elem in coluniq:
 				if(str(elem) == "nan" or elem == np.nan or pd.isna(elem)):
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-				#elif(type(elem) == float):
-				#	if(math.isnan(elem)):
-				#		elem = "NA"
-			#for elem in coluniq:
-			#	print(str(elem))
 			if "NA" in coluniq:
+				# check if column entries are binary - length is 3 if na is there
 				if(len(coluniq) == 3):
-					#print(coluniq)
 					patients_temp_0 = []
 					patients_temp_1 = []
-					#param_names.append(column_name)
-					#param_cols.append(ctr)
+					# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -2537,35 +2479,22 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					column = column.replace('ALIVE','1')
 					column = column.replace('DEAD','0')
 					column = column.replace('NTL','NA')
-					#column2 = [str(w).replace(r'^P','1') for w in column]
-					#column2 = [re.sub(r'^P$','1',str(w)) for w in column]
-					#column2 = [re.sub(r'^N$','0',str(w)) for w in column2]
-					#column2 = [re.sub(r'^yes$','1',str(w)) for w in column2]
-					#column2 = [re.sub(r'^no$','0',str(w)) for w in column2]
-					#column2 = [re.sub(r'^Good Prognosis$','1') for w in column2]
-					#column2 = [re.sub(r'^Bad Prognosis$','0') for w in column2]
-					#column2 = [str(w).replace('Good Prognosis','1') for w in column]
-					#column2 = [str(w).replace('Bad Prognosis','0') for w in column2]
-					#column2 = [str(w).replace('yes','1') for w in column2]
-					#column2 = [str(w).replace('no','0') for w in column2]
-					#column2 = [str(w).replace('P','1') for w in column2]
-					#column2 = [str(w).replace('N','0') for w in column2]
-					#column2 = [str(w).replace('0A','NA') for w in column2]
-					#if(column.unique() 
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
 					print(column_name)
-					#print(patients_temp_0)
+					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
+						# check for which patients current metadata variable is 0 or 1
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
 							elif(col_as_list[i] == '1'):
 								patients_temp_1.append(patientids_metadata[i])
 						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)										
+						patients_1.append(patients_temp_1)		
+						# add column name to parameter names								
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
@@ -2580,12 +2509,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 								tmp94.append(all_patients[i])
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
-						#print(group1_has)									
-					#print(column2)
-					#param_values.append(column)
 			else:
+				# do the same as above for columns without NA
 				if(len(coluniq) == 2):
-					#print(coluniq)
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -2602,14 +2528,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					column = column.replace('ALIVE','1')
 					column = column.replace('DEAD','0')
 					column = column.replace('NTL','NA')
-					#column2 = [str(w).replace('Good Prognosis','1') for w in column]
-					#column2 = [str(w).replace('Bad Prognosis','0') for w in column2]
-					#column2 = [str(w).replace('yes','1') for w in column2]
-					#column2 = [str(w).replace('no','0') for w in column2]
-					#column2 = [str(w).replace('P','1') for w in column2]
-					#column2 = [str(w).replace('N','0') for w in column2]
-					#column2 = [str(w).replace('0A','NA') for w in column2]
-					#print(column.unique())
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
 					#print(sorted(coluniq3))
@@ -2636,70 +2554,35 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 								tmp94.append(all_patients[i])
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
-						#print(group1_has)									
-								
-					#param_values.append(column)
 			ctr = ctr + 1
-		print(param_names)
-		print(patients_0)
-		print(patients_1)
-		print(param_cols)
 		jaccards_1 = []
 		jaccards_2 = []
 		param_names_final = []
 		nbr_patients = float(len(group1_ids) + len(group2_ids))
+		# calculate fractions of patients for which metadata variables are 0 or 1
 		for i in range(0,len(param_names)-1):
 			if((float(len(patients_0[i])+len(patients_1[i]))/nbr_patients) > 0.8):
 				param_names_final.append(param_names[i])
 				jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
 				jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
-		print(param_names_final)
-		#param_names_final.replace(":ch1","")
-		#param_names_final.replace("bm event","Breast metastasis")
-		#param_names_final.replace("lm event","Lung metastasis")
-		#param_names_final.replace("met event","Metastasis")
-		print(group1_has)
-		print(jaccards_1)
-		print(jaccards_2)
-				#jaccards_1.append(lib.jac(patients_0[i],grou
-			#col_uniq = clinicaldf.column_name.unique()
-			#print(col_uniq)
-		print(list(clinicaldf.columns).index(survival_col))
-		print(list(clinicaldf.iloc[:,42]))
+
+		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-			#survival_col_nbr = title_col.index(survival_col) + 1
-			print("survival col")
-			print(survival_col_nbr)
-			print(list(clinicaldf.iloc[:,survival_col_nbr]))
-		#clinical_stringio = StringIO(clinicalstr)
-		#print("finished stringio")		
-		#print(clinicaldf)
-		#print(clinicalLines[0])
+		
+		# get list of patient ids
 		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
 			patient_id_list = list(clinicaldf.index)
 		else:
 			patient_id_list = list(clinicaldf.iloc[:,0])
 		
-		#clinical_stringio = StringIO(clinicalstr)
-		#print("finished stringio")		
-		#print(clinicaldf)
-		#print(clinicalLines[0])
+		
 		patient_id_list = list(clinicaldf.iloc[:,0])
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+		# iterate over patient IDs
 		for i in range(0,len(patient_id_list)):
-			#bababa = line.replace('"','')
-			#bababa2 = line.split("\",\"")
-			#bababa2 = line.split(",")
-			#print(bababa2)
-			#bababa2[0] = bababa2[0].replace('"','')
-			#print(bababa2[0])
-			#print(bababa2[64])
-			#if(len(bababa2) > survival_col_nbr):
-				#print(bababa2[53])	
-				#print(bababa2[63])
-				#print(bababa2[72])
+			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 				if("month" in survival_col):
 					print("month")
@@ -2708,31 +2591,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					patientData.update({patient_id_list[i]:survivalcol_list_temp})
 				else:
 					patientData.update({patient_id_list[i]:survivalcol_list[i]})		
-					#patientData.update({patient_id_list[i]:survivalcol_list[i]})
 					print(survivalcol_list[i])
-				#	print(patientData)
-			#if(len(bababa2) > 71):
 				
 		age1 = 0
 		ct1 = 0.001
 		age2 = 0
 		ct2 = 0.001
-		print(patientData_misc)
-		#for key in patientData_misc:
-		#	if key in group1_ids:
-		#		age1 = age1 + patientData_misc[key][0]
-		#		ct1 = ct1 + 1
-		#		size1 = size1 + patientData_misc[key][2]
-		#		ct3 = ct3 + 1
-		#		ct5 = ct5 + 1
-		#		metas1 = metas1 + patientData_misc[key][1]
-		#	elif key in group2_ids:
-		#		age2 = age2 + patientData_misc[key][0]
-		#		ct2 = ct2 + 1
-		#		size2 = size2 + patientData_misc[key][2]
-		#		ct4 = ct4 + 1
-		#		ct6 = ct6 + 1
-		#		metas2 = metas2 + patientData_misc[key][1]
 		ret_metadata = []
 		survival_1 = []
 		survival_2 = []
@@ -2742,15 +2606,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		sum_surv_1 = 0
 		ctr_surv_2 = 0.001
 		sum_surv_2 = 0
+		# make arrays with survival time of patients in both groups
 		for key in patientData:
 			if key in group1_ids:
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
 		print(survival_1)
-		#surv_results = logrank_test(survival_1,survival_2)
-		#p_val = surv_results.p_value
-		#print("p value" + str(p_val))
 		p_val = 0.1
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
@@ -2767,8 +2629,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
 		text_file_3 = open(path_metadata, "w")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Correlation with clinical Group</th><th>Mean Survival</th><th>mean age at diagnosis</th><th>mean tumor size</th></tr>")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
+		# write metadata in file
 		text_file_3.write("<table><tr>")
 		if(len(jaccards_1) < len(param_names)):
 			for i in range(len(jaccards_1),len(param_names)):
@@ -2786,6 +2647,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.close()
 		survival_perc_1 = {0:1}
 		survival_perc_2 = {0:1}
+		# calculate data for kaplan meyer plot
 		for i in range(1,10):	
 			tmp1 = 1.0
 			tmp2 = 1.0
@@ -2798,6 +2660,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			survival_perc_1.update({i:tmp1})
 			survival_perc_2.update({i:tmp2})
 		#output_notebook()	
+		
+		# make kaplan meyer plots
 		trace1 = go.Scatter(
 		x=list(survival_perc_1.keys()),
 		y=list(survival_perc_1.values()),
@@ -2821,7 +2685,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		traceorder='reversed',
 		font=dict(size=16)))
 		fig = dict(data=data99, layout=layout)
-		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
 		print(output_plot_path)
@@ -2864,6 +2727,7 @@ def run_enrichment_2(path,pval_enr,out_dir):
 	gene_list = []
 	lines = fh1.readlines()
 	#lines = lines[1:]
+	# read gene list line for line from file
 	for line in lines:
 		line.replace("\\n","")
 		gene_list.append(line)
@@ -2907,6 +2771,7 @@ def run_go_enrichment_2(path,pval_enr,out_dir):
 	gene_list = []
 	lines = fh1.readlines()
 	#lines = lines[1:]
+	# read gene list from file line for line
 	for line in lines:
 		line.replace("\\n","")
 		gene_list.append(line)
@@ -2955,11 +2820,13 @@ def read_kegg_enrichment(path,pval_enr):
 		tmp = {}
 		lineSplit = line.split("\t")
 		if(ctr > 0):	
+			# check p-value
 			if(float(lineSplit[3]) < float(pval_enr)):
 				#print(lineSplit[3])
 				#for i in range(0,len(lineSplit)):
 				#	tmp[i] = lineSplit[i]
 				#ret_dict.append(tmp)
+				# append genes, enrichment term, p-value etc to list
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
@@ -2976,23 +2843,26 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 	ret_dict = []
 	ret_dict_2 = []
 	ctr = 0
+	# file 1 and array 1 is results for genes in cluster 1
 	for line in result_file_1:
 		tmp = {}
 		lineSplit = line.split("\t")
 		if(ctr > 0):	
+			# check p-value
 			if(float(lineSplit[3]) < float(pval_enr)):
 				#print(lineSplit[3])
 				#for i in range(0,len(lineSplit)):
 				#	tmp[i] = lineSplit[i]
 				#ret_dict.append(tmp)
 				#temp_dict.update({lineSplit[0]:tmp})
+				# append genes, enrichment term, p-value etc to list
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
 				#ret_dict.append(tmp)
 				temp_dict.update({lineSplit[0]:tmp})
 		ctr = ctr + 1
-
+	# file 2 and array 2 is results for genes in cluster 2
 	ctr2 = 0
 	for line in result_file_2:
 		tmp = {}
@@ -3008,9 +2878,11 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 				tmp[5] = lineSplit[9]
 				temp_dict_2.update({lineSplit[0]:tmp})
 		ctr2 = ctr2 + 1
+	# check terms in list 1 but not in list 2
 	for key in temp_dict:
 		if(key not in temp_dict_2):
 			ret_dict.append(temp_dict[key])
+	# check terms in list 2 but not in list 1
 	for key in temp_dict_2:
 		if(key not in temp_dict):
 			ret_dict_2.append(temp_dict_2[key])
@@ -3029,12 +2901,14 @@ def check_input_files(ppistr,exprstr):
 	ppidf = pd.read_csv(ppi_stringio,sep='\t')
 	print(ppidf)
 	print(ppidf.iloc[0,:])
+	# check if PPI file has at least 2 columns
 	if(len(ppidf.columns) < 2):
 		errstr = errstr + "Input file must contain two columns with interaction partners.\n"
 		#errstr = errstr + "\n \n To avoid this error, go to <a href=\"infopage.html\">the infopage</a> and make sure that your input data has the specified format."
 		return(errstr)
 	contains_numbers = "false"
 	#for i in range(len(ppidf.index)):
+	# check if PPI file contains lines with two protein IDs
 	for i in range(len(ppidf.index)):
 		if(contains_numbers == "false"):
 			print(i)
@@ -3060,6 +2934,7 @@ def convert_gene_list(adjlist,filename):
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
 	conv_genelist = conv['Gene name'].tolist()
 	retstr = ""
+	# convert list of gene IDs
 	for elem in adjlist:
 		prot_1 = elem[0]
 		prot_2 = elem[1]

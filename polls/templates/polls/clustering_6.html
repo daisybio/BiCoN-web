@@ -433,7 +433,10 @@ border:1px solid black;
    			{% else %}
 			<a href="login.html">Login</a>
    			{% endif %} 
-                    </li>
+                        </li>
+			<li>
+			<a href="signup.html">Sign up</a>
+		    </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -565,9 +568,9 @@ border:1px solid black;
 </div>
 	
 <script>
+ // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
     if ($(this).prop('checked')) {
-    //alert("bla");
        $('#parse_ndex_file').prop('checked', true);
     } else {
        $('#parse_ndex_file').prop('checked', false);
@@ -577,7 +580,7 @@ $('#selectall').trigger('change');
 </script>
 <script>
 function myFunction3() {
-  // Get the checkbox
+  // show predefined input files if parse-predefined-files box is checked 
   var checkBox = document.getElementById("predef_box");
   // Get the output text
   var text = document.getElementById("ppi_upload");
@@ -599,6 +602,7 @@ function myFunction3() {
 } 
 </script>
 <script>
+// display the import-ndex dropdown after click on label
 var coll2 = document.getElementsByClassName("collapsible_2");
 var i;
 
@@ -616,6 +620,7 @@ for (i = 0; i < coll2.length; i++) {
 </script>
        	
 <script>
+// display the information text for selected NDEx files
 $(document).ready(function() {
 
     $('#ndex_name_2').change(function() {
@@ -655,45 +660,6 @@ $(document).ready(function() {
 });
 </script>
 
-<script>
-$(document).ready(function() {
-
-    $('#ndex_name').change(function() {
-
-        var selectedValue = $(this).val();
-
-        if ( selectedValue == '1' ) {
-            $('.message_1').show();
-        } else {
-            $('.message_1').hide();
-        }
-        if ( selectedValue == '2' ) {
-            $('.message_2').show();
-        } else {
-            $('.message_2').hide();
-        }
-        if ( selectedValue == '3' || selectedValue =='7' || selectedValue =='8' || selectedValue =='9' || selectedValue =='10' || selectedValue =='11' || selectedValue =='12'|| selectedValue =='13' ) {
-            $('.message_3').show();
-        } else {
-            $('.message_3').hide();
-        }
-	if ( selectedValue == '4' ) {
-            $('.message_4').show();
-        } else {
-            $('.message_4').hide();
-        }if ( selectedValue == '5' ) {
-            $('.message_5').show();
-        } else {
-            $('.message_5').hide();
-        }if ( selectedValue == '6' ) {
-            $('.message_6').show();
-        } else {
-            $('.message_6').hide();
-        }
-
-    });
-});
-</script>
 <!---<br>-->
 
 <div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
@@ -804,6 +770,8 @@ Stop criteria: score_max - score_av <
 	</div>
 <div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
+    <!--- show tab3(0) shows the overview tab without input page when you click previous on the first input tab --->
+    <!--- nextPrev is for showing next or previous page --->
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
     <button type="button" id="prevBtn" onclick="nextPrev(-1)" style="font-size: 24px;">Previous</button>
     <button type="button" id="nextBtn" onclick="nextPrev(1)" style="font-size: 24px;">Next</button>
@@ -812,6 +780,7 @@ Stop criteria: score_max - score_av <
   </div>
 </div>
 
+<!--- this function generates the small boxes with steps written on it, and makes clickable links --->
 <div style="text-align:center;margin-top:40px;position:absolute;bottom:50px;" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
 <!---<div class="arrow-right" style="display:inline"></div>-->
@@ -823,12 +792,14 @@ Stop criteria: score_max - score_av <
 </div>
    		</form>
 <script>
+// check input data - if old results are displayed, no uploads or parameters are needed
 function checkInp()
 {
 
 if (document.getElementById('display_old_results').checked){
     return true;
 }
+// check if minimal and maximal number of genes is a number between 0 and 1000
   var x=document.forms["myForm"]["L_g_min"].value;
   if (isNaN(x)) 
   {
@@ -858,6 +829,7 @@ if (document.getElementById('display_old_results').checked){
 <br><br><br><br>
 </div>
 <script>
+// display collapsible content if the label is clicked
 var coll = document.getElementsByClassName("collapsible");
 var i;
 
@@ -876,7 +848,8 @@ for (i = 0; i < coll.length; i++) {
        {% load staticfiles %}
         <!-- /.row -->
         <!-- Feature Row -->
-
+<!--- progress tab with the loading image and progress plots --->
+<!--- progress tab has its own div so it can be hidden easily --->
 <div class="tab5" style="width:500px; height:600px; float:left;display:inline;position:absolute;right:400px" id="progress_tab">
 <!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
 <!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
@@ -887,7 +860,7 @@ for (i = 0; i < coll.length; i++) {
 	
 	</div>
 <script>
-//$.get("home/quirin/testproject/polls/static/loading_1.gif")
+// optional function to hide the input form when algorithm is running
 $.get("/static/loading_1.gif")
     .done(function() { 
 	//$('#input_data_div').hide();
@@ -902,14 +875,15 @@ $.get("/static/loading_1.gif")
 
 
 <script>
-var currentTab = 0; // Current tab is set to be the first tab (0)
+// function for display of the result tabs. this function is mostly identical to showTab2() and not used much anymore
+var currentTab = 0; // Current tab is set to be the first tab (0) where the user can choose between starting a new run or showing old results
 showTab(currentTab); // Display the current tab
 
 function showTab(n) {
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
   x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // ... and fix the Previous/Next buttons. first page has no previous button etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
@@ -947,6 +921,7 @@ if (n == 0) {
 //	document.getElementById("start_new_analysis").style = "text-align:center";
 //	document.getElementById("start_new_analysis_button").style = "display:inline-block";
   }
+// hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
@@ -957,7 +932,7 @@ function showTab2(n) {
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // ... and fix the Previous/Next buttons. no previous button on first page etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
@@ -987,11 +962,6 @@ if (n == 1) {
     x[i].style.display = "none";
   }
   x[n].style.display = "block";
-//if (n == 0) {
-     //x[n].style.display = "block";    
- //    document.getElementById("start_new_analysis").style = "text-align:center";
-  //   document.getElementById("start_new_analysis_button").style = "display:inline-block";
-  //}
   currentTab = n;
 if (n == 5) {
  } else {
@@ -1011,7 +981,7 @@ for (i = 0; i < y.length; i++) {
 
 
 function showTab3(n) {
-  // This function will display the specified tab of the form ...
+  // show the overview tab if you click previous on the first input step
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
   // ... and fix the Previous/Next buttons:
@@ -1079,7 +1049,7 @@ for (i = 0; i < y.length; i++) {
 
 
 function showOldAnalysisTab() {
-  // This function will display the specified tab of the form ...
+  // Show the tab to run an old analysis
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
   // ... and fix the Previous/Next buttons:
@@ -1121,6 +1091,7 @@ function oldAnalysisStepIndicator() {
 
 
 function showProgressTab(n) {
+  // function to show the progress tab with progress plot after the user has clicked submit
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab5");
   x[n].style.display = "block";
@@ -1142,11 +1113,12 @@ function showProgressTab(n) {
   //}
   // ... and run a function that displays the correct step indicator:
   //fixStepIndicator(n)
+  // set all data-upload plots to invisible and display the labels as "done"
   for (i = 0; i < y.length; i++) {
     y[i].style.display = "none";
     y[i].className = y[i].className.replace(" finish", "");
   }
-
+  // set current tab to 4 (last tab of upload form)
     document.getElementById("progress_tab").style.display = "block";
   currentTab = 4;
 //var j, y= document.getElementsByClassName("step2");
@@ -1159,10 +1131,10 @@ function showProgressTab(n) {
 
 
 function hideAll() {
-  // This function will display the specified tab of the form ...
+  // Hide all tabs, activated after clicking the submit button
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // show no previous/next buttons, and hide the start-new analysis button
   //if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
@@ -1189,9 +1161,7 @@ function hideAll() {
 function nextPrev(n) {
   // This function will figure out which tab to display
   var x = document.getElementsByClassName("tab4");
-  // Exit the function if any field in the current tab is invalid:
-  //if (n == 1) return false;
-  // Hide the current tab:
+   // Hide the current tab:
   x[currentTab].style.display = "none";
   // Increase or decrease the current tab by 1:
   currentTab = currentTab + n;
@@ -1201,9 +1171,10 @@ function nextPrev(n) {
     //document.getElementById("regForm").submit();
     return false;
   }
-
+  //hide the first step (where you select run new analysis or show old results)
   var j,y = document.getElementsByClassName("step2");
   y[0].style.display = "none";
+// remove the "start a new analysis" button when clicking next on step 1
 if(currentTab==1){
 if(n==1){
     document.getElementsByClassName("step")[0].className += " finish";
@@ -1212,6 +1183,7 @@ if(n==1){
 }
 if (currentTab == 2) {
 if (n == 1) {
+// if you are on the expression file input tab, check if the user has uploaded something or selected a predefined file
 if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false )){
 
     alert("Please input file with expression data");
@@ -1224,6 +1196,7 @@ if(document.getElementById('myfile_input').value=='' && (document.getElementById
 
 if (currentTab == 3) {
 if (n == 1) {
+// if you are on the PPI file input tab, check if the user has uploaded something or selected a NDEx file
 if(document.getElementById('protfile_input').value=='' && (document.getElementById('parse_ndex_file').checked === false )){
 
     alert("Please input file with PPI data");
@@ -1233,7 +1206,7 @@ if(document.getElementById('protfile_input').value=='' && (document.getElementBy
 }
 }
 }
-
+// if you click the "next" button, set the label style for the previous step to "done"
 if(n==1){
     document.getElementsByClassName("step")[currentTab-1].className += " finish";
 }
@@ -1255,7 +1228,7 @@ function fixStepIndicator(n) {
 
 </div>
 
-
+<!--- openTab is for choosing and displaying result tabs --->
 <div class="tab">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
@@ -1264,8 +1237,8 @@ function fixStepIndicator(n) {
   <button class="tablinks" onclick="openTab(event, 'convergence')">Convergence</button>
   <button class="tablinks" onclick="openTab(event, 'kegg_enrichment')">Enrichment</button>
 </div>
-
-
+<!--- class tabcontent is invisible per default, it only gets visible after clicking its label -->
+<!--- enrichment_open is a parameter that is passed to the template after the user has run an enrichment analysis, so that the enrichment tab will be open then by default -->
 {% if enrichment_open %}
 <div class="tabcontent" id="ppi">
 {% else %}
@@ -1294,7 +1267,7 @@ sigma.utils.pkg('sigma.canvas.nodes');
  * configuration object. The plugin will just add the "graph" key to it
  * before the instanciation.
  */
-
+ // the neighbors method is for highlighting all edges and neighbors after clicking on a node
   sigma.classes.graph.addMethod('neighbors', function(nodeId) {
     var k,
         neighbors = {},
@@ -1321,6 +1294,7 @@ container: 'graph-container'
       s.graph.edges().forEach(function(e) {
         e.originalColor = e.color;
       });
+  // highlight nodes after clicking
 s.bind('clickNode', function(e) {
         var nodeId = e.data.node.id,
             toKeep = s.graph.neighbors(nodeId);
@@ -1505,6 +1479,13 @@ The log-rank test gives a p-value of: {{pval}}
 	        <option value="0.20">0.2</option>
 	        <option value="0.50" selected="selected">0.5</option>
        	</select>
+
+{% if user.is_authenticated %}
+{% else %}
+<input type="hidden" id="ppi_path" name="newAnalysis" value="{{json_path}}">                
+<input type="hidden" id="heatmap_path" name="newAnalysis" value="{{path4}}">                
+<input type="hidden" id="plot_path" name="newAnalysis" value="{{output_plot_path}}">      
+{% endif %}
 		<input type="submit" value="Submit" />
 	<!--<table id="example" class="display">-->
 <br><br>Show Enrichment for Genes of:<br>
@@ -1696,6 +1677,7 @@ The log-rank test gives a p-value of: {{pval}}
 {% endif %}
 
 <script>
+// function for displaying the content of result tabs after clicking its label
 function openTab(evt, cityName) {
     //var a = "{{enrichment_open}}";
     if(js_enrichment_open === true){
@@ -1715,12 +1697,14 @@ function openTab(evt, cityName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
+    // hide the PPI tab that is active by default after loading
     document.getElementById('ppi').style.display = "none";
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(cityName).style.display = "block";
     evt.currentTarget.className += " active";
 } 
 function openTab2(evt, cityName) {
+// almost the same as openTab, used for displaying the PPI tab
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -1735,6 +1719,7 @@ function openTab2(evt, cityName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
+    // show the PPI tab by default
     document.getElementById('ppi').style.display = "block";
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(cityName).style.display = "block";
@@ -1742,6 +1727,7 @@ function openTab2(evt, cityName) {
 } 
 
 function openTab3(evt, cityName) {
+    // this function is not used
     // Declare all variables
     var i, tabcontent, tabcontent2, tablinks;
 

@@ -423,7 +423,9 @@ border:1px solid black;
    			{% else %}
 			<a href="login.html">Login</a>
    			{% endif %} 
-                    </li>
+                    </li><li>
+			<a href="signup.html">Sign up</a>
+		    </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -554,6 +556,7 @@ border:1px solid black;
 </div>
 </div>
 <script>
+ // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
     if ($(this).prop('checked')) {
     //alert("bla");
@@ -566,6 +569,7 @@ $('#selectall').trigger('change');
 </script>	
 <script>
 function myFunction3() {
+  // show predefined input files if parse-predefined-files box is checked 
   // Get the checkbox
   var checkBox = document.getElementById("predef_box");
   // Get the output text
@@ -590,7 +594,7 @@ function myFunction3() {
 <script>
 var coll2 = document.getElementsByClassName("collapsible_2");
 var i;
-
+// display the import-ndex dropdown after click on label
 for (i = 0; i < coll2.length; i++) {
   coll2[i].addEventListener("click", function() {
     //alert("bla")
@@ -611,6 +615,7 @@ for (i = 0; i < coll2.length; i++) {
 </script>
        	
 <script>
+// display the information text for selected NDEx files
 $(document).ready(function() {
 
     $('#ndex_name_2').change(function() {
@@ -799,6 +804,8 @@ Stop criteria: score_max - score_av <
 	</div>
 <div style="overflow:auto;">
   <div style="float:right;">
+    <!--- show tab3(0) shows the overview tab without input page when you click previous on the first input tab --->
+    <!--- nextPrev is for showing next or previous page --->
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
     <button type="button" id="prevBtn" onclick="nextPrev(-1)" style="font-size: 24px;">Previous</button>
     <button type="button" id="nextBtn" onclick="nextPrev(1)" style="font-size: 24px;">Next</button>
@@ -807,6 +814,7 @@ Stop criteria: score_max - score_av <
   </div>
 </div>
 
+<!--- this function generates the small boxes with steps written on it, and makes clickable links --->
 <div style="text-align:center;margin-top:40px;" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
 <!---<div class="arrow-right" style="display:inline"></div>-->
@@ -818,12 +826,14 @@ Stop criteria: score_max - score_av <
 </div>
    		</form>
 <script>
+// check input data - if old results are displayed, no uploads or parameters are needed
 function checkInp()
 {
 
 if (document.getElementById('display_old_results').checked){
     return true;
 }
+// check if minimal and maximal number of genes is a number between 0 and 1000
   var x=document.forms["myForm"]["L_g_min"].value;
   if (isNaN(x)) 
   {
@@ -850,9 +860,24 @@ if (document.getElementById('display_old_results').checked){
     }
 }
 </script>
+<script>
+// optional function to hide the input form when algorithm is running
+$.get("/static/loading_1.gif")
+    .done(function() { 
+	//$('#input_data_div').hide();
+        // Do something now you know the image exists.
+
+    }).fail(function() { 
+	//$('#progress_tab').hide();
+        // Image doesn't exist - do something else.
+
+    })
+</script>
+
 <br><br><br><br>
 </div>
 <script>
+// display collapsible content if the label is clicked
 var coll = document.getElementsByClassName("collapsible");
 var i;
 
@@ -871,6 +896,9 @@ for (i = 0; i < coll.length; i++) {
        {% load staticfiles %}
         <!-- /.row -->
         <!-- Feature Row -->
+
+<!--- progress tab with the loading image and progress plots --->
+<!--- progress tab has its own div so it can be hidden easily --->
 <div class="tab5" style="width:500px; height:300px; float:left; display:inline" id="progress_tab">
 <!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
 <img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
@@ -883,14 +911,16 @@ for (i = 0; i < coll.length; i++) {
 
 
 <script>
-var currentTab = 0; // Current tab is set to be the first tab (0)
+// function for display of the result tabs. this function is mostly identical to showTab2() and not used much anymore
+var currentTab = 0; // Current tab is set to be the first tab (0) where the user can choose between starting a new run or showing old results
 showTab(currentTab); // Display the current tab
 
 function showTab(n) {
+
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
   x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // ... and fix the Previous/Next buttons. first page has no previous button etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
@@ -928,6 +958,7 @@ if (n == 0) {
 //	document.getElementById("start_new_analysis").style = "text-align:center";
 //	document.getElementById("start_new_analysis_button").style = "display:inline-block";
   }
+// hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
@@ -938,7 +969,7 @@ function showTab2(n) {
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // ... and fix the Previous/Next buttons. no previous button on first page etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
@@ -991,7 +1022,7 @@ for (i = 0; i < y.length; i++) {
 
 
 function showTab3(n) {
-  // This function will display the specified tab of the form ...
+  // show the overview tab if you click previous on the first input step
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
   // ... and fix the Previous/Next buttons:
@@ -1059,7 +1090,7 @@ for (i = 0; i < y.length; i++) {
 
 
 function showOldAnalysisTab() {
-  // This function will display the specified tab of the form ...
+  // Show the tab to run an old analysis
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
   // ... and fix the Previous/Next buttons:
@@ -1101,6 +1132,7 @@ function oldAnalysisStepIndicator() {
 
 
 function showProgressTab(n) {
+  // function to show the progress tab with progress plot after the user has clicked submit
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab5");
   x[n].style.display = "block";
@@ -1126,7 +1158,7 @@ function showProgressTab(n) {
     y[i].style.display = "none";
     y[i].className = y[i].className.replace(" finish", "");
   }
-
+  // set current tab to 4 (last tab of upload form)
     document.getElementById("progress_tab").style.display = "block";
   currentTab = 4;
 //var j, y= document.getElementsByClassName("step2");
@@ -1139,10 +1171,10 @@ function showProgressTab(n) {
 
 
 function hideAll() {
-  // This function will display the specified tab of the form ...
+  // Hide all tabs, activated after clicking the submit button
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // show no previous/next buttons, and hide the start-new analysis button
   //if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
@@ -1180,16 +1212,19 @@ function nextPrev(n) {
     //document.getElementById("regForm").submit();
     return false;
   }
-
+  //hide the first step (where you select run new analysis or show old results)
   var j,y = document.getElementsByClassName("step2");
   y[0].style.display = "none";
+// remove the "start a new analysis" button when clicking next on step 1
 if(currentTab==1){
 if(n==1){
+// if you are on the expression file input tab, check if the user has uploaded something or selected a predefined file
     //document.getElementsByClassName("step")[0].className += " finish";
 }
 }
 if (currentTab == 2) {
 if (n == 1) {
+// if you are on the PPI file input tab, check if the user has uploaded something or selected a NDEx file
 if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false )){
 
     alert("Please input file with expression data");
@@ -1211,7 +1246,7 @@ if(document.getElementById('protfile_input').value=='' && (document.getElementBy
 }
 }
 }
-
+// if you click the "next" button, set the label style for the previous step to "done"
 if(n==1){
     document.getElementsByClassName("step")[currentTab-1].className += " finish";
 }
@@ -1232,7 +1267,7 @@ function fixStepIndicator(n) {
 </script>
 
 </div>
-
+<!--- openTab is for choosing and displaying result tabs --->
 <div style="display:none">
 <div class="tab">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
