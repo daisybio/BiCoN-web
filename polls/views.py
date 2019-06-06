@@ -477,10 +477,12 @@ def clustering_6_4_part_2(request):
 				clinicalstr = "empty"
 				clinicaldf = ""
 				survival_col_name = ""
+				# read expression file
 				if('myfile' in request.FILES):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
 					result10 = preprocess_file.delay(exprstr)
 					exprstr = result10.get()
+				# read predefined expression file and clinical data
 				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 					cancer_type = request.POST.get("cancer_type")
 					if(cancer_type == "1"):
@@ -504,6 +506,7 @@ def clustering_6_4_part_2(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "mfs (yr):ch1"
+				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
 					result4 = check_input_files.delay(ppistr,exprstr)
@@ -511,6 +514,7 @@ def clustering_6_4_part_2(request):
 					if(errstr != ""):
 						request.session['errors'] = errstr
 						return render(request,'polls/errorpage.html',{'errors':errstr})
+				# read ndex file from web
 				elif('ndex_name_2' in request.POST):
 					ndex_file_id = request.POST.get("ndex_name_2")
 					if(ndex_file_id == "1"):
@@ -525,6 +529,7 @@ def clustering_6_4_part_2(request):
 					elif(ndex_file_id == "4"):
 						result_ndex = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf")
 						ppistr = result_ndex.get()
+				# read metadata if given
 				if('analyze_metadata' in request.POST):
 					if(request.FILES['patientdata']):
 						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
@@ -534,13 +539,18 @@ def clustering_6_4_part_2(request):
 							#print("barabsfrbasdb")
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
+				# run algorithm and read results
 				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()	
+				# start session for storing result data			
 				session_id = request.session._get_or_create_session_key()
+				# make plots and process results
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(div,script,plot1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path) = result2.get()
+				# read metadata
 				metd = list_metadata_3.apply_async(countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				# paths for showing results
 				output_plot_path = "output_plotly_" + session_id + ".html"
 				json_path = "test15_" + session_id + ".json"
 				#metd = list_metadata_3.apply_async(countdown=0)
@@ -553,6 +563,7 @@ def clustering_6_4_part_2(request):
 				write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)	
 				#(div,script,plot1) = result2.get()			
 				plot2 = "test.png"
+				# save data
 				if save_data in ["save_data"]:
 	                		if request.user.is_authenticated:
 	                			#print("save data")
@@ -597,6 +608,7 @@ def clustering_6_4_part_2(request):
 				#else:
 				if request.user.is_authenticated:
 					request.session['done'] = "true"
+				# store session id in POST data
 				else:
 					request.POST._mutable = True
 					request.POST['session_id'] = session_id
@@ -607,6 +619,7 @@ def clustering_6_4_part_2(request):
 				#session_id = request.session._get_or_create_session_key()
 				#print(session_id)
 				#request.session['done'] = "true"
+				# copy plots from shared volume to static directory
 				path99 = "test_" + session_id + ".png"				
 				copyfile(("/code/polls/static/" + path99),("polls/static/" + path99))	
 				copyfile(("/code/polls/static/" + json_path),("polls/static/" + json_path))
@@ -758,7 +771,7 @@ def clustering_6_4_part_2(request):
 			output_plot_path = request.POST.get('plot_path')
 		#return clustering_6(request)
 		#return HttpResponseRedirect('polls/clustering_6.html')
-		return render(request,'polls/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+		return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 	else:		
 		#remove_loading_image.delay()
 		ret_metadata = ""

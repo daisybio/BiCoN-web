@@ -1,0 +1,20 @@
+###### README ########
+
+
+- Livereload: Needed for a good display of the loading page. Livereload makes every file reload automatically when it is changed.
+There appears to still be a bug with livereload on Docker, so it is possible that this part of the server will be replaced by javascript code with the same functionality.
+
+- RabbitMQ: Needed as server where celery executes its tasks.
+
+- Celery: Used as queuing system to execute tasks synchronously. Executes all computationally intensive tasks such as running the algorithm or processing results.
+
+- Django: The server for running and processing requests.
+
+
+What is where:
+
+Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what.
+
+Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template.
+
+

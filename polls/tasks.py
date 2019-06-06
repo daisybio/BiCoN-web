@@ -969,13 +969,12 @@ def preprocess_file(expr_str):
 			#print(list(set(exprdf["cancer_type"])))
 			return(expr_str)
 	elif("," in expr_str):
+		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
 			expr_str = expr_str.replace(",","\t")
-			#print(expr_str)
-			#expr_str = expr_str.replace("status","cancer_type")
-			#expr_str = expr_str.replace("-0.","0.")
 			print(expr_str.split("\n")[0])
 			expr_str_split = expr_str.split("\n")
+			# remove entries after given length if expression data file is too big
 			if(len(expr_str_split) > 300):
 				expr_str = "\n".join(expr_str_split[:200])
 			else:
@@ -983,6 +982,7 @@ def preprocess_file(expr_str):
 			expr_stringio = StringIO(expr_str)
 			expr_str = expr_str.replace("MCI","CTL")
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
 			#done1 = "false"
 			#for column_name, column in exprdf.transpose().iterrows():
 			#	if(not column_name.isdigit()):
