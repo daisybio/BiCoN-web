@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>Corporate 1</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+
+       {% load staticfiles %}
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'bootstrap.min.css'%}" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="{% static 'custom.css'%}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                	Quirin's Master Thesis
+                </a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#">Home</a>
+                    </li>
+                    <li>
+                        <a href="clustering.html">Clustering</a>
+                    </li>
+                    <li>
+                        <a href="predictions_3.html">Prediction</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+	<div class="jumbotron feature">
+		<div class="container">
+			<h1> Quirin's Master Thesis Test Page</h1>
+			<p>Vizualise Gene Expression and PPI data. </p>
+		</div>
+	</div>
+	<div>
+	Stuff I used:
+	<a href="https://grandforest-supervised.compbio.sdu.dk/">GrandForest</a> as I will work with the creators of this model for my Master's Thesis :)
+	<br>	
+	<a href="https://www.djangoproject.com/">Django</a> framework for the <a href="https://www.python.org/">Python</a>-based webserver
+	<br>
+	<a href="https://bokeh.pydata.org/en/latest/">Bokeh</a> for graph vizualisation
+	<br>
+	Gene Expression data from the <a href="https://portal.gdc.cancer.gov/projects/TCGA-BRCA">TGCA-BRCA project</a>
+	<br>
+	<a href="http://www.ensembl.org/biomart/martview/c0e5e9f82683b9bec16e050d88faf577">Biomart</a> server for Gene ID conversions
+	<br>
+	<a href="https://string-db.org/cgi/input.pl">String-DB</a> for obtaining PPI data
+	<br>
+	<a href="http://scikit-learn.org/stable/">Scikit</a> package for python for survivorship predictions
+	<br>
+	</div>
+    <!-- Content -->
+	<footer>
+		<div class="footer-blurb">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-4 footer-blurb-item">
+						<h3><span class="glyphicon glyphicon-leaf"></span> Survivorship Prediction</h3>
+						<p>Use a Random Forest to predict survivorship for a test dataset and check the accuracy</p>
+						<p><a class="btn btn-default" href="predictions_3.html">Prediction</a></p>
+					</div>
+
+				</div>
+				<!-- /.row -->	
+			</div>
+        </div>
+        
+        <div class="small-print">
+        	<div class="container">
+        		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
+        		<p>Copyright &copy; Example.com 2015 </p>
+        	</div>
+        </div>
+	</footer>
+
+	
+    <!-- jQuery -->
+    <script src="{% static 'jquery-1.11.3.min.js'%}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{%static 'bootstrap.min.js'%}"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="{%static 'ie10-viewport-bug-workaround.js'%}"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="{%static 'holder.min.js'%}"></script>
+	
+</body>
+
+</html>
+

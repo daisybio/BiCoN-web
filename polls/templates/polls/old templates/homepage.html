@@ -1,0 +1,46 @@
+<!doctype html>
+<title>Welcome to my website!</title>
+<style>
+  * {
+   box-sizing: border-box; 
+  }
+  body {
+    margin: 0;
+  }
+  #main {
+    display: flex;
+    min-height: calc(100vh - 40vh);
+  }
+  #main > article {
+    flex: 1;
+  }
+  #main > nav, 
+  #main > aside {
+    flex: 0 0 20vw;
+    background: beige;
+  }
+  #main > nav {
+    order: -1;
+  }
+  header, footer, article, nav, aside {
+    padding: 1em;
+  }
+  header, footer {
+    background: yellowgreen;
+    height: 20vh;
+  }
+</style>
+<body>
+  <header>Welcome to my website!</header>
+  <div id="main">
+    <article>Welcome to my website! This site contains an example app built by me using Django. You can upload PPI and Gene Expression data for building heatmaps with classification of the genes and show corresponding PPI files as networks. Furthermore you can use a simple classifier to predict survival for patients based on Gene Expression data.</article>
+    <nav><a href="list.html">
+        <br>Generate PPI Graph and Heatmap<br>
+	</a>
+	<a href="predictions.html">
+	<br> Or make a survival prediction:<br><br>
+	</a></nav>
+    <aside><a href="about.html">About This Page</aside></a>
+  </div>
+  <footer>(C) Quirin Heiss 2018</footer>
+</body>
