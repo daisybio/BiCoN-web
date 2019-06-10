@@ -25,6 +25,7 @@ SECRET_KEY = '9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# allowed host must list every adress that is used for accessing the web server in the browser. In the docker container, it runs on 172.18.0.6:8000; when run outside a docker container, you can access the website on localhost:8000.
 ALLOWED_HOSTS = ['0.0.0.0','172.18.0.6','localhost']
 
 # Application definition
@@ -52,8 +53,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'testproject.urls'
+# celery configuration. this line tells celery where it can access rabbitMQ.
 CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
 #CELERY_BROKER_URL = 'amqp://localhost'
+# the serializer is used for passing results from celery to python functions. pickle is the only serializer that is suitable for all different data formats.
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
@@ -73,6 +76,7 @@ TEMPLATES = [
         },
     },
 ]
+# tells the server where to find the HTML pages to display for the user.
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'polls/templates')]
 
 WSGI_APPLICATION = 'testproject.wsgi.application'
@@ -135,10 +139,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-
+# tells the server where to look for static files. Static files are all non-html files used for display on the web pages, such as heatmaps or loading gifs.
 STATIC_URL = '/static/'
 #STATIC_URL = '/code/polls/static/'
 #STATIC_URL = '/'
 #STATIC_ROOT = os.path.join(BASE_DIR, '../code/polls/static')
 #STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'polls/static')
+STATICFILES_DIRS = ['/code/polls/static/']
+

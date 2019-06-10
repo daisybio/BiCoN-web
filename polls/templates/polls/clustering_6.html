@@ -334,7 +334,7 @@ width:500px;}
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
-    display: block;
+    display: inline-block;
     float: left;
     clear: both;
 }
@@ -371,7 +371,7 @@ body {
     #graph-container {
 	width: 1000px;
     height: 600px;
-    margin: auto;
+    /*margin: auto;*/
 border:1px solid black;
       top: 100;
       bottom: 100;
@@ -576,7 +576,7 @@ border:1px solid black;
   </div>
 </div> <!--- end ndex_div -->
 </div> <!--- end PPI upload -->
-	
+
 <script>
 $('#collapsible_2').change(function () {
     if ($(this).prop('checked')) {
@@ -815,6 +815,21 @@ Stop criteria: score_max - score_av <
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 <!-- this was new-->
 	</div> <!-- end params -->
+
+		
+<script>
+$('#collapsible').change(function () {
+    if ($(this).prop('checked')) {
+    //alert("bla");
+    $('#params').css('height','450px');
+    $('#input_data_div').css('height','600px');
+    } else {
+    $('#params').css('height','300px');
+    $('#input_data_div').css('height','420px');
+    }
+});
+$('#selectall').trigger('change');
+</script>
 
 <div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
@@ -1281,8 +1296,8 @@ function fixStepIndicator(n) {
 </script>
 
 <div id="results" style="clear:both;">
-Results
-<div class="tab" style="position:relative">
+<div class="tab" style="position:relative;left:15%;z-index:10;">
+<!---<div class="tab" style="position:relative;">-->
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
   <button class="tablinks" onclick="openTab(event, 'survival')">Survival Data</button>
@@ -1301,7 +1316,7 @@ Results
     document.getElementById('enr_tablink').className += " active";
 </script>
 {% endif %}
-
+<div id="result_tabs" style="position:relative;left:15%">
 {% if enrichment_open %}
 <div class="tabcontent" id="ppi">
 {% else %}
@@ -1316,7 +1331,7 @@ Results
                 </h3>
 		
        {% load staticfiles %}
-		<div id="graph-container" style="display: block"><script>
+		<div id="graph-container" style="display:block;"><script>
 sigma.utils.pkg('sigma.canvas.nodes');
 /**
  * 
@@ -1576,7 +1591,7 @@ The log-rank test gives a p-value of: {{pval}}
   <li><a data-toggle="tab" href="#menu4">Only in Group 2</a></li>
 </ul>
 
-<div class="tab-content">
+<div class="tab-content" style="width:60%">
   <div id="home" class="tab-pane fade in active" style="background-color: #FFFFFF;">
     <h3>Both Groups</h3>
     <p><table id="ctable" class="display" style="width: 1200px;">
@@ -1733,7 +1748,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 </article>
 </div><!--- tab content ---><!--- end kegg enrichment -->
-
+</div>
 </div><!--- results --->
 
         </div><!--- overall wrapper div--->
@@ -1832,7 +1847,9 @@ function openTab3(evt, cityName) {
     evt.currentTarget.className += " active";
 } 
 </script>
-	<footer>
+
+</body>
+	<footer style="clear:both">
 		<div class="footer-blurb" style="display:none">
 			<div class="container">
 				<div class="row">
@@ -1868,7 +1885,6 @@ function openTab3(evt, cityName) {
 	<!-- Placeholder Images -->
 	<script src="{%static 'holder.min.js'%}"></script>
 	
-</body>
 
 </html>
 

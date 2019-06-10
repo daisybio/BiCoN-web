@@ -44,7 +44,7 @@ $(document).ready(function() {
 </script>
        {% load staticfiles %}
 
-
+<!--- sigma.js imports needed for PPI graph -->
 <script src="{% static 'src/sigma.core.js' %}"></script>
 <script src="{% static 'src/conrad.js' %}"></script>
 <script src="{% static 'src/utils/sigma.utils.js' %}"></script>
@@ -490,7 +490,12 @@ border:1px solid black;
                 
             </div>
         </div>    
-	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;  display:inline;height:620px" id="input_data_div">
+		
+	<div id="wrapper_div_2" style="float:left;"> <!--- overall wrapper div -->
+	<div id="input_div_2" style="float:left; display:inline-block;"> <!--- wrapper input div --->
+	<div id="wrapper_div_3" style="float:left; display: inline-block;">
+	<div id="wrapper_div_4" style="float:left; display: inline-block;">
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;display:inline;height:420px;width=50%;" id="input_data_div">
         <h1>Run Algorithm:</h1>
 	<a href="infopage.html"  target="_blank">How to</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
@@ -498,9 +503,11 @@ border:1px solid black;
 	<!---<div id="expr_upload" style="display:block">-->
 
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
-	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button"><h3>Start new analysis</h3></button>
-	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button"><h3>Show old results</h3></button>
+	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
+	<div class="divider" style="height:5px"/>
+	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
 	<!---<button type="button" onclick="redoOldAnalysisTab()" id="redo_old_analysis_button"><h3>Redo old analysis</h3></button>-->
+	<!--- border-radius: 4px; border-style:solid;outline: 4px; -->
 	</div>
 	<div class="tab4" style="width:500px; height:300px" id="expr_upload">
 	<b>Upload expression data:    </b><br>
@@ -563,10 +570,11 @@ border:1px solid black;
 	
 </div>
   </div>
-</div>
-</div>
-	
+</div> <!--- end ndex_div -->
+</div> <!--- end PPI upload -->
+
 <script>
+ // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
     if ($(this).prop('checked')) {
     //alert("bla");
@@ -578,6 +586,7 @@ $('#collapsible_2').change(function () {
 $('#selectall').trigger('change');
 </script>
 <script>
+  // show predefined input files if parse-predefined-files box is checked 
 function myFunction3() {
   // Get the checkbox
   var checkBox = document.getElementById("predef_box");
@@ -601,6 +610,7 @@ function myFunction3() {
 } 
 </script>
 <script>
+// display the import-ndex dropdown after click on label
 var coll2 = document.getElementsByClassName("collapsible_2");
 var i;
 
@@ -618,6 +628,7 @@ for (i = 0; i < coll2.length; i++) {
 </script>
        	
 <script>
+// display the information text for selected NDEx files
 $(document).ready(function() {
 
     $('#ndex_name_2').change(function() {
@@ -697,7 +708,6 @@ $(document).ready(function() {
 });
 </script>
 <!---<br>-->
-
 <div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
 	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
 		<br><br><h3>Use own uploaded files:</h3>
@@ -800,10 +810,11 @@ Stop criteria: score_max - score_av <
 	</p>
     </div>
   </div>
-</div>
+</div> <!--- end wrap-collapsible -->
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 <!-- this was new-->
-	</div>
+	</div> <!-- end params -->
+
 <div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
@@ -813,8 +824,10 @@ Stop criteria: score_max - score_av <
     <!---<button type="submit" id="submitBtn" onclick="nextPrev(1)">Submit</button>-->
   </div>
 </div>
+</div> <!--- input_data_div-->
+</div> <!--- wrapper div 4 -->
 
-<div style="text-align:center;margin-top:40px;position:absolute;bottom:50px;" id="showtabs">
+<div style="text-align:center;margin-top:40px;bottom:50px;clear:both" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
 <!---<div class="arrow-right" style="display:inline"></div>-->
   <span class="step"><a id="myLink" href="#" onclick="showTab2(1);">2.<br>Expression Data</a></span>
@@ -822,8 +835,24 @@ Stop criteria: score_max - score_av <
   <span class="step"><a id="myLink" href="#" onclick="showTab2(3);">4.<br>Metadata<br><br></a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(4);">5.<br>Parameters<br><br></a></span>
   <span class="step2"><a id="myLink" href="#" onclick="showOldAnalysisTab();">Show old analysis<br><br></a></span>
+<div style="height:200px">
 </div>
-   		</form>
+</div><!--- showtabs -->
+</div><!--- wrapper div 3 -->
+
+<div class="tab5" style="width:50%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
+<!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
+<!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
+<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
+</object><br><br><img src={% static 'progress.png' %} width="400" height="400">
+	
+</div>
+</div><!--- progress tab --->
+</div><!--- input div 2-->
+
+</form>
 <script>
 function checkInp()
 {
@@ -858,7 +887,6 @@ if (document.getElementById('display_old_results').checked){
 }
 </script>
 <br><br><br><br>
-</div>
 <script>
 var coll = document.getElementsByClassName("collapsible");
 var i;
@@ -876,18 +904,10 @@ for (i = 0; i < coll.length; i++) {
 } 
 </script>
        {% load staticfiles %}
+</div>
         <!-- /.row -->
         <!-- Feature Row -->
 
-<div class="tab5" style="width:500px; height:600px; float:left;display:inline;position:absolute;right:400px" id="progress_tab">
-<!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
-<!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
-<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
-	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
-<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
-</object><br><br><img src={% static 'progress.png' %} width="400" height="400">
-	
-	</div>
 <script>
 //$.get("home/quirin/testproject/polls/static/loading_1.gif")
 $.get("/static/loading_1.gif")
@@ -1258,7 +1278,8 @@ function fixStepIndicator(n) {
 </div>
 
 
-<div class="tab">
+<div id="results" style="clear:both;">
+<div class="tab" style="position:relative;left:15%;z-index:10;">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
   <button class="tablinks" onclick="openTab(event, 'survival')">Survival Data</button>
@@ -1267,7 +1288,7 @@ function fixStepIndicator(n) {
   <button class="tablinks" onclick="openTab(event, 'kegg_enrichment')">Enrichment</button>
 </div>
 
-
+<div id="result_tabs" style="position:relative;left:15%">
 {% if enrichment_open %}
 <div class="tabcontent" id="ppi">
 {% else %}
@@ -1723,16 +1744,22 @@ The log-rank test gives a p-value of: {{pval}}
 </table></p>
   </div>
 
-</div>
-</div>
 </article> 
-        </div>
+</div><!--- tab content ---><!--- end kegg enrichment -->
+</div>
+</div><!--- results --->
+
+        </div><!--- overall wrapper div--->
         <!-- /.row -->
 
+</div>
+    </div>
     </div>
     <!-- /.container -->
 
 </div>  
+</div>
+</div>
 
 <script type="text/javascript"> <![CDATA[
         function loading(){
@@ -1819,7 +1846,8 @@ function openTab3(evt, cityName) {
     evt.currentTarget.className += " active";
 } 
 </script>
-	<footer>
+</body>
+	<footer style="clear:both">
 		<div class="footer-blurb" style="display:none">
 			<div class="container">
 				<div class="row">
@@ -1855,7 +1883,6 @@ function openTab3(evt, cityName) {
 	<!-- Placeholder Images -->
 	<script src="{%static 'holder.min.js'%}"></script>
 	
-</body>
 
 </html>
 

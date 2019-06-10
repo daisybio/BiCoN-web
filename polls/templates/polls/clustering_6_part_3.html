@@ -1244,8 +1244,11 @@ function fixStepIndicator(n) {
 
 </div>
 
+	<div id="wrapper_div_2" style="float:left;"> <!--- overall wrapper div -->
 <!--- openTab is for choosing and displaying result tabs --->
-<div class="tab">
+
+<div id="results" style="clear:both;">
+<div class="tab" style="position:relative;left:15%;z-index:10;">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
   <button class="tablinks" onclick="openTab(event, 'survival')">Survival Data</button>
@@ -1256,8 +1259,21 @@ function fixStepIndicator(n) {
 <!--- class tabcontent is invisible per default, it only gets visible after clicking its label -->
 <!--- enrichment_open is a parameter that is passed to the template after the user has run an enrichment analysis, so that the enrichment tab will be open then by default -->
 
-
+{% if enrichment_open %}
+<script>
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById('enr_tablink').className += " active";
+</script>
+{% endif %}
+<div id="result_tabs" style="position:relative;left:15%">
+{% if enrichment_open %}
+<div class="tabcontent" id="ppi">
+{% else %}
 <div class="row" id="ppi">
+{% endif %}
             <article class="col-md-8 article-intro">
 
 		
@@ -1400,7 +1416,7 @@ s.refresh();
         <!-- <img src={% static plot2 %}> -->
 	
 
-       <img src={% static path4 %}><h3>--->
+       <img src={% static path4 %}><h3>
        <!---<img src={% static "test.png" %}><h3>-->
                     <a href="#">Heatmap</a>
                 </h3>
@@ -1472,7 +1488,11 @@ s.refresh();
            
             
         </div>
+	{% if enrichment_open %}
+	<div class="row" id="kegg_enrichment">
+	{% else %}
 	<div class="tabcontent" id="kegg_enrichment">
+	{% endif %}
             <article class="col-md-12 article-intro">
                 <h1>Enrichment</h1>
 		<h3>
@@ -1684,6 +1704,9 @@ s.refresh();
 </div>
 <button type="button" style="display:inline;" onclick="location.href='polls/clustering_6.html';" id="start_new_analysis_button"><br><b>Start a new analysis</b><br><br></button>
 </article> 
+</div><!--- results --->
+
+        </div><!--- overall wrapper div--->
 
  
         </div>
@@ -1691,6 +1714,11 @@ s.refresh();
     <!-- /.container -->
 
 </div>  
+
+
+</div>  
+</div>
+</div>
 
 <script type="text/javascript"> <![CDATA[
         function loading(){
@@ -1771,6 +1799,8 @@ function openTab3(evt, cityName) {
     evt.currentTarget.className += " active";
 } 
 </script>
+
+</body>
 	<footer>
 		<div class="footer-blurb" style="display:none">
 			<div class="container">
@@ -1807,7 +1837,6 @@ function openTab3(evt, cityName) {
 	<!-- Placeholder Images -->
 	<script src="{%static 'holder.min.js'%}"></script>
 	
-</body>
 
 </html>
 

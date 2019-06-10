@@ -1026,7 +1026,8 @@ def add_loading_image():
 
 @shared_task(name="remove_loading_image")
 def remove_loading_image():
-	os.unlink("/code/polls/static/loading_1.gif")
+	if(os.path.isfile("/code/polls/static/loading_1.gif")):
+		os.unlink("/code/polls/static/loading_1.gif")
 
 @shared_task(name="write_to_file_1")
 def write_to_file_1(text,pth):
@@ -1066,24 +1067,6 @@ def metadata_to_string(metadata):
     	ret = ret + "<th>" + str(elem['size']) + "</th>"
     	ret = ret + "</tr>"
     ret = ret + "</table>"
-
-@shared_task(name="list_metadata")
-def list_metadata():
-    fh1 = open("/code/polls/static/metadata.txt")
-    lines = fh1.read()
-    lines = lines.replace('<table><tr><th>','')
-    lines = lines.replace('<tr><th>','')
-    lines = lines.replace('</table>','')
-    lines = lines.replace('</th></tr>','\n')
-    lines = lines.replace('</th><th>','\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    print(line1)
-    ret = []
-    ret.append({'group':"Group 1",'lm':line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    return(ret)
-
 
 ##################################################################
 ################## used for metadata display #####################
@@ -1146,34 +1129,14 @@ def list_metadata_3():
     #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
     #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
     return(dict0,dict1,dict2)
-@shared_task(name="list_metadata_2")
-def list_metadata_2():
-    fh1 = open("/code/polls/static/metadata.txt")
-    lines = fh1.read()
-    lines = lines.replace('<table><tr><th>','')
-    lines = lines.replace('<tr><th>','')
-    lines = lines.replace('</table>','')
-    lines = lines.replace('</th></tr>','\n')
-    lines = lines.replace('</th><th>','\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    ret = []
-    if(len(line1) < 5):
-    	is_lungc = "true"
-    	ret.append({'group':"Group 1",'gender':line1[0],'relapse':line1[1],'living':line1[2]})
-    	ret.append({'group':"Group 2",'gender':line2[0],'relapse':line2[1],'living':line2[2]})
-    	print(line1)
-    else:
-    	ret.append({'group':"Group 1",'lm':line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    	ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    	is_lungc = "false"
-    return(ret,is_lungc)
 
 
 @shared_task(name="list_metadata_4")
 def list_metadata_4(path):
+    # used for reading metadata
     fh1 = open(path)
     lines = fh1.read()
+    # remove html from metadata file and replace table elements by tab
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
     lines = lines.replace('</th></table>','')
@@ -1182,9 +1145,11 @@ def list_metadata_4(path):
     lines = lines.replace('</th><th>','\t')
     emptydict = {}
     print(len(lines.split('\n')))
+    # if no data in file, remove empty dictionaries
     if(len(lines.split('\n')) < 3):
     	print("basdbasdbasdb")
     	return(emptydict,emptydict,emptydict)
+    # read content from lines
     line0 = lines.split('\n')[0].split('\t')
     line1 = lines.split('\n')[1].split('\t')
     line2 = lines.split('\n')[2].split('\t')
@@ -1210,6 +1175,7 @@ def list_metadata_4(path):
     #	dict1[elem] = line1[ctr]
     #	dict2[elem] = line2[ctr]
     #	ctr = ctr + 1
+    # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
     for i in range(0,len(line0)-1):
     	#print(ctr)
     	print(line0[i])
@@ -1227,29 +1193,6 @@ def list_metadata_4(path):
     #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
     #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
     return(dict0,dict1,dict2)
-@shared_task(name="list_metadata_2")
-def list_metadata_2():
-    fh1 = open("/code/polls/static/metadata.txt")
-    lines = fh1.read()
-    lines = lines.replace('<table><tr><th>','')
-    lines = lines.replace('<tr><th>','')
-    lines = lines.replace('</table>','')
-    lines = lines.replace('</th></tr>','\n')
-    lines = lines.replace('</th><th>','\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    ret = []
-    if(len(line1) < 5):
-    	is_lungc = "true"
-    	ret.append({'group':"Group 1",'gender':line1[0],'relapse':line1[1],'living':line1[2]})
-    	ret.append({'group':"Group 2",'gender':line2[0],'relapse':line2[1],'living':line2[2]})
-    	print(line1)
-    else:
-    	ret.append({'group':"Group 1",'lm':line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    	ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    	is_lungc = "false"
-    return(ret,is_lungc)
-    
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
@@ -1666,17 +1609,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	G = nx.Graph()
 	print(G_list)
 	print(genes1)
-	#for G_tmp in G_list:
-	#	genes.update({G_tmp:0})	
-	#	tp = "circle"
-	#	if(G_tmp in genes1):
-	#		tp = "square"
-	#	G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-	#	nodecolors.append(color_for_graph(means[ctr]))
-	#	ctr = ctr + 1
-	#	names.append(G_tmp)
 	genelist_ret = []
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
@@ -1684,10 +1616,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		if(G_tmp in genes1):
 			tp = "square"
 		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
 		nodecolors.append(color_for_graph(means[ctr]))
-		#genelist_ret.append({'gene_name':G_tmp,'diff':float(means[ctr])})
 		ctr = ctr + 1
 		names.append(G_tmp)
 	ctr = 0
@@ -1695,51 +1624,33 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		G.add_edge(edg[0],edg[1],id=ctr,color="rgb(0,0,0)")
 		ctr = ctr + 1
 	pos = nx.spring_layout(G)	
-	#print(pos)
 	x_pos = {}
 	y_pos = {}
 	for k in pos:	
 		x_pos[k] = pos[k][0]
 		y_pos[k] = pos[k][1]
-	#print(x_pos)
 	edgl = {}
 	ctr = 0
-	
-	#nodecolors = [color_for_graph(i) for i in means]
-	#for edg in G.edges():
-	#	edgl[edg] = ctr
-	#	ctr = ctr + 1
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
-	#nx.set_edge_attributes(G,edgl,'id')
 	nx.set_node_attributes(G,10,'size')
-	#nx.set_node_attributes(G,nodecolors,'color')
-	#print(json_graph.node_link_data(G))
 	jsn = json_graph.node_link_data(G)
 	jsn2 = str(json.dumps(jsn))
 	jsn33 = jsn2.replace('links','edges')
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#print(jsn3)
 	with open("/code/polls/static/test15.json", "w") as text_file:
 		text_file.write(jsn3)		
-	#nx.write_gexf(G,"test.gexf")
 	output_notebook()
 	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
 	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
 	# create bokeh graph
-	#graph = from_networkx(G, nx.spring_layout, iterations=1000, scale=1, center=(0,0))
 	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	#graph = from_networkx(G, nx.circular_layout, scale=1, center=(0,0))
 	# add name to node data
-	
-	
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
-	
-	# add name to node data
+	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]	
 	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
 	graph.selection_policy = NodesAndLinkedEdges()
 	graph.inspection_policy = EdgesAndLinkedNodes()
@@ -1758,20 +1669,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
 	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
-	#sns.clustermap(T,method="average", figsize=(13, 13),robust=True,col_colors=col_colors1,row_colors=row_colors1,col_cluster=False)
-	#sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)		
-	#plt.xlabel('Genes')
-	#plt.ylabel('Patients')
 	g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
 	plt.savefig("/code/polls/static/test.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
-	print("in method")
+	#print("in method")
 	patientData = {}
 	patientData_misc = {}
 	group1_in_metadata = []
@@ -1826,18 +1732,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
 		text_file_3.write("<tr><th>Group1</th></tr>")
 		text_file_3.write("</table>")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
-		#for elem in ret_metadata:
-		#	text_file_3.write("<tr>")
-		#	text_file_3.write("<th>" + str(elem['lm']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['bm']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['lymph']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['metastasis']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['path_er']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['path_pr']) + "</th>")
-		#	text_file_3.write("<th>" + str(elem['good_prognosis']) + "</th>")
-		#	text_file_3.write("</tr>")
-		#text_file_3.write("</table>")
 		text_file_3.close()	
 		plot_div = ""
 		with open("/code/polls/static/output_plotly.html", "w") as text_file_2:
@@ -1852,7 +1746,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		#print(clinicaldf.index)
 		print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
 		print(clinicaldf_col_names)
@@ -1865,8 +1758,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
-
-		#print(clinicaldf["relapse (event=1; no event=0):ch1"])
 		param_names = []
 		param_values = []
 		param_cols = []
@@ -1878,46 +1769,27 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		group2_has = []
 		for column_name, column in clinicaldf.transpose().iterrows():
 			column.fillna("NA",inplace=True)
-			#print(column_name)
-			#print(column)
 			coluniq = column.unique()
-			#print(coluniq)
-			#print(column_name)
-			#print(list(column))
 			for elem in coluniq:
-				#print(elem)
 				if ": " in str(elem):
 					elem = elem.split(": ")[1]
 			for elem in column:
-				#print(elem)
 				if ": " in str(elem):
 					elem = elem.split(": ")[1]
-					#print(elem)
 			for elem in column:
 				if(str(elem) == "nan" or elem == np.nan or pd.isna(elem)):
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-				#elif(type(elem) == float):
-				#	if(math.isnan(elem)):
-				#		elem = "NA"
 			for elem in coluniq:
 				if(str(elem) == "nan" or elem == np.nan or pd.isna(elem)):
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-				#elif(type(elem) == float):
-				#	if(math.isnan(elem)):
-				#		elem = "NA"
-			#for elem in coluniq:
-			#	print(str(elem))
 			if "NA" in coluniq:
 				if(len(coluniq) == 3):
-					#print(coluniq)
 					patients_temp_0 = []
 					patients_temp_1 = []
-					#param_names.append(column_name)
-					#param_cols.append(ctr)
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -1934,25 +1806,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					column = column.replace('ALIVE','1')
 					column = column.replace('DEAD','0')
 					column = column.replace('NTL','NA')
-					#column2 = [str(w).replace(r'^P','1') for w in column]
-					#column2 = [re.sub(r'^P$','1',str(w)) for w in column]
-					#column2 = [re.sub(r'^N$','0',str(w)) for w in column2]
-					#column2 = [re.sub(r'^yes$','1',str(w)) for w in column2]
-					#column2 = [re.sub(r'^no$','0',str(w)) for w in column2]
-					#column2 = [re.sub(r'^Good Prognosis$','1') for w in column2]
-					#column2 = [re.sub(r'^Bad Prognosis$','0') for w in column2]
-					#column2 = [str(w).replace('Good Prognosis','1') for w in column]
-					#column2 = [str(w).replace('Bad Prognosis','0') for w in column2]
-					#column2 = [str(w).replace('yes','1') for w in column2]
-					#column2 = [str(w).replace('no','0') for w in column2]
-					#column2 = [str(w).replace('P','1') for w in column2]
-					#column2 = [str(w).replace('N','0') for w in column2]
-					#column2 = [str(w).replace('0A','NA') for w in column2]
-					#if(column.unique() 
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
 					print(column_name)
-					#print(patients_temp_0)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
@@ -1966,20 +1822,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						#print(all_patients)
 						tmp95 = []
 						tmp94 = []
 						for i in range(0,len(all_patients)-1):
-						#	print(all_patients[i])
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
 								tmp94.append(all_patients[i])
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
-						#print(group1_has)									
-					#print(column2)
-					#param_values.append(column)
 			else:
 				if(len(coluniq) == 2):
 					#print(coluniq)
@@ -1999,17 +1850,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					column = column.replace('ALIVE','1')
 					column = column.replace('DEAD','0')
 					column = column.replace('NTL','NA')
-					#column2 = [str(w).replace('Good Prognosis','1') for w in column]
-					#column2 = [str(w).replace('Bad Prognosis','0') for w in column2]
-					#column2 = [str(w).replace('yes','1') for w in column2]
-					#column2 = [str(w).replace('no','0') for w in column2]
-					#column2 = [str(w).replace('P','1') for w in column2]
-					#column2 = [str(w).replace('N','0') for w in column2]
-					#column2 = [str(w).replace('0A','NA') for w in column2]
-					#print(column.unique())
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					#print(sorted(coluniq3))
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						col_as_list = [str(i) for i in column]
 						for i in range(0,len(col_as_list)-1):
@@ -2022,20 +1864,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						#print(all_patients)
 						tmp95 = []
 						tmp94 = []
 						for i in range(0,len(all_patients)-1):
-							#print(all_patients[i])
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
 								tmp94.append(all_patients[i])
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
-						#print(group1_has)									
-								
-					#param_values.append(column)
 			ctr = ctr + 1
 		print(param_names)
 		print(patients_0)
@@ -2051,21 +1888,13 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
 				jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
 		print(param_names_final)
-		#param_names_final.replace(":ch1","")
-		#param_names_final.replace("bm event","Breast metastasis")
-		#param_names_final.replace("lm event","Lung metastasis")
-		#param_names_final.replace("met event","Metastasis")
 		print(group1_has)
 		print(jaccards_1)
 		print(jaccards_2)
-				#jaccards_1.append(lib.jac(patients_0[i],grou
-			#col_uniq = clinicaldf.column_name.unique()
-			#print(col_uniq)
 		print(list(clinicaldf.columns).index(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-			#survival_col_nbr = title_col.index(survival_col) + 1
 			print("survival col")
 			print(survival_col_nbr)
 			print(list(clinicaldf.iloc[:,survival_col_nbr]))
@@ -2073,26 +1902,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			patient_id_list = list(clinicaldf.index)
 		else:
 			patient_id_list = list(clinicaldf.iloc[:,0])
-		
-		#clinical_stringio = StringIO(clinicalstr)
-		#print("finished stringio")		
-		#print(clinicaldf)
-		#print(clinicalLines[0])
-		#patient_id_list = list(clinicaldf.iloc[:,0])
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
 		for i in range(0,len(patient_id_list)):
-			#bababa = line.replace('"','')
-			#bababa2 = line.split("\",\"")
-			#bababa2 = line.split(",")
-			#print(bababa2)
-			#bababa2[0] = bababa2[0].replace('"','')
-			#print(bababa2[0])
-			#print(bababa2[64])
-			#if(len(bababa2) > survival_col_nbr):
-				#print(bababa2[53])	
-				#print(bababa2[63])
-				#print(bababa2[72])
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 					if("month" in survival_col):
 						print("month")
@@ -2101,32 +1913,12 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						patientData.update({patient_id_list[i]:survivalcol_list_temp})
 					else:
 						patientData.update({patient_id_list[i]:survivalcol_list[i]})
-					
-					#patientData.update({patient_id_list[i]:survivalcol_list[i]})
-					print(survivalcol_list[i])
-				#	print(patientData)
-			#if(len(bababa2) > 71):
-				
+					print(survivalcol_list[i])				
 		age1 = 0
 		ct1 = 0.001
 		age2 = 0
 		ct2 = 0.001
 		print(patientData_misc)
-		#for key in patientData_misc:
-		#	if key in group1_ids:
-		#		age1 = age1 + patientData_misc[key][0]
-		#		ct1 = ct1 + 1
-		#		size1 = size1 + patientData_misc[key][2]
-		#		ct3 = ct3 + 1
-		#		ct5 = ct5 + 1
-		#		metas1 = metas1 + patientData_misc[key][1]
-		#	elif key in group2_ids:
-		#		age2 = age2 + patientData_misc[key][0]
-		#		ct2 = ct2 + 1
-		#		size2 = size2 + patientData_misc[key][2]
-		#		ct4 = ct4 + 1
-		#		ct6 = ct6 + 1
-		#		metas2 = metas2 + patientData_misc[key][1]
 		ret_metadata = []
 		survival_1 = []
 		survival_2 = []
@@ -2154,15 +1946,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			ctr_surv_2 = ctr_surv_2 + 1
 		survival_mean_1 = sum_surv_1 / ctr_surv_1
 		survival_mean_2 = sum_surv_2 / ctr_surv_2
-		#print(group1_in_metadata)
-		#print(metastasis) 
 		param_names = [elem.replace("bm event:ch1","Breast Metastasis") for elem in param_names]
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
 		text_file_3 = open("/code/polls/static/metadata.txt", "w")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Correlation with clinical Group</th><th>Mean Survival</th><th>mean age at diagnosis</th><th>mean tumor size</th></tr>")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
 		text_file_3.write("<table><tr>")
 		if(len(jaccards_1) < len(param_names)):
 			for i in range(len(jaccards_1),len(param_names)):
@@ -2191,7 +1979,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					tmp2 = tmp2 - (1.0/len(survival_2))
 			survival_perc_1.update({i:tmp1})
 			survival_perc_2.update({i:tmp2})
-		#output_notebook()	
 		trace1 = go.Scatter(
 		x=list(survival_perc_1.keys()),
 		y=list(survival_perc_1.values()),
@@ -2225,6 +2012,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
         	text_file.write("Done!")
 	print(ret_metadata)
 	return(script,div,plot_1,plot_div,ret_metadata,p_val)
+
 
 @shared_task(name="script_output_task_10")
 def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
@@ -2292,6 +2080,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
 	nx.set_node_attributes(G,10,'size')
+	# replace some json object names by correct form
 	jsn = json_graph.node_link_data(G)
 	jsn2 = str(json.dumps(jsn))
 	jsn33 = jsn2.replace('links','edges')
@@ -2699,27 +2488,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 
 ## enrichment stuff ##
 
-@shared_task(name="run_enrichment")
-def run_enrichment(path,pval_enr):
-	fh1 = open(path)
-	gene_list = []
-	lines = fh1.readlines()
-	#lines = lines[1:]
-	for line in lines:
-		line.replace("\\n","")
-		gene_list.append(line)
-	print("baabababa")
-	print(pval_enr)
-	enr = gp.enrichr(gene_list=gene_list,
-                 description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
-                 gene_sets=['KEGG_2016','KEGG_2013'],
-                 outdir="/code/polls/data/test/enrichr_kegg",
-                 cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
-                )
-	print(enr.results)
-	return(enr.results)
 
 @shared_task(name="run_enrichment_2")
 def run_enrichment_2(path,pval_enr,out_dir):
@@ -2742,27 +2510,6 @@ def run_enrichment_2(path,pval_enr,out_dir):
                  cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
                 )
 	print(enr.results)
-	return(enr.results)
-@shared_task(name="run_go_enrichment")
-def run_go_enrichment(path,pval_enr):
-	fh1 = open(path)
-	gene_list = []
-	lines = fh1.readlines()
-	#lines = lines[1:]
-	for line in lines:
-		line.replace("\\n","")
-		gene_list.append(line)
-	print("baabababa")
-	print(pval_enr)
-	enr = gp.enrichr(gene_list=gene_list,
-                 description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
-                 gene_sets=['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'],
-                 outdir="/code/polls/data/test/enrichr_go",
-                 cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
-                )
-	print(type(enr.results))
 	return(enr.results)
 
 @shared_task(name="run_go_enrichment_2")
@@ -2932,16 +2679,19 @@ def convert_gene_list(adjlist,filename):
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 	                  host='http://www.ensembl.org')
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	# conv is a list of genes with ENSEMBL Id, gene name and Entrez ID
 	conv_genelist = conv['Gene name'].tolist()
 	retstr = ""
-	# convert list of gene IDs
+	# convert list of gene IDs from gene names to NCBI ID
 	for elem in adjlist:
 		prot_1 = elem[0]
 		prot_2 = elem[1]
+		# read which element of list the gene is and read NCBI ID
 		gene_nbr_1 = conv.index[conv['Gene name'] == prot_1]
 		gene_nbr_1_2 = conv.loc[gene_nbr_1,'NCBI gene ID'].values[0]
 		gene_nbr_2 = conv.index[conv['Gene name'] == prot_2]
 		gene_nbr_2_2 = conv.loc[gene_nbr_2,'NCBI gene ID'].values[0]
+		# write genes into tab separated string
 		retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
 	#return(retstr)
 	with open(filename, "w") as text_file:
@@ -3091,27 +2841,35 @@ def read_ndex_file_4(fn):
 #from the web
 @shared_task(name="import_ndex")
 def import_ndex(name):
+	# import NDEx from server based on UUID (network contains lists with nodes and edges)
 	nice_cx_network = ndex2.create_nice_cx_from_server(server='public.ndexbio.org', uuid=name)
 	tmp4 = []
 	node_dict = {}
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
+	# get list of genes for later conversion
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
 	conv_genelist = conv['Gene name'].tolist()
+	# iterate over all nodes in network
 	for node_id, node in nice_cx_network.get_nodes():
 		current_node = {}
+		# node has ID and "name"
 		current_node['id'] = node_id
 		current_node['n'] = node.get('n')
 		#current_node['r'] = node.get('r')
 		if(name=="9c38ce6e-c564-11e8-aaa6-0ac135e8bacf"):
+			# get GeneName for node
 			curr_gene_name = nice_cx_network.get_node_attribute_value(node_id,'GeneName_A')
 			if(curr_gene_name in conv_genelist):
+				# get index in gene conversion list, convert Gene Name to NCBI ID
 				gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
-				gene_nbr1 = conv.loc[gene_nbr,'NCBI gene ID'].values[0]
+				gene_nbr1 = conv.loc[gene_nbr,'NCBI gene ID'].values[0]	
+				# check if NCBI ID was found
 				if not(math.isnan(float(gene_nbr1))):
 					node_dict[node_id] = str(int(gene_nbr1))	
 				#print(gene_nbr1)
 		else:
+			# if gene name is stored in node name
 			curr_gene_name = current_node['n']				
 			if(curr_gene_name in conv_genelist):
 				gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
@@ -3122,14 +2880,17 @@ def import_ndex(name):
 		tmp4.append(current_node)
 	edgelist = []
 	ret = ""
+	# iterate over edges
 	for edge_id, edge in nice_cx_network.get_edges():
 		source = edge.get('s')
 		target = edge.get('t')
 		if(source in node_dict and target in node_dict and source != target):
+			# convert source and target to NCBI IDs and write into string
 			curr_edge_str = str(node_dict[source]) + "\t" + str(node_dict[target]) + "\n"
 			edgelist.append([node_dict[source],node_dict[target]])
 			ret = ret + curr_edge_str
 	print(node_dict)
+	# return tab separated string
 	return(ret)
 
 
@@ -3290,453 +3051,6 @@ def script_output_task_2(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	with open("polls/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
 	return(script,div,plot_1)
-
-
-@shared_task(name="script_output_task_4")
-def script_output_task_4(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	def color_for_graph(v):
-		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
-		v = v*2
-		#tmp98 = int(v + (0.5 if v > 0 else -0.5))
-		tmp98 = int(v)
-		if(v < -4):
-			tmp98 = -4
-		if(v > 3):
-			tmp98 = 3
-		return(cmap_custom[tmp98])
-	
-	nodes = []
-	nodecolors = []
-	names = []
-	genes = {}
-	genes_5 = {}	
-	genes_3 = {}
-	#read file with PPI, calculate expression difference of respective genes between groups
-	G_list = list(G2.nodes())
-	ctr = 0
-	G = nx.Graph()
-	print(G_list)
-	print(genes1)
-	#for G_tmp in G_list:
-	#	genes.update({G_tmp:0})	
-	#	tp = "circle"
-	#	if(G_tmp in genes1):
-	#		tp = "square"
-	#	G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-	#	nodecolors.append(color_for_graph(means[ctr]))
-	#	ctr = ctr + 1
-	#	names.append(G_tmp)
-	genelist_ret = []
-	for G_tmp in genes_all:
-		genes.update({G_tmp:0})	
-		tp = "circle"
-		if(G_tmp in genes1):
-			tp = "square"
-		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-		nodecolors.append(color_for_graph(means[ctr]))
-		#genelist_ret.append({'gene_name':G_tmp,'diff':float(means[ctr])})
-		ctr = ctr + 1
-		names.append(G_tmp)
-	ctr = 0
-	for edg in adjlist:
-		G.add_edge(edg[0],edg[1],id=ctr,color="rgb(0,0,0)")
-		ctr = ctr + 1
-	pos = nx.spring_layout(G)	
-	#print(pos)
-	x_pos = {}
-	y_pos = {}
-	for k in pos:	
-		x_pos[k] = pos[k][0]
-		y_pos[k] = pos[k][1]
-	#print(x_pos)
-	edgl = {}
-	ctr = 0
-	
-	#nodecolors = [color_for_graph(i) for i in means]
-	#for edg in G.edges():
-	#	edgl[edg] = ctr
-	#	ctr = ctr + 1
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,y_pos,'y')
-	#nx.set_edge_attributes(G,edgl,'id')
-	nx.set_node_attributes(G,10,'size')
-	#nx.set_node_attributes(G,nodecolors,'color')
-	#print(json_graph.node_link_data(G))
-	jsn = json_graph.node_link_data(G)
-	jsn2 = str(json.dumps(jsn))
-	jsn33 = jsn2.replace('links','edges')
-	jsn44 = jsn33.replace('Label','label')
-	jsn55 = jsn44.replace('bels','bel')
-	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#print(jsn3)
-	with open("polls/static/test15.json", "w") as text_file:
-		text_file.write(jsn3)		
-	#nx.write_gexf(G,"test.gexf")
-	output_notebook()
-	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
-	# add tools to the plot
-	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	# create bokeh graph
-	#graph = from_networkx(G, nx.spring_layout, iterations=1000, scale=1, center=(0,0))
-	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	#graph = from_networkx(G, nx.circular_layout, scale=1, center=(0,0))
-	# add name to node data
-	
-	
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
-	
-	# add name to node data
-	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	graph.selection_policy = NodesAndLinkedEdges()
-	graph.inspection_policy = EdgesAndLinkedNodes()
-	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
-	x,y = zip(*graph.layout_provider.graph_layout.values())
-	node_labels = nx.get_node_attributes(G, 'Name')
-	z = tuple([(bar-0.1) for bar in x])
-	#make bokeh graph with transparent labels
-	source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	plot.renderers.append(graph)
-	plot.renderers.append(labels2)
-	plot.add_layout(labels2)
-	#begin making heatmap here
-	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
-	colordict={0:'#BB0000',1:'#0000BB'}
-	#sns.clustermap(T,method="average", figsize=(13, 13),robust=True,col_colors=col_colors1,row_colors=row_colors1,col_cluster=False)
-	#sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)		
-	#plt.xlabel('Genes')
-	#plt.ylabel('Patients')
-	g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
-	ax = g.ax_heatmap
-	ax.set_xlabel("Genes")
-	ax.set_ylabel("Patients")
-	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("polls/static/test.png")
-	script, div = components(plot)	
-	plot_1=plt.gcf()
-	plt.clf()
-	patientData = {}
-	patientData_misc = {}
-	group1_in_metadata = []
-	group2_in_metadata = []
-	metastasis = []
-	no_metastasis = []
-	group1_has_bm = []
-	group2_has_bm = []
-	bm = []
-	no_bm = []
-	group1_has_lm = []
-	group2_has_lm = []
-	lm = []
-	no_lm = []
-	group1_has_lymph = []
-	group2_has_lymph = []
-	lymph = []
-	no_lymph = []
-	group1_has_path_er = []
-	group2_has_path_er = []
-	path_er = []
-	no_path_er = []
-	group1_has_path_pr = []
-	group2_has_path_pr = []
-	path_pr = []
-	no_path_pr = []
-	group1_has_prognosis = []
-	group2_has_prognosis = []
-	prognosis_good = []
-	prognosis_bad = []
-	if(clinicalstr == "empty"):
-		ret_metadata = []
-		ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		text_file_3 = open("polls/static/metadata.txt", "w")
-		text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
-		for elem in ret_metadata:
-			text_file_3.write("<tr>")
-			text_file_3.write("<th>" + str(elem['lm']) + "</th>")
-			text_file_3.write("<th>" + str(elem['bm']) + "</th>")
-			text_file_3.write("<th>" + str(elem['lymph']) + "</th>")
-			text_file_3.write("<th>" + str(elem['metastasis']) + "</th>")
-			text_file_3.write("<th>" + str(elem['path_er']) + "</th>")
-			text_file_3.write("<th>" + str(elem['path_pr']) + "</th>")
-			text_file_3.write("<th>" + str(elem['good_prognosis']) + "</th>")
-			text_file_3.write("</tr>")
-		text_file_3.write("</table>")
-		text_file_3.close()	
-		plot_div = ""
-		with open("polls/static/output_plotly.html", "w") as text_file_2:
-        		text_file_2.write("")
-	
-	else:
-		clinicalLines = clinicalstr.split("\n")
-		for line in clinicalLines:
-			#bababa = line.replace('"','')
-			bababa2 = line.split("\",\"")
-			bababa2[0] = bababa2[0].replace('"','')
-			if(len(bababa2) > 64):
-				#print(bababa2[53])	
-				#print(bababa2[63])
-				#print(bababa2[72])
-				if(bababa2[64] != "--" and bababa2[64] != "name:ch1" and bababa2[64] != "NA" and bababa2[64].replace('.','',1).isdigit()):
-					patientData.update({bababa2[0]:bababa2[64]})
-				#	print(patientData)
-			#if(len(bababa2) > 71):
-			if(len(bababa2) > 63):
-				if(bababa2[63].isdigit()):
-					print("patient id" + str(bababa2[0]))
-					if(bababa2[0] in group1_ids):
-						print("foo")
-						group1_in_metadata.append(bababa2[0])
-					elif(bababa2[0] in group2_ids):
-						group2_in_metadata.append(bababa2[0])
-					if(int(bababa2[63]) == 1):
-						metastasis.append(bababa2[0])
-					elif(int(bababa2[63]) == 0):
-						no_metastasis.append(bababa2[0])
-					tmp97 = [0.0,float(bababa2[63]),0.0]
-					#patientData_misc.update({bababa2[0]:tmp97})
-				if(bababa2[61].isdigit()):
-					if(bababa2[0] in group1_ids):
-						group1_has_lm.append(bababa2[0])
-					elif(bababa2[0] in group2_ids):
-						group1_has_lm.append(bababa2[0])
-					if(int(bababa2[61]) == 1):
-						lm.append(bababa2[0])
-					elif(int(bababa2[61]) == 0):
-						no_lm.append(bababa2[0])
-				if(bababa2[58].isdigit()):
-					if(bababa2[0] in group1_ids):
-						group1_has_bm.append(bababa2[0])
-					elif(bababa2[0] in group2_ids):
-						group1_has_bm.append(bababa2[0])
-					if(int(bababa2[58]) == 1):
-						bm.append(bababa2[0])
-					elif(int(bababa2[58]) == 0):
-						no_bm.append(bababa2[0])
-				if(len(bababa2[15]) > 1 and len(bababa2[15]) < 20):
-					if(bababa2[15].split(": ")[1] == "N"):
-						if(bababa2[0] in group1_ids):
-							group1_has_path_er.append(bababa2[0])
-						elif(bababa2[0] in group2_ids):
-							group2_has_path_er.append(bababa2[0])
-						no_path_er.append(bababa2[0])
-					if(bababa2[15].split(": ")[1] == "P"):
-						if(bababa2[0] in group1_ids):
-							group1_has_path_er.append(bababa2[0])
-						elif(bababa2[0] in group2_ids):
-							group2_has_path_er.append(bababa2[0])
-						path_er.append(bababa2[0])
-				if(len(bababa2[16]) > 1 and len(bababa2[16]) < 20):
-					if(bababa2[16].split(": ")[1] == "N"):
-						if(bababa2[0] in group1_ids):
-							group1_has_path_pr.append(bababa2[0])
-						elif(bababa2[0] in group2_ids):
-							group2_has_path_pr.append(bababa2[0])
-						no_path_pr.append(bababa2[0])
-					if(bababa2[16].split(": ")[1] == "P"):
-						if(bababa2[0] in group1_ids):
-							group1_has_path_pr.append(bababa2[0])
-						elif(bababa2[0] in group2_ids):
-							group2_has_path_pr.append(bababa2[0])
-						path_pr.append(bababa2[0])
-				if(len(bababa2) > 71):	
-					if(bababa2[0] in group1_ids):
-						group1_has_prognosis.append(bababa2[0])
-					elif(bababa2[0] in group2_ids):
-						group2_has_prognosis.append(bababa2[0])
-					if(bababa2[71] == "Good Prognosis"):
-						prognosis_good.append(bababa2[0])
-					elif(bababa2[71] == "Bad Prognosis"):
-						prognosis_bad.append(bababa2[0])
-				if(len(bababa2) > 70):				
-					if(bababa2[70].isdigit()):
-						if(bababa2[0] in group1_ids):
-							group1_has_lymph.append(bababa2[0])
-						elif(bababa2[0] in group2_ids):
-							group1_has_lymph.append(bababa2[0])
-						if(int(bababa2[70]) == 1):
-							lymph.append(bababa2[0])
-						elif(int(bababa2[70]) == 0):
-							no_lymph.append(bababa2[0])
-				elif(bababa2[53].replace('.','',1).isdigit() and bababa2[63].isdigit()):
-					print("patient id" + str(bababa2[0]))
-					if(bababa2[0] in group1_ids):
-						print("foo")
-						group1_in_metadata.append(bababa2[0])
-					elif(bababa2[0] in group2_ids):
-						group2_in_metadata.append(bababa2[0])
-					if(int(bababa2[63]) == 1):
-						metastasis.append(bababa2[0])
-					elif(int(bababa2[63]) == 0):
-						no_metastasis.append(bababa2[0])
-					#tmp97 = [float(bababa2[53]),float(bababa2[63]),0.0]
-					#patientData_misc.update({bababa2[0]:tmp97})
-				
-		age1 = 0
-		ct1 = 0.001
-		age2 = 0
-		ct2 = 0.001
-		print(patientData_misc)
-		#for key in patientData_misc:
-		#	if key in group1_ids:
-		#		age1 = age1 + patientData_misc[key][0]
-		#		ct1 = ct1 + 1
-		#		size1 = size1 + patientData_misc[key][2]
-		#		ct3 = ct3 + 1
-		#		ct5 = ct5 + 1
-		#		metas1 = metas1 + patientData_misc[key][1]
-		#	elif key in group2_ids:
-		#		age2 = age2 + patientData_misc[key][0]
-		#		ct2 = ct2 + 1
-		#		size2 = size2 + patientData_misc[key][2]
-		#		ct4 = ct4 + 1
-		#		ct6 = ct6 + 1
-		#		metas2 = metas2 + patientData_misc[key][1]
-		ret_metadata = []
-		nbr_patients = float(len(group1_ids) + len(group2_ids))
-		survival_1 = []
-		survival_2 = []
-		survival_mean_1 = 0
-		survival_mean_2 = 0
-		ctr_surv_1 = 0.001
-		sum_surv_1 = 0
-		ctr_surv_2 = 0.001
-		sum_surv_2 = 0
-		for key in patientData:
-			if key in group1_ids:
-				survival_1.append(patientData[key])
-			elif key in group2_ids:
-				survival_2.append(patientData[key])
-		for elem in survival_1:
-			sum_surv_1 = sum_surv_1 + float(elem)
-			ctr_surv_1 = ctr_surv_1 + 1
-		for elem in survival_2:
-			sum_surv_2 = sum_surv_2 + float(elem)
-			ctr_surv_2 = ctr_surv_2 + 1
-		survival_mean_1 = sum_surv_1 / ctr_surv_1
-		survival_mean_2 = sum_surv_2 / ctr_surv_2
-		#print(group1_in_metadata)
-		#print(metastasis)
-
-		if(float(len(group1_in_metadata) + len(group2_in_metadata)) / nbr_patients > 0.8):
-			metas_jac = lib.jac(group1_in_metadata,metastasis)
-			metas_jac_2 = lib.jac(group2_in_metadata,metastasis)
-		else:
-			metas_jac = "NA"
-			metas_jac_2 = "NA"
-		if(float(len(group1_has_lm) + len(group2_has_lm)) / nbr_patients > 0.8):
-			lm_jac = lib.jac(group1_has_lm,lm)
-			lm_jac_2 = lib.jac(group2_has_lm,lm)
-		else:
-			lm_jac = "NA"
-			lm_jac_2 = "NA"
-		if(float(len(group1_has_bm) + len(group2_has_bm)) / nbr_patients > 0.8):
-			bm_jac = lib.jac(group1_has_bm,bm)
-			bm_jac_2 = lib.jac(group2_has_bm,bm)
-		else:
-			bm_jac = "NA"
-			bm_jac_2 = "NA"
-		if(float(len(group1_has_lymph) + len(group2_has_lymph)) / nbr_patients > 0.8):
-			lymph_jac = lib.jac(group1_has_lymph,lymph)
-			lymph_jac_2 = lib.jac(group2_has_lymph,lymph)
-		else:
-			lymph_jac = "NA"
-			lymph_jac_2 = "NA"
-		if(float(len(group1_has_path_er) + len(group2_has_path_er)) / nbr_patients > 0.8):
-			path_er_jac = lib.jac(group1_has_path_er,path_er)
-			path_er_jac_2 = lib.jac(group2_has_path_er,path_er)
-		else:
-			path_er_jac = "NA"
-			path_er_jac_2 = "NA"
-		if(float(len(group1_has_path_er) + len(group2_has_path_er)) / nbr_patients > 0.8):
-			path_pr_jac = lib.jac(group1_has_path_pr,path_pr)
-			path_pr_jac_2 = lib.jac(group2_has_path_pr,path_pr)
-		else:
-			path_pr_jac = "NA"
-			path_pr_jac_2 = "NA"
-		if(float(len(group1_has_prognosis) + len(group2_has_prognosis)) / nbr_patients > 0.8):
-			prognosis_jac = lib.jac(group1_has_prognosis,prognosis_good)
-			prognosis_jac_2 = lib.jac(group2_has_prognosis,prognosis_good)
-		else:
-			prognosis_jac = "NA"
-			prognosis_jac_2 = "NA"
-		ret_metadata.append({'group':"Group 1",'lm':lm_jac,'bm':bm_jac,'lymph':lymph_jac,'metastasis':metas_jac,'path_er':path_er_jac,'path_pr':path_pr_jac,'good_prognosis':prognosis_jac})
-		ret_metadata.append({'group':"Group 2",'lm':lm_jac_2,'bm':bm_jac_2,'lymph':lymph_jac_2,'metastasis':metas_jac_2,'path_er':path_er_jac_2,'path_pr':path_pr_jac_2,'good_prognosis':prognosis_jac_2})
-		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':survival_mean_1,'age':mean_age_1,'metastasis':metas_mean_1,'size':mean_size_1})
-		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':survival_mean_2,'age':mean_age_2,'metastasis':metas_mean_2,'size':mean_size_2})
-		print(survival_mean_1)
-		text_file_3 = open("polls/static/metadata.txt", "w")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th><th>Correlation with clinical Group</th><th>Mean Survival</th><th>mean age at diagnosis</th><th>mean tumor size</th></tr>")
-		text_file_3.write("<table><tr><th>Patient Cluster</th><th>Lung metastasis</th><th>Breast metastasis</th><th>Lymph nodes</th><th>Metastasis</th><th>Path_ER</th><th>Path_PR</th><th>Good Prognosis</th></tr>")
-		for elem in ret_metadata:
-			text_file_3.write("<tr>")
-			text_file_3.write("<th>" + str(elem['lm']) + "</th>")
-			text_file_3.write("<th>" + str(elem['bm']) + "</th>")
-			text_file_3.write("<th>" + str(elem['lymph']) + "</th>")
-			text_file_3.write("<th>" + str(elem['metastasis']) + "</th>")
-			text_file_3.write("<th>" + str(elem['path_er']) + "</th>")
-			text_file_3.write("<th>" + str(elem['path_pr']) + "</th>")
-			text_file_3.write("<th>" + str(elem['good_prognosis']) + "</th>")
-			text_file_3.write("</tr>")
-		text_file_3.write("</table>")
-		text_file_3.close()
-		survival_perc_1 = {0:1}
-		survival_perc_2 = {0:1}
-		for i in range(1,10):	
-			tmp1 = 1.0
-			tmp2 = 1.0
-			for k in survival_1:
-				if(float(k) < float(i)):
-					tmp1 = tmp1 - (1.0/len(survival_1))
-			for k in survival_2:
-				if(float(k) < float(i)):
-					tmp2 = tmp2 - (1.0/len(survival_2))
-			survival_perc_1.update({i:tmp1})
-			survival_perc_2.update({i:tmp2})
-		#output_notebook()	
-		trace1 = go.Scatter(
-		x=list(survival_perc_1.keys()),
-		y=list(survival_perc_1.values()),
-		mode='lines+markers',
-		name="'Group 1'",
-		hoverinfo='name',
-		line=dict(
-		shape='hv'))
-		trace2 = go.Scatter(
-		x=list(survival_perc_2.keys()),
-		y=list(survival_perc_2.values()),
-		mode='lines+markers',
-		name="'Group 2'",
-		hoverinfo='name',
-		line=dict(
-		shape='hv'))
-		data99 = [trace1,trace2]
-		layout = dict(
-		legend=dict(
-		y=0.5,
-		traceorder='reversed',
-		font=dict(size=16)))
-		fig = dict(data=data99, layout=layout)
-		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
-		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		with open("polls/static/output_plotly.html", "w") as text_file_2:
-        		text_file_2.write(plot_div)
-		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
-	with open("polls/static/output_console.txt", "w") as text_file:
-        	text_file.write("Done!")
-	print(ret_metadata)
-	return(script,div,plot_1,plot_div,ret_metadata)
 
 #########################################################################
 #### Stuff below here is never run, I just haven't deleted it yet bc of

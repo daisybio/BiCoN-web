@@ -480,15 +480,20 @@ border:1px solid black;
                 
             </div>
         </div>    
-	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;  display:inline;">
+	<div id="wrapper_div_2" style="float:left;"> <!--- overall wrapper div -->
+	<div id="input_div_2" style="float:left; display:inline-table"> <!--- wrapper input div --->
+	<div id="wrapper_div_3" style="float:left; display: inline-block;">
+	<div id="wrapper_div_4" style="float:left; display: inline-block;">
+	
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;display:inline;height:420px;width=50%;" id="input_data_div">
         <h1>Run Algorithm:</h1>
 	<a href="infopage.html"  target="_blank">How to</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 	<!---<div id="expr_upload" style="display:block">-->
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
-	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button"><h3>Start new analysis</h3></button>
-	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button"><h3>Show old results</h3></button>
+	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
+	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px; "><h3>Show old results</h3></button>
 	<!---<button type="button" onclick="redoOldAnalysisTab()" id="redo_old_analysis_button"><h3>Redo old analysis</h3></button>-->
 	</div>
 	
@@ -551,10 +556,12 @@ border:1px solid black;
 	<span class="message_5" style="display:none;">PPI network from Ulitsky et al. 2008</span>
 	<span class="message_6" style="display:none;">PPI from the <a href="http://ophid.utoronto.ca/ophidv2.204/">I2D</a> project.</span>
 	
+
 </div>
   </div>
-</div>
-</div>
+</div> <!--- end ndex_div -->
+</div> <!--- end PPI upload -->
+
 <script>
  // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
@@ -796,26 +803,46 @@ Stop criteria: score_max - score_av <
        	</select>
 	
 	</p>
-    </div>
+    <!---</div>--->
   </div>
-</div><input type="hidden" id="newAnalysis" name="newAnalysis" value="false">                
+</div> <!--- end wrap-collapsible -->
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 <!-- this was new-->
-	</div>
-<div style="overflow:auto;">
+	</div> <!-- end params -->
+
+
+<input type="hidden" id="newAnalysis" name="newAnalysis" value="false">                
+	        <!---<input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>--->
+<!-- this was new-->
+	</div> <!-- end params -->
+
+<script>
+$('#collapsible').change(function () {
+    if ($(this).prop('checked')) {
+    //alert("bla");
+    $('#params').css('height','450px');
+    $('#input_data_div').css('height','600px');
+    } else {
+    $('#params').css('height','300px');
+    $('#input_data_div').css('height','420px');
+    }
+});
+$('#selectall').trigger('change');
+</script>
+
+<div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
-    <!--- show tab3(0) shows the overview tab without input page when you click previous on the first input tab --->
-    <!--- nextPrev is for showing next or previous page --->
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
     <button type="button" id="prevBtn" onclick="nextPrev(-1)" style="font-size: 24px;">Previous</button>
     <button type="button" id="nextBtn" onclick="nextPrev(1)" style="font-size: 24px;">Next</button>
-    <button type="submit" id="submitBtn" onclick="nextPrev(1)" onclick="hideAll()" onclick="showProgressTab(0)"style="font-size: 24px;">Submit</button>
+    <button type="submit" id="submitBtn" onclick="nextPrev(1)" onclick="hideAll()" onclick="showProgressTab(0)" style="font-size: 24px;">Submit</button>
     <!---<button type="submit" id="submitBtn" onclick="nextPrev(1)">Submit</button>-->
   </div>
 </div>
+</div> <!--- input_data_div-->
+</div> <!--- wrapper div 4 -->
 
-<!--- this function generates the small boxes with steps written on it, and makes clickable links --->
-<div style="text-align:center;margin-top:40px;" id="showtabs">
+<div style="text-align:center;margin-top:40px;bottom:50px;clear:both" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
 <!---<div class="arrow-right" style="display:inline"></div>-->
   <span class="step"><a id="myLink" href="#" onclick="showTab2(1);">2.<br>Expression Data</a></span>
@@ -823,7 +850,23 @@ Stop criteria: score_max - score_av <
   <span class="step"><a id="myLink" href="#" onclick="showTab2(3);">4.<br>Metadata<br><br></a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(4);">5.<br>Parameters<br><br></a></span>
   <span class="step2"><a id="myLink" href="#" onclick="showOldAnalysisTab();">Show old analysis<br><br></a></span>
+<div style="height:200px">
 </div>
+</div><!--- showtabs -->
+</div><!--- wrapper div 3 -->
+
+<div class="tab5" style="width:45%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
+<!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
+<!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
+<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
+	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
+</object><br><br><img src={% static 'progress.png' %} width="400" height="400">
+	
+</div>
+</div><!--- progress tab --->
+</div><!--- input div 2-->
+
    		</form>
 <script>
 // check input data - if old results are displayed, no uploads or parameters are needed
@@ -899,14 +942,9 @@ for (i = 0; i < coll.length; i++) {
 
 <!--- progress tab with the loading image and progress plots --->
 <!--- progress tab has its own div so it can be hidden easily --->
-<div class="tab5" style="width:500px; height:300px; float:left; display:inline" id="progress_tab">
-<!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
-<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
-	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
-<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
-</object><br><br><img src={% static 'progress.png' %} width="400" height="400">
-	
-	</div>
+
+</div><!--- progress tab --->
+</div><!--- input div 2-->
 
 
 
@@ -1266,6 +1304,7 @@ function fixStepIndicator(n) {
 }
 </script>
 
+        </div><!--- overall wrapper div--->
 </div>
 <!--- openTab is for choosing and displaying result tabs --->
 <div style="display:none">
