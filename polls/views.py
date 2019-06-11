@@ -874,10 +874,11 @@ def clustering_6_4(request):
 	#	print("in request")
 	#if(('protfile' in request.POST) or (('parse_ndex_file' in request.POST) and ('ndex_name_2' in request.POST))):
 	#	print("in request 2")
-	if('input_own_file' in request.POST and 'display_old_results' in request.POST and not ('myfile' in request.FILES) and request.user.is_authenticated):
+	#if('input_own_file' in request.POST and 'display_old_results' in request.POST and not ('myfile' in request.FILES) and request.user.is_authenticated):
+	if('input_own_file' in request.POST and 'display_old_results' in request.POST and request.user.is_authenticated):
 		if(request.POST['input_own_file'] and request.POST['display_old_results']):
 			make_empty_figure.delay()
-			with open("polls/static/output_console.txt", "w") as text_file:
+			with open("/code/polls/static/output_console.txt", "w") as text_file:
    				text_file.write("Your request is being processed...")
 			filename1 = request.POST.get("input_own_file")
 			#fh1 = open(filename1)
@@ -1032,16 +1033,16 @@ def clustering_6_4(request):
 				path99 = "test_" + session_id + ".png"
 				if save_data in ["save_data"]:
 					if request.user.is_authenticated:
+						print("save data")
 						savedata_param = "true"
 						username = str(request.user)
 						#GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
 						#GraphForm.save_results(username)
-						curr_time = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
+						curr_time = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]	
 						copyfile(("/code/polls/static/" + path99),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/polls/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
 						copyfile(("/code/polls/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
-				
 				#else:
 					#cache.clear()
 				if request.user.is_authenticated:
@@ -1147,7 +1148,7 @@ def clustering_6_4(request):
 			result4 = read_kegg_enrichment.delay("/code/polls/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
 			result5 = read_kegg_enrichment.delay("/code/polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
 			result6 = read_kegg_enrichment.delay("/code/polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			result7 = read_kegg_enrichment_2.delay("/code/polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			result7 = read_kegg_enrichment_2.delay("/code/polls/data/test2/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt","/code/polls/data/test3/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
 			enrichment_dict = result4.get()
 			enrichment_dict_2 = result5.get()
 			enrichment_dict_3 = result6.get()

@@ -298,7 +298,7 @@ def ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps
         print("Iteration # "+ str(count_big+1))
         print("best round score: " + str(round(max_round_score,3)))
         print("average score: " + str(round(av_score/K,3)))
-        with open("polls/static/output_console.txt", "w") as text_file:
+        with open("/code/polls/static/output_console.txt", "w") as text_file:
         	#print("foobar")
         	text_file.write("Iteration # "+ str(count_big+1))
         	text_file.close()
@@ -335,7 +335,7 @@ def ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps
             #plt.ylim((0,1))
             #plt.legend()
             #this was not commented before #plt.show(block=False)
-            plt.savefig("polls/static/progress.png")
+            plt.savefig("/code/polls/static/progress.png")
             plt.close(fig)
         if len(set(score_change[:3])) ==1 and len(score_change)>3:
             flag = True
