@@ -1,0 +1,477 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf version="1.2" xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+  <graph defaultedgetype="undirected" mode="static" name="">
+    <attributes class="node" mode="static">
+      <attribute id="0" title="Name" type="string" />
+      <attribute id="1" title="d" type="double" />
+    </attributes>
+    <meta>
+      <creator>NetworkX 2.1</creator>
+      <lastmodified>29/10/2018</lastmodified>
+    </meta>
+    <nodes>
+      <node id="IGF1R" label="IGF1R">
+        <attvalues>
+          <attvalue for="0" value="IGF1R" />
+          <attvalue for="1" value="1.2566910359226156" />
+        </attvalues>
+      </node>
+      <node id="AR" label="AR">
+        <attvalues>
+          <attvalue for="0" value="AR" />
+          <attvalue for="1" value="0.31339672170381705" />
+        </attvalues>
+      </node>
+      <node id="MEOX2" label="MEOX2">
+        <attvalues>
+          <attvalue for="0" value="MEOX2" />
+          <attvalue for="1" value="1.5175864759606523" />
+        </attvalues>
+      </node>
+      <node id="ESR1" label="ESR1">
+        <attvalues>
+          <attvalue for="0" value="ESR1" />
+          <attvalue for="1" value="1.0481560625435962" />
+        </attvalues>
+      </node>
+      <node id="MUC1" label="MUC1">
+        <attvalues>
+          <attvalue for="0" value="MUC1" />
+          <attvalue for="1" value="1.0307298450731357" />
+        </attvalues>
+      </node>
+      <node id="APOD" label="APOD">
+        <attvalues>
+          <attvalue for="0" value="APOD" />
+          <attvalue for="1" value="0.8763453238003965" />
+        </attvalues>
+      </node>
+      <node id="GSTM2" label="GSTM2">
+        <attvalues>
+          <attvalue for="0" value="GSTM2" />
+          <attvalue for="1" value="1.1582504475358195" />
+        </attvalues>
+      </node>
+      <node id="LDHB" label="LDHB">
+        <attvalues>
+          <attvalue for="0" value="LDHB" />
+          <attvalue for="1" value="0.36367659336399394" />
+        </attvalues>
+      </node>
+      <node id="GSTM1" label="GSTM1">
+        <attvalues>
+          <attvalue for="0" value="GSTM1" />
+          <attvalue for="1" value="0.9543801869299482" />
+        </attvalues>
+      </node>
+      <node id="GPD1L" label="GPD1L">
+        <attvalues>
+          <attvalue for="0" value="GPD1L" />
+          <attvalue for="1" value="1.2193729384028535" />
+        </attvalues>
+      </node>
+      <node id="PKP1" label="PKP1">
+        <attvalues>
+          <attvalue for="0" value="PKP1" />
+          <attvalue for="1" value="-0.763386545801247" />
+        </attvalues>
+      </node>
+      <node id="CA2" label="CA2">
+        <attvalues>
+          <attvalue for="0" value="CA2" />
+          <attvalue for="1" value="-1.4966139465883397" />
+        </attvalues>
+      </node>
+      <node id="CDKN2A" label="CDKN2A">
+        <attvalues>
+          <attvalue for="0" value="CDKN2A" />
+          <attvalue for="1" value="0.06450434044924681" />
+        </attvalues>
+      </node>
+      <node id="VAV3" label="VAV3">
+        <attvalues>
+          <attvalue for="0" value="VAV3" />
+          <attvalue for="1" value="-1.4021880789271894" />
+        </attvalues>
+      </node>
+      <node id="XRCC3" label="XRCC3">
+        <attvalues>
+          <attvalue for="0" value="XRCC3" />
+          <attvalue for="1" value="-1.591987800609078" />
+        </attvalues>
+      </node>
+      <node id="CCND1" label="CCND1">
+        <attvalues>
+          <attvalue for="0" value="CCND1" />
+          <attvalue for="1" value="-0.8918334529954624" />
+        </attvalues>
+      </node>
+      <node id="SIAH2" label="SIAH2">
+        <attvalues>
+          <attvalue for="0" value="SIAH2" />
+          <attvalue for="1" value="-0.9456206715697999" />
+        </attvalues>
+      </node>
+      <node id="CDC45" label="CDC45">
+        <attvalues>
+          <attvalue for="0" value="CDC45" />
+          <attvalue for="1" value="-1.4528845353074606" />
+        </attvalues>
+      </node>
+      <node id="PGR" label="PGR">
+        <attvalues>
+          <attvalue for="0" value="PGR" />
+          <attvalue for="1" value="0.16709102534623876" />
+        </attvalues>
+      </node>
+      <node id="GSTM3" label="GSTM3">
+        <attvalues>
+          <attvalue for="0" value="GSTM3" />
+          <attvalue for="1" value="-1.414684864345334" />
+        </attvalues>
+      </node>
+      <node id="ERBB4" label="ERBB4">
+        <attvalues>
+          <attvalue for="0" value="ERBB4" />
+          <attvalue for="1" value="-0.5695769587327641" />
+        </attvalues>
+      </node>
+      <node id="ART3" label="ART3">
+        <attvalues>
+          <attvalue for="0" value="ART3" />
+          <attvalue for="1" value="-0.8028604384771203" />
+        </attvalues>
+      </node>
+      <node id="PLK1" label="PLK1">
+        <attvalues>
+          <attvalue for="0" value="PLK1" />
+          <attvalue for="1" value="-0.8090567364908687" />
+        </attvalues>
+      </node>
+      <node id="SLC4A8" label="SLC4A8">
+        <attvalues>
+          <attvalue for="0" value="SLC4A8" />
+          <attvalue for="1" value="-1.1291928909335096" />
+        </attvalues>
+      </node>
+      <node id="MYO6" label="MYO6">
+        <attvalues>
+          <attvalue for="0" value="MYO6" />
+          <attvalue for="1" value="-1.1559306777805647" />
+        </attvalues>
+      </node>
+      <node id="HSPB1" label="HSPB1">
+        <attvalues>
+          <attvalue for="0" value="HSPB1" />
+          <attvalue for="1" value="-1.380726485388478" />
+        </attvalues>
+      </node>
+      <node id="PRKCD" label="PRKCD">
+        <attvalues>
+          <attvalue for="0" value="PRKCD" />
+          <attvalue for="1" value="1.0765588471538443" />
+        </attvalues>
+      </node>
+      <node id="KRT15" label="KRT15">
+        <attvalues>
+          <attvalue for="0" value="KRT15" />
+          <attvalue for="1" value="-1.475079415287122" />
+        </attvalues>
+      </node>
+      <node id="PPARG" label="PPARG">
+        <attvalues>
+          <attvalue for="0" value="PPARG" />
+          <attvalue for="1" value="-0.9046928375607352" />
+        </attvalues>
+      </node>
+      <node id="DSG1" label="DSG1">
+        <attvalues>
+          <attvalue for="0" value="DSG1" />
+          <attvalue for="1" value="-0.8381330426100517" />
+        </attvalues>
+      </node>
+      <node id="IL13RA2" label="IL13RA2">
+        <attvalues>
+          <attvalue for="0" value="IL13RA2" />
+          <attvalue for="1" value="-0.8267295493925337" />
+        </attvalues>
+      </node>
+      <node id="PAK1" label="PAK1">
+        <attvalues>
+          <attvalue for="0" value="PAK1" />
+          <attvalue for="1" value="0.41083455770276966" />
+        </attvalues>
+      </node>
+      <node id="CACNA2D1" label="CACNA2D1">
+        <attvalues>
+          <attvalue for="0" value="CACNA2D1" />
+          <attvalue for="1" value="0.04168349044533516" />
+        </attvalues>
+      </node>
+      <node id="SYT17" label="SYT17">
+        <attvalues>
+          <attvalue for="0" value="SYT17" />
+          <attvalue for="1" value="0.31124718332003704" />
+        </attvalues>
+      </node>
+      <node id="GABRA6" label="GABRA6">
+        <attvalues>
+          <attvalue for="0" value="GABRA6" />
+          <attvalue for="1" value="-0.06878366560273837" />
+        </attvalues>
+      </node>
+      <node id="XBP1" label="XBP1">
+        <attvalues>
+          <attvalue for="0" value="XBP1" />
+          <attvalue for="1" value="-0.00384472469593315" />
+        </attvalues>
+      </node>
+      <node id="ZBTB16" label="ZBTB16">
+        <attvalues>
+          <attvalue for="0" value="ZBTB16" />
+          <attvalue for="1" value="-1.230177252819807" />
+        </attvalues>
+      </node>
+      <node id="LYPD3" label="LYPD3">
+        <attvalues>
+          <attvalue for="0" value="LYPD3" />
+          <attvalue for="1" value="0.35297907977528076" />
+        </attvalues>
+      </node>
+      <node id="KRT18" label="KRT18">
+        <attvalues>
+          <attvalue for="0" value="KRT18" />
+          <attvalue for="1" value="-1.643539682597916" />
+        </attvalues>
+      </node>
+      <node id="ATP2A3" label="ATP2A3">
+        <attvalues>
+          <attvalue for="0" value="ATP2A3" />
+          <attvalue for="1" value="-0.5305480870592811" />
+        </attvalues>
+      </node>
+      <node id="KRT19" label="KRT19">
+        <attvalues>
+          <attvalue for="0" value="KRT19" />
+          <attvalue for="1" value="-0.5221927054497723" />
+        </attvalues>
+      </node>
+      <node id="TF" label="TF">
+        <attvalues>
+          <attvalue for="0" value="TF" />
+          <attvalue for="1" value="-1.5011093963919988" />
+        </attvalues>
+      </node>
+      <node id="GALNT7" label="GALNT7">
+        <attvalues>
+          <attvalue for="0" value="GALNT7" />
+          <attvalue for="1" value="-1.0406141437492848" />
+        </attvalues>
+      </node>
+      <node id="ALCAM" label="ALCAM">
+        <attvalues>
+          <attvalue for="0" value="ALCAM" />
+          <attvalue for="1" value="-1.0593766088015508" />
+        </attvalues>
+      </node>
+      <node id="FKBP5" label="FKBP5">
+        <attvalues>
+          <attvalue for="0" value="FKBP5" />
+          <attvalue for="1" value="0.4404024199422862" />
+        </attvalues>
+      </node>
+      <node id="MAGEA11" label="MAGEA11">
+        <attvalues>
+          <attvalue for="0" value="MAGEA11" />
+          <attvalue for="1" value="-1.4717171839078447" />
+        </attvalues>
+      </node>
+      <node id="IGF1" label="IGF1">
+        <attvalues>
+          <attvalue for="0" value="IGF1" />
+          <attvalue for="1" value="-1.3374697563706115" />
+        </attvalues>
+      </node>
+      <node id="MYH7B" label="MYH7B">
+        <attvalues>
+          <attvalue for="0" value="MYH7B" />
+          <attvalue for="1" value="0.2953098333699859" />
+        </attvalues>
+      </node>
+      <node id="SUSD4" label="SUSD4">
+        <attvalues>
+          <attvalue for="0" value="SUSD4" />
+          <attvalue for="1" value="0.14103452972553043" />
+        </attvalues>
+      </node>
+      <node id="PHGDH" label="PHGDH">
+        <attvalues>
+          <attvalue for="0" value="PHGDH" />
+          <attvalue for="1" value="-0.48959809028405" />
+        </attvalues>
+      </node>
+      <node id="SLC9A1" label="SLC9A1">
+        <attvalues>
+          <attvalue for="0" value="SLC9A1" />
+          <attvalue for="1" value="-0.0009322571607521783" />
+        </attvalues>
+      </node>
+      <node id="ITGA7" label="ITGA7">
+        <attvalues>
+          <attvalue for="0" value="ITGA7" />
+          <attvalue for="1" value="-0.38943915647142846" />
+        </attvalues>
+      </node>
+      <node id="AKR1C3" label="AKR1C3">
+        <attvalues>
+          <attvalue for="0" value="AKR1C3" />
+          <attvalue for="1" value="-0.6592757438051252" />
+        </attvalues>
+      </node>
+      <node id="MYC" label="MYC">
+        <attvalues>
+          <attvalue for="0" value="MYC" />
+          <attvalue for="1" value="-0.23209144052902497" />
+        </attvalues>
+      </node>
+      <node id="ASS1" label="ASS1">
+        <attvalues>
+          <attvalue for="0" value="ASS1" />
+          <attvalue for="1" value="0.07817651729542274" />
+        </attvalues>
+      </node>
+      <node id="IRS1" label="IRS1">
+        <attvalues>
+          <attvalue for="0" value="IRS1" />
+          <attvalue for="1" value="-0.8716406955400471" />
+        </attvalues>
+      </node>
+      <node id="PRKAA2" label="PRKAA2">
+        <attvalues>
+          <attvalue for="0" value="PRKAA2" />
+          <attvalue for="1" value="-0.17399474609719245" />
+        </attvalues>
+      </node>
+      <node id="TRO" label="TRO">
+        <attvalues>
+          <attvalue for="0" value="TRO" />
+          <attvalue for="1" value="-0.0709724066435273" />
+        </attvalues>
+      </node>
+      <node id="GABRB3" label="GABRB3">
+        <attvalues>
+          <attvalue for="0" value="GABRB3" />
+          <attvalue for="1" value="0.23755056605135147" />
+        </attvalues>
+      </node>
+      <node id="FOS" label="FOS">
+        <attvalues>
+          <attvalue for="0" value="FOS" />
+          <attvalue for="1" value="-0.5505060837380467" />
+        </attvalues>
+      </node>
+      <node id="MCM10" label="MCM10">
+        <attvalues>
+          <attvalue for="0" value="MCM10" />
+          <attvalue for="1" value="-0.9052245854394756" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="0" source="IGF1R" target="ESR1" />
+      <edge id="1" source="IGF1R" target="IRS1" />
+      <edge id="2" source="IGF1R" target="IGF1" />
+      <edge id="3" source="IGF1R" target="VAV3" />
+      <edge id="4" source="IGF1R" target="LYPD3" />
+      <edge id="5" source="IGF1R" target="IL13RA2" />
+      <edge id="6" source="AR" target="ZBTB16" />
+      <edge id="7" source="AR" target="SIAH2" />
+      <edge id="8" source="AR" target="MAGEA11" />
+      <edge id="9" source="AR" target="FKBP5" />
+      <edge id="10" source="AR" target="CCND1" />
+      <edge id="11" source="MEOX2" target="SYT17" />
+      <edge id="12" source="MEOX2" target="GABRB3" />
+      <edge id="13" source="ESR1" target="ZBTB16" />
+      <edge id="14" source="ESR1" target="IRS1" />
+      <edge id="15" source="ESR1" target="KRT18" />
+      <edge id="16" source="ESR1" target="FOS" />
+      <edge id="17" source="ESR1" target="MYO6" />
+      <edge id="18" source="ESR1" target="PGR" />
+      <edge id="19" source="ESR1" target="HSPB1" />
+      <edge id="20" source="ESR1" target="GSTM3" />
+      <edge id="21" source="ESR1" target="KRT19" />
+      <edge id="22" source="ESR1" target="MYC" />
+      <edge id="23" source="ESR1" target="APOD" />
+      <edge id="24" source="ESR1" target="DSG1" />
+      <edge id="25" source="ESR1" target="FKBP5" />
+      <edge id="26" source="ESR1" target="MUC1" />
+      <edge id="27" source="ESR1" target="CCND1" />
+      <edge id="28" source="ESR1" target="TF" />
+      <edge id="29" source="ESR1" target="PAK1" />
+      <edge id="30" source="ESR1" target="XBP1" />
+      <edge id="31" source="ESR1" target="VAV3" />
+      <edge id="32" source="MUC1" target="ERBB4" />
+      <edge id="33" source="MUC1" target="PPARG" />
+      <edge id="34" source="MUC1" target="PRKCD" />
+      <edge id="35" source="APOD" target="ALCAM" />
+      <edge id="36" source="GSTM2" target="GSTM3" />
+      <edge id="37" source="GSTM2" target="GSTM1" />
+      <edge id="38" source="LDHB" target="ASS1" />
+      <edge id="39" source="LDHB" target="PHGDH" />
+      <edge id="40" source="GSTM1" target="GSTM3" />
+      <edge id="41" source="GPD1L" target="PHGDH" />
+      <edge id="42" source="GPD1L" target="MYH7B" />
+      <edge id="43" source="GPD1L" target="ART3" />
+      <edge id="44" source="PKP1" target="MYC" />
+      <edge id="45" source="PKP1" target="DSG1" />
+      <edge id="46" source="CA2" target="SLC9A1" />
+      <edge id="47" source="CA2" target="SLC4A8" />
+      <edge id="48" source="CDKN2A" target="CDC45" />
+      <edge id="49" source="CDKN2A" target="MCM10" />
+      <edge id="50" source="CDKN2A" target="MYC" />
+      <edge id="51" source="CDKN2A" target="CCND1" />
+      <edge id="52" source="XRCC3" target="FKBP5" />
+      <edge id="53" source="XRCC3" target="IL13RA2" />
+      <edge id="54" source="CCND1" target="MCM10" />
+      <edge id="55" source="SIAH2" target="AKR1C3" />
+      <edge id="56" source="CDC45" target="MCM10" />
+      <edge id="57" source="PGR" target="MAGEA11" />
+      <edge id="58" source="PGR" target="FKBP5" />
+      <edge id="59" source="ERBB4" target="TRO" />
+      <edge id="60" source="ART3" target="PRKCD" />
+      <edge id="61" source="ART3" target="ITGA7" />
+      <edge id="62" source="ART3" target="ALCAM" />
+      <edge id="63" source="ART3" target="GALNT7" />
+      <edge id="64" source="PLK1" target="MYC" />
+      <edge id="65" source="PLK1" target="DSG1" />
+      <edge id="66" source="SLC4A8" target="ATP2A3" />
+      <edge id="67" source="MYO6" target="PAK1" />
+      <edge id="68" source="HSPB1" target="KRT18" />
+      <edge id="69" source="HSPB1" target="MYC" />
+      <edge id="70" source="HSPB1" target="PRKCD" />
+      <edge id="71" source="PRKCD" target="IRS1" />
+      <edge id="72" source="PRKCD" target="TRO" />
+      <edge id="73" source="KRT15" target="KRT18" />
+      <edge id="74" source="KRT15" target="MCM10" />
+      <edge id="75" source="KRT15" target="KRT19" />
+      <edge id="76" source="PPARG" target="PRKAA2" />
+      <edge id="77" source="CACNA2D1" target="MYH7B" />
+      <edge id="78" source="CACNA2D1" target="SUSD4" />
+      <edge id="79" source="SYT17" target="TF" />
+      <edge id="80" source="GABRA6" target="ATP2A3" />
+      <edge id="81" source="GABRA6" target="GABRB3" />
+      <edge id="82" source="XBP1" target="FOS" />
+      <edge id="83" source="ZBTB16" target="MAGEA11" />
+      <edge id="84" source="LYPD3" target="SLC9A1" />
+      <edge id="85" source="TF" target="MYC" />
+      <edge id="86" source="TF" target="IGF1" />
+      <edge id="87" source="GALNT7" target="SLC9A1" />
+      <edge id="88" source="FKBP5" target="MAGEA11" />
+      <edge id="89" source="MAGEA11" target="AKR1C3" />
+      <edge id="90" source="SUSD4" target="ITGA7" />
+      <edge id="91" source="PHGDH" target="ASS1" />
+      <edge id="92" source="MYC" target="ASS1" />
+      <edge id="93" source="PRKAA2" target="FOS" />
+    </edges>
+  </graph>
+</gexf>

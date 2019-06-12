@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>Corporate 1</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                	<span class="glyphicon glyphicon-fire"></span> 
+                	Logo
+                </a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#">Home</a>
+                    </li>
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Products</a>
+                    </li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Services <span class="caret"></span></a>
+						<ul class="dropdown-menu" aria-labelledby="about-us">
+							<li><a href="#">Engage</a></li>
+							<li><a href="#">Pontificate</a></li>
+							<li><a href="#">Synergize</a></li>
+						</ul>
+					</li>
+                </ul>
+
+				<!-- Search -->
+				<form class="navbar-form navbar-right" role="search">
+					<div class="form-group">
+						<input type="text" class="form-control">
+					</div>
+					<button type="submit" class="btn btn-default">Search</button>
+				</form>
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+	<div class="jumbotron feature">
+		<div class="container">
+			<h1><span class="glyphicon glyphicon-equalizer"></span> Dramatically Engage</h1>
+			<p>Objectively innovate empowered manufactured products whereas parallel platforms.</p>
+			<p><a class="btn btn-default" href="#">Engage Now</a></p>
+		</div>
+	</div>
+
+    <!-- Content -->
+    <div class="container">
+
+        <!-- Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Superior Collaboration
+                    <small>Visualize Quality</small>
+                </h1>
+                <p>Proactively envisioned multimedia based expertise and cross-media growth strategies. Seamlessly visualize quality intellectual capital without superior collaboration and idea-sharing. Holistically pontificate installed base portals after maintainable products.</p>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Feature Row -->
+	<div style="padding:40px;margin:40px;border:1px solid #ccc">
+        <h1>Generate PPI Graph and Heatmap</h1>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<input class="input" type="file" name="myfile">
+    	<input class="input" type="file" name="prot_file">
+                <input type="submit" value="Upload" />
+	<label for="l_box1"><input type="radio" name="include_survival" value="include_survival" id="l_box1">Include Survival</label>
+        </form>
+	<br> Or use predefined example files:<br><br>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<select name="pre_def_file" size="1">
+	        <option value="pre_def_1">Example 1</option>
+       	</select>
+	<label for="l_box1"><input type="radio" name="include_survival" value="include_survival" id="l_box1">Include Survival</label>
+	<input type="submit"></form>
+    <h1>PPI Graph</h1>
+
+    {{ div|safe }}
+
+    {{ script|safe }}
+    <h1>Heatmap HEATMAP</h1>
+       {% load staticfiles %}
+
+        <img src={% static plot2 %}>
+	<h1> Survival Plot</h1>
+        <!--<img src={% static "test_2.png" %}>-->
+	<a href="homepage.html">Go to "home"</a>
+</div>
+<div class="col-md-12">{{plot_2|safe}}</div>
+    <h1>Survival Info</h1><table>
+<tr>
+  <th>Gene Name</th>
+  <th>Difference</th>
+  <th>Correlation</th>
+</tr>
+{% for result in genelist_diff %}
+<tr>
+  <th> {{ result.gene_name }}</th>
+  <th> {{ result.difference }}</th>
+  <th> {{ result.correlation }}</th>
+</tr> 
+{% endfor %}
+</table>
+        <div class="row">
+            <article class="col-md-4 article-intro">
+                <a href="#">
+                    <img class="img-responsive img-rounded" src="holder.js/700x300" alt="">
+                </a>
+                <h3>
+                    <a href="#">Efficiently Unleash</a>
+                </h3>
+                <p>Collaboratively administrate empowered markets via plug-and-play networks. Dynamically procrastinate B2C users after installed base benefits. Dramatically visualize customer directed convergence without revolutionary ROI.</p>
+            </article>
+            <article class="col-md-4 article-intro">
+                <a href="#">
+                    <img class="img-responsive img-rounded" src="holder.js/700x300" alt="">
+                </a>
+                <h3>
+                    <a href="#">Completely Synergize</a>
+                </h3>
+                <p>Dramatically maintain clicks-and-mortar solutions without functional solutions. Efficiently unleash cross-media information without cross-media value. Quickly maximize timely deliverables for real-time schemas.</p>
+            </article>
+
+            <article class="col-md-4 article-intro">
+                <a href="#">
+                    <img class="img-responsive img-rounded" src="holder.js/700x300" alt="">
+                </a>
+                <h3>
+                    <a href="#">Dynamically Procrastinate</a>
+                </h3>
+                <p>Professionally cultivate one-to-one customer service with robust ideas. Completely synergize resource taxing relationships via premier niche markets. Dynamically innovate resource-leveling customer service for state of the art customer service.</p>
+            </article>
+        </div>
+        <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+	
+	<footer>
+		<div class="footer-blurb">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-4 footer-blurb-item">
+						<h3><span class="glyphicon glyphicon-fire"></span> Dynamically Procrastinate</h3>
+						<p>Collaboratively administrate empowered markets via plug-and-play networks. Dynamically procrastinate B2C users after installed base benefits. Dramatically visualize customer directed convergence without revolutionary ROI.</p>
+						<p><a class="btn btn-default" href="#">Procrastinate</a></p>
+					</div>
+					<div class="col-sm-4 footer-blurb-item">
+						<h3><span class="glyphicon glyphicon-cloud-upload"></span> Efficiently Unleash</h3>
+						<p>Dramatically maintain clicks-and-mortar solutions without functional solutions. Efficiently unleash cross-media information without cross-media value. Quickly maximize timely deliverables for real-time schemas. </p>
+						<p><a class="btn btn-default" href="#">Unleash</a></p>
+					</div>
+					<div class="col-sm-4 footer-blurb-item">
+						<h3><span class="glyphicon glyphicon-leaf"></span> Completely Synergize</h3>
+						<p>Professionally cultivate one-to-one customer service with robust ideas. Completely synergize resource taxing relationships via premier niche markets. Dynamically innovate resource-leveling customer service for state of the art customer service.</p>
+						<p><a class="btn btn-default" href="#">Synergize</a></p>
+					</div>
+
+				</div>
+				<!-- /.row -->	
+			</div>
+        </div>
+        
+        <div class="small-print">
+        	<div class="container">
+        		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
+        		<p>Copyright &copy; Example.com 2015 </p>
+        	</div>
+        </div>
+	</footer>
+
+	
+    <!-- jQuery -->
+    <script src="js/jquery-1.11.3.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="js/ie10-viewport-bug-workaround.js"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="js/holder.min.js"></script>
+	
+</body>
+
+</html>
+

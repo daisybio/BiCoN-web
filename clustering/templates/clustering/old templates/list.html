@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Experiment with Bokeh</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+</head>
+<body>
+<div style="padding:40px;margin:40px;border:1px solid #ccc">
+        <h1>Generate PPI Graph and Heatmap</h1>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<input class="input" type="file" name="myfile">
+    	<input class="input" type="file" name="prot_file">
+                <input type="submit" value="Upload" />
+	<label for="l_box1"><input type="radio" name="include_survival" value="include_survival" id="l_box1">Include Survival</label>
+        </form>
+	<br> Or use predefined example files:<br><br>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<select name="pre_def_file" size="1">
+	        <option value="pre_def_1">Example 1</option>
+       	</select>
+	<label for="l_box1"><input type="radio" name="include_survival" value="include_survival" id="l_box1">Include Survival</label>
+	<input type="submit"></form>
+    <h1>PPI Graph</h1>
+
+    {{ div|safe }}
+
+    {{ script|safe }}
+    <h1>Heatmap</h1>
+       {% load staticfiles %}
+
+        <img src={% static plot2 %}>
+	<h1> Survival Plot</h1>
+        <!--<img src={% static "test_2.png" %}>-->
+	<a href="homepage.html">Go to "home"</a>
+</div>
+<div class="col-md-12">{{plot_2|safe}}</div>
+    <h1>Survival Info</h1><table>
+<tr>
+  <th>Gene Name</th>
+  <th>Difference</th>
+  <th>Correlation</th>
+</tr>
+{% for result in genelist_diff %}
+<tr>
+  <th> {{ result.gene_name }}</th>
+  <th> {{ result.difference }}</th>
+  <th> {{ result.correlation }}</th>
+</tr> 
+{% endfor %}
+</table>
+</body>
+</html>
+

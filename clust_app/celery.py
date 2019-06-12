@@ -1,0 +1,10 @@
+import os
+from celery import Celery
+
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clust_app.settings')
+
+#app = Celery('testproject.polls')
+app = Celery('clust_app.clustering')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Experiment with Bokeh</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+</head>
+<body>
+<div style="padding:40px;margin:40px;border:1px solid #ccc">
+        <h1>Generate Survival Prediction</h1>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	<input class="input" type="file" name="myfile">
+    	<input class="input" type="file" name="prot_file">
+                <input type="submit" value="Upload" />
+	<label for="l_box1"><input type="radio" name="linear_prediction" value="linear_prediction" id="l_box1">Predict Survival Time</label>
+        </form>
+    <h1>Survival Info</h1><table>
+<tr>
+  <th>Patient ID</th>
+  <th>Actual Survival</th>
+  <th>Predicted Survival</th>
+  <th>Prediction Accuracy</th>
+</tr>
+{% for result in results %}
+<tr>
+  <th> {{ result.patient_id }}</th>
+  <th> {{ result.real_value }}</th>
+  <th> {{ result.prediction }}</th>
+  <th> {{ result.was_correct }}</th>
+</tr> 
+{% endfor %}
+</table>
+<a href="homepage.html">Go to "home"</a>
+</body>
+</html>
+
+
