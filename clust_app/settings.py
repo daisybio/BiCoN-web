@@ -144,8 +144,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 # tells the server where to look for static files. Static files are all non-html files used for display on the web pages, such as heatmaps or loading gifs.
-STATIC_URL = '/static/'
-#STATIC_URL = '/code/polls/static/'
+#STATIC_URL = '/static/'
+STATIC_URL = '/code/clustering/static/'
 #STATIC_URL = '/'
 #STATIC_ROOT = os.path.join(BASE_DIR, '../code/polls/static')
 #STATIC_URL = '/static/'

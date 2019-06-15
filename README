@@ -1,20 +1,44 @@
 ###### README ########
 
 
+There are 4 docker containers that each run a task or a server that is necessary for the web application:
+
 - Livereload: Needed for a good display of the loading page. Livereload makes every file reload automatically when it is changed.
 There appears to still be a bug with livereload on Docker, so it is possible that this part of the server will be replaced by javascript code with the same functionality.
 
-- RabbitMQ: Needed as server where celery executes its tasks.
+- RabbitMQ: Needed as server where celery executes its tasks. Must run in the background for celery to run properly.
 
 - Celery: Used as queuing system to execute tasks synchronously. Executes all computationally intensive tasks such as running the algorithm or processing results.
 
 - Django: The server for running and processing requests.
 
+In order to show the progress of the algorithm while running, LiveReload is needed to run in both the container and the folder where the container is started. For this, open two tabs in the terminal, in the first run: 
+python manage.py livereload
+In the second:
+sudo docker compose-up
+This ensures that everytime a gif or png changes, which is needed to display the running status of the algorithm, it is reloaded in the page displayed to the user.
 
 What is where:
 
 Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what.
 
 Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template.
+
+Files with results are stored in a static directory for which the location is defined in settings.py. This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. 
+
+How a request runs on the server:
+
+If you submit a request, several steps are executed in views.py. 
+For the loading page, the gif with loading symbol is copied to its place so that it is visible in the page. The current status of the run is written and read from a log file.
+Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. There are lines of code in this script that, when uncommented, automatically select the two biggest clusters if more than two clinical patient groups exist in the expression file.
+Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10.
+
+How the templates work:
+
+The results are referenced in the templates by setting django variables (in the views.py script) with paths to json files for PPI data and images for the other plots.
+
+Which methods do what:
+
+In views.py, methods are defined that run code after the user accesses a web page. 
 
 

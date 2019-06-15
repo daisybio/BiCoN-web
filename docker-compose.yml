@@ -13,7 +13,7 @@ services:
   web:
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    container_name: testproject_2
+    container_name: clust_app
     volumes:
       - .:/code
     ports:
@@ -33,10 +33,9 @@ services:
         - C_FORCE_ROOT=true
     build: .
     container_name: celery_container
-    command: bash -c "celery -A testproject worker -l info"
+    command: bash -c "celery -A clust_app worker -l info"
     volumes:
       - .:/code
     depends_on:
       - db
       - rabbit
-  
