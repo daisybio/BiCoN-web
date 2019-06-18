@@ -187,6 +187,12 @@ def make_empty_figure():
 	plt.savefig("/code/clustering/static/progress.png")
 	plt.close(fig)
 
+@shared_task(name="empty_log_file")
+def empty_log_file():
+    text_file = open("/code/clustering/static/output_console.txt", "w")
+    text_file.write("")
+    text_file.close()
+
 
 @shared_task(name="write_pval")
 def write_pval(pval,filename):
@@ -1048,44 +1054,6 @@ def remove_loading_image():
 	if(os.path.isfile("/code/clustering/static/loading_1.gif")):
 		os.unlink("/code/clustering/static/loading_1.gif")
 
-@shared_task(name="write_to_file_1")
-def write_to_file_1(text,pth):
-    text_file = open(pth, "w")
-    text_file.write(text)
-    text_file.close()
-  
-
-@shared_task(name="write_metadata_to_file")
-def write_metadata_to_file(metadata):
-    text_file = open("/code/clustering/static/metadata.txt", "w")
-    text_file.write("<table style=\"font-family: arial, sans-serif;border-collapse: collapse;width: 100%;\"><tr><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">Patient Group</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">Mean Survival</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">mean age at diagnosis</th><th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">mean tumor size</th></tr>")
-    for elem in metadata:
-    	text_file.write("<tr>")
-    	text_file.write("<th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">" + str(elem['group']) + "</th>")
-    	text_file.write("<th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">" + str(elem['survival']) + "</th>")
-    	text_file.write("<th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">" + str(elem['age']) + "</th>")
-    	text_file.write("<th style=\"border: 1px solid #dddddd;text-align: left;padding: 8px;\">" + str(elem['size']) + "</th>")
-    	text_file.write("</tr>")
-    text_file.write("</table>")
-    text_file.close()
-@shared_task(name="empty_log_file")
-def empty_log_file():
-    text_file = open("/code/clustering/static/output_console.txt", "w")
-    text_file.write("")
-    text_file.close()
-
-
-@shared_task(name="metadata_to_string")
-def metadata_to_string(metadata):
-    ret = "<table><tr><th>Patient Group</th><th>Correlation with clinical Group</th><th>Mean Survival</th><th>percentage of metastasis</th><th>mean age at diagnosis</th></tr>"
-    for elem in metadata:
-    	ret = ret + "<tr>"
-    	ret = ret + "<th>" + str(elem['group']) + "</th>"
-    	ret = ret + "<th>" + str(elem['survival']) + "</th>"
-    	ret = ret + "<th>" + str(elem['age']) + "</th>"
-    	ret = ret + "<th>" + str(elem['size']) + "</th>"
-    	ret = ret + "</tr>"
-    ret = ret + "</table>"
 
 ##################################################################
 ################## used for metadata display #####################
@@ -1095,6 +1063,9 @@ def metadata_to_string(metadata):
 def list_metadata_3():
     fh1 = open("/code/clustering/static/metadata.txt")
     lines = fh1.read()
+    emptydict = {}
+    if(lines == "NA"):
+    	return(emptydict,emptydict,emptydict)
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
     lines = lines.replace('</th></table>','')
@@ -1155,6 +1126,9 @@ def list_metadata_4(path):
     # used for reading metadata
     fh1 = open(path)
     lines = fh1.read()
+    emptydict = {}
+    if(lines == "NA"):
+    	return(emptydict,emptydict,emptydict)
     # remove html from metadata file and replace table elements by tab
     lines = lines.replace('<table><tr><th>','')
     lines = lines.replace('<tr><th>','')
@@ -1616,20 +1590,16 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			tmp98 = 3
 		return(cmap_custom[tmp98])
 	
-	nodes = []
 	nodecolors = []
 	names = []
 	genes = {}
-	genes_5 = {}	
-	genes_3 = {}
 	#read file with PPI, calculate expression difference of respective genes between groups
 	G_list = list(G2.nodes())
-	ctr = 0
 	G = nx.Graph()
-	print(G_list)
-	print(genes1)
-	genelist_ret = []
+	#print(G_list)
+	#print(genes1)
 	# make node objects for genes
+	ctr = 0
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
 		tp = "circle"
@@ -1651,7 +1621,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		x_pos[k] = pos[k][0]
 		y_pos[k] = pos[k][1]
 	edgl = {}
-	ctr = 0
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
@@ -1715,25 +1684,24 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
 	if(clinicalstr == "empty"):
-		ret_metadata = []
-		ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
+		#ret_metadata = []
+		#ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
+		#ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
+		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
+		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
 		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
-		text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
-		text_file_3.write("<tr><th>Group1</th></tr>")
-		text_file_3.write("</table>")
+		#text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
+		#text_file_3.write("<tr><th>Group1</th></tr>")
+		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""
 		with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
         		text_file_2.write("")
 	
 	else:
-		print("barfbasdbhasdb")
 		clinicalLines = clinicalstr.split("\n")
 		title_col = clinicalLines[0].split(",")
-		print(title_col)
+		#print(title_col)
 		survival_col_nbr = 64
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
@@ -2029,13 +1997,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			tmp98 = 3
 		return(cmap_custom[tmp98])
 	nodecolors = []
-	names = []
 	genes = {}
 	G_list = list(G2.nodes())
 	ctr = 0
 	G = nx.Graph()
 	#print(G_list)
-	print("genes in cluster 1:" + genes1)
+	#print("genes in cluster 1:" + genes1)
 	# make node objects for genes
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
@@ -2045,7 +2012,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
 		nodecolors.append(color_for_graph(means[ctr]))
 		ctr = ctr + 1
-		names.append(G_tmp)
 	ctr = 0
 	# make edge objects for PPI
 	for edg in adjlist:
@@ -2058,7 +2024,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	for k in pos:	
 		x_pos[k] = pos[k][0]
 		y_pos[k] = pos[k][1]
-	ctr = 0
 	# write json object of genes and interactions
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,x_pos,'x')
@@ -2108,13 +2073,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax.set_ylabel("Patients")
 	path99 = "/code/clustering/static/test_" + session_id + ".png"
 	plt.savefig(path99)
-	script, div = components(plot)	
+	#script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
-	patientData_misc = {}
-	
 	# write lists of genes in files, needed for enrichment analysis
 	path_genelist = "genelist_" + session_id + ".txt"
 	path_genelist_1 = "genelist_1_" + session_id + ".txt"
@@ -2134,18 +2097,18 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
 	path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
-	print(path_genelist)
+	#print(path_genelist)
 	# if no metadata given, write an empty metadata file
 	if(clinicalstr == "empty"):
 		ret_metadata = []
-		ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
+		#ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
+		#ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
+		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
+		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
 		text_file_3 = open(path_metadata, "w")
-		text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
-		text_file_3.write("<tr><th>Group1</th></tr>")
-		text_file_3.write("</table>")
+		#text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
+		#text_file_3.write("<tr><th>Group1</th></tr>")
+		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
 		#output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
@@ -2157,21 +2120,21 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")
 		title_col = clinicalLines[0].split(",")
+		# assign some default value to survival col nbr (for the case that no survival column exists)
 		survival_col_nbr = 64
 		# replace all type of NA in dataframe by standard pandas-NA
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		print(clinicaldf_col_names)
+		#print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
-
 		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			print(clinicaldf_col_names_new)
+			#print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
 
@@ -2179,7 +2142,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_values = []
 		param_cols = []
 		ctr = 0
-		print(patientids_metadata)
+		#print(patientids_metadata)
 		patients_0 = []
 		patients_1 = []
 		group1_has = []
@@ -2229,7 +2192,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					column = column.replace('NTL','NA')
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					print(column_name)
+					#print(column_name)
 					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
@@ -2251,7 +2214,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						tmp94 = []
 						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
-						#	print(all_patients[i])
+							#print(all_patients[i])
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
@@ -2334,14 +2297,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 				if("month" in survival_col):
-					print("month")
-					print(patient_id_list[i])
+					#print("month")
+					#print(patient_id_list[i])
 					survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
 					# array patientData
 					patientData.update({patient_id_list[i]:survivalcol_list_temp})
 				else:
 					patientData.update({patient_id_list[i]:survivalcol_list[i]})		
-					print(survivalcol_list[i])
+					#print(survivalcol_list[i])
 				
 		age1 = 0
 		ct1 = 0.001
@@ -2362,7 +2325,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
-		print(survival_1)	
+		#print(survival_1)	
 		errstr = ""
 		if(len(survival_1) == 0):
 			errstr = "Unfortunately, no survival data could be computed."
@@ -2446,7 +2409,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		fig = dict(data=data99, layout=layout)
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
-		print(output_plot_path)
+		#print(output_plot_path)
 		if(errstr == ""):
 			with open(output_plot_path, "w") as text_file_2:
         			text_file_2.write(plot_div)
@@ -2456,8 +2419,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
-	print(ret_metadata)
-	return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
+	#print(ret_metadata)
+	#return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
+	return(ret_metadata,path99,path_metadata,output_plot_path,json_path)
 
 
 ## enrichment stuff ##
@@ -2880,296 +2844,5 @@ def show_old_data(path_json,path_heatmap):
 	copyfile(path_json,"/code/clustering/static/test15.json")
 	
 
-#########################################################################
-#### Old alternative settings for algorithm that are soon replaced.
-#########################################################################
-
-
-@shared_task(name="script_output_task_2")
-def script_output_task_2(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,save_data,username):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	def color_for_graph(v):
-		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
-		v = v*2
-		#tmp98 = int(v + (0.5 if v > 0 else -0.5))
-		tmp98 = int(v)
-		if(v < -4):
-			tmp98 = -4
-		if(v > 3):
-			tmp98 = 3
-		return(cmap_custom[tmp98])
-	
-	nodes = []
-	nodecolors = []
-	names = []
-	genes = {}
-	genes_5 = {}	
-	genes_3 = {}
-	#read file with PPI, calculate expression difference of respective genes between groups
-	G_list = list(G2.nodes())
-	ctr = 0
-	G = nx.Graph()
-	print(G_list)
-	print(genes1)
-	#for G_tmp in G_list:
-	#	genes.update({G_tmp:0})	
-	#	tp = "circle"
-	#	if(G_tmp in genes1):
-	#		tp = "square"
-	#	G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-	#	nodecolors.append(color_for_graph(means[ctr]))
-	#	ctr = ctr + 1
-	#	names.append(G_tmp)
-	genelist_ret = []
-	for G_tmp in genes_all:
-		genes.update({G_tmp:0})	
-		tp = "circle"
-		if(G_tmp in genes1):
-			tp = "square"
-		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-		nodecolors.append(color_for_graph(means[ctr]))
-		#genelist_ret.append({'gene_name':G_tmp,'diff':float(means[ctr])})
-		ctr = ctr + 1
-		names.append(G_tmp)
-	ctr = 0
-	for edg in adjlist:
-		G.add_edge(edg[0],edg[1],id=ctr,color="rgb(0,0,0)")
-		ctr = ctr + 1
-	pos = nx.spring_layout(G)	
-	#print(pos)
-	x_pos = {}
-	y_pos = {}
-	for k in pos:	
-		x_pos[k] = pos[k][0]
-		y_pos[k] = pos[k][1]
-	#print(x_pos)
-	edgl = {}
-	ctr = 0
-	
-	#nodecolors = [color_for_graph(i) for i in means]
-	#for edg in G.edges():
-	#	edgl[edg] = ctr
-	#	ctr = ctr + 1
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,y_pos,'y')
-	#nx.set_edge_attributes(G,edgl,'id')
-	nx.set_node_attributes(G,10,'size')
-	#nx.set_node_attributes(G,nodecolors,'color')
-	#print(json_graph.node_link_data(G))
-	jsn = json_graph.node_link_data(G)
-	jsn2 = str(json.dumps(jsn))
-	jsn33 = jsn2.replace('links','edges')
-	jsn44 = jsn33.replace('Label','label')
-	jsn55 = jsn44.replace('bels','bel')
-	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#print(jsn3)
-	with open("polls/static/test15.json", "w") as text_file:
-		text_file.write(jsn3)
-	#nx.write_gexf(G,"test.gexf")
-	output_notebook()
-	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
-	# add tools to the plot
-	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	# create bokeh graph
-	#graph = from_networkx(G, nx.spring_layout, iterations=1000, scale=1, center=(0,0))
-	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	#graph = from_networkx(G, nx.circular_layout, scale=1, center=(0,0))
-	# add name to node data
-	
-	
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
-	
-	# add name to node data
-	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	graph.selection_policy = NodesAndLinkedEdges()
-	graph.inspection_policy = EdgesAndLinkedNodes()
-	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
-	x,y = zip(*graph.layout_provider.graph_layout.values())
-	node_labels = nx.get_node_attributes(G, 'Name')
-	z = tuple([(bar-0.1) for bar in x])
-	#make bokeh graph with transparent labels
-	source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	plot.renderers.append(graph)
-	plot.renderers.append(labels2)
-	plot.add_layout(labels2)
-	#begin making heatmap here
-	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
-	colordict={0:'#BB0000',1:'#0000BB'}
-	#sns.clustermap(T,method="average", figsize=(13, 13),robust=True,col_colors=col_colors1,row_colors=row_colors1,col_cluster=False)
-	#sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)		
-	#plt.xlabel('Genes')
-	#plt.ylabel('Patients')
-	g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
-	ax = g.ax_heatmap
-	ax.set_xlabel("Genes")
-	ax.set_ylabel("Patients")
-	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("polls/static/test.png")
-	script, div = components(plot)	
-	plot_1=plt.gcf()
-	plt.clf()
-	if(save_data == "true"):
-		foobar = "user_uploaded_files/" + username
-		if not(os.path.isdir(foobar)):
-			os.mkdir(foobar)
-		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-		filename_2 = foobar + "/" + username + filename_1 + "_json.json"
-		filename_3 = foobar + "/" + username + filename_1 + "_heatmap.png"
-		copyfile("polls/static/test.png",filename_3)
-		copyfile("polls/static/test15.json",filename_2)
-	with open("polls/static/output_console.txt", "w") as text_file:
-        	text_file.write("Done!")
-	return(script,div,plot_1)
-
-#########################################################################
-#### Stuff below here is never run, I just haven't deleted it yet bc of
-#### dependencies #######################################################
-#########################################################################
-
-
-@shared_task(name="script_output_task")
-def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	def color_for_graph(v):
-		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
-		v = v*2
-		#tmp98 = int(v + (0.5 if v > 0 else -0.5))
-		tmp98 = int(v)
-		if(v < -4):
-			tmp98 = -4
-		if(v > 3):
-			tmp98 = 3
-		return(cmap_custom[tmp98])
-	
-	nodes = []
-	nodecolors = []
-	names = []
-	genes = {}
-	genes_5 = {}	
-	genes_3 = {}
-	#read file with PPI, calculate expression difference of respective genes between groups
-	G_list = list(G2.nodes())
-	ctr = 0
-	G = nx.Graph()
-	print(G_list)
-	print(genes1)
-	#for G_tmp in G_list:
-	#	genes.update({G_tmp:0})	
-	#	tp = "circle"
-	#	if(G_tmp in genes1):
-	#		tp = "square"
-	#	G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-	#	#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-	#	nodecolors.append(color_for_graph(means[ctr]))
-	#	ctr = ctr + 1
-	#	names.append(G_tmp)
-	genelist_ret = []
-	for G_tmp in genes_all:
-		genes.update({G_tmp:0})	
-		tp = "circle"
-		if(G_tmp in genes1):
-			tp = "square"
-		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp,borderColor="#000")
-		#G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]))
-		nodecolors.append(color_for_graph(means[ctr]))
-		#genelist_ret.append({'gene_name':G_tmp,'diff':float(means[ctr])})
-		ctr = ctr + 1
-		names.append(G_tmp)
-	ctr = 0
-	for edg in adjlist:
-		G.add_edge(edg[0],edg[1],id=ctr,color="rgb(0,0,0)")
-		ctr = ctr + 1
-	pos = nx.spring_layout(G)	
-	#print(pos)
-	x_pos = {}
-	y_pos = {}
-	for k in pos:	
-		x_pos[k] = pos[k][0]
-		y_pos[k] = pos[k][1]
-	#print(x_pos)
-	edgl = {}
-	ctr = 0
-	
-	#nodecolors = [color_for_graph(i) for i in means]
-	#for edg in G.edges():
-	#	edgl[edg] = ctr
-	#	ctr = ctr + 1
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,x_pos,'x')
-	nx.set_node_attributes(G,y_pos,'y')
-	#nx.set_edge_attributes(G,edgl,'id')
-	nx.set_node_attributes(G,10,'size')
-	#nx.set_node_attributes(G,nodecolors,'color')
-	#print(json_graph.node_link_data(G))
-	jsn = json_graph.node_link_data(G)
-	jsn2 = str(json.dumps(jsn))
-	jsn33 = jsn2.replace('links','edges')
-	jsn44 = jsn33.replace('Label','label')
-	jsn55 = jsn44.replace('bels','bel')
-	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#print(jsn3)
-	with open("polls/static/test15.json", "w") as text_file:
-		text_file.write(jsn3)		
-	#nx.write_gexf(G,"test.gexf")
-	output_notebook()
-	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
-	# add tools to the plot
-	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	# create bokeh graph
-	#graph = from_networkx(G, nx.spring_layout, iterations=1000, scale=1, center=(0,0))
-	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	#graph = from_networkx(G, nx.circular_layout, scale=1, center=(0,0))
-	# add name to node data
-	
-	
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
-	
-	# add name to node data
-	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	graph.selection_policy = NodesAndLinkedEdges()
-	graph.inspection_policy = EdgesAndLinkedNodes()
-	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
-	x,y = zip(*graph.layout_provider.graph_layout.values())
-	node_labels = nx.get_node_attributes(G, 'Name')
-	z = tuple([(bar-0.1) for bar in x])
-	#make bokeh graph with transparent labels
-	source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	plot.renderers.append(graph)
-	plot.renderers.append(labels2)
-	plot.add_layout(labels2)
-	#begin making heatmap here
-	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
-	colordict={0:'#BB0000',1:'#0000BB'}
-	#sns.clustermap(T,method="average", figsize=(13, 13),robust=True,col_colors=col_colors1,row_colors=row_colors1,col_cluster=False)
-	#sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)		
-	#plt.xlabel('Genes')
-	#plt.ylabel('Patients')
-	g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
-	ax = g.ax_heatmap
-	ax.set_xlabel("Genes")
-	ax.set_ylabel("Patients")
-	#plt.legend(handles=[red_patch,blue_patch],loc=2,mode="expand",bbox_to_anchor=(3, 1))
-	plt.savefig("polls/static/test.png")
-	script, div = components(plot)	
-	plot_1=plt.gcf()
-	plt.clf()
-	with open("polls/static/output_console.txt", "w") as text_file:
-        	text_file.write("Done!")
-	return(script,div,plot_1)
 
 

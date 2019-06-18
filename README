@@ -1,6 +1,32 @@
 ###### README ########
 
 
+################################
+How to run the docker container:
+################################
+
+You can build the docker compose, and run the server and all neccessities, by running in a terminal (in the same directory as this file):
+
+sudo allowed_hosts=['*'] docker-compose up
+
+instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0'].
+You can find out which port Django is using by running
+
+sudo docker-compose up
+
+and waiting until a message appears in the terminal that says
+
+clust_app     | Starting development server at http://0.0.0.0:8000/
+
+In this case, the address where the server runs is 0.0.0.0.
+
+
+
+
+################
+What runs where:
+################
+
 There are 4 docker containers that each run a task or a server that is necessary for the web application:
 
 - Livereload: Needed for a good display of the loading page. Livereload makes every file reload automatically when it is changed.
@@ -20,7 +46,7 @@ This ensures that everytime a gif or png changes, which is needed to display the
 
 What is where:
 
-Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what.
+Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified if something changes (e.g. the port address used by RabbitMQ).
 
 Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template.
 
@@ -40,5 +66,6 @@ The results are referenced in the templates by setting django variables (in the 
 Which methods do what:
 
 In views.py, methods are defined that run code after the user accesses a web page. 
+
 
 

@@ -1,5 +1,5 @@
 
-
+psycopg2
 amqp==2.2.2
 anyjson==0.3.3
 appdirs==1.4.3
