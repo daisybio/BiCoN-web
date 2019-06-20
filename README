@@ -69,3 +69,20 @@ In views.py, methods are defined that run code after the user accesses a web pag
 
 
 
+Troubleshooting:
+
+Common Errors that might occur:
+
+- Celery does not start properly and RabbitMQ produces an error upon starting:
+
+After usable space on the server was totally full, this error can occur. It is possibly solved by typing
+ sudo rabbitmqctl stop
+ sudo rabbitmq-server
+
+If this does not help, then a log file was corrupted. This is no big deal and can be solved by running
+ mkdir -p /tmp/badrabbit/
+ sudo mv /var/lib/rabbitmq/mnesia/rabbit[[[COMPUTER_NAME]]]/queues/* /tmp/badrabbit/;
+substitute COMPUTER_NAME by the name of your computer/the server in the shell, that is shown in the terminal at the start of each line
+
+
+

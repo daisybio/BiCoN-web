@@ -1667,8 +1667,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
-	#print("in method")
+	# Array PatientData is for storing survival information
 	patientData = {}
+	# write lists of genes in files, needed for enrichment analysis
 	with open("genelist.txt","w") as text_file_4:
 		for i in G_list:
 			text_file_4.write(str(i) + "\n")
@@ -1683,15 +1684,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
+	# if no metadata given, write an empty metadata file
 	if(clinicalstr == "empty"):
-		#ret_metadata = []
-		#ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		#ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
 		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
-		#text_file_3.write("<tr><th>Group1</th></tr>")
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""
@@ -1699,10 +1694,12 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
         		text_file_2.write("")
 	
 	else:
+		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")
 		title_col = clinicalLines[0].split(",")
-		#print(title_col)
+		# assign some default value to survival col nbr (for the case that no survival column exists)
 		survival_col_nbr = 64
+		# replace all type of NA in dataframe by standard pandas-NA
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
@@ -1710,6 +1707,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		clinicaldf_col_names = list(clinicaldf.columns)
 		print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
+		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
 			print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
@@ -1727,9 +1725,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		patients_1 = []
 		group1_has = []
 		group2_has = []
+		# iterate over columns of metadata, get all unique entries
 		for column_name, column in clinicaldf.transpose().iterrows():
 			column.fillna("NA",inplace=True)
 			coluniq = column.unique()
+			# replace all instances of NA by pandas-standard NA
 			for elem in coluniq:
 				if ": " in str(elem):
 					elem = elem.split(": ")[1]
@@ -1747,9 +1747,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				elif(elem == float('nan')):
 					elem = "NA"
 			if "NA" in coluniq:
+				# check if column entries are binary - length is 3 if na is there
 				if(len(coluniq) == 3):
 					patients_temp_0 = []
 					patients_temp_1 = []
+					# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -1768,7 +1770,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					column = column.replace('NTL','NA')
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					print(column_name)
+					#print(column_name)
+					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
@@ -1778,7 +1781,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 							elif(col_as_list[i] == '1'):
 								patients_temp_1.append(patientids_metadata[i])
 						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)										
+						patients_1.append(patients_temp_1)	
+						# add column name to parameter names									
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
@@ -1814,6 +1818,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					coluniq3 = [str(w) for w in coluniq2]
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						col_as_list = [str(i) for i in column]
+						# check for which patients current metadata variable is 0 or 1
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
@@ -1826,6 +1831,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						all_patients = patients_temp_0 + patients_temp_1
 						tmp95 = []
 						tmp94 = []
+						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
@@ -1842,6 +1848,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		jaccards_2 = []
 		param_names_final = []
 		nbr_patients = float(len(group1_ids) + len(group2_ids))
+		# calculate fractions of patients for which metadata variables are 0 or 1
 		for i in range(0,len(param_names)-1):
 			if((float(len(patients_0[i])+len(patients_1[i]))/nbr_patients) > 0.8):
 				param_names_final.append(param_names[i])
@@ -1853,18 +1860,23 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		print(jaccards_2)
 		print(list(clinicaldf.columns).index(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
+		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
 			print("survival col")
 			print(survival_col_nbr)
 			print(list(clinicaldf.iloc[:,survival_col_nbr]))
+		# get list of patient ids
 		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
 			patient_id_list = list(clinicaldf.index)
 		else:
 			patient_id_list = list(clinicaldf.iloc[:,0])
+		# replace NA by standard NA for all entries in survival column
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+		# iterate over patient IDs
 		for i in range(0,len(patient_id_list)):
+			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 					if("month" in survival_col):
 						print("month")
@@ -1887,16 +1899,18 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		sum_surv_1 = 0
 		ctr_surv_2 = 0.001
 		sum_surv_2 = 0
+		# make arrays with survival time of patients in both groups
 		for key in patientData:
 			if key in group1_ids:
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
 		print(survival_1)
+		# calculate p-value for survival times
 		surv_results = logrank_test(survival_1,survival_2)
 		p_val = surv_results.p_value
 		print("p value" + str(p_val))
-		
+		# count survival times in both arrays
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
 			ctr_surv_1 = ctr_surv_1 + 1
@@ -1905,10 +1919,12 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			ctr_surv_2 = ctr_surv_2 + 1
 		survival_mean_1 = sum_surv_1 / ctr_surv_1
 		survival_mean_2 = sum_surv_2 / ctr_surv_2
+		# replace some abbreviated clinical terms by proper description
 		param_names = [elem.replace("bm event:ch1","Breast Metastasis") for elem in param_names]
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
+		# write metadata in file
 		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
 		text_file_3.write("<table><tr>")
 		if(len(jaccards_1) < len(param_names)):
@@ -1925,6 +1941,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			text_file_3.write("<th>" + str(elem) + "</th>")
 		text_file_3.write("</table>")
 		text_file_3.close()
+		# write metadata to dicts
 		ret_metadata = []
 		ret_metadata_1 = {}
 		ret_metadata_2 = {}
@@ -1938,6 +1955,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		ret_metadata.append(ret_metadata_3)
 		survival_perc_1 = {0:1}
 		survival_perc_2 = {0:1}
+		# calculate data for kaplan meyer plot
 		for i in range(1,10):	
 			tmp1 = 1.0
 			tmp2 = 1.0
@@ -1983,7 +2001,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	print(ret_metadata)
 	return(script,div,plot_1,plot_div,ret_metadata,p_val)
 
-
+### Processing of algorithm output with using session ID
 @shared_task(name="script_output_task_10")
 def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
 	# define colors depending on z-score differences of genes in graph
@@ -2097,7 +2115,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
 	path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
-	#print(path_genelist)
 	# if no metadata given, write an empty metadata file
 	if(clinicalstr == "empty"):
 		ret_metadata = []
@@ -2126,23 +2143,24 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
+		print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		#print(clinicaldf_col_names)
+		print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
 		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
+			print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			#print(clinicaldf_col_names_new)
+			print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
-
 		param_names = []
 		param_values = []
 		param_cols = []
 		ctr = 0
-		#print(patientids_metadata)
+		print(patientids_metadata)
 		patients_0 = []
 		patients_1 = []
 		group1_has = []
@@ -2197,24 +2215,20 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
-						# check for which patients current metadata variable is 0 or 1
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
 							elif(col_as_list[i] == '1'):
 								patients_temp_1.append(patientids_metadata[i])
 						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)		
-						# add column name to parameter names								
+						patients_1.append(patients_temp_1)	
+						# add column name to parameter names									
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						#print(all_patients)
 						tmp95 = []
 						tmp94 = []
-						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
-							#print(all_patients[i])
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
@@ -2222,8 +2236,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
 			else:
-				# do the same as above for columns without NA
 				if(len(coluniq) == 2):
+					#print(coluniq)
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -2242,9 +2256,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					column = column.replace('NTL','NA')
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					#print(sorted(coluniq3))
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						col_as_list = [str(i) for i in column]
+						# check for which patients current metadata variable is 0 or 1
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
@@ -2255,11 +2269,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						#print(all_patients)
 						tmp95 = []
 						tmp94 = []
+						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
-							#print(all_patients[i])
 							if(all_patients[i] in group1_ids):
 								tmp95.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
@@ -2267,6 +2280,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
 			ctr = ctr + 1
+		print(param_names)
+		print(patients_0)
+		print(patients_1)
+		print(param_cols)
 		jaccards_1 = []
 		jaccards_2 = []
 		param_names_final = []
@@ -2277,35 +2294,38 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				param_names_final.append(param_names[i])
 				jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
 				jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
-
+		print(param_names_final)
+		print(group1_has)
+		print(jaccards_1)
+		print(jaccards_2)
+		print(list(clinicaldf.columns).index(survival_col))
+		print(list(clinicaldf.iloc[:,42]))
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-		
+			print("survival col")
+			print(survival_col_nbr)
+			print(list(clinicaldf.iloc[:,survival_col_nbr]))
 		# get list of patient ids
 		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
 			patient_id_list = list(clinicaldf.index)
 		else:
 			patient_id_list = list(clinicaldf.iloc[:,0])
-		
 		# replace NA by standard NA for all entries in survival column
-		patient_id_list = list(clinicaldf.iloc[:,0])
 		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
 		# iterate over patient IDs
 		for i in range(0,len(patient_id_list)):
 			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
-				if("month" in survival_col):
-					#print("month")
-					#print(patient_id_list[i])
-					survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
-					# array patientData
-					patientData.update({patient_id_list[i]:survivalcol_list_temp})
-				else:
-					patientData.update({patient_id_list[i]:survivalcol_list[i]})		
-					#print(survivalcol_list[i])
-				
+					if("month" in survival_col):
+						print("month")
+						print(patient_id_list[i])
+						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
+						patientData.update({patient_id_list[i]:survivalcol_list_temp})
+					else:
+						patientData.update({patient_id_list[i]:survivalcol_list[i]})
+					print(survivalcol_list[i])				
 		age1 = 0
 		ct1 = 0.001
 		age2 = 0
@@ -2325,11 +2345,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_1.append(patientData[key])
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
-		#print(survival_1)	
-		errstr = ""
-		if(len(survival_1) == 0):
-			errstr = "Unfortunately, no survival data could be computed."
-		p_val = 0.1
+		print(survival_1)
+		# calculate p-value for survival times
+		surv_results = logrank_test(survival_1,survival_2)
+		p_val = surv_results.p_value
+		print("p value" + str(p_val))
 		# count survival times in both arrays
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
@@ -2339,17 +2359,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			ctr_surv_2 = ctr_surv_2 + 1
 		survival_mean_1 = sum_surv_1 / ctr_surv_1
 		survival_mean_2 = sum_surv_2 / ctr_surv_2
-		errstr = ""
-		if(len(survival_1) == 0):
-			errstr = "Unfortunately, no survival data could be computed."		
-		
-		#print(group1_in_metadata)
-		#print(metastasis) 
 		# replace some abbreviated clinical terms by proper description
 		param_names = [elem.replace("bm event:ch1","Breast Metastasis") for elem in param_names]
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
+		errstr = ""
+		if(len(survival_1) == 0):
+			errstr = "Unfortunately, no survival data could be computed."		
 		text_file_3 = open(path_metadata, "w")
 		# write metadata in file
 		text_file_3.write("<table><tr>")
@@ -2367,6 +2384,18 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			text_file_3.write("<th>" + str(elem) + "</th>")
 		text_file_3.write("</table>")
 		text_file_3.close()
+		# write metadata to dicts
+		ret_metadata = []
+		ret_metadata_1 = {}
+		ret_metadata_2 = {}
+		ret_metadata_3 = {}
+		for i in range(0, len(param_names)):
+			ret_metadata_1[i] = param_names[i]
+			ret_metadata_2[i] = jaccards_1[i]
+			ret_metadata_3[i] = jaccards_2[i]
+		ret_metadata.append(ret_metadata_1)
+		ret_metadata.append(ret_metadata_2)
+		ret_metadata.append(ret_metadata_3)
 		survival_perc_1 = {0:1}
 		survival_perc_2 = {0:1}
 		# calculate data for kaplan meyer plot
@@ -2381,9 +2410,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					tmp2 = tmp2 - (1.0/len(survival_2))
 			survival_perc_1.update({i:tmp1})
 			survival_perc_2.update({i:tmp2})
-		#output_notebook()	
-		
-		# make kaplan meyer plots
 		trace1 = go.Scatter(
 		x=list(survival_perc_1.keys()),
 		y=list(survival_perc_1.values()),
@@ -2403,10 +2429,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		data99 = [trace1,trace2]
 		layout = dict(
 		legend=dict(
-		y=0.5,
+		yanchor="bottom",
 		traceorder='reversed',
+		orientation="h",
 		font=dict(size=16)))
 		fig = dict(data=data99, layout=layout)
+		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		#print(output_plot_path)
@@ -2421,7 +2449,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
         	text_file.write("Done!")
 	#print(ret_metadata)
 	#return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
-	return(ret_metadata,path99,path_metadata,output_plot_path,json_path)
+	return(ret_metadata,path99,path_metadata,output_plot_path,json_path,p_val)
 
 
 ## enrichment stuff ##

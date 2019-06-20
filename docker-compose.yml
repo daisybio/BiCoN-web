@@ -1,8 +1,10 @@
 version: '3'
 
+# all containers have access to a shared volume in /code. files that are modified by the celery container can be accessed from the django container etc.
 services:
   db:
     image: postgres
+  # livereload is needed to update images after change, for a display of the loading page.
   livereload:
     build: .
     command: bash -c "python3 manage.py livereload"
@@ -10,16 +12,25 @@ services:
       - .:/code
     depends_on:
       - db
+    ports:
+      - "5432:5432"
+  # the django web server.
   web:
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: clust_app
     volumes:
       - .:/code
+    environment:
+      - DJANGO_ALLOWED_HOSTS=${allowed_hosts}
+      - CELERY_URL=${cel_url}
     ports:
       - "8000:8000"
     depends_on:
       - db
+    links:
+      - db
+  # rabbitmq, needed for executing celery tasks.
   rabbit:
     hostname: rabbit
     image: rabbitmq:latest
@@ -28,9 +39,14 @@ services:
         - RABBITMQ_DEFAULT_PASS=mypass
     ports:
         - "5672:5672"
+  # the queuing system
   celery:
     environment: 
+        #- DJANGO_ALLOWED_HOSTS=['0.0.0.0','172.18.0.6']
         - C_FORCE_ROOT=true
+        - CELERY_URL=${cel_url}
+        #- ALLOWED_HOSTS='["0.0.0.0"]'
+        #- CELERY_BROKER_URL=${cel}
     build: .
     container_name: celery_container
     command: bash -c "celery -A clust_app worker -l info"
@@ -39,3 +55,5 @@ services:
     depends_on:
       - db
       - rabbit
+    links:
+      - db

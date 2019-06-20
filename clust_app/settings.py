@@ -30,6 +30,7 @@ DEBUG = True
 #ALLOWED_HOSTS = ['*']
 
 # get list of allowed hosts from environment variable
+#ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS") 
 
 # Application definition
@@ -60,6 +61,7 @@ MIDDLEWARE = [
 #ROOT_URLCONF = 'testproject.urls'
 ROOT_URLCONF = 'clust_app.urls'
 # celery configuration. this line tells celery where it can access rabbitMQ.
+#CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_BROKER_URL = os.environ.get("CELERY_URL") 
 #CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
 #CELERY_BROKER_URL = 'amqp://localhost'
