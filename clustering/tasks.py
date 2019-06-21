@@ -1851,9 +1851,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		# calculate fractions of patients for which metadata variables are 0 or 1
 		for i in range(0,len(param_names)-1):
 			if((float(len(patients_0[i])+len(patients_1[i]))/nbr_patients) > 0.8):
-				param_names_final.append(param_names[i])
-				jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
-				jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
+				if not(lib.jac(group1_has[i],patients_0[i]) == 0 and lib.jac(group2_has[i],patients_1[i]) == 0):
+					param_names_final.append(param_names[i])
+					jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
+					jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
 		print(param_names_final)
 		print(group1_has)
 		print(jaccards_1)
@@ -1927,10 +1928,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		# write metadata in file
 		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
 		text_file_3.write("<table><tr>")
-		if(len(jaccards_1) < len(param_names)):
-			for i in range(len(jaccards_1),len(param_names)):
-				jaccards_1.append(0.0)
-				jaccards_2.append(0.0)
+		#if(len(jaccards_1) < len(param_names)):
+		#	for i in range(len(jaccards_1),len(param_names)):
+		#		jaccards_1.append(0.0)
+		#		jaccards_2.append(0.0)
 		for elem in param_names:
 			text_file_3.write("<th>" + str(elem) + "</th>")
 		text_file_3.write("</tr><tr>")
@@ -1946,7 +1947,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		ret_metadata_1 = {}
 		ret_metadata_2 = {}
 		ret_metadata_3 = {}
-		for i in range(0, len(param_names)):
+		#for i in range(0, len(param_names)):
+		for i in range(0, len(jaccards_1)):
 			ret_metadata_1[i] = param_names[i]
 			ret_metadata_2[i] = jaccards_1[i]
 			ret_metadata_3[i] = jaccards_2[i]
@@ -1989,7 +1991,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		yanchor="bottom",
 		traceorder='reversed',
 		orientation="h",
-		font=dict(size=16)))
+		font=dict(size=16)),
+		xaxis=dict(
+        	title='Time in years'),
+		yaxis=dict(
+        	title='percentage of patients'))
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
@@ -2291,9 +2297,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		# calculate fractions of patients for which metadata variables are 0 or 1
 		for i in range(0,len(param_names)-1):
 			if((float(len(patients_0[i])+len(patients_1[i]))/nbr_patients) > 0.8):
-				param_names_final.append(param_names[i])
-				jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
-				jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
+				if not(lib.jac(group1_has[i],patients_0[i]) == 0.0 and lib.jac(group2_has[i],patients_1[i]) == 0.0):
+					param_names_final.append(param_names[i])
+					jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
+					jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
 		print(param_names_final)
 		print(group1_has)
 		print(jaccards_1)
@@ -2370,10 +2377,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3 = open(path_metadata, "w")
 		# write metadata in file
 		text_file_3.write("<table><tr>")
-		if(len(jaccards_1) < len(param_names)):
-			for i in range(len(jaccards_1),len(param_names)):
-				jaccards_1.append(0.0)
-				jaccards_2.append(0.0)
+		#if(len(jaccards_1) < len(param_names)):
+		#	for i in range(len(jaccards_1),len(param_names)):
+		#		jaccards_1.append(0.0)
+		#		jaccards_2.append(0.0)
 		for elem in param_names:
 			text_file_3.write("<th>" + str(elem) + "</th>")
 		text_file_3.write("</tr><tr>")
@@ -2389,7 +2396,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		ret_metadata_1 = {}
 		ret_metadata_2 = {}
 		ret_metadata_3 = {}
-		for i in range(0, len(param_names)):
+		#for i in range(0, len(param_names)):
+		for i in range(0, len(jaccards_1)):
 			ret_metadata_1[i] = param_names[i]
 			ret_metadata_2[i] = jaccards_1[i]
 			ret_metadata_3[i] = jaccards_2[i]
@@ -2432,7 +2440,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		yanchor="bottom",
 		traceorder='reversed',
 		orientation="h",
-		font=dict(size=16)))
+		font=dict(size=16)),
+		xaxis=dict(
+        	title='Time in years'),
+		yaxis=dict(
+        	title='percentage of patients'),
+		)
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
