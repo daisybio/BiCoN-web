@@ -994,6 +994,10 @@ def clustering_6_4(request):
 				if('analyze_metadata' in request.POST):
 					if(request.FILES['patientdata']):
 						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
+						clinicalstr_first_line = clinicalstr.split("\n")[0]
+						if(len(clinicalstr_first_line.split("\t")) > len(clinicalstr_first_line.split(","))):
+							print("is tsv")
+							clinicalstr = clinicalstr.replace("\t",",")
 						clinical_stringio = StringIO(clinicalstr)
 						clinicaldf = pd.read_csv(clinical_stringio)
 						if('survival_col' in request.POST):
@@ -1084,6 +1088,7 @@ def clustering_6_4(request):
 				cache.set('ret_metadata1', ret_metadata1)	
 				cache.set('ret_metadata2', ret_metadata2)	
 				cache.set('ret_metadata3', ret_metadata3)	
+				cache.set('json_path', json_path)	
 				cache.set('p_val', p_val)
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"		
@@ -1273,10 +1278,6 @@ def clustering_6_4(request):
 			request.POST._mutable = mutable
 		if('enr' in request.POST):
 			print("enr in request")
-		session_id = request.session._get_or_create_session_key()
-		path99 = "test_" + session_id + ".png"
-		json_path = "test15_" + session_id + ".json"
-		output_plot_path = "output_plotly_" + session_id + ".html"
 		if('ppi_path' in request.POST and 'heatmap_path' in request.POST and 'plot_path' in request.POST and 1==0):
 			print(request.POST.get('ppi_path'))
 			path99 = request.POST.get('heatmap_path')
@@ -1291,6 +1292,11 @@ def clustering_6_4(request):
 			ret_metadata1 = cache.get('ret_metadata1','none')
 			ret_metadata2 = cache.get('ret_metadata2','none')
 			ret_metadata3 = cache.get('ret_metadata3','none')
+		else:
+			session_id = request.session._get_or_create_session_key()
+			path99 = "test_" + session_id + ".png"
+			json_path = "test15_" + session_id + ".json"
+			output_plot_path = "output_plotly_" + session_id + ".html"	
 		#return clustering_6(request)
 		#return HttpResponseRedirect('polls/clustering_6.html')
 		#return clustering_6(request)
@@ -1339,7 +1345,7 @@ def clustering_6_4(request):
 			ret_metadata3 = cache.get('ret_metadata3',"")
 			p_val = cache.get('p_val',"")
 			cache.clear()	
-			cache.set('session_id', session_id)	
+			cache.set('session_id', session_id_from_cache)	
 			cache.set('ret_metadata1', ret_metadata1)	
 			cache.set('ret_metadata2', ret_metadata2)	
 			cache.set('ret_metadata3', ret_metadata3)	

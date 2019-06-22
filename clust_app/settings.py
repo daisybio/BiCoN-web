@@ -70,6 +70,14 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
 CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
+
+CACHES = {
+   'default': {
+      'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+      'TIMEOUT': 10000,
+   }
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
