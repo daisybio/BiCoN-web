@@ -1269,8 +1269,8 @@ def clustering_6_4(request):
 			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 			
 			#output_plot_path = "polls/static/output_plotly_" + session_id + ".html"
 			output_plot_path = "output_plotly_" + session_id + ".html"
-			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path99,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
-'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
+			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':("userfiles/"+path99),'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
+'json_path':("userfiles/"+json_path + "?foo=bar"),'output_plot_path':("userfiles/"+output_plot_path),'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 		if('enr' not in request.POST):
 			mutable = request.POST._mutable
 			request.POST._mutable = True

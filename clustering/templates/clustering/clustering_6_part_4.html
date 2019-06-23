@@ -96,13 +96,10 @@ $(document).ready(function() {
 
 
      
-<!-- <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script> -->
-<!---<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.3.1.js"></script>-->
-
 
 <!-- END SIGMA IMPORTS -->
 <script src="{% static 'plugins/sigma.parsers.json/sigma.parsers.json.js' %}"></script>
-<!--<script src="http://code.jquery.com/jquery-latest.js"></script>-->
+
 
     <!-- Bootstrap Core CSS -->
     <link href="{% static 'bootstrap.min.css'%}" rel="stylesheet">
@@ -121,6 +118,7 @@ $(document).ready(function() {
   margin-bottom: 1.2rem 0;
 }
 
+/* css for expandible (collapsible) input fields*/
 .lbl-toggle {
   display: block;
 
@@ -189,6 +187,7 @@ $(document).ready(function() {
 .message_1 {
     display:none;
 }
+/* tables */
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -214,6 +213,7 @@ td, th {
 tr:nth-child(even) {
     background-color: #dddddd;
 }
+/* the collapsible input area */
 .collapsible {
   background-color: #eee;
   color: #444;
@@ -234,6 +234,7 @@ tr:nth-child(even) {
   overflow: hidden;
   background-color: #f1f1f1;
 }
+/**/ 
 .tab button {
     background-color: inherit;
     float: left;
@@ -253,6 +254,7 @@ tr:nth-child(even) {
 .tab4 {
   display: none;
 }
+/* steps for multi-step input form */
 .step {
   border: solid 0px #d3d3d3;
   width: 100px;
@@ -292,7 +294,7 @@ tr:nth-child(even) {
   opacity: 1;
 }
 
-
+/* clickable links in active steps*/
 .step.active a{
     color:#D8D8D8;
 }
@@ -317,6 +319,7 @@ tr:nth-child(even) {
 margin-bottom: -20px;
 /*position:absolute;*/
 }
+/* result tabs */
 .tabcontent {
     display: none;
     padding: 6px 12px;
@@ -331,6 +334,7 @@ margin-bottom: -20px;
 }
 #ctable{
 width:500px;}
+/* input tabs */
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
@@ -366,6 +370,7 @@ width:500px;}
 <body>
 <div id="container">
   <style>
+   /* the container with the PPI graph */
     #graph-container {
 	width: 1000px;
     height: 600px;
@@ -377,17 +382,7 @@ border:1px solid black;
       right: 100;
       position:
     }
-    #sigma-container {
-	width: 700px;
-      height: 400px;
-    margin: auto;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      position: absolute;
-    }
-  </style>
+   </style>
 		
 </div>
     <!-- Navigation -->
@@ -411,19 +406,10 @@ border:1px solid black;
                     <li class="active">
                         <a href="#">Home</a>
                     </li>
-                    <!---<li>--->
-                        <!---<a href="#">Analysis</a>--->
-                    <!---</li>--->
-                    <!---<li>--->
-                        <!---<a href="clustering.html">Old analysis site</a>--->
-                    <!---</li>--->
-		    <li>
+                     <li>
                         <a href="infopage.html">How to</a>
                     </li>
-                    <!---<li>--->
-                       <!---<a href="predictions_3.html">Prediction</a>--->
-                    <!---</li>--->
-			<li>
+                    <li>
                         <a>Logged in?</a>
 			{% if user.is_authenticated %}
     			User: {{ user.get_username }}
@@ -453,34 +439,7 @@ border:1px solid black;
 
     <!-- Content -->
     <div class="container">
-<script>
-//$(document).ready(function () {
-//    $('#predef_box').change(function () {
-//if($('predef_box').is(":checked"))
-//    $('#ppi_upload').fadeOut('slow');
-//    $('#expr_upload').fadeOut('slow');
-//    else
-//    $('#ppi_upload').fadeIn('slow');
-//   $('#expr_upload').fadeIn('slow');
 
-
-//        $('#ppi_upload').fadeToggle();
-//        $('#expr_upload').fadeToggle();
-//    });
-
-//    $('#redo_box').change(function () {
-//if($('predef_box').is(":checked"))
-//    $('#ppi_upload').fadeOut('slow');
-//    $('#expr_upload').fadeOut('slow');
-//    else
-//    $('#ppi_upload').fadeIn('slow');
-//   $('#expr_upload').fadeIn('slow');
-//      $('#predef_upload').fadeToggle();
-//      $('#ppi_upload').fadeToggle();
-//      $('#expr_upload').fadeToggle();
-//  });
-//});
-</script>
 <a name="Content"></a>
         <!-- Heading -->
         <div class="row">
@@ -491,8 +450,8 @@ border:1px solid black;
                 
             </div>
         </div>    
-		
-	<div id="wrapper_div_2" style="float:left;"> <!--- overall wrapper div -->
+	<!--- wrapper divs are used for a stable display of the page layout when resizing browser window --->
+	<div id="wrapper_div_2" style="float:left;min-width:1200px"> <!--- overall wrapper div -->
 	<div id="input_div_2" style="float:left; display:inline-block;"> <!--- wrapper input div --->
 	<div id="wrapper_div_3" style="float:left; display: inline-block;">
 	<div id="wrapper_div_4" style="float:left; display: inline-block;">
@@ -501,14 +460,13 @@ border:1px solid black;
 	<a href="infopage.html"  target="_blank">How to</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
-	<!---<div id="expr_upload" style="display:block">-->
+
 
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
-	<!---<button type="button" onclick="redoOldAnalysisTab()" id="redo_old_analysis_button"><h3>Redo old analysis</h3></button>-->
-	<!--- border-radius: 4px; border-style:solid;outline: 4px; -->
+
 	</div>
 	<div class="tab4" style="width:500px; height:300px" id="expr_upload">
 	<b>Upload expression data:    </b><br>
@@ -518,7 +476,7 @@ border:1px solid black;
     	<label for="l_box1"><input type="checkbox" name="save_data" value="save_data" id="l_box1">  Save data</label>	
    	{% endif %}
 <br><br>
-	<!---<div id="predef_upload" style="display:block">-->
+
 <label for="l_box1"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
 <select name="cancer_type" id="predef_input" size="1">	
 	        <option value="1">Lung Cancer</option>
@@ -534,7 +492,7 @@ border:1px solid black;
 	<br><br>
 	{% endif %}	
 	</div>
-	<!---<div id="ppi_upload" style="display:block">-->
+
 	<div class="tab4" style="width:500px; height:300px" id="ppi_upload">
 	<b>Upload file with PPI:</b><br>
 	<input class="input" id="protfile_input" type="file" name="protfile"   style="float: left;"> 
@@ -544,9 +502,9 @@ border:1px solid black;
   <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
   <div class="collapsible-content">
     <div class="content-inner">
-	<!--<label for="l_box1"><input type="radio" name="ndex_file" value="ndex_file" id="ndex_file">Import network from Ndex:</label>-->
+
 	<label for="l_box1"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
-	<!--<input class="input" type="file" name="ndex_file_input">-->
+
 	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1" onchange="recalctotals()">	
 	        <option value="1" selected="selected">APID</option>
 	        <option value="2">STRING</option>
@@ -578,7 +536,6 @@ border:1px solid black;
  // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
     if ($(this).prop('checked')) {
-    //alert("bla");
        $('#parse_ndex_file').prop('checked', true);
     } else {
        $('#parse_ndex_file').prop('checked', false);
@@ -708,7 +665,8 @@ $(document).ready(function() {
     });
 });
 </script>
-<!---<br>-->
+
+<!--- tab for selecting old data to display --->
 <div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
 	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
 		<br><br><h3>Use own uploaded files:</h3>
@@ -744,7 +702,7 @@ $(document).ready(function() {
 	{% endif %}
 	</div>
 	<div class="tab4" style="width:500px; height:300px" id="params">
-	<!---<br><br>-->
+
 	<h3>Algorithm Parameters</h3>
 	<p><b>Enter minimum and maximum number of genes per cluster and run the algorithm:</b></p>
        Minimal:
@@ -760,7 +718,7 @@ $(document).ready(function() {
 	        <option value="20">20</option>
 	        <option value="45">45</option>
        	</select>
-	<!-- was moved to below (inside collapsible) -->	
+
 	 <div class="wrap-collabsible">
   <input id="collapsible" class="toggle" type="checkbox" style="display:none">
   <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
@@ -813,24 +771,39 @@ Stop criteria: score_max - score_av <
   </div>
 </div> <!--- end wrap-collapsible -->
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
-<!-- this was new-->
+
 	</div> <!-- end params -->
 
+
+<script>
+// expand box for data input to fit expanded dropdown menu
+$('#collapsible').change(function () {
+    if ($(this).prop('checked')) {
+    $('#params').css('height','450px');
+    $('#input_data_div').css('height','600px');
+    } else {
+    $('#params').css('height','300px');
+    $('#input_data_div').css('height','420px');
+    }
+});
+$('#selectall').trigger('change');
+</script>
+<!--- the previous-next buttons for the input form --->
 <div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
     <button type="button" id="prevBtn" onclick="nextPrev(-1)" style="font-size: 24px;">Previous</button>
     <button type="button" id="nextBtn" onclick="nextPrev(1)" style="font-size: 24px;">Next</button>
     <button type="submit" id="submitBtn" onclick="nextPrev(1)" onclick="hideAll()" onclick="showProgressTab(0)" style="font-size: 24px;">Submit</button>
-    <!---<button type="submit" id="submitBtn" onclick="nextPrev(1)">Submit</button>-->
+
   </div>
 </div>
 </div> <!--- input_data_div-->
 </div> <!--- wrapper div 4 -->
 
+<!--- the progress-boxes for the input form --->
 <div style="text-align:center;margin-top:40px;bottom:50px;clear:both" id="showtabs">
   <span class="step"><a id="myLink" href="#" onclick="showTab2(0);">1.<br>Start new analysis</a></span>
-<!---<div class="arrow-right" style="display:inline"></div>-->
   <span class="step"><a id="myLink" href="#" onclick="showTab2(1);">2.<br>Expression Data</a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(2);">3.<br>PPI<br><br></a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(3);">4.<br>Metadata<br><br></a></span>
@@ -841,11 +814,12 @@ Stop criteria: score_max - score_av <
 </div><!--- showtabs -->
 </div><!--- wrapper div 3 -->
 
+<!--- div for showing algorithm progress --->
 <div class="tab5" style="width:50%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
-<!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
-<!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
+<!--- gif with symbol for "page loading" --->
 <img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<!--- output text from the console and convergence plot--->
 <object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
 </object><br><br><img src={% static 'progress.png' %} width="400" height="400">
 	
@@ -855,12 +829,13 @@ Stop criteria: score_max - score_av <
 
 </form>
 <script>
+// check input data - if old results are displayed, no uploads or parameters are needed
 function checkInp()
 {
-
+// return true if old results is checked (no additional input parameters needed)
 if (document.getElementById('display_old_results').checked){
     return true;
-}
+}// check if minimal and maximal number of genes was given
   var x=document.forms["myForm"]["L_g_min"].value;
   if (isNaN(x)) 
   {
@@ -872,8 +847,9 @@ if (document.getElementById('display_old_results').checked){
   {
     alert("Input for maximal number of genes must be a number");
     return false;
-  }
+  }  // parseFloat converts input from field L_g_min to float
   var input=parseFloat($('#L_g_min').val(), 2000);
+    // check if inputted number is between 0 and 1000
     if (input >= 0 && input <= 1000) {
     } else { 
     alert("Input for minimal number of genes must be between 0 and 1000");
@@ -889,9 +865,10 @@ if (document.getElementById('display_old_results').checked){
 </script>
 <br><br><br><br>
 <script>
+// display collapsible content if the label is clicked
 var coll = document.getElementsByClassName("collapsible");
 var i;
-
+// set display property of content to "block" instead of "none" to make it visible
 for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
     this.classList.toggle("active");
@@ -910,6 +887,7 @@ for (i = 0; i < coll.length; i++) {
         <!-- Feature Row -->
 
 <script>
+// optional function to hide the input form when algorithm is running
 //$.get("home/quirin/testproject/polls/static/loading_1.gif")
 $.get("/static/loading_1.gif")
     .done(function() { 
@@ -925,14 +903,15 @@ $.get("/static/loading_1.gif")
 
 
 <script>
-var currentTab = 0; // Current tab is set to be the first tab (0)
+// function for display of the result tabs. this function is mostly identical to showTab2() and not used much anymore
+var currentTab = 0; // Current tab is set to be the first tab (0) where the user can choose between starting a new run or showing old results
 showTab(currentTab); // Display the current tab
 
 function showTab(n) {
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
   x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+  // ... and fix the Previous/Next buttons. first page has no previous button etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
@@ -963,13 +942,10 @@ if (n == 5) {
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
  } else {
-    //document.getElementById("progress_tab").style.display = "none";
   }
 if (n == 0) {
-    // x[n].style.display = "block";    
-//	document.getElementById("start_new_analysis").style = "text-align:center";
-//	document.getElementById("start_new_analysis_button").style = "display:inline-block";
   }
+// hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
@@ -979,19 +955,19 @@ for (i = 0; i < y.length; i++) {
 function showTab2(n) {
   // This function will display the specified tab of the form ...
   var x = document.getElementsByClassName("tab4");
-  //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
+
+  // ... and fix the Previous/Next buttons. no previous button on first page etc.
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
     document.getElementById("prevBtn").style.display = "inline";
   }
   if (n == (x.length - 1)) {
-    //document.getElementById("nextBtn").innerHTML = "Submit";
+
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "inline";
   } else {
-    //document.getElementById("nextBtn").innerHTML = "Next";
+
     document.getElementById("nextBtn").style.display = "inline";
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
@@ -1010,33 +986,23 @@ if (n == 1) {
     x[i].style.display = "none";
   }
   x[n].style.display = "block";
-//if (n == 0) {
-     //x[n].style.display = "block";    
- //    document.getElementById("start_new_analysis").style = "text-align:center";
-  //   document.getElementById("start_new_analysis_button").style = "display:inline-block";
-  //}
+
   currentTab = n;
 if (n == 5) {
  } else {
-    //document.getElementById("progress_tab").style.display = "none";
+
   }
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
   }
 
-//var j, y= document.getElementsByClassName("step2");
- //for (j = 0; j < x.length; j++) {
- //x[j].className += " active";{
- //x[j].style.display = "none";
-  //}
 }
 
 
 function showTab3(n) {
-  // This function will display the specified tab of the form ...
+  // show the overview tab if you click previous on the first input step
   var x = document.getElementsByClassName("tab4");
-  //x[n].style.display = "block";
   // ... and fix the Previous/Next buttons:
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
@@ -1068,15 +1034,11 @@ if (n == 1) {
   x[n].style.display = "block";
 
     document.getElementById("prevBtn2").style.display = "none";
-//if (n == 0) {
-     //x[n].style.display = "block";    
- //    document.getElementById("start_new_analysis").style = "text-align:center";
-  //   document.getElementById("start_new_analysis_button").style = "display:inline-block";
-  //}
+
   currentTab = n;
 if (n == 5) {
  } else {
-    //document.getElementById("progress_tab").style.display = "none";
+
   }
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
@@ -1085,26 +1047,21 @@ for (i = 0; i < y.length; i++) {
 
   var i, x = document.getElementsByClassName("step");
   for (i = 0; i < x.length; i++) {
-    //x[i].className = x[i].className.replace(" active", "");
+
     x[i].style.display = "inline-block";
   }
   //... and adds the "active" class to the current step:
   var j,y = document.getElementsByClassName("step2");
-  //y[0].className += " active";
+
   y[0].style.display = "none";
-//var j, y= document.getElementsByClassName("step2");
- //for (j = 0; j < x.length; j++) {
- //x[j].className += " active";{
- //x[j].style.display = "none";
-  //}
 }
 
 
 
 function showOldAnalysisTab() {
-  // This function will display the specified tab of the form ...
+  // Show the tab to run an old analysis
   var x = document.getElementsByClassName("tab4");
-  //x[n].style.display = "block";
+
   // ... and fix the Previous/Next buttons:
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "inline";
@@ -1119,11 +1076,7 @@ for (i = 0; i < y.length; i++) {
   y[i].style.display = "block";
   }
 oldAnalysisStepIndicator()
-  //currentTab = n;
-//if (n == 5) {
- //} else {
-    //document.getElementById("progress_tab").style.display = "none";
-  //}
+
 }
 
 
@@ -1144,27 +1097,17 @@ function oldAnalysisStepIndicator() {
 
 
 function showProgressTab(n) {
-  // This function will display the specified tab of the form ...
+  // function to show the progress tab with progress plot after the user has clicked submit
   var x = document.getElementsByClassName("tab5");
   x[n].style.display = "block";
 
   // ... and fix the Previous/Next buttons:
   var y = document.getElementsByClassName("tab4");
-  //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
-  //if (n == 0) {
+
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
-  //} else {
-  //document.getElementById("prevBtn").style.display = "inline";
-  //}
-  //if (n == (x.length - 1)) {
     document.getElementById("nextBtn").style.display = "none";
-  //} else {
-  //document.getElementById("nextBtn").innerHTML = "Next";
-  //}
-  // ... and run a function that displays the correct step indicator:
-  //fixStepIndicator(n)
+  
   for (i = 0; i < y.length; i++) {
     y[i].style.display = "none";
     y[i].className = y[i].className.replace(" finish", "");
@@ -1172,73 +1115,55 @@ function showProgressTab(n) {
 
     document.getElementById("progress_tab").style.display = "block";
   currentTab = 4;
-//var j, y= document.getElementsByClassName("step2");
- //for (j = 0; j < x.length; j++) {
- //x[j].className += " active";{
- //x[j].style.display = "none";
-  //S}
+
 }
 
 
 
 function hideAll() {
-  // This function will display the specified tab of the form ...
+  // Hide all input tabs, activated after clicking the submit button
   var x = document.getElementsByClassName("tab4");
-  //x[n].style.display = "block";
-  // ... and fix the Previous/Next buttons:
-  //if (n == 0) {
+
+
+  // show no previous/next buttons, and hide the start-new analysis button
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
-	document.getElementById("start_new_analysis").style = "width:0px";
-	document.getElementById("start_new_analysis_wrapper").style = "width:0px";
-  //} else {
-  //document.getElementById("prevBtn").style.display = "inline";
-  //}
-  //if (n == (x.length - 1)) {
-    document.getElementById("nextBtn").style.display = "none";
-  //} else {
-  //document.getElementById("nextBtn").innerHTML = "Next";
-  //}
-  // ... and run a function that displays the correct step indicator:
-  //fixStepIndicator(n)
-  //document.getElementById("input_div").style.display = "none";
-  for (i = 0; i < x.length; i++) {
+	//document.getElementById("start_new_analysis").style = "width:0px";
+	//document.getElementById("start_new_analysis_wrapper").style = "width:0px";
+   document.getElementById("nextBtn").style.display = "none";
+ for (i = 0; i < x.length; i++) {
     x[i].style.display = "none";
   }
-  //x[n].style.display = "block";
-  //currentTab = n;
-}
+ }
 
 function nextPrev(n) {
   // This function will figure out which tab to display
   var x = document.getElementsByClassName("tab4");
-  // Exit the function if any field in the current tab is invalid:
-  //if (n == 1) return false;
   // Hide the current tab:
   x[currentTab].style.display = "none";
   // Increase or decrease the current tab by 1:
   currentTab = currentTab + n;
   // if you have reached the end of the form... :
   if (currentTab >= x.length) {
-    //...the form gets submitted:
-    //document.getElementById("regForm").submit();
     return false;
   }
-
+  //hide the first step (where you select run new analysis or show old results)
   var j,y = document.getElementsByClassName("step2");
   y[0].style.display = "none";
+// remove the "start a new analysis" button when clicking next on step 1
 if(currentTab==1){
 if(n==1){
     document.getElementsByClassName("step")[0].className += " finish";
     document.getElementById('start_new_analysis_wrapper').display = "none";
 }
 }
+// if you are on the expression file input tab, check if the user has uploaded something or selected a predefined file
 if (currentTab == 2) {
 if (n == 1) {
 if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false )){
-
+   // give warning if user has not uploaded anything
     alert("Please input file with expression data");
-
+  // and stay on the same tab instead of going to the next
   currentTab = currentTab -1;
   //showTab(currentTab);
 }
@@ -1252,11 +1177,11 @@ if(document.getElementById('protfile_input').value=='' && (document.getElementBy
     alert("Please input file with PPI data");
 
   currentTab = currentTab -1;
-  //showTab(currentTab);
-}
-}
-}
 
+}
+}
+}
+// if you click the "next" button, set the label style for the previous step to "done"
 if(n==1){
     document.getElementsByClassName("step")[currentTab-1].className += " finish";
 }
@@ -1278,8 +1203,9 @@ function fixStepIndicator(n) {
 
 </div>
 
-
+<!--- openTab is for choosing and displaying result tabs --->
 <div id="results" style="clear:both;">
+<!--- this generates the box where result tabs can be selected --->
 <div class="tab" style="position:relative;left:15%;z-index:10;">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>
@@ -1289,6 +1215,10 @@ function fixStepIndicator(n) {
   <button class="tablinks" onclick="openTab(event, 'kegg_enrichment')">Enrichment</button>
 </div>
 
+<!--- class tabcontent is invisible per default, it only gets visible after clicking its label -->
+<!--- enrichment_open is a parameter that is passed to the template after the user has run an enrichment analysis, so that the enrichment tab will be open then by default -->
+
+<!--- hide ppi (which is open by default) if enrichment was run -->
 <div id="result_tabs" style="position:relative;left:15%">
 {% if enrichment_open %}
 <div class="tabcontent" id="ppi">
@@ -1296,62 +1226,18 @@ function fixStepIndicator(n) {
 <div class="row" id="ppi">
 {% endif %}
             <article class="col-md-8 article-intro">
-
+{{json_path}}		
 		
                 <h1>PPI Graph</h1>
                 <h3>
                     <a href="#">Visualize Protein-Protein Interactions</a>
                 </h3>
-		{{json_path}}
-		<script type="text/javascript"> 
-   var path_json = '{% static ""%}/{{json_path}}';
-   //alert(path_json)
-    var http = new XMLHttpRequest();
-    http.open('HEAD', path_json, false);
-    http.send();
-    //alert(http.status!=404);
-</script>
+<!---{{json_path}}--->
+		
 
-<script>
-//$.get("home/quirin/testproject/polls/static/loading_1.gif")
-$.get("code/clustering/static/test15_wm11gvrxpf8y6p64nmokvxwkgd59x7sx.json")
-    .done(function() { 
-	//alert("exists")
-	//$('#input_data_div').hide();
-        // Do something now you know the image exists.
-
-    }).fail(function() { 
-	//alert("not found")
-	//$('#progress_tab').hide();
-        // Image doesn't exist - do something else.
-
-    })
-</script>
-
-<script>
-//$.get("home/quirin/testproject/polls/static/loading_1.gif")
-var path_json = '{{json_path}}';
-//alert(path_json);
-</script>
-
-<script>
-//$.get("home/quirin/testproject/polls/static/loading_1.gif")
-var path_json = '{% static ""%}/{{json_path}}':
-$.get(path_json)
-    .done(function() { 
-	//alert("path exists")
-	//$('#input_data_div').hide();
-        // Do something now you know the image exists.
-
-    }).fail(function() { 
-	//alert("path not found")
-	//$('#progress_tab').hide();
-        // Image doesn't exist - do something else.
-
-    })
-</script>
        {% load staticfiles %}
-		<div id="graph-container" style="display: block"><script>
+		<!--- here the PPI graph is displayed --->
+		<div id="graph-container" style="display: block;float:left"><script>
 sigma.utils.pkg('sigma.canvas.nodes');
 /**
  * 
@@ -1377,14 +1263,13 @@ sigma.utils.pkg('sigma.canvas.nodes');
     return neighbors;
   });
 
-//sigma.parsers.json('{% static 'test15.json' %}', {
-sigma.parsers.json('{% static 'test15_ei8bymz1s8p80lf13f4bwrzdmbdmfdt3.json' %}', {
-//sigma.parsers.json('{% static ""%}/{{json_path}}', {
+// in this script, the PPI graph is generated from the json file
+sigma.parsers.json('{% static ""%}/{{json_path}}', {
 
-// sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
 container: 'graph-container'
+ // sideMargin is to avoid PPI graph to extend its frame 
 	},        settings: {sideMargin:0.05}
 },function(s) {
       // We first need to save the original colors of our
@@ -1438,20 +1323,20 @@ s.bind('clickNode', function(e) {
 CustomShapes.init(s);
 s.refresh();
 </script><img src={% static 'legend.png' %} width="132" height="218" style="position:absolute"> </div>	
-		<!--<div id="graph-container"><img src={% static 'legend.png' %} width="198" height="327"> </div>-->
+<div id="div-for-newline" style="clear:both">
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>
-         
+<!--- display the files for downloading --->
 {% if user.is_authenticated %}
      <br><br>
 	Download the network 
      <a href={% static 'ntw.png' %} download> as png </a> or
-     <a href={% static 'test15.json' %} download> as json file </a>
+     <a href={% static 'json_path' %} download> as json file </a>
    {% else %}
 	Download the network 
      <a href={% static 'ntw.png' %} download> as png </a> or
-     <a href={% static 'test15.json' %} download> as json file </a>
+     <a href={% static json_path %} download> as json file </a>
    {% endif %} 
-
+</div>
 </article>
             
         </div>
@@ -1463,9 +1348,8 @@ s.refresh();
                 <h1>Heatmap</h1>
        {% load staticfiles %}
 
-        <!-- <img src={% static plot2 %}> -->
 	
-        <img src={% static path4 %}><h3>
+        <img src={% static path_heatmap %}><h3>
                     <a href="#">Heatmap</a>
                 </h3>
                 <p>The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.</p>
@@ -1479,15 +1363,20 @@ s.refresh();
 <div class="tabcontent" id="survival">
             <article class="col-md-12 article-intro">
                 <h1>Survival Information</h1>
+<!--- load the survival graph --->
 <object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object>
                 <h3>
                     <a href="#">Survival of patients</a>
                 </h3>
-                <p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p> 
+{% if output_plot_path == "empty" %}
+
+{% else %}
+<p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p> 
 {% if pval is None %}
-<object type="text/html" data="{% static 'pvalue.txt' %}" width="400" height="100"></object>
+<!---<object type="text/html" data="{% static 'pvalue.txt' %}" width="400" height="100"></object>--->
 {% else %}
 The log-rank test gives a p-value of: {{pval}}
+{% endif %}
 {% endif %}
 </article> 
         </div>
@@ -1503,6 +1392,7 @@ The log-rank test gives a p-value of: {{pval}}
 {{ret_metadata}}
 <table style="max-width:1200px;">
 <tr>
+<!--- iterate over tables of metadata and display as table--->
 <th style="width:200px;">Group</th>
 {% for key,value in ret_metadata1.items %}
   <th> {{value}} </th>
@@ -1548,7 +1438,6 @@ The log-rank test gives a p-value of: {{pval}}
             <article class="col-md-12 article-intro">
                 <h1>Enrichment</h1>
 		<h3>
-                    <!---<a href="#">Run Enrichment Analysis</a>-->
                 </h3>
                 <p></p><br>
 		Run an Enrichment for the genes used in the analysis. Select for which terms you want to run the enrichment and display the results for genes either in both clusters, in cluster 1 or in cluster 2.<br><br>
@@ -1560,19 +1449,9 @@ The log-rank test gives a p-value of: {{pval}}
 	        <option value="go_enrichment" selected="selected">GO Biological Process</option>
 	        <option value="go_molecular" selected="selected">GO Molecular Function</option>
 	        <option value="reactome_enrichment" selected="selected">Reactome</option>
-		</select>
-		<!---<label for="l_box1"><input type="radio" name="kegg_enrichment" value="kegg_enrichment" id="l_box1">Run KEGG Enrichment:</label>--->
-		<!---<label for="l_box1"><input type="radio" name="go_enrichment" value="go_enrichment" id="l_box1">Run GO Enrichment:</label>--->
-		<!---<label for="l_box1"><input type="radio" name="go_molecular" value="go_molecular" id="l_box1">Run GO Enrichment (Molecular Function):</label>--->
-		<!---<label for="l_box1"><input type="radio" name="reac_enrichment" value="reac_enrichment" id="l_box1">Run Reactome Enrichment:</label>--->
-<!--<br>Gene Clusters for Enrichment:-->
-<!--<select name="group_for_enr" size="1">	-->
-	        <!--<option value="1">Cluster 1</option>-->
-	        <!--<option value="2">Cluster 2</option>-->
-	        <!--<option value="both">Both Clusters</option>-->
-       	<!--</select>-->
-<br>P-value cutoff:
-<select name="pval_enr" size="1">	
+       		</select>
+		<br>P-value cutoff:
+	<select name="pval_enr" size="1">	
 	        <option value="0.01">0.01</option>
 	        <option value="0.05">0.05</option>
 	        <option value="0.10">0.1</option>
@@ -1580,9 +1459,10 @@ The log-rank test gives a p-value of: {{pval}}
 	        <option value="0.50" selected="selected">0.5</option>
        	</select>
 		<input type="submit" value="Submit" />
-	<!--<table id="example" class="display">-->
+	</form>
 <br><br>Show Enrichment for Genes of:<br>
 <ul class="nav nav-tabs">
+<!--- select gene cluster to show enrichment for--->
   <li class="active"><a data-toggle="tab" href="#home">Both Groups</a></li>
   <li><a data-toggle="tab" href="#menu1">Group 1</a></li>
   <li><a data-toggle="tab" href="#menu2">Group 2</a></li>
@@ -1602,10 +1482,6 @@ The log-rank test gives a p-value of: {{pval}}
 <th>Overlap</th>
 <th>P-value</th>
 <th>Adjusted P-Value</th>
-<!---<th>Old P-Value</th>-->
-<!---<th>Old Adjusted P-value</th>-->
-<!---<th>Z-score</th>-->
-<!---<th>Combined Score</th>-->
 <th>Genes</th>
 </tr>
 </thead>
@@ -1632,10 +1508,6 @@ The log-rank test gives a p-value of: {{pval}}
 <th>Overlap</th>
 <th>P-value</th>
 <th>Adjusted P-Value</th>
-<!---<th>Old P-Value</th>-->
-<!---<th>Old Adjusted P-value</th>-->
-<!---<th>Z-score</th>-->
-<!---<th>Combined Score</th>-->
 <th>Genes</th>
 </tr>
 </thead>
@@ -1653,7 +1525,7 @@ The log-rank test gives a p-value of: {{pval}}
   </div>
   <div id="menu2" class="tab-pane fade" style="background-color: #FFFFFF;">
     <h3>Group 2</h3>
-    <p><table id="ctable3" class="display" width="100%">
+    <p><table id="ctable3" class="display"  style="width: 1200px;">
 
 <thead>
 <tr>
@@ -1662,10 +1534,6 @@ The log-rank test gives a p-value of: {{pval}}
 <th>Overlap</th>
 <th>P-value</th>
 <th>Adjusted P-Value</th>
-<!---<th>Old P-Value</th>-->
-<!---<th>Old Adjusted P-value</th>-->
-<!---<th>Z-score</th>-->
-<!---<th>Combined Score</th>-->
 <th>Genes</th>
 </tr>
 </thead>
@@ -1685,7 +1553,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 <div id="menu3" class="tab-pane fade" style="background-color: #FFFFFF;">
     <h3>Only in Group 1</h3>
-    <p><table id="ctable4" class="display" width="100%">
+    <p><table id="ctable4" class="display"  style="width: 1200px;">
 
 <thead>
 <tr>
@@ -1694,10 +1562,6 @@ The log-rank test gives a p-value of: {{pval}}
 <th>Overlap</th>
 <th>P-value</th>
 <th>Adjusted P-Value</th>
-<!---<th>Old P-Value</th>-->
-<!---<th>Old Adjusted P-value</th>-->
-<!---<th>Z-score</th>-->
-<!---<th>Combined Score</th>-->
 <th>Genes</th>
 </tr>
 </thead>
@@ -1716,7 +1580,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 <div id="menu4" class="tab-pane fade" style="background-color: #FFFFFF;">
     <h3>Only in Group 2</h3>
-    <p><table id="ctable5" class="display" width="100%">
+    <p><table id="ctable5" class="display"  style="width: 1200px;">
 
 <thead>
 <tr>
@@ -1725,10 +1589,6 @@ The log-rank test gives a p-value of: {{pval}}
 <th>Overlap</th>
 <th>P-value</th>
 <th>Adjusted P-Value</th>
-<!---<th>Old P-Value</th>-->
-<!---<th>Old Adjusted P-value</th>-->
-<!---<th>Z-score</th>-->
-<!---<th>Combined Score</th>-->
 <th>Genes</th>
 </tr>
 </thead>
@@ -1776,8 +1636,11 @@ The log-rank test gives a p-value of: {{pval}}
 {% endif %}
 
 <script>
+
+// function for displaying the content of result tabs after clicking its label
+// cityName is the name of the tab
 function openTab(evt, cityName) {
-    //var a = "{{enrichment_open}}";
+
     if(js_enrichment_open === true){
     document.getElementById('kegg_enrichment').style.display = "none";
     }
@@ -1795,12 +1658,14 @@ function openTab(evt, cityName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
+    // hide the PPI tab that is active by default after loading
     document.getElementById('ppi').style.display = "none";
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(cityName).style.display = "block";
     evt.currentTarget.className += " active";
 } 
 function openTab2(evt, cityName) {
+// almost the same as openTab, used for displaying the PPI tab. A different function is needed because the PPI tab must not be hidden in this function
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -1818,7 +1683,18 @@ function openTab2(evt, cityName) {
     document.getElementById('ppi').style.display = "block";
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(cityName).style.display = "block";
+    // trigger window resize event (needed for sigma.js to display anything after it has been hidden)
     evt.currentTarget.className += " active";
+    window.dispatchEvent(new Event('resize'));
+    var element1 = document.getElementById("graph-container");
+    if(element1.style.height == "1000px"){
+    element1.style.height = "999px";}
+    else{
+    element1.style.height = "1000px";}
+    // refresh sigma.js (needed to display graph after it has been hidden)
+    var s = sigma.instances()[0];
+    s.refresh();
+  
 } 
 
 function openTab3(evt, cityName) {
@@ -1826,10 +1702,6 @@ function openTab3(evt, cityName) {
     var i, tabcontent, tabcontent2, tablinks;
 
     // Get all elements with class="tabcontent" and hide them
-    //tabcontent = document.getElementsByClassName("tabcontent3");
-    //for (i = 0; i < tabcontent.length; i++) {
-    //    tabcontent[i].style.display = "none";
-    //}
     tabcontent2 = document.getElementsByClassName("tabcontent");
  for (i = 0; i < tabcontent2.length; i++) {
         tabcontent2[i].style.display = "none";

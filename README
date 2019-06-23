@@ -15,7 +15,7 @@ sudo allowed_hosts=['*'] docker-compose up
 instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0'].
 You can find out which port Django is using by running
 
-sudo docker-compose up
+sudo allowed_hosts=['*'] docker-compose up
 
 and waiting until a line appears in the terminal that says
 
@@ -45,6 +45,8 @@ Own data must consist of one file with expression data in CSV or TSV format (the
 
 You can change the exact settings for the algorithm in the fourth tab.
 
+To run an enrichment analysis, scroll down to the results and select the tab "run enrichment". 
+ 
 
 
 #################################################
@@ -64,7 +66,9 @@ There appears to still be a bug with livereload on Docker, so it is possible tha
 
 - Celery: Used as queuing system to execute tasks synchronously. Executes all computationally intensive tasks such as running the algorithm or processing results.
 
-- Django: The server for running and processing requests.
+- Django: The server for running and processing requests. This container is where the actual server runs and where paths to files can be referenced.
+
+There is a shared volume that can be accessed by all containers under /code. This is needed to transfer files from one to another container by the server.
 
 In order to show the progress of the algorithm while running, LiveReload is needed to run in both the container and the folder where the container is started. For this, open two tabs in the terminal, in the first run: 
 python manage.py livereload
@@ -73,6 +77,7 @@ sudo docker compose-up
 This ensures that everytime a gif or png changes, which is needed to display the running status of the algorithm, it is reloaded in the page displayed to the user.
 
 In addition to the Docker containers, a crontab runs at /etc/crontab to automatically delete old unused user files (files with results, e.g heatmap png).
+
 
 ###############################
 What is where (in the code):
@@ -91,7 +96,7 @@ How a request runs on the server:
 If you submit a request, several steps are executed in views.py. 
 For the loading page, the gif with loading symbol is copied to its place so that it is visible in the page. The current status of the run is written and read from a log file.
 Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. There are lines of code in this script that, when uncommented, automatically select the two biggest clusters if more than two clinical patient groups exist in the expression file.
-Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10.
+Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10. These tasks are executed via Celery, and their results are written on the shared volume (under /code).
 
 #####################################
 How the templates work:
@@ -129,7 +134,7 @@ substitute COMPUTER_NAME by the name of your computer/the server in the shell, t
 If this happens, look for a line in the output of RabbitMQ that says that the memory is insufficient. RabbitMQ needs at least 50 MB of free memory on the system, otherwise it will not take any requests from Celery. 
 
 - The database gives a "duplicate table" error on the shell:
-
+e.g. "psycopg2.errors.DuplicateTable: relation "clustering_graphform" already exists"
 This is a database error that is produced because there are two containers running postgres. This error can happen if you accidentally built the postgres contatiner twice. Delete the older postgres
 container to avoid this error.
 

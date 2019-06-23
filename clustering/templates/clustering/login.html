@@ -68,20 +68,23 @@ tr:nth-child(even) {
                     <li class="active">
                         <a href="#">Home</a>
                     </li>
-                    <li>
-                        <a href="#">Analysis</a>
+                     <li>
+                        <a href="infopage.html">How to</a>
                     </li>
                     <li>
-                        <a href="predictions_3.html">Prediction</a>
-                    </li>
-			<li>
-                        <a>Username</a>
+                        <a>Logged in?</a>
 			{% if user.is_authenticated %}
     			User: {{ user.get_username }}
+			<form action="logout.html" method="post" enctype="multipart/form-data">
+              	  	{% csrf_token %}
+                	<input type="submit" value="Logout"/>
+			</form>
    			{% else %}
 			<a href="login.html">Login</a>
    			{% endif %} 
-                    </li>
+                    </li><li>
+			<a href="signup.html">Sign up</a>
+		    </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

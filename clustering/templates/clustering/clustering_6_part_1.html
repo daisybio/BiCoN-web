@@ -443,32 +443,6 @@ border:1px solid black;
     <!-- Content -->
     <div class="container">
 <script>
-//$(document).ready(function () {
-//    $('#predef_box').change(function () {
-//if($('predef_box').is(":checked"))
-//    $('#ppi_upload').fadeOut('slow');
-//    $('#expr_upload').fadeOut('slow');
-//    else
-//    $('#ppi_upload').fadeIn('slow');
-//   $('#expr_upload').fadeIn('slow');
-
-
-//        $('#ppi_upload').fadeToggle();
-//        $('#expr_upload').fadeToggle();
-//    });
-
-//    $('#redo_box').change(function () {
-//if($('predef_box').is(":checked"))
-//    $('#ppi_upload').fadeOut('slow');
-//    $('#expr_upload').fadeOut('slow');
-//    else
-//    $('#ppi_upload').fadeIn('slow');
-//   $('#expr_upload').fadeIn('slow');
-//      $('#predef_upload').fadeToggle();
-//      $('#ppi_upload').fadeToggle();
-//      $('#expr_upload').fadeToggle();
-//  });
-//});
 </script>
 <a name="Content"></a>
         <!-- Heading -->
@@ -480,6 +454,7 @@ border:1px solid black;
                 
             </div>
         </div>    
+	<!--- wrapper divs are used for a stable display of the page layout when resizing browser window --->
 	<div id="wrapper_div_2" style="float:left;"> <!--- overall wrapper div -->
 	<div id="input_div_2" style="float:left; display:inline-table"> <!--- wrapper input div --->
 	<div id="wrapper_div_3" style="float:left; display: inline-block;">
@@ -702,7 +677,7 @@ $(document).ready(function() {
 });
 </script>
 <!---<br>-->
-
+<!--- tab for selecting old data to display --->
 <div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
 	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
 		<br><br><h3>Use own uploaded files:</h3>
@@ -817,6 +792,7 @@ Stop criteria: score_max - score_av <
 	</div> <!-- end params -->
 
 <script>
+// expand box for data input to fit expanded dropdown menu
 $('#collapsible').change(function () {
     if ($(this).prop('checked')) {
     //alert("bla");
@@ -855,11 +831,14 @@ $('#selectall').trigger('change');
 </div><!--- showtabs -->
 </div><!--- wrapper div 3 -->
 
+<!--- div for showing algorithm progress --->
 <div class="tab5" style="width:45%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
 <!---<div class="tab5" style="width:500px; height:600px; float:left;display:inline;right:400px" id="progress_tab">-->
 <!---<div class="tab4" style="width:500px; height:300px" id="progress_tab">-->
+<!--- gif with symbol for "page loading" --->
 <img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<!--- output text from the console and convergence plot--->
 <object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
 </object><br><br><img src={% static 'progress.png' %} width="400" height="400">
 	
@@ -876,7 +855,7 @@ function checkInp()
 if (document.getElementById('display_old_results').checked){
     return true;
 }
-// check if minimal and maximal number of genes is a number between 0 and 1000
+// check if minimal and maximal number of genes was given
   var x=document.forms["myForm"]["L_g_min"].value;
   if (isNaN(x)) 
   {
@@ -889,9 +868,12 @@ if (document.getElementById('display_old_results').checked){
     alert("Input for maximal number of genes must be a number");
     return false;
   }
+  // parseFloat converts input from field L_g_min to float
   var input=parseFloat($('#L_g_min').val(), 2000);
+    // check if inputted number is between 0 and 1000
     if (input >= 0 && input <= 1000) {
     } else { 
+    // alert creates popup with warning
     alert("Input for minimal number of genes must be between 0 and 1000");
     return false;
     }
@@ -923,7 +905,7 @@ $.get("/static/loading_1.gif")
 // display collapsible content if the label is clicked
 var coll = document.getElementsByClassName("collapsible");
 var i;
-
+// set display property of content to "block" instead of "none" to make it visible
 for (i = 0; i < coll.length; i++) {
   coll[i].addEventListener("click", function() {
     this.classList.toggle("active");
@@ -1209,7 +1191,7 @@ function showProgressTab(n) {
 
 
 function hideAll() {
-  // Hide all tabs, activated after clicking the submit button
+  // Hide all input tabs, activated after clicking the submit button
   var x = document.getElementsByClassName("tab4");
   //x[n].style.display = "block";
   // show no previous/next buttons, and hide the start-new analysis button
@@ -1308,6 +1290,7 @@ function fixStepIndicator(n) {
 </div>
 <!--- openTab is for choosing and displaying result tabs --->
 <div style="display:none">
+<!--- this generates the box where result tabs can be selected --->
 <div class="tab">
   <button class="tablinks" onclick="openTab2(event, 'ppi')">PPI Graph</button>
   <button class="tablinks" onclick="openTab(event, 'heatmap')">Heatmap</button>

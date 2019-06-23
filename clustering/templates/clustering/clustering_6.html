@@ -192,7 +192,8 @@ $(document).ready(function() {
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
-    width: 100%;
+    min-width: 500px;
+    /*width: 100%;*/
 }
 
 table.dataTable {
@@ -1480,20 +1481,20 @@ The log-rank test gives a p-value of: {{pval}}
 {% if request.session.metadata1 %}
             <table>
 <tr>
-<th>Group</th>
+<th style="width:200px;">Group</th>
 {% for key,value in request.session.metadata1.items %}
   <th> {{value}} </th>
 {% endfor %}
 </tr>
 <tr>
-<th>Group 1</th>
+<th style="width:200px;">Group 1</th>
 {% for key,value in request.session.metadata2.items %}
   <th> {{value}}</th>
 {% endfor %}
 </tr> 
 
 <tr>
-<th>Group 2</th>
+<th style="width:200px;">Group 2</th>
 {% for key,value in request.session.metadata3.items  %}
   <th>{{value}}</th>
 {% endfor %}

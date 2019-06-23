@@ -74,6 +74,7 @@ CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
 CACHES = {
    'default': {
       'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+      'LOCATION': 'my_cache_table',
       'TIMEOUT': 10000,
    }
 }

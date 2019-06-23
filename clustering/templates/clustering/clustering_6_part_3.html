@@ -22,26 +22,8 @@
 <!--<script type="text/javascript" charset="utf8" src="
 https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js "></script>-->
        {% load staticfiles %}
-<script>
-var jsonpath2 = "/home/quirin/testproject/polls" + static_url + jsonpath;
-</script>
+
 <script type="text/javascript" charset="utf8">
-$(document).ready(function() {
-//var jsonpath = {% static '{{json_path}}' %};
-//var jsonpath = "polls/static/{{json_path}}";
-
-//var jsonpath =  "{{json_path}}";
-var static_url = "{{ STATIC_URL }}";
-
-var jsonpath =  "{{json_path}}";
-var static_url = {%static ""%};
-//jsonpath2 = static_url + jsonpath;
-//var jsonpath2 = '{{STATIC_URL}}' + jsonpath;
-var jsonpath2 = '{% static "{{jsonpath}}" %}'
-//document.getElementById('division').innerHTML= jsonpath2;
-//alert(String("{{json_path}}"));
-//alert(jsonpath2);
-    //alert("bsfbaisdfbajsidf");
 
 //var table = $('#ctable').removeAttr('width').DataTable( {
 //      scrollY:        "550px",
@@ -220,7 +202,8 @@ input[type='checkbox'] {
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
-    width: 100%;
+    /*width: 100%;*/
+    min-width: 500px;
 }
 
 table.dataTable {
@@ -1268,6 +1251,7 @@ function fixStepIndicator(n) {
     document.getElementById('enr_tablink').className += " active";
 </script>
 {% endif %}
+<!--- hide ppi (which is open by default) if enrichment was run -->
 <div id="result_tabs" style="position:relative;left:15%">
 {% if enrichment_open %}
 <div class="tabcontent" id="ppi">
@@ -1284,17 +1268,11 @@ function fixStepIndicator(n) {
 
 <div id="division">bla{{STATIC_URL}}</div>
        {% load staticfiles %}
+		<!--- here the PPI graph is displayed --->
 		<div id="graph-container" style="display: block">
 <script>
+// in this script, the PPI graph is generated from the json file
 
-var jsonpath =  {{json_path}};
-//var static_url = {%static ""%};
-var jsonpath2 = static_url + jsonpath;
-//var jsonpath2 = '{{STATIC_URL}}' + jsonpath;
-//var jsonpath = {% static '{{json_path}}' %};
-//jsonpath = "{{json_path}}";
-var jsonpath2 = "/home/quirin/testproject/polls/" + static_url + jsonpath;
-</script><script>
 //alert('polls/static/{{json_path}}');
 //var jsonpath= document.getElementById("myvar").innerHTML;
 sigma.utils.pkg('sigma.canvas.nodes');
@@ -1310,7 +1288,7 @@ sigma.utils.pkg('sigma.canvas.nodes');
  * configuration object. The plugin will just add the "graph" key to it
  * before the instanciation.
  */
-
+  // add 'neighbors' function
   sigma.classes.graph.addMethod('neighbors', function(nodeId) {
     var k,
         neighbors = {},
@@ -1323,16 +1301,9 @@ sigma.utils.pkg('sigma.canvas.nodes');
   });
  //sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
  sigma.parsers.json('{% static ""%}{{json_path}}', {
- //sigma.parsers.json('{% static "{{json_path}}" %}', {
- //sigma.parsers.json(jsonpath, {1
- //sigma.parsers.json('{% static 'jsonpath' %}', {
- //sigma.parsers.json(jsonpath2, { 
-
- //sigma.parsers.json('{% static 'test15.json' %}', {
-//sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
-//sigma.parsers.json('{% static '{{json_path}}' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
+ // sideMargin is to avoid PPI graph to extend its frame 
 container: 'graph-container'
 	},        settings: {sideMargin:0.05}
 },function(s) {
@@ -1391,6 +1362,7 @@ s.refresh();
 		<!--<div id="graph-container"><img src={% static 'legend.png' %} width="198" height="327"> </div>-->
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>
          
+<!--- display the files for downloading --->
 {% if user.is_authenticated %}
      <br><br>
 	Download the network 
@@ -1431,6 +1403,7 @@ s.refresh();
             <article class="col-md-12 article-intro">
                 <h1>Survival Information</h1>
 <!---<object type="text/html" data="{% static '{{output_plot_path}}' %}" width="800" height="500" ></object>--->
+<!--- load the survival graph --->
 <object type="text/html" data="{% static output_plot_path %}" width="800" height="500" ></object>
 <!---<object type="text/html" data="{% static 'output_plotly.html' %}" width="800" height="500" ></object>--->
                 <h3>
@@ -1448,22 +1421,23 @@ s.refresh();
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients in Cluster 1 has a lung metastasis).</p>
             
 {{ret_metadata}}
+<!--- iterate over tables of metadata and display as table--->
 <table>
 <tr>
-<th>Group</th>
+<th style="width:200px;">Group</th>
 {% for key,value in ret_metadata1.items %}
   <th> {{value}} </th>
 {% endfor %}
 </tr>
 <tr>
-<th>Group 1</th>
+<th style="width:200px;">Group 1</th>
 {% for key,value in ret_metadata2.items %}
   <th> {{value}}</th>
 {% endfor %}
 </tr> 
 
 <tr>
-<th>Group 2</th>
+<th style="width:200px;">Group 2</th>
 {% for key,value in ret_metadata3.items  %}
   <th>{{value}}</th>
 {% endfor %}
@@ -1471,6 +1445,7 @@ s.refresh();
 </table>       
 </article> 
         </div>
+
 	<div class="tabcontent" id="convergence">
             <article class="col-md-12 article-intro">
                 <h1>Convergence Behaviour</h1>
@@ -1495,11 +1470,10 @@ s.refresh();
 	{% endif %}
             <article class="col-md-12 article-intro">
                 <h1>Enrichment</h1>
-		<h3>
-                    <!---<a href="#">Run Enrichment Analysis</a>-->
-                </h3>
                 <p></p><br>
 		Run an Enrichment for the genes used in the analysis. Select for which terms you want to run the enrichment and display the results for genes either in both clusters, in cluster 1 or in cluster 2.<br><br>
+
+		<!--- input form for enrichment analysis --->
             <form action="#" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 		<b>Run Enrichment:</b><br>
@@ -1528,6 +1502,7 @@ s.refresh();
 	        <option value="0.50" selected="selected">0.5</option>
        	</select>
 
+<!--- if user is not logged in, pass link of PPI graph etc to template (for use instead of session ID) --->
 {% if user.is_authenticated %}
 {% else %}
 <input type="hidden" id="ppi_path" name="ppi_path" value="{{json_path}}">                
@@ -1536,6 +1511,7 @@ s.refresh();
 {% endif %}
 		<input type="submit" value="Submit" />
 	<!--<table id="example" class="display">-->
+<!--- select gene cluster to show enrichment for--->
 <br><br>Show Enrichment for Genes of:<br>
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#home">Both Groups</a></li>
@@ -1728,6 +1704,7 @@ s.refresh();
        {% load staticfiles %}
 <script>
 // function for displaying the content of result tabs after clicking its label
+// cityName is the name of the tab
 function openTab(evt, cityName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -1750,7 +1727,7 @@ function openTab(evt, cityName) {
     evt.currentTarget.className += " active";
 } 
 function openTab2(evt, cityName) {
-// almost the same as openTab, used for displaying the PPI tab
+// almost the same as openTab, used for displaying the PPI tab. A different function is needed because the PPI tab must not be hidden in this function
     // Declare all variables
     var i, tabcontent, tablinks;
 
