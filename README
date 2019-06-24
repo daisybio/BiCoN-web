@@ -10,12 +10,13 @@
 
 You can run the application by running docker compose, which starts the server and all neccessities, by writing in a terminal (in the same directory as this file):
 
-sudo allowed_hosts=['*'] docker-compose up
+sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' docker-compose up
 
-instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0'].
+instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0']. It is important to specify (even if it is *, meaning all addresses) allowed hosts since otherwise Django will not be able to show the website to you. The cel_url parameter should be the same on all computers but it is possible to specify password and username (which will be described in 3. How the code works).
+
 You can find out which port Django is using by running
 
-sudo allowed_hosts=['*'] docker-compose up
+sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' docker-compose up
 
 and waiting until a line appears in the terminal that says
 
@@ -23,7 +24,7 @@ clust_app     | Starting development server at http://0.0.0.0:8000/
 
 In this case, the address where the server runs is 0.0.0.0. This is the address you need later to access the site.
 
-IN ADDITION, in order to allow the live updates of algorithm progress, open a terminal in the same directory as this file and type:
+IN ADDITION, in order to allow the live updates of algorithm progress, open a terminal in the same directory as this file (not on the Docker container, but on your local computer) and type:
 
 python manage.py livereload
 
@@ -83,11 +84,21 @@ In addition to the Docker containers, a crontab runs at /etc/crontab to automati
 What is where (in the code):
 ###############################
 
+In docker-compose.yml, general specifications are listed for the different parts of the application. There you can specify a different password for RabbitMQ by modifying the line RABBITMQ_DEFAULT_USER.
+You can change the port on which the website is running by modifying the command
+ python manage.py runserver 0.0.0.0:8000 
+and substituting 0.0.0.0 by another address.
+
 Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified to change a specific setting.
 
 Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template.
 
 Files with results are stored in a static directory for which the location is defined in settings.py. This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. 
+
+The code needed for running a request is in three different files:
+- views.py - processes the request, will be described below.
+- tasks.py - running the algorithm on the queuing system and pre/postprocessing files
+- weighted_aco_lib - parts of the algorithm that are connected to a method in tasks.py
 
 #####################################
 How a request runs on the server:

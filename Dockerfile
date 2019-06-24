@@ -9,5 +9,7 @@ RUN chmod 0644 /etc/cron.d/hello-cron
 RUN touch /var/log/cron.log
 RUN apt-get update
 RUN apt-get -y install cron
-CMD cron && tail -f /var/log/cron.log
 RUN cp crontab /etc/crontab
+COPY crontab /etc/cron.d/cool-task
+RUN chmod 0644 /etc/cron.d/cool-task
+CMD cron && tail -f /var/log/cron.log && service cron start

@@ -1872,9 +1872,22 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			patient_id_list = list(clinicaldf.index)
 		else:
 			patient_id_list = list(clinicaldf.iloc[:,0])
+		# check if there is a column with survival data
+		if(survival_col in list(clinicaldf.columns)):
+			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
+			print("survival col")
+			print(survival_col_nbr)
+			print(list(clinicaldf.iloc[:,survival_col_nbr]))
+			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
+			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
+			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+		# give empty survival lists if no data given
+		else:
+			survivalcol_list = []
+			patient_id_list = []
 		# replace NA by standard NA for all entries in survival column
-		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
-		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+
 		# iterate over patient IDs
 		for i in range(0,len(patient_id_list)):
 			# check if survival column contains number. divide by 12 if it is given in months
@@ -1908,9 +1921,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				survival_2.append(patientData[key])
 		print(survival_1)
 		# calculate p-value for survival times
-		surv_results = logrank_test(survival_1,survival_2)
-		p_val = surv_results.p_value
-		print("p value" + str(p_val))
+		if(survival_col in list(clinicaldf.columns)):
+			surv_results = logrank_test(survival_1,survival_2)
+			p_val = surv_results.p_value
+			print("p value" + str(p_val))
 		# count survival times in both arrays
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
@@ -1999,8 +2013,14 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-        		text_file_2.write(plot_div)
+		if(survival_col not in list(clinicaldf.columns)):
+			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
+        			text_file_2.write("")
+		else:
+			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
+        			text_file_2.write(plot_div)
+		#with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
+        	#	text_file_2.write(plot_div)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
@@ -2305,22 +2325,29 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		print(group1_has)
 		print(jaccards_1)
 		print(jaccards_2)
-		print(list(clinicaldf.columns).index(survival_col))
+		#print(list(clinicaldf.columns).index(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
+		# get list of patient ids
+		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
+			patient_id_list = list(clinicaldf.index)
+		else:
+			patient_id_list = list(clinicaldf.iloc[:,0])
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
 			print("survival col")
 			print(survival_col_nbr)
 			print(list(clinicaldf.iloc[:,survival_col_nbr]))
-		# get list of patient ids
-		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
-			patient_id_list = list(clinicaldf.index)
+			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
+			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
+			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+		# give empty survival lists if no data given
 		else:
-			patient_id_list = list(clinicaldf.iloc[:,0])
+			survivalcol_list = []
+			patient_id_list = []
 		# replace NA by standard NA for all entries in survival column
-		clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
-		survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
+
 		# iterate over patient IDs
 		for i in range(0,len(patient_id_list)):
 			# check if survival column contains number. divide by 12 if it is given in months
@@ -2354,9 +2381,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_2.append(patientData[key])
 		print(survival_1)
 		# calculate p-value for survival times
-		surv_results = logrank_test(survival_1,survival_2)
-		p_val = surv_results.p_value
-		print("p value" + str(p_val))
+		if(survival_col in list(clinicaldf.columns)):
+			surv_results = logrank_test(survival_1,survival_2)
+			p_val = surv_results.p_value
+			print("p value" + str(p_val))
+		else:
+			p_val = ""
 		# count survival times in both arrays
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
@@ -2451,7 +2481,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		#print(output_plot_path)
-		if(errstr == ""):
+		if(survival_col not in list(clinicaldf.columns)):
+			with open(output_plot_path, "w") as text_file_2:
+        			text_file_2.write("")
+		elif(errstr == ""):
 			with open(output_plot_path, "w") as text_file_2:
         			text_file_2.write(plot_div)
 		else:

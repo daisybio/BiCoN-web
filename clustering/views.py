@@ -1318,14 +1318,18 @@ def clustering_6_4(request):
 			list_of_files = GraphForm.list_user_data_2(username)
 			list_of_files_2 = GraphForm.list_user_data(username)
 			cache.clear()
+			ret_metadata1 = ""
+			ret_metadata2 = ""
+			ret_metadata3 = ""
 			#metd = list_metadata_4.apply_async(args=["/code/clustering/static/metadata.txt"],countdown=0)
-			metd = list_metadata_4.apply_async(args=["/code/clustering/static/metadata_" + session_id + ".txt"],countdown=0)
-			(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
-			print(ret_metadata1) 
-			print("iubaerb")
+			if(os.path.isfile("/code/clustering/static/userfiles/metadata_" + session_id + ".txt")):
+				metd = list_metadata_4.apply_async(args=["/code/clustering/static/userfiles/metadata_" + session_id + ".txt"],countdown=0)
+				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
+			#print(ret_metadata1) 
+			#print("iubaerb")
 			metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
-			result2 = read_kegg_enrichment.delay("clustering/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			enrichment_dict = result2.get()
+			#result2 = read_kegg_enrichment.delay("clustering/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
+			#enrichment_dict = result2.get()
 		ret_metadata1 = ""
 		ret_metadata2 = ""
 		ret_metadata3 = ""
@@ -1352,7 +1356,7 @@ def clustering_6_4(request):
 			cache.set('p_val', p_val)	
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path4':path99,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'p_val':p_val})
 		cache.clear()
-		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})
+		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':""})
 
 
 def clustering_6_part_2_2(request):
