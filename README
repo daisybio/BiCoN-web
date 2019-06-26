@@ -10,13 +10,13 @@
 
 You can run the application by running docker compose, which starts the server and all neccessities, by writing in a terminal (in the same directory as this file):
 
-sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' docker-compose up
+sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' secret_key='9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6' docker-compose up
 
-instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0']. It is important to specify (even if it is *, meaning all addresses) allowed hosts since otherwise Django will not be able to show the website to you. The cel_url parameter should be the same on all computers but it is possible to specify password and username (which will be described in 3. How the code works).
+instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0']. It is important to specify (even if it is *, meaning all addresses) allowed hosts since otherwise Django will not be able to show the website to you. The cel_url parameter should be the same on all computers but it is possible to specify password and username (which will be described in 3. How the code works). 
 
 You can find out which port Django is using by running
 
-sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' docker-compose up
+sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672'  secret_key='9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6' docker-compose up
 
 and waiting until a line appears in the terminal that says
 

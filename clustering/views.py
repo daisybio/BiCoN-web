@@ -924,7 +924,22 @@ def clustering_6_4(request):
 			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path99,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':"",'ret_dat':"",'ret_metadata1':ret_metadata_1,'ret_metadata2':ret_metadata_2,'ret_metadata3':ret_metadata_3,'list_of_files_2':""})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
-		if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
+		# check if input files exist
+		input_valid = "false"
+		if('myfile' in request.FILES and 'protfile' in request.FILES):
+			if(request.FILES['myfile'] and request.FILES['protfile']):
+				input_valid = "true"
+		elif('myfile' in request.FILES and 'parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST):
+			if(request.FILES['myfile'] and request.POST['parse_ndex_file'] and request.POST['ndex_name_2']):
+				input_valid = "true"
+		elif('predef_file' in request.POST and 'protfile' in request.FILES):
+			if(request.POST['predef_file'] and request.FILES['protfile']):
+				input_valid = "true"
+		elif('predef_file' in request.POST and 'parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST):
+			if(request.POST['predef_file'] and request.POST['parse_ndex_file'] and request.POST['ndex_name_2']):
+				input_valid = "true"
+		#if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
+		if(input_valid == "true"):
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])

@@ -1684,6 +1684,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
+	p_val = ""
 	# if no metadata given, write an empty metadata file
 	if(clinicalstr == "empty"):
 		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
@@ -1692,7 +1693,13 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		plot_div = ""
 		with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
         		text_file_2.write("")
-	
+		ret_metadata = []
+		ret_metadata_1 = {}
+		ret_metadata_2 = {}
+		ret_metadata_3 = {}
+		ret_metadata.append(ret_metadata_1)
+		ret_metadata.append(ret_metadata_2)
+		ret_metadata.append(ret_metadata_3)
 	else:
 		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")
@@ -1920,6 +1927,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			elif key in group2_ids:
 				survival_2.append(patientData[key])
 		print(survival_1)
+		p_val = ""
 		# calculate p-value for survival times
 		if(survival_col in list(clinicaldf.columns)):
 			surv_results = logrank_test(survival_1,survival_2)
@@ -2142,6 +2150,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	text_file_6.close()
 	path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
 	# if no metadata given, write an empty metadata file
+	p_val = ""
 	if(clinicalstr == "empty"):
 		ret_metadata = []
 		#ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
@@ -2158,7 +2167,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write("")
-	
+		ret_metadata = []
+		ret_metadata_1 = {}
+		ret_metadata_2 = {}
+		ret_metadata_3 = {}
+		ret_metadata.append(ret_metadata_1)
+		ret_metadata.append(ret_metadata_2)
+		ret_metadata.append(ret_metadata_3)
 	else:
 		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")

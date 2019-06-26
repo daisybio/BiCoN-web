@@ -8,6 +8,8 @@ services:
   livereload:
     build: .
     command: bash -c "python3 manage.py livereload"
+    environment: 
+        - SECRET_KEY=${secret_key}
     volumes:
       - .:/code
     depends_on:
@@ -22,6 +24,7 @@ services:
     volumes:
       - .:/code
     environment:
+      - SECRET_KEY=${secret_key}
       - DJANGO_ALLOWED_HOSTS=${allowed_hosts}
       - CELERY_URL=${cel_url}
     ports:
@@ -43,6 +46,7 @@ services:
   celery:
     environment: 
         #- DJANGO_ALLOWED_HOSTS=['0.0.0.0','172.18.0.6']
+        - SECRET_KEY=${secret_key}
         - C_FORCE_ROOT=true
         - CELERY_URL=${cel_url}
         #- ALLOWED_HOSTS='["0.0.0.0"]'
