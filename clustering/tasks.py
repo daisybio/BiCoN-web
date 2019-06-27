@@ -974,11 +974,30 @@ def sim_data(genes1,genes2,background,patients1,patients2,dens):
 ########################################################
 
 
+@shared_task(name="preprocess_clinical_file")
+def preprocess_clinical_file(clinical_str):
+	if(len(clinical_str.split("\n")[0].split("\t")) > 2):
+		#print(expr_str.split("\n")[0])	+
+		#clinical_stringio = StringIO(clinical_str)	
+		#clinicaldf = pd.read_csv(clinical_stringio,sep='\t')
+		return(clinical_str)
+	elif("," in clinical_str):
+		# replace comma by tab if file is CSV and not TSV
+		if("\t" not in clinical_str.split("\n")[0]):
+			clinical_str = clinical_str.replace(",","\t")
+	return clinical_str
 
 @shared_task(name="preprocess_file")
 def preprocess_file(expr_str):
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
-		print(expr_str.split("\n")[0])	
+		#print(expr_str.split("\n")[0])	+
+		expr_stringio = StringIO(expr_str)	
+		exprdf = pd.read_csv(expr_stringio,sep='\t')
+		for column_name, column in exprdf.transpose().iterrows():
+			if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
+				if(len(column.unique()) == 2):
+					print(column_name)
+					expr_str = expr_str.replace(column_name,"cancer_type")	
 		return(expr_str)
 	elif(0 == 1):
 		if("\t" not in expr_str.split("\n")[0]):
@@ -986,7 +1005,7 @@ def preprocess_file(expr_str):
 			#print(expr_str)
 			expr_str = expr_str.replace("status","cancer_type")
 			#expr_str = expr_str.replace("-0.","0.")
-			print(expr_str.split("\n")[0])
+			#print(expr_str.split("\n")[0])
 			#expr_stringio = StringIO(expr_str)
 			expr_str = expr_str.replace("CTL","MCI")
 			#exprdf = pd.read_csv(expr_stringio,sep='\t')
@@ -996,7 +1015,7 @@ def preprocess_file(expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
 			expr_str = expr_str.replace(",","\t")
-			print(expr_str.split("\n")[0])
+			#print(expr_str.split("\n")[0])
 			expr_str_split = expr_str.split("\n")
 			# remove entries after given length if expression data file is too big
 			if(len(expr_str_split) > 300):
@@ -1006,6 +1025,13 @@ def preprocess_file(expr_str):
 			expr_stringio = StringIO(expr_str)
 			expr_str = expr_str.replace("MCI","CTL")
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
+
+			#### comment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given (and uncomment lines specified further below)
+			for column_name, column in exprdf.transpose().iterrows():
+				if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
+					if(len(column.unique()) == 2):
+						print(column_name)
+						expr_str = expr_str.replace(column_name,"cancer_type")	
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
 			#done1 = "false"
 			#for column_name, column in exprdf.transpose().iterrows():
@@ -2008,17 +2034,18 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		line=dict(
 		shape='hv'))
 		data99 = [trace1,trace2]
-		layout = dict(
-		legend=dict(
-		yanchor="bottom",
-		traceorder='reversed',
-		orientation="h",
-		font=dict(size=16)),
+		layout = dict(showlegend=False,
+		#legend=dict(
+		#yanchor="bottom",
+		#traceorder='reversed',
+		#orientation="h",
+		#font=dict(size=16)
 		xaxis=dict(
         	title='Time in years'),
 		yaxis=dict(
         	title='percentage of patients'))
-		fig = dict(data=data99, layout=layout)
+		#fig = dict(data=data99, layout=layout)
+		fig = dict(data=data99,layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		if(survival_col not in list(clinicaldf.columns)):
@@ -2058,9 +2085,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	# make node objects for genes
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
+		# circle/square nodes based on cluster of genes
 		tp = "circle"
 		if(G_tmp in genes1):
 			tp = "square"
+		# create node objects with color property based on z-score difference
 		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
 		nodecolors.append(color_for_graph(means[ctr]))
 		ctr = ctr + 1
@@ -2153,20 +2182,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	p_val = ""
 	if(clinicalstr == "empty"):
 		ret_metadata = []
-		#ret_metadata.append({'group':"Group 1",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		#ret_metadata.append({'group':"Group 2",'lm':"NA",'bm':"NA",'lymph':"NA",'metastasis':"NA",'path_er':"NA",'path_pr':"NA",'good_prognosis':"NA"})
-		#ret_metadata.append({'group':"Group 1",'jac':jac_1_ret,'survival':"NA",'age':"NA",'size':"NA"})
-		#ret_metadata.append({'group':"Group 2",'jac':jac_2_ret,'survival':"NA",'age':"NA",'size':"NA"})
 		text_file_3 = open(path_metadata, "w")
-		#text_file_3.write("<table><tr><th>Patient Cluster</th></tr>")
-		#text_file_3.write("<tr><th>Group1</th></tr>")
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		#output_plot_path = "/code/polls/static/output_plotly_" + session_id + ".html"
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write("")
+		# fill empty metadata arrays
 		ret_metadata = []
 		ret_metadata_1 = {}
 		ret_metadata_2 = {}
@@ -2480,18 +2503,18 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		line=dict(
 		shape='hv'))
 		data99 = [trace1,trace2]
-		layout = dict(
-		legend=dict(
-		yanchor="bottom",
-		traceorder='reversed',
-		orientation="h",
-		font=dict(size=16)),
+		layout = dict(showlegend=False,
+		#legend=dict(
+		#yanchor="bottom",
+		#traceorder='reversed',
+		#orientation="h",
+		#font=dict(size=16)
 		xaxis=dict(
         	title='Time in years'),
 		yaxis=dict(
-        	title='percentage of patients'),
-		)
-		fig = dict(data=data99, layout=layout)
+        	title='percentage of patients'))
+		fig = dict(data=data99,layout=layout)		
+		#fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
@@ -2608,6 +2631,8 @@ def read_kegg_enrichment(path,pval_enr):
 		ctr = ctr + 1
 	return(ret_dict)
 
+
+
 @shared_task(name="read_kegg_enrichment_2")
 def read_kegg_enrichment_2(path1,path2,pval_enr):
 	result_file_1 = open(path1)
@@ -2634,7 +2659,7 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
 				#ret_dict.append(tmp)
-				temp_dict.update({lineSplit[0]:tmp})
+				temp_dict.update({lineSplit[1]:tmp})
 		ctr = ctr + 1
 	# file 2 and array 2 is results for genes in cluster 2
 	ctr2 = 0
@@ -2650,7 +2675,7 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
-				temp_dict_2.update({lineSplit[0]:tmp})
+				temp_dict_2.update({lineSplit[1]:tmp})
 		ctr2 = ctr2 + 1
 	# check terms in list 1 but not in list 2
 	for key in temp_dict:
