@@ -486,7 +486,7 @@ border:1px solid black;
 	<label for="l_box1"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
+	        <option value="{{filename2.f2}}">Filename:{{filename2.f1}}</option>
 		{% endfor %}
        	</select>
 	<br><br>
@@ -725,6 +725,9 @@ $(document).ready(function() {
   <div class="collapsible-content">
     <div class="content-inner">
       <p>
+	Gene set size:
+	<input class="input" type="text" name="gene_set_size" id="gene_set_size">
+	<br>
        Number of ants:
 	<select name="nbr_ants" size="1">	
 	        <option value="10">10</option>
@@ -732,7 +735,7 @@ $(document).ready(function() {
 	        <option value="30" selected="selected">30</option>
 	        <option value="40">40</option>
 	        <option value="50">50</option>
-       	</select>
+       	</select>  
 	Evaporation rate:
 	<select name="evap" size="1">	
 	        <option value="0.1">0.1</option>

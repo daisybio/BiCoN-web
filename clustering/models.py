@@ -155,6 +155,43 @@ class GraphForm(models.Model):
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
 		return bar
+	#def list_user_data(username):
+	#	foobar = "user_uploaded_files/" + username
+	#	fileslist = os.listdir(foobar)
+	#	print(fileslist)
+	#	bar = []
+	#	for f in fileslist:
+	#		if "_expr.txt" in f:
+	#			print(f)
+	#			ret1 = "user_uploaded_files/" + username + "/" + f
+	#			fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
+	#			ret2 = "user_uploaded_files/" + username + "/" + fn_temp
+	#			bar.append({'f1':ret1,'f2':ret2})
+	#			#time_temp = f.split("_")
+	#			#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
+	#	return bar
+
+
+	def list_user_data(username):
+		foobar = "user_uploaded_files/" + username
+		fileslist = os.listdir(foobar)
+		print(fileslist)
+		bar = []
+		for f in fileslist:
+			if "_expr.txt" in f:
+				#print(f)
+				f_split=f.split("_")
+				f_new = f_split[0] + "/" + f_split[1] + "/" + f_split[2] + ", " + f_split[3] + ":" + f_split[4]
+				print(f_new)
+				ret1 = "user_uploaded_files/" + username + "/" + f
+				fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
+				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
+				bar.append({'f1':f_new,'f2':ret_1})
+				#time_temp = f.split("_")
+				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
+		return bar
+	
+
 	def list_user_data_2(username):
 		foobar = "user_uploaded_files/" + username
 		fileslist = os.listdir(foobar)
@@ -168,4 +205,5 @@ class GraphForm(models.Model):
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
 		return bar
+	
 	

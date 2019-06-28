@@ -865,6 +865,8 @@ def clustering_6_4(request):
 		print("done")
 	if('session_id' in request.POST):
 		print(request.POST['session_id'])
+	analysis_running = cache.get('analysis_running', 'none')
+	print(analysis_running)
 	session_id_from_cache = cache.get('session_id', 'has expired')
 	print(session_id_from_cache)
 	ret_metadata1 = {}
@@ -876,6 +878,7 @@ def clustering_6_4(request):
 	list_of_files = ""
 	list_of_files_2 = ""
 	save_data = request.POST.get("save_data", None)
+	gene_set_size = request.POST.get("gene_set_size",2000)
 	nbr_iter = request.POST.get("nbr_iter",45)
 	nbr_ants = request.POST.get("nbr_ants",30)
 	evap = request.POST.get("evap",0.3)
@@ -887,6 +890,9 @@ def clustering_6_4(request):
 	if('input_own_file' in request.POST and 'display_old_results' in request.POST and request.user.is_authenticated):
 		if(request.POST['input_own_file'] and request.POST['display_old_results']):
 			# configure loading page
+			analysis_running = cache.get('analysis_running', 'none')
+			if (analysis_running == 'none'):
+				cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
    				text_file.write("Your request is being processed...")
@@ -942,6 +948,9 @@ def clustering_6_4(request):
 				input_valid = "true"
 		#if((request.FILES['myfile'] or request.POST['predef_file']) and (request.FILES['protfile'] or (request.POST['parse_ndex_file'] and request.POST['ndex_name_2']))):
 		if(input_valid == "true"):
+			analysis_running = cache.get('analysis_running', 'none')
+			if (analysis_running == 'none'):
+				cache.set('analysis_running','analysis_running')
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
@@ -1023,8 +1032,11 @@ def clustering_6_4(request):
 				session_id = ""
 				# start session for storing result data			
 				session_id = request.session._get_or_create_session_key()
+				if(gene_set_size = ""):
+					gene_set_size = 2000
 				# run algorithm and read results
-				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
@@ -1092,6 +1104,8 @@ def clustering_6_4(request):
 					request.POST._mutable = True
 					request.POST['session_id'] = session_id
 				remove_loading_image.delay()
+				if(os.path.isfile("clustering/static/loading_1.gif")):
+					os.unlink("clustering/static/loading_1.gif")
 				cache.clear()				
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
@@ -1107,12 +1121,16 @@ def clustering_6_4(request):
 				cache.set('ret_metadata3', ret_metadata3)	
 				cache.set('json_path', json_path)	
 				cache.set('p_val', p_val)
+				cache.set('analysis_running','analysis_running')
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"		
 				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':("userfiles/"+path99),'output_plot_path':("userfiles/"+output_plot_path),'json_path':("userfiles/"+json_path), 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'p_val':p_val})
 	if('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			# configure loading page
+			analysis_running = cache.get('analysis_running', 'none')
+			if (analysis_running == 'none'):
+				cache.set('analysis_running','analysis_running')
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
    				text_file.write("Your request is being processed...")
 			add_loading_image.delay()
@@ -1191,6 +1209,9 @@ def clustering_6_4(request):
 		if('group_for_enr' in request.POST):
 			group_for_enr = request.POST.get('group_for_enr')
 			#print(pval_enr)
+		analysis_running = cache.get('analysis_running', 'none')
+		if (analysis_running == 'none'):
+			cache.set('analysis_running','analysis_running')
 		enrichment_dict = {}
 		enrichment_dict_2 = {}
 		enrichment_dict_3 = {}
@@ -1320,6 +1341,15 @@ def clustering_6_4(request):
 		#return HttpResponseRedirect('polls/clustering_6.html')
 		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path99,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 	else:		
+		analysis_running = cache.get('analysis_running', 'none')
+		if (analysis_running == 'none'):
+			if(os.path.isfile("clustering/static/loading_1.gif")):
+				os.unlink("clustering/static/loading_1.gif")
+			remove_loading_image.delay()	
+			print("removed loading image")
+			with open("/code/clustering/static/output_console.txt", "w") as text_file:
+   				text_file.write("")
+			cache.set('analysis_running','analysis_running')
 		#remove_loading_image.delay()
 		ret_metadata = ""
 		#session_id_from_cache = cache.get('session_id', 'has_expired')
@@ -1373,6 +1403,7 @@ def clustering_6_4(request):
 			cache.set('p_val', p_val)	
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path99,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'p_val':p_val})
 		cache.clear()
+		cache.set('analysis_running', analysis_running)
 		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':""})
 
 

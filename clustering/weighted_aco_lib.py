@@ -661,6 +661,8 @@ def aco_preprocessing_ownfile(fh, fh_ppi, col,log2, gene_list = None, size = Non
     expr = pd.read_csv(fh,sep = "\t") 
     expr = expr.set_index("Unnamed: 0")
 	#TODO: check if column 'prognosis' or 'cancer type' exists, set column based on this info
+    print("size")
+    print(size)
     if('cancer_type' in list(expr)):
     	col = 'cancer_type'
     else:
@@ -759,6 +761,8 @@ def aco_preprocessing_strings(expr_str, ppi_str, col,log2, gene_list = None, siz
     #gene_list - preselected genes (if any)
     #size -  if genes are not preselected specify size of the gene set  for standard deviation selection
     # sample = None - all patients, otherwise specify fraction of patients taken
+    print("size")
+    print(size)
     EXPRDATA = StringIO(expr_str)
     expr = pd.read_csv(EXPRDATA,sep = "\t") 
     expr = expr.set_index("Unnamed: 0")
