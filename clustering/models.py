@@ -119,6 +119,37 @@ class GraphForm(models.Model):
 		outfile3 = open(filename_4, "w")
 		outfile3.write(str3)
 		outfile3.close()
+	def save_user_data_3(exprstr,ppistr,clinicalstr,username):
+		foobar = "user_uploaded_files/" + username
+		if not(os.path.isdir(foobar)):
+			os.mkdir(foobar)
+		if not(os.path.isdir(foobar + "/bla")):
+			os.mkdir(foobar + "/bla")	
+		if not(os.path.isdir("/code/user_uploaded_files/" + username)):
+			os.mkdir("/code/user_uploaded_files/" + username)	
+		if(clinicalstr == ""):
+			clinicalstr = "empty"
+		print("saving files")
+		#fn.seek(0)
+		#prot_fn.seek(0)
+		#clinical_fn.seek(0)
+		#str1 = fn.read().decode('utf-8')
+		#str2 = prot_fn.read().decode('utf-8')
+		#str3 = clinical_fn.read().decode('utf-8')
+		#print(str1)
+		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
+		filename_2 = foobar + "/" + filename_1 + "_expr.txt"
+		filename_3 = foobar + "/" + filename_1 + "_prot.txt"
+		filename_4 = foobar + "/" + filename_1 + "_clin.txt"
+		outfile1 = open(filename_2, "w")
+		outfile1.write(exprstr)
+		outfile1.close()
+		outfile2 = open(filename_3, "w")
+		outfile2.write(ppistr)
+		outfile2.close()
+		outfile3 = open(filename_4, "w")
+		outfile3.write(clinicalstr)
+		outfile3.close()
 
 
 	def save_results(username):
@@ -140,20 +171,20 @@ class GraphForm(models.Model):
 		outfile2.write(str2)
 		outfile2.close()
 	
-	def list_user_data(username):
-		foobar = "user_uploaded_files/" + username
-		fileslist = os.listdir(foobar)
-		print(fileslist)
-		bar = []
-		for f in fileslist:
-			if "_expr.txt" in f:
-				print(f)
-				ret1 = "user_uploaded_files/" + username + "/" + f
-				fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
-				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
-				bar.append({'f1':ret1,'f2':ret2})
-				#time_temp = f.split("_")
-				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
+	#def list_user_data(username):
+	#	foobar = "user_uploaded_files/" + username
+	#	fileslist = os.listdir(foobar)
+	#	print(fileslist)
+	#	bar = []
+	#	for f in fileslist:
+	#		if "_expr.txt" in f:
+	#			print(f)
+	#			ret1 = "user_uploaded_files/" + username + "/" + f
+	#			fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
+	#			ret2 = "user_uploaded_files/" + username + "/" + fn_temp
+	#			bar.append({'f1':ret1,'f2':ret2})
+	#			#time_temp = f.split("_")
+	#			#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
 		return bar
 	#def list_user_data(username):
 	#	foobar = "user_uploaded_files/" + username
@@ -186,7 +217,7 @@ class GraphForm(models.Model):
 				ret1 = "user_uploaded_files/" + username + "/" + f
 				fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
 				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
-				bar.append({'f1':f_new,'f2':ret_1})
+				bar.append({'f1':f_new,'f2':ret1})
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
 		return bar
@@ -198,10 +229,13 @@ class GraphForm(models.Model):
 		bar = []
 		for f in fileslist:
 			if "_json.json" in f:
+				f_split=f.split("_")				
+				f_new = f_split[0] + "/" + f_split[1] + "/" + f_split[2] + ", " + f_split[3] + ":" + f_split[4]
+				print(f_new)
 				ret1 = "user_uploaded_files/" + username + "/" + f
 				fn_temp = f.split("_json.json")[0] + "_heatmap.png"
 				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
-				bar.append({'f1':ret1,'f2':ret2})
+				bar.append({'f1':f_new,'f2':ret1})
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
 		return bar

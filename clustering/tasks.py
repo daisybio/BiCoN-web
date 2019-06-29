@@ -1406,14 +1406,14 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 
 
 @shared_task(name="algo_output_task")
-def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig):
+def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,size):
 	col = "cancer_type"
-	size = 2000
+	#size = 2000
 	log2 = True
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
-	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = size, sample= None)
+	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
    		text_file.write("Starting model run...")	

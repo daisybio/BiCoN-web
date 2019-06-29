@@ -153,6 +153,7 @@ def clustering_6_new(request):
 	list_of_files = ""
 	list_of_files_2 = ""
 	save_data = request.POST.get("save_data", None)
+	gene_set_size = request.POST.get("gene_set_size",2000)
 	nbr_iter = request.POST.get("nbr_iter",45)
 	nbr_ants = request.POST.get("nbr_ants",30)
 	evap = request.POST.get("evap",0.3)
@@ -243,7 +244,9 @@ def clustering_6_new(request):
 							#print("barabsfrbasdb")
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				if(gene_set_size == ""):
+					gene_set_size = 2000
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
 				(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
@@ -307,8 +310,9 @@ def clustering_6_new(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
-
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				if(gene_set_size == ""):
+					gene_set_size = 2000
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				if not(has_clin_data == "true"):
 					clinicalstr = "empty"
@@ -464,8 +468,8 @@ def clustering_6_4_part_2(request):
 	if('done' in request.session):
 		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
 		print("done")
-	if('session_id' in request.POST):
-		print(request.POST['session_id'])
+	#if('session_id' in request.POST):
+	#	print(request.POST['session_id'])
 	#print("in clustering")
 	ret_metadata1 = {}
 	ret_metadata2 = {}
@@ -477,6 +481,7 @@ def clustering_6_4_part_2(request):
 	list_of_files_2 = ""
 	# assign standard parameters
 	save_data = request.POST.get("save_data", None)
+	gene_set_size = request.POST.get("gene_set_size",2000)
 	nbr_iter = request.POST.get("nbr_iter",45)
 	nbr_ants = request.POST.get("nbr_ants",30)
 	evap = request.POST.get("evap",0.3)
@@ -576,8 +581,10 @@ def clustering_6_4_part_2(request):
 							#print("barabsfrbasdb")
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
+				if(gene_set_size == ""):
+					gene_set_size = 2000
 				# run algorithm and read results
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()	
 				# start session for storing result data			
 				session_id = request.session._get_or_create_session_key()
@@ -631,9 +638,9 @@ def clustering_6_4_part_2(request):
 				if request.user.is_authenticated:
 					request.session['done'] = "true"
 				# store session id in POST data
-				else:
-					request.POST._mutable = True
-					request.POST['session_id'] = session_id
+				#else:
+				#	request.POST._mutable = True
+				#	request.POST['session_id'] = session_id
 				remove_loading_image.delay()
 				cache.clear()				
 				make_empty_figure.apply_async(countdown=10)
@@ -645,9 +652,9 @@ def clustering_6_4_part_2(request):
 				copyfile(("/code/clustering/static/" + output_plot_path),("clustering/static/" + output_plot_path))
 				if request.user.is_authenticated:
 					request.session['done'] = "true"
-				else:
-					request.POST._mutable = True
-					request.POST['session_id'] = session_id
+				#else:
+				#	request.POST._mutable = True
+				#	request.POST['session_id'] = session_id
 				cache.set('session_id', session_id)	
 				cache.set('ret_metadata1', ret_metadata1)	
 				cache.set('ret_metadata2', ret_metadata2)	
@@ -684,8 +691,10 @@ def clustering_6_4_part_2(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
+				if(gene_set_size == ""):
+					gene_set_size = 2000
 				# run algorithm
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				if not(has_clin_data == "true"):
 					clinicalstr = "empty"
@@ -863,8 +872,10 @@ def clustering_6_4(request):
 			request.POST['newAnalysis'] = "false"
 	if('done' in request.session):
 		print("done")
-	if('session_id' in request.POST):
-		print(request.POST['session_id'])
+	#if('session_id' in request.POST):
+	#	print(request.POST['session_id'])
+	# the parameter analysis_running is true when an analysis has been run while the current cache exists. If it is false and an empty request is submitted (which is when an user first accesses the
+	# page), and for some reason the output-console file for the progress page is filled with text, it gets emptied and the loading-gif removed.
 	analysis_running = cache.get('analysis_running', 'none')
 	print(analysis_running)
 	session_id_from_cache = cache.get('session_id', 'has expired')
@@ -916,9 +927,9 @@ def clustering_6_4(request):
 			ret_metadata_1 = ""
 			ret_metadata_2 = ""
 			ret_metadata_3 = ""
-			# check if plotly file exists
-			if(os.path.isfile(output_plot_path)):
-				copyfile(output_plot_path,("clustering/static/" + path_plotly_2))
+			# check if plotly file exists and copy
+			if(os.path.isfile(path_plotly)):
+				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
 			# read metadata
 			if(os.path.isfile(path_metadata)):
@@ -1017,7 +1028,7 @@ def clustering_6_4(request):
 						result_ndex = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf")
 						ppistr = result_ndex.get()
 				# read metadata if given
-				if('analyze_metadata' in request.POST):
+				if('analyze_metadata' in request.POST and 'patientdata' in request.FILES):
 					if(request.FILES['patientdata']):
 						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
 						clinicalstr_first_line = clinicalstr.split("\n")[0]
@@ -1032,7 +1043,8 @@ def clustering_6_4(request):
 				session_id = ""
 				# start session for storing result data			
 				session_id = request.session._get_or_create_session_key()
-				if(gene_set_size = ""):
+				# assign standard value to gene set size
+				if(gene_set_size == ""):
 					gene_set_size = 2000
 				# run algorithm and read results
 				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
@@ -1062,7 +1074,8 @@ def clustering_6_4(request):
 	                			#print("save data")
 	                			savedata_param = "true"
 	                			username = str(request.user)
-	                			GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+	                			#GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
+	                			GraphForm.save_user_data_3(exprstr,ppistr,clinicalstr,username)
 						#GraphForm.save_results(username)
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
 				if request.user.is_authenticated:
@@ -1100,9 +1113,9 @@ def clustering_6_4(request):
 				#else:
 				if request.user.is_authenticated:
 					request.session['done'] = "true"
-				else:
-					request.POST._mutable = True
-					request.POST['session_id'] = session_id
+				#else:
+				#	request.POST._mutable = True
+				#	request.POST['session_id'] = session_id
 				remove_loading_image.delay()
 				if(os.path.isfile("clustering/static/loading_1.gif")):
 					os.unlink("clustering/static/loading_1.gif")
@@ -1148,6 +1161,10 @@ def clustering_6_4(request):
 				fh3 = open(filename3)
 				has_clin_data = "true"
 				clinicalstr = fh3.read()
+			survival_col_name = ""
+			if('survival_col' in request.POST):
+				if(request.POST['survival_col']):
+					survival_col_name = request.POST['survival_col']
 			#path_json = filename1
 			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
 			ppistr = fh2.read()
@@ -1155,9 +1172,12 @@ def clustering_6_4(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				if(gene_set_size == ""):
+					gene_set_size = 2000
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				if not(has_clin_data == "true"):
+					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
 				session_id_from_cache = cache.get('session_id', 'has expired')
@@ -1202,7 +1222,8 @@ def clustering_6_4(request):
 	
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
-		group_for_enr = "both"
+		group_for_enr = "both"	
+		# get p-value cutoff
 		if('pval_enr' in request.POST):
 			pval_enr = request.POST.get('pval_enr')
 			print(pval_enr)
@@ -1210,6 +1231,7 @@ def clustering_6_4(request):
 			group_for_enr = request.POST.get('group_for_enr')
 			#print(pval_enr)
 		analysis_running = cache.get('analysis_running', 'none')
+		# set analysis running parameter to allow display of "loading"-gif + text
 		if (analysis_running == 'none'):
 			cache.set('analysis_running','analysis_running')
 		enrichment_dict = {}
@@ -1226,12 +1248,8 @@ def clustering_6_4(request):
 			genelist = "genelist_" + session_id + ".txt"
 			genelist1 = "genelist_1_" + session_id + ".txt"
 			genelist2 = "genelist_2_" + session_id + ".txt"
-			kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
-			kegg_dir_2 = "/code/clustering/data/test2/enrichr_kegg/" + session_id
-			kegg_dir_3 = "/code/clustering/data/test3/enrichr_kegg/" + session_id
-			kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
-			kegg_output_dir_2 = kegg_dir_2 + "/KEGG_2013.test_name.enrichr.reports.txt"
-			kegg_output_dir_3 = kegg_dir_3 + "/KEGG_2013.test_name.enrichr.reports.txt"
+			#kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
+			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
 			if(enr_type == "kegg_enrichment"):
 				result1 = run_enrichment_2.delay(("genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_kegg/" + session_id))
 				result2 = run_enrichment_2.delay(("genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_kegg/" + session_id))
@@ -1244,9 +1262,12 @@ def clustering_6_4(request):
 				result5 = read_kegg_enrichment.delay(("/code/clustering/data/test2/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
 				result6 = read_kegg_enrichment.delay(("/code/clustering/data/test3/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
 				result7 = read_kegg_enrichment_2.delay(("/code/clustering/data/test2/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),("/code/clustering/data/test3/enrichr_kegg/" + session_id + "/KEGG_2013.test_name.enrichr.reports.txt"),pval_enr)
+				# both groups
 				enrichment_dict = result4.get()
+				# group 1, group 2
 				enrichment_dict_2 = result5.get()
 				enrichment_dict_3 = result6.get()
+				# results "only in group 1/2"
 				(enrichment_dict_4,enrichment_dict_5) = result7.get()
 			elif(enr_type == "go_enrichment"):	
 				result1 = run_go_enrichment_2.delay(("genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id))
@@ -1299,6 +1320,7 @@ def clustering_6_4(request):
 				#enrichment_dict_3 = {}		
 				#return render(request,'polls/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5})
 			#path99 = "/home/quirin/testproject/polls/static/test_" + session_id + ".png"
+			# give links to result files from last analysis
 			path99 = "test_" + session_id + ".png"
 			json_path = "test15_" + session_id + ".json"
 			#path_metadata = "polls/static/metadata_" + session_id + ".txt"
@@ -1316,11 +1338,7 @@ def clustering_6_4(request):
 			request.POST._mutable = mutable
 		if('enr' in request.POST):
 			print("enr in request")
-		if('ppi_path' in request.POST and 'heatmap_path' in request.POST and 'plot_path' in request.POST and 1==0):
-			print(request.POST.get('ppi_path'))
-			path99 = request.POST.get('heatmap_path')
-			json_path = request.POST.get('ppi_path')
-			output_plot_path = request.POST.get('plot_path')
+		# get session id from cache
 		session_id_from_cache = cache.get('session_id', 'has expired')
 		if not(session_id_from_cache == 'has expired'):
 			path99 = "test_" + session_id_from_cache + ".png"
@@ -1330,18 +1348,16 @@ def clustering_6_4(request):
 			ret_metadata1 = cache.get('ret_metadata1','none')
 			ret_metadata2 = cache.get('ret_metadata2','none')
 			ret_metadata3 = cache.get('ret_metadata3','none')
-		else:
+		else:	
 			session_id = request.session._get_or_create_session_key()
+			# create new session if session id does not exist in cache
 			path99 = "test_" + session_id + ".png"
 			json_path = "test15_" + session_id + ".json"
 			output_plot_path = "output_plotly_" + session_id + ".html"	
-		#return clustering_6(request)
-		#return HttpResponseRedirect('polls/clustering_6.html')
-		#return clustering_6(request)
-		#return HttpResponseRedirect('polls/clustering_6.html')
 		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path99,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 	else:		
 		analysis_running = cache.get('analysis_running', 'none')
+		# if no analysis is running, remove loading image and text. this is to make sure after an incomplete analysis no "leftover" text with the status of last run is displayed
 		if (analysis_running == 'none'):
 			if(os.path.isfile("clustering/static/loading_1.gif")):
 				os.unlink("clustering/static/loading_1.gif")
@@ -1349,16 +1365,10 @@ def clustering_6_4(request):
 			print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
    				text_file.write("")
+			with open("clustering/static/output_console.txt", "w") as text_file:
+   				text_file.write("")
 			cache.set('analysis_running','analysis_running')
-		#remove_loading_image.delay()
 		ret_metadata = ""
-		#session_id_from_cache = cache.get('session_id', 'has_expired')
-		#if not (request.user.is_authenticated):	
-		#cache.clear()
-		#if not ('session_id' in request.POST):
-		#	session_id = request.session._get_or_create_session_key()
-		#	request.POST._mutable = True
-		#	request.POST['session_id'] = session_id
 		if (request.user.is_authenticated):	
 			session_id = request.session._get_or_create_session_key()
 			username = str(request.user)
@@ -1382,6 +1392,7 @@ def clustering_6_4(request):
 		ret_metadata3 = ""
 		# check if session already exists for current user (e.g. when user has hit the reload button)
 		session_id_from_cache = cache.get('session_id', 'has_expired')
+		# display results from most recent analysis
 		if not (session_id_from_cache == "has_expired"):
 			#cache.set('session_id',session_id_from_cache)
 			# take result files from storage
@@ -1440,8 +1451,8 @@ def errorpage(request):
 		#return(clustering_6_part_3_2(request))
 
 def clustering_6_part_3_2(request):
-	if('session_id' in request.POST):
-		print(request.POST['session_id'])
+	#if('session_id' in request.POST):
+	#	print(request.POST['session_id'])
 	print("basdbasdbasdbasdbs")
 	ret_metadata1 = {}
 	ret_metadata2 = {}
@@ -1452,6 +1463,7 @@ def clustering_6_part_3_2(request):
 	list_of_files = ""
 	list_of_files_2 = ""
 	save_data = request.POST.get("save_data", None)
+	gene_set_size = request.POST.get("gene_set_size",2000)
 	nbr_iter = request.POST.get("nbr_iter",45)
 	nbr_ants = request.POST.get("nbr_ants",30)
 	evap = request.POST.get("evap",0.3)
@@ -1492,7 +1504,9 @@ def clustering_6_part_3_2(request):
 					print("barabsfrbasdb")
 					if(request.POST['survival_col']):
 						survival_col_name = request.POST['survival_col']
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig)
+				if(gene_set_size == ""):
+					gene_set_size = 2000
+				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				#result2 = script_output_task.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1)
 				#result2 = script_output_task_4.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2)

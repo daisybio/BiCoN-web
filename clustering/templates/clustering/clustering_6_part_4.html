@@ -486,7 +486,7 @@ border:1px solid black;
 	<label for="l_box1"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f2}}">Filename:{{filename2.f1}}</option>
+	        <option value="{{filename2.f2}}">File(s) from: {{filename2.f1}}</option>
 		{% endfor %}
        	</select>
 	<br><br>
@@ -672,7 +672,7 @@ $(document).ready(function() {
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
-	        <option value="{{filename.f1}}">Filename:{{filename.f1}}</option>
+	        <option value="{{filename.f2}}">File(s) from: {{filename.f1}}</option>
 		{% endfor %}
        	</select><br>
 	</div>
@@ -696,7 +696,7 @@ $(document).ready(function() {
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
-	        <option value="{{filename.f1}}">Filename:{{filename.f1}}</option>
+	        <option value="{{filename.f2}}">File(s) from: {{filename.f1}}</option>
 		{% endfor %}
        	</select><br>
 	{% endif %}
@@ -1163,7 +1163,7 @@ if(n==1){
 // if you are on the expression file input tab, check if the user has uploaded something or selected a predefined file
 if (currentTab == 2) {
 if (n == 1) {
-if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false )){
+if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false ) && (document.getElementById('redo_box').checked === false )){
    // give warning if user has not uploaded anything
     alert("Please input file with expression data");
   // and stay on the same tab instead of going to the next
@@ -1175,7 +1175,8 @@ if(document.getElementById('myfile_input').value=='' && (document.getElementById
 
 if (currentTab == 3) {
 if (n == 1) {
-if(document.getElementById('protfile_input').value=='' && (document.getElementById('parse_ndex_file').checked === false )){
+// no protein file needed if user has selected own old data
+if(document.getElementById('protfile_input').value=='' && (document.getElementById('parse_ndex_file').checked === false) && (document.getElementById('redo_box').checked === false)){
 
     alert("Please input file with PPI data");
 
@@ -1245,14 +1246,17 @@ function fixStepIndicator(n) {
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>
 <!--- display the files for downloading --->
 {% if user.is_authenticated %}
-     <br><br>
-	Download the network 
-     <a href={% static 'ntw.png' %} download> as png </a> or
-     <a href={% static 'json_path' %} download> as json file </a>
-   {% else %}
+     <br><br><b>
 	Download the network 
      <a href={% static 'ntw.png' %} download> as png </a> or
      <a href={% static json_path %} download> as json file </a>
+	</b>
+   {% else %}
+	<b>
+	Download the network 
+     <a href={% static 'ntw.png' %} download> as png </a> or
+     <a href={% static json_path %} download> as json file </a>
+	</b>
    {% endif %} 
 </div>
 </article>
@@ -1606,10 +1610,10 @@ function openTab2(evt, tabName) {
     evt.currentTarget.className += " active";
     window.dispatchEvent(new Event('resize'));
     var element1 = document.getElementById("graph-container");
-    if(element1.style.height == "1000px"){
-    element1.style.height = "999px";}
+    if(element1.style.height == "600px"){
+    element1.style.height = "599px";}
     else{
-    element1.style.height = "1000px";}
+    element1.style.height = "600px";}
     // refresh sigma.js (needed to display graph after it has been hidden)
     var s = sigma.instances()[0];
     s.refresh();
