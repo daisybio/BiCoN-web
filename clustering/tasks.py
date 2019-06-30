@@ -1211,6 +1211,68 @@ def list_metadata_4(path):
     #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
     #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
     return(dict0,dict1,dict2)
+
+
+
+@shared_task(name="list_metadata_5")
+def list_metadata_5(path):
+    # used for reading metadata
+    fh1 = open(path)
+    lines = fh1.read()
+    emptydict = {}
+    if(lines == "NA"):
+    	return(emptydict,emptydict,emptydict)
+    # remove html from metadata file and replace table elements by tab
+    emptydict = {}
+    print(len(lines.split('\n')))
+    # if no data in file, remove empty dictionaries
+    if(len(lines.split('\n')) < 3):
+    	print("basdbasdbasdb")
+    	return(emptydict,emptydict,emptydict)
+    # read content from lines
+    line0 = lines.split('\n')[0].split('\t')
+    line1 = lines.split('\n')[1].split('\t')
+    line2 = lines.split('\n')[2].split('\t')
+    print(line0)
+    print(line1)
+    print(line2)
+    ret = []
+    dict3 = {}
+    dict1 = {}
+    dict2 = {}
+    dict0 = {}
+    list0 = []
+    list1 = []
+    list2 = []
+    ctr = 0
+    dict3['params'] = line0
+    dict3['gr1'] = line1
+    dict3['gr2'] = line2
+    dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
+    #for elem in line0:
+    #	print(ctr)
+    #	dict0[ctr] = line0[ctr]
+    #	dict1[elem] = line1[ctr]
+    #	dict2[elem] = line2[ctr]
+    #	ctr = ctr + 1
+    # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
+    for i in range(0,len(line0)-1):
+    	#print(ctr)
+    	print(line0[i])
+    	dict0[i] = line0[i]
+    	dict1[dict0[i]] = line1[i]
+    	dict2[dict0[i]] = line2[i]
+    	ctr = ctr + 1
+    #ret.append(dict1)
+    print(dict0)
+    print(dict1)
+    print(dict2)
+    #ret.append(dict1)
+    #ret.append(dict2)
+    #ret.append({'group':"Group 1",line0[0]:line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
+    #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
+    #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
+    return(dict0,dict1,dict2)
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
@@ -2458,6 +2520,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			text_file_3.write("<th>" + str(elem) + "</th>")
 		text_file_3.write("</table>")
 		text_file_3.close()
+		text_file_4 = open((path_metadata + "_2"),"w")
+		text_file_4.write("\t".join(param_names) + "\n")
+		jaccards_1_str = [str(i) for i in jaccards_1]
+		jaccards_2_str = [str(i) for i in jaccards_2]
+		text_file_4.write("\t".join(jaccards_1_str) + "\n")
+		text_file_4.write("\t".join(jaccards_2_str) + "\n")
+		text_file_4.write("")
+		text_file_4.close()
 		# write metadata to dicts
 		ret_metadata = []
 		ret_metadata_1 = {}

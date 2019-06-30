@@ -25,7 +25,7 @@ from clustering.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
 #from clustering.script3 import run_algo,algo_output,algo_output_ownfile,algo_output_ownfile_2,algo_output_ownfile_3
 #from polls.tasks import make_empty_figure,algo_output_task,script_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,script_output_task_3,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,read_ndex_file,read_ndex_file_2,read_ndex_file_3,list_metadata_2,list_metadata,script_output_task_7,script_output_task_8,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
-from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new
+from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new,list_metadata_5
 from django.core.cache import cache
 import os.path
 from django.core.mail import send_mail
@@ -66,7 +66,7 @@ def login_2(request):
 		if user is not None:
 			login(request, user)
 			#return render(request,'polls/login.html')
-			return redirect('clustering/clustering_6.html')
+			return redirect('clustering/clustering_6_part_4.html')
 		else:
 			return render(request,'clustering/login.html')
 			#return redirect('polls/clustering.html')
@@ -872,8 +872,6 @@ def clustering_6_4(request):
 			request.POST['newAnalysis'] = "false"
 	if('done' in request.session):
 		print("done")
-	#if('session_id' in request.POST):
-	#	print(request.POST['session_id'])
 	# the parameter analysis_running is true when an analysis has been run while the current cache exists. If it is false and an empty request is submitted (which is when an user first accesses the
 	# page), and for some reason the output-console file for the progress page is filled with text, it gets emptied and the loading-gif removed.
 	analysis_running = cache.get('analysis_running', 'none')
@@ -897,7 +895,7 @@ def clustering_6_4(request):
 	hi_sig = request.POST.get("hisig",1)
 	pher_sig = request.POST.get("pher",1)
 	savedata_param = "false"
-	# if the user uses an own uploaded, old file
+	# if the user wants to display old results
 	if('input_own_file' in request.POST and 'display_old_results' in request.POST and request.user.is_authenticated):
 		if(request.POST['input_own_file'] and request.POST['display_old_results']):
 			# configure loading page
@@ -908,12 +906,12 @@ def clustering_6_4(request):
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
    				text_file.write("Your request is being processed...")
 			filename1 = request.POST.get("input_own_file")
-			# get name of selected file, and names of other stored files from same run
+			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
 			path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
 			path_metadata = filename1.split("_json.json")[0] + "metadata.txt"
 			path_plotly = filename1.split("_json.json")[0] + "plotly.html"
-			# get locations to copy old files to
+			# get locations to copy old result files to
 			session_id = request.session._get_or_create_session_key() 
 			json_path = "test15_" + session_id + ".json"
 			path99 = "test_" + session_id + ".png"
@@ -1063,59 +1061,42 @@ def clustering_6_4(request):
 				path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
 				# write list of genes to downloadable file
 				convert_gene_list.delay(adjlist,"/code/clustering/static/genelist_temp.txt")
-				#print("iasdfasdfsf")
-				#print(ret_metadata1)
-				#write_pval.apply_async([p_val,"/code/polls/static/pvalue.txt"],countdown=0)	
-				#(div,script,plot1) = result2.get()			
 				plot2 = "test.png"
 				# save uploaded files if specified
 				if save_data in ["save_data"]:
-	                		if request.user.is_authenticated:
-	                			#print("save data")
-	                			savedata_param = "true"
-	                			username = str(request.user)
-	                			#GraphForm.save_user_data_2(request.FILES['myfile'],request.FILES['protfile'],request.FILES['patientdata'],username)
-	                			GraphForm.save_user_data_3(exprstr,ppistr,clinicalstr,username)
-						#GraphForm.save_results(username)
+					if request.user.is_authenticated:
+						username = str(request.user)
+						if not (survival_col_name == ""):
+							clinicalstr = clinicalstr.replace(survival_col_name,"SURVIVAL_COLUMN",1)
+						GraphForm.save_user_data_3(exprstr,ppistr,clinicalstr,username)
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
 				if request.user.is_authenticated:
 			        	username = str(request.user)
 			        	list_of_files = GraphForm.list_user_data_2(username)	
 			        	list_of_files_2 = GraphForm.list_user_data(username)              
-				#else:
 				# remove the loading-gif and progress image, clear cache             
 				remove_loading_image.delay()
 				cache.clear()				
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
-				#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
-				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				print("iasdfasdfsf")
-				print(ret_metadata1) 	
 				plot2 = "test.png"				
 				path99 = "test_" + session_id + ".png"
 				if save_data in ["save_data"]:
 					if request.user.is_authenticated:
-						print("save data")
-						savedata_param = "true"
 						username = str(request.user)
+						# save results
 						curr_time = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]	
 						copyfile(("/code/clustering/static/" + path99),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
 						copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
-				#else:
-					#cache.clear()
 				if request.user.is_authenticated:
 			        	username = str(request.user)
 			        	list_of_files = GraphForm.list_user_data_2(username)	
 			        	list_of_files_2 = GraphForm.list_user_data(username)              
-				#else:
+
 				if request.user.is_authenticated:
 					request.session['done'] = "true"
-				#else:
-				#	request.POST._mutable = True
-				#	request.POST['session_id'] = session_id
 				remove_loading_image.delay()
 				if(os.path.isfile("clustering/static/loading_1.gif")):
 					os.unlink("clustering/static/loading_1.gif")
@@ -1157,16 +1138,19 @@ def clustering_6_4(request):
 			filename3 = filename1.split("_expr.txt")[0] + "_clin.txt"
 			# see if clinical data were given, and load them
 			has_clin_data = "false"
+			clinicaldf = ""
 			if(os.path.isfile(filename3)):
 				fh3 = open(filename3)
 				has_clin_data = "true"
 				clinicalstr = fh3.read()
+				if("SURVIVAL_COLUMN" in clinicalstr):
+					survival_col_name = "SURVIVAL_COLUMN"
+				clinical_stringio = StringIO(clinicalstr)
+				clinicaldf = pd.read_csv(clinical_stringio)
 			survival_col_name = ""
 			if('survival_col' in request.POST):
 				if(request.POST['survival_col']):
 					survival_col_name = request.POST['survival_col']
-			#path_json = filename1
-			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
 			ppistr = fh2.read()
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
 				make_empty_figure.delay()
@@ -1174,8 +1158,10 @@ def clustering_6_4(request):
 				lgmax = int(request.POST['L_g_max'])	
 				if(gene_set_size == ""):
 					gene_set_size = 2000
+				# run algorithm
 				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				# check if clinical data exist				
 				if not(has_clin_data == "true"):
 					survival_col_name = ""
 					clinicalstr = "empty"
@@ -1379,8 +1365,8 @@ def clustering_6_4(request):
 			ret_metadata2 = ""
 			ret_metadata3 = ""
 			#metd = list_metadata_4.apply_async(args=["/code/clustering/static/metadata.txt"],countdown=0)
-			if(os.path.isfile("/code/clustering/static/userfiles/metadata_" + session_id + ".txt")):
-				metd = list_metadata_4.apply_async(args=["/code/clustering/static/userfiles/metadata_" + session_id + ".txt"],countdown=0)
+			if(os.path.isfile("/code/clustering/static/userfiles/metadata_" + session_id + "_2.txt")):
+				metd = list_metadata_5.apply_async(args=["/code/clustering/static/userfiles/metadata_" + session_id + "_2.txt"],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
 			#print(ret_metadata1) 
 			#print("iubaerb")

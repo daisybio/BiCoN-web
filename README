@@ -131,7 +131,6 @@ Which methods do what:
 
 In views.py, methods are defined that run code after the user accesses a web page.
 
-
 #####################################
 #### 4. Troubleshooting: ############
 #####################################
