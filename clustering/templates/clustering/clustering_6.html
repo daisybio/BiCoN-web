@@ -1358,7 +1358,7 @@ sigma.utils.pkg('sigma.canvas.nodes');
     return neighbors;
   });
 
-sigma.parsers.json('{% static 'test15.json' %}', {
+sigma.parsers.json('{% static 'ppi.json' %}', {
 // sigma.parsers.json('{% static 'test15_487i09fcpzr5kz8si83dh7gfa2b898z8.json' %}', {
   container: 'graph-container', renderer: {
 		type: 'canvas',
@@ -1443,7 +1443,7 @@ s.refresh();
 
         <!-- <img src={% static plot2 %}> -->
 	
-        <img src={% static "test.png" %}><h3>
+        <img src={% static "heatmap.png" %}><h3>
                     <a href="#">Heatmap</a>
                 </h3>
                 <p>The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.</p>

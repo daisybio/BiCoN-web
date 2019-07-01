@@ -17,6 +17,7 @@ services:
     ports:
       - "5432:5432"
   # the django web server.
+  # add default values for environment variables by changing PARAM=${var} to PARAM=${var:-default}
   web:
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py createcachetable && service cron start && python manage.py runserver 0.0.0.0:8000"
@@ -25,7 +26,7 @@ services:
       - .:/code
     environment:
       - SECRET_KEY=${secret_key}
-      - DJANGO_ALLOWED_HOSTS=${allowed_hosts}
+      - DJANGO_ALLOWED_HOSTS=${allowed_hosts:-['*']}
       - CELERY_URL=${cel_url}
     ports:
       - "8000:8000"

@@ -78,17 +78,17 @@ class GraphForm(models.Model):
 		return(1)
 	
 	def save_user_data(fn,prot_fn,username):
-		foobar = "user_uploaded_files/" + username
-		if not(os.path.isdir(foobar)):
-			os.mkdir(foobar)
+		user_dir = "user_uploaded_files/" + username
+		if not(os.path.isdir(user_dir)):
+			os.mkdir(user_dir)
 		fn.seek(0)
 		prot_fn.seek(0)
 		str1 = fn.read().decode('utf-8')
 		str2 = prot_fn.read().decode('utf-8')
 		#print(str1)
 		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-		filename_2 = foobar + "/" + filename_1 + "_expr.txt"
-		filename_3 = foobar + "/" + filename_1 + "_prot.txt"
+		filename_2 = user_dir + "/" + filename_1 + "_expr.txt"
+		filename_3 = user_dir + "/" + filename_1 + "_prot.txt"
 		outfile1 = open(filename_2, "w")
 		outfile1.write(str1)
 		outfile1.close()
@@ -96,9 +96,9 @@ class GraphForm(models.Model):
 		outfile2.write(str2)
 		outfile2.close()
 	def save_user_data_2(fn,prot_fn,clinical_fn,username):
-		foobar = "user_uploaded_files/" + username
-		if not(os.path.isdir(foobar)):
-			os.mkdir(foobar)
+		user_dir = "user_uploaded_files/" + username
+		if not(os.path.isdir(user_dir)):
+			os.mkdir(user_dir)
 		fn.seek(0)
 		prot_fn.seek(0)
 		clinical_fn.seek(0)
@@ -107,9 +107,9 @@ class GraphForm(models.Model):
 		str3 = clinical_fn.read().decode('utf-8')
 		#print(str1)
 		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-		filename_2 = foobar + "/" + filename_1 + "_expr.txt"
-		filename_3 = foobar + "/" + filename_1 + "_prot.txt"
-		filename_4 = foobar + "/" + filename_1 + "_clin.txt"
+		filename_2 = user_dir + "/" + filename_1 + "_expr.txt"
+		filename_3 = user_dir + "/" + filename_1 + "_prot.txt"
+		filename_4 = user_dir + "/" + filename_1 + "_clin.txt"
 		outfile1 = open(filename_2, "w")
 		outfile1.write(str1)
 		outfile1.close()
@@ -120,11 +120,11 @@ class GraphForm(models.Model):
 		outfile3.write(str3)
 		outfile3.close()
 	def save_user_data_3(exprstr,ppistr,clinicalstr,username):
-		foobar = "user_uploaded_files/" + username
-		if not(os.path.isdir(foobar)):
-			os.mkdir(foobar)
-		if not(os.path.isdir(foobar + "/bla")):
-			os.mkdir(foobar + "/bla")	
+		user_dir = "user_uploaded_files/" + username
+		if not(os.path.isdir(user_dir)):
+			os.mkdir(user_dir)
+		#if not(os.path.isdir(foobar + "/bla")):
+		#	os.mkdir(foobar + "/bla")	
 		if not(os.path.isdir("/code/user_uploaded_files/" + username)):
 			os.mkdir("/code/user_uploaded_files/" + username)	
 		if(clinicalstr == ""):
@@ -138,9 +138,9 @@ class GraphForm(models.Model):
 		#str3 = clinical_fn.read().decode('utf-8')
 		#print(str1)
 		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-		filename_2 = foobar + "/" + filename_1 + "_expr.txt"
-		filename_3 = foobar + "/" + filename_1 + "_prot.txt"
-		filename_4 = foobar + "/" + filename_1 + "_clin.txt"
+		filename_2 = user_dir + "/" + filename_1 + "_expr.txt"
+		filename_3 = user_dir + "/" + filename_1 + "_prot.txt"
+		filename_4 = user_dir + "/" + filename_1 + "_clin.txt"
 		outfile1 = open(filename_2, "w")
 		outfile1.write(exprstr)
 		outfile1.close()
@@ -153,17 +153,17 @@ class GraphForm(models.Model):
 
 
 	def save_results(username):
-		foobar = "user_uploaded_files/" + username
-		if not(os.path.isdir(foobar)):
-			os.mkdir(foobar)
+		user_dir = "user_uploaded_files/" + username
+		if not(os.path.isdir(user_dir)):
+			os.mkdir(user_dir)
 		fn.seek(0)
 		prot_fn.seek(0)
 		str1 = fn.read().decode('utf-8')
 		str2 = prot_fn.read().decode('utf-8')
 		#print(str1)
 		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-		filename_2 = foobar + "/" + filename_1 + "_json.json"
-		filename_3 = foobar + "/" + filename_1 + "_heatmap.png"
+		filename_2 = user_dir + "/" + filename_1 + "_json.json"
+		filename_3 = user_dir + "/" + filename_1 + "_heatmap.png"
 		outfile1 = open(filename_2, "w")
 		outfile1.write(str1)
 		outfile1.close()
@@ -204,8 +204,8 @@ class GraphForm(models.Model):
 
 
 	def list_user_data(username):
-		foobar = "user_uploaded_files/" + username
-		fileslist = os.listdir(foobar)
+		user_dir = "user_uploaded_files/" + username
+		fileslist = os.listdir(user_dir)
 		print(fileslist)
 		bar = []
 		for f in fileslist:
@@ -224,8 +224,8 @@ class GraphForm(models.Model):
 	
 
 	def list_user_data_2(username):
-		foobar = "user_uploaded_files/" + username
-		fileslist = os.listdir(foobar)
+		user_dir = "user_uploaded_files/" + username
+		fileslist = os.listdir(user_dir)
 		bar = []
 		for f in fileslist:
 			if "_json.json" in f:

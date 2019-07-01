@@ -1712,13 +1712,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
 	nx.set_node_attributes(G,10,'size')
+	#replace strings stepwise that are needed differently for sigma.js
 	jsn = json_graph.node_link_data(G)
 	jsn2 = str(json.dumps(jsn))
 	jsn33 = jsn2.replace('links','edges')
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	with open("/code/clustering/static/test15.json", "w") as text_file:
+	#with open("/code/clustering/static/test15.json", "w") as text_file:
+	with open("/code/clustering/static/ppi.json", "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
 	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
@@ -1732,6 +1734,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	graph.selection_policy = NodesAndLinkedEdges()
 	graph.inspection_policy = EdgesAndLinkedNodes()
 	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
+	# get graph coordinates on layout
 	x,y = zip(*graph.layout_provider.graph_layout.values())
 	node_labels = nx.get_node_attributes(G, 'Name')
 	z = tuple([(bar-0.1) for bar in x])
@@ -1750,7 +1753,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	plt.savefig("/code/clustering/static/test.png")
+	#plt.savefig("/code/clustering/static/test.png")
+	plt.savefig("/code/clustering/static/heatmap.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
@@ -1869,6 +1873,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
+						# get list for which patients variable is 1 or 0
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
@@ -1880,15 +1885,16 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						tmp95 = []
-						tmp94 = []
+						current_patients_1 = []
+						current_patients_2 = []
+						# check if patient that has the current variable is in one of the patient clusters, and add patient list
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
-								tmp95.append(all_patients[i])
+								current_patients_1.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
-								tmp94.append(all_patients[i])
-						group1_has.append(tmp95)				
-						group2_has.append(tmp94)
+								current_patients_2.append(all_patients[i])
+						group1_has.append(current_patients_1)				
+						group2_has.append(current_patients_2)
 			else:
 				if(len(coluniq) == 2):
 					#print(coluniq)
@@ -1923,16 +1929,16 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						tmp95 = []
-						tmp94 = []
+						current_patients_1 = []
+						current_patients_2 = []
 						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
-								tmp95.append(all_patients[i])
+								current_patients_1.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
-								tmp94.append(all_patients[i])
-						group1_has.append(tmp95)				
-						group2_has.append(tmp94)
+								current_patients_2.append(all_patients[i])
+						group1_has.append(current_patients_1)				
+						group2_has.append(current_patients_2)
 			ctr = ctr + 1
 		print(param_names)
 		print(patients_0)

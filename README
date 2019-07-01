@@ -12,7 +12,7 @@ You can run the application by running docker compose, which starts the server a
 
 sudo allowed_hosts=['*'] cel_url='amqp://admin:mypass@rabbit:5672' secret_key='9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6' docker-compose up
 
-instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0']. It is important to specify (even if it is *, meaning all addresses) allowed hosts since otherwise Django will not be able to show the website to you. The cel_url parameter should be the same on all computers but it is possible to specify password and username (which will be described in 3. How the code works). 
+instead of ['*'], which allows all hosts, you can write a number of the port that django is using, for example ['0.0.0.0']. It is important to specify (even if it is *, meaning all addresses) allowed hosts since otherwise Django will not be able to show the website to you. The cel_url parameter should be the same on all computers but it is possible to specify password and username (which will be described in 3. How the code works).
 
 You can find out which port Django is using by running
 
@@ -89,7 +89,12 @@ You can change the port on which the website is running by modifying the command
  python manage.py runserver 0.0.0.0:8000 
 and substituting 0.0.0.0 by another address.
 
-Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified to change a specific setting.
+Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified to change a specific setting. It is possible to add default values for the input variables (e.g. ['*'] for accepted_hosts) in settings.py by changing
+
+#ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS")
+to
+#ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", ['*'])
+Then, the input variables become optional, and the server will run with the default values if none are given.
 
 Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template. If you want to change the link for one of the pages, add a line below "urlpatterns" in this form:
 url(r'new_address.html', views.your_view),
