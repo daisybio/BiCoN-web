@@ -461,24 +461,35 @@ border:1px solid black;
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 
-
+	<!--- buttons for the start page --->
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
-
 	</div>
+	<!--- tab for selecting old data to display --->
+	<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
+	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
+		<br><br><h3>Use own uploaded files:</h3>
+	<select name="input_own_file" size="1"style="width:500px">	
+		{% for filename in list_of_files %}
+	        <option value="{{filename.f2}}">File(s) from: {{filename.f1}}</option>
+		{% endfor %}
+       	</select><br>	
+	</div>
+	<!--- start of multi-step input form --->
+	<!--- upload expression data (step 1) --->
 	<div class="tab4" style="width:500px; height:300px" id="expr_upload">
 	<b>Upload expression data:    </b><br>
 
 	<input class="input" id="myfile_input" type="file" name="myfile" style="float:left">
-{% if user.is_authenticated %}
+	{% if user.is_authenticated %}
     	<label for="l_box1"><input type="checkbox" name="save_data" value="save_data" id="l_box1">  Save data</label>	
    	{% endif %}
-<br><br>
+	<br><br>
 
-<label for="l_box1"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
-<select name="cancer_type" id="predef_input" size="1">	
+	<label for="l_box1"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
+	<select name="cancer_type" id="predef_input" size="1">	
 	        <option value="1">Lung Cancer</option>
 	        <option value="2">Breast Cancer</option>
        	</select><br><br>
@@ -492,16 +503,16 @@ border:1px solid black;
 	<br><br>
 	{% endif %}	
 	</div>
-
+	<!--- upload PPI data (step 2) --->
 	<div class="tab4" style="width:500px; height:300px" id="ppi_upload">
 	<b>Upload file with PPI:</b><br>
 	<input class="input" id="protfile_input" type="file" name="protfile"   style="float: left;"> 
-
- <div class="wrap-collabsible" style="width:200px; display:inline;" id="ndex_div">
-  <input id="collapsible_2" class="toggle" type="checkbox" style="display:none">
-  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
-  <div class="collapsible-content">
-    <div class="content-inner">
+	<!--- ndex import (collapsible)--->
+	 <div class="wrap-collabsible" style="width:200px; display:inline;" id="ndex_div">
+	  <input id="collapsible_2" class="toggle" type="checkbox" style="display:none">
+	  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
+	  <div class="collapsible-content">
+	    <div class="content-inner">
 
 	<label for="l_box1"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
 
@@ -531,7 +542,7 @@ border:1px solid black;
   </div>
 </div> <!--- end ndex_div -->
 </div> <!--- end PPI upload -->
-
+<!--- js code for PPI data upload --->
 <script>
  // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
 $('#collapsible_2').change(function () {
@@ -626,56 +637,10 @@ $(document).ready(function() {
 });
 </script>
 
-<script>
-$(document).ready(function() {
 
-    $('#ndex_name').change(function() {
 
-        var selectedValue = $(this).val();
 
-        if ( selectedValue == '1' ) {
-            $('.message_1').show();
-        } else {
-            $('.message_1').hide();
-        }
-        if ( selectedValue == '2' ) {
-            $('.message_2').show();
-        } else {
-            $('.message_2').hide();
-        }
-        if ( selectedValue == '3' || selectedValue =='7' || selectedValue =='8' || selectedValue =='9' || selectedValue =='10' || selectedValue =='11' || selectedValue =='12'|| selectedValue =='13' ) {
-            $('.message_3').show();
-        } else {
-            $('.message_3').hide();
-        }
-	if ( selectedValue == '4' ) {
-            $('.message_4').show();
-        } else {
-            $('.message_4').hide();
-        }if ( selectedValue == '5' ) {
-            $('.message_5').show();
-        } else {
-            $('.message_5').hide();
-        }if ( selectedValue == '6' ) {
-            $('.message_6').show();
-        } else {
-            $('.message_6').hide();
-        }
-
-    });
-});
-</script>
-
-<!--- tab for selecting old data to display --->
-<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
-	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
-		<br><br><h3>Use own uploaded files:</h3>
-	<select name="input_own_file" size="1"style="width:500px">	
-		{% for filename in list_of_files %}
-	        <option value="{{filename.f2}}">File(s) from: {{filename.f1}}</option>
-		{% endfor %}
-       	</select><br>
-	</div>
+	<!--- upload expression data (step 3) --->
 	<div class="tab4" style="width:500px; height:300px" id="metad_upload">
 	<b>This step is optional.</b><br> If you do not want to upload metadata, you can
     	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
@@ -701,6 +666,7 @@ $(document).ready(function() {
        	</select><br>
 	{% endif %}
 	</div>
+	<!--- algorithm parameters (step 4) --->
 	<div class="tab4" style="width:500px; height:300px" id="params">
 
 	<h3>Algorithm Parameters</h3>
@@ -772,11 +738,12 @@ Stop criteria: score_max - score_av <
 	</p>
     </div>
   </div>
+
 </div> <!--- end wrap-collapsible -->
 	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 
 	</div> <!-- end params -->
-
+<!--- end of multi-stetp input form --->
 
 <script>
 // expand box for data input to fit expanded dropdown menu
@@ -831,6 +798,7 @@ $('#selectall').trigger('change');
 </div><!--- input div 2-->
 
 </form>
+<!--- javascript for input verification --->
 <script>
 // check input data - if old results are displayed, no uploads or parameters are needed
 function checkInp()

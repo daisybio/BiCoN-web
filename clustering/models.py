@@ -204,6 +204,7 @@ class GraphForm(models.Model):
 
 
 	def list_user_data(username):
+		print("listing user data")
 		user_dir = "user_uploaded_files/" + username
 		fileslist = os.listdir(user_dir)
 		print(fileslist)
@@ -224,6 +225,7 @@ class GraphForm(models.Model):
 	
 
 	def list_user_data_2(username):
+		print("listing user data 2")
 		user_dir = "user_uploaded_files/" + username
 		fileslist = os.listdir(user_dir)
 		bar = []

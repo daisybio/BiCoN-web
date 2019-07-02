@@ -34,6 +34,7 @@ urlpatterns = [
 	url(r'login.html', views.login_2),
 	url(r'logout.html', views.logout_2),
 	url(r'signup.html', views.signup),
+	url(r'delete_user.html', views.delete_user),
 #	url(r'other_test.html', views.list_3),
 #	url(r'test3.html', views.list_2),
 #	url(r'^list/$', views.list_2, name='list'),

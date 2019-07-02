@@ -2185,6 +2185,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
 	json_path = "/code/clustering/static/test15_" + session_id + ".json"
+	#json_path = "/code/clustering/static/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
@@ -2219,8 +2220,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	path99 = "/code/clustering/static/test_" + session_id + ".png"
-	plt.savefig(path99)
+	path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
+	#path_heatmap = "/code/clustering/static/heatmap_" + session_id + ".png"
+	plt.savefig(path_heatmap)
 	#script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
@@ -2481,9 +2483,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		# make arrays with survival time of patients in both groups
 		for key in patientData:
 			if key in group1_ids:
-				survival_1.append(patientData[key])
+				survival_1.append(float(patientData[key]))
 			elif key in group2_ids:
-				survival_2.append(patientData[key])
+				survival_2.append(float(patientData[key]))
 		print(survival_1)
 		# calculate p-value for survival times
 		if(survival_col in list(clinicaldf.columns)):
@@ -2577,7 +2579,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		hoverinfo='name',
 		line=dict(
 		shape='hv'))
-		data99 = [trace1,trace2]
+		surv_data_for_graph = [trace1,trace2]
 		layout = dict(showlegend=False,
 		#legend=dict(
 		#yanchor="bottom",
@@ -2588,7 +2590,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
         	title='Time in years'),
 		yaxis=dict(
         	title='percentage of patients'))
-		fig = dict(data=data99,layout=layout)		
+		fig = dict(data=surv_data_for_graph,layout=layout)		
 		#fig = dict(data=data99, layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
@@ -2608,7 +2610,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
         	text_file.write("Done!")
 	#print(ret_metadata)
 	#return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
-	return(ret_metadata,path99,path_metadata,output_plot_path,json_path,p_val)
+	return(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val)
 
 
 ## enrichment stuff ##
