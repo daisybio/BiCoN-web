@@ -2187,6 +2187,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	json_path = "/code/clustering/static/test15_" + session_id + ".json"
 	#json_path = "/code/clustering/static/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
+		text_file.write(jsn3)	
+	json_path_2 = "/code/clustering/static/ppi_" + session_id + ".json"
+	with open(json_path_2, "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
 	# configure plot
@@ -2223,15 +2226,17 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
 	#path_heatmap = "/code/clustering/static/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
+	path_heatmap_2 = "/code/clustering/static/heatmap_" + session_id + ".png"
+	plt.savefig(path_heatmap_2)
 	#script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
 	# write lists of genes in files, needed for enrichment analysis
-	path_genelist = "genelist_" + session_id + ".txt"
-	path_genelist_1 = "genelist_1_" + session_id + ".txt"
-	path_genelist_2 = "genelist_2_" + session_id + ".txt"
+	path_genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
+	path_genelist_1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
+	path_genelist_2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
 	with open(path_genelist,"w") as text_file_4:
 		for i in G_list:
 			text_file_4.write(str(i) + "\n")

@@ -422,6 +422,8 @@ border:1px solid black;
    			{% endif %} 
                     </li><li>
 			<a href="signup.html">Sign up</a>
+		    </li><li>
+			<a href="delete_user.html">Delete user account</a>
 		    </li>
                 </ul>
             </div>
@@ -1230,9 +1232,9 @@ function fixStepIndicator(n) {
 </article>
             
         </div>
+<!--- tab for heatmap --->
 <div class="tabcontent" id="heatmap">
-            
-<h3></h3>           
+                    
             <article class="col-md-8 article-intro">
 
                 <h1>Heatmap</h1>
@@ -1249,12 +1251,13 @@ function fixStepIndicator(n) {
             </article>
         </div>
        {% load staticfiles %}
-
+<!--- tab for survival plot --->
 <div class="tabcontent" id="survival">
             <article class="col-md-12 article-intro">
                 <h1>Survival Information</h1>
-<!--- load the survival graph --->
-<object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object>
+	<!--- load the survival graph --->
+	{{output_plot_path_2}}
+	<object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object>
                 <h3>
                     <a href="#">Survival of patients</a>
                 </h3>
@@ -1270,7 +1273,7 @@ The log-rank test gives a p-value of: {{pval}}
 {% endif %}
 </article> 
         </div>
-
+<!--- tab for metadata --->
 <div class="tabcontent" id="patient_metadata">
             <article class="col-md-12 article-intro">
                 <h1>Patient Data</h1>
@@ -1304,6 +1307,7 @@ The log-rank test gives a p-value of: {{pval}}
 </table>       
 </article> 
         </div>
+<!--- tab for convergence plot --->
 	<div class="tabcontent" id="convergence">
             <article class="col-md-8 article-intro">
                 <h1>Convergence Behaviour</h1>
@@ -1320,6 +1324,7 @@ The log-rank test gives a p-value of: {{pval}}
            
             
         </div>
+<!--- tab for enrichment --->
 	{% if enrichment_open %}
 	<div class="row" id="kegg_enrichment">
 	{% else %}
@@ -1331,6 +1336,7 @@ The log-rank test gives a p-value of: {{pval}}
                 </h3>
                 <p></p><br>
 		Run an Enrichment for the genes used in the analysis. Select for which terms you want to run the enrichment and display the results for genes either in both clusters, in cluster 1 or in cluster 2.<br><br>
+	<!--- form for enrichment analysis --->
             <form action="#" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 		<b>Run Enrichment:</b><br>
@@ -1350,6 +1356,7 @@ The log-rank test gives a p-value of: {{pval}}
        	</select>
 		<input type="submit" value="Submit" />
 	</form>
+<!--- enrichment results ---->
 <br><br>Show Enrichment for Genes of:<br>
 <ul class="nav nav-tabs">
 <!--- select gene cluster to show enrichment for--->
@@ -1359,12 +1366,12 @@ The log-rank test gives a p-value of: {{pval}}
   <li><a data-toggle="tab" href="#menu3">Only in Group 1</a></li>
   <li><a data-toggle="tab" href="#menu4">Only in Group 2</a></li>
 </ul>
-
+<!--- both groups --->
 <div class="tab-content">
   <div id="home" class="tab-pane fade in active" style="background-color: #FFFFFF;width:1200px">
     <h3>Both Groups</h3>
     <p><table id="ctable" class="display" style="width: 1200px;">
-
+<!--- generate table with results from enrichment --->
 <thead>
 <tr>
 <th>Gene_set</th>
@@ -1387,6 +1394,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 </table> </p>
   </div>
+<!--- group 1 --->
   <div id="menu1" class="tab-pane fade" style="background-color: #FFFFFF;width:1200px">
     <h3>Group 1</h3>
     <p><table id="ctable2" class="display"  style="width: 1200px;">
@@ -1413,6 +1421,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 </table></p>
   </div>
+<!--- group 2 --->
   <div id="menu2" class="tab-pane fade" style="background-color: #FFFFFF;width: 1200px;">
     <h3>Group 2</h3>
     <p><table id="ctable3" class="display"  style="width: 1200px;">
@@ -1440,7 +1449,7 @@ The log-rank test gives a p-value of: {{pval}}
 </table></p>
   </div>
 	
-
+<!--- group 1 only --->
 <div id="menu3" class="tab-pane fade" style="background-color: #FFFFFF;width: 1200px;">
     <h3>Only in Group 1</h3>
     <p><table id="ctable4" class="display"  style="width: 1200px;">
@@ -1467,7 +1476,7 @@ The log-rank test gives a p-value of: {{pval}}
 
 </table></p>
   </div>
-
+<!--- group 2 only --->
 <div id="menu4" class="tab-pane fade" style="background-color: #FFFFFF;width: 1200px;">
     <h3>Only in Group 2</h3>
     <p><table id="ctable5" class="display"  style="width: 1200px;">
