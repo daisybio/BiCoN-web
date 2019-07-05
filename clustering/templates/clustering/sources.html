@@ -289,12 +289,26 @@ border:1px solid black;
         </div>
 	<div style="padding:40px;margin:40px;border:1px solid #ccc;min-width:1400px">
 
-         Most of the code for this website is written in <a href="https://www.python.org/"><b>Python</b></a>.<br>
+        <h3> Sources </h3>
+        The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/">NDEx Bio</a> webserver and contain datasets from the following sources: <a href="http://www.hprd.org/">Human Protein Reference Database</a>, <a href="http://cicblade.dep.usal.es:8080/APID/init.action">Agile Protein Interactions Database</a>, <a href="https://string-db.org/">STRING</a> database and from <a href="https://thebiogrid.org/">BioGrid</a>.<br>
+        Most of the code for this website is written in <a href="https://www.python.org/"><b>Python</b></a>.<br>
 	As a server framework, <a href="https://www.djangoproject.com/"><b>Django</b></a> Version 2.1.3 is used.<br>
-	The queuing system <a href="http://www.celeryproject.org/">Celery</a> is used for request processing.<br>
+	The queuing system <a href="http://www.celeryproject.org/">Celery</a> is used, based on a <a href="https://www.rabbitmq.com/">RabbitMQ</a> server for request processing.<br>
 	For the frontend, additional <a href="https://www.javascript.com"><b>JavaScript</b></a> code is used.<br>
+	For the PPI network display, the javascript library <a href="http://sigmajs.org/">Sigma.js</a> is used.<br>
+	The javascript library <a href="https://datatables.net/">DataTables</a> is used to improve table display.<br>
 	The server uses the following python libraries:<br>
-	<a href="https://github.com/tjwalch/django-livereload-server">django-livereload-server</a>
+	<a href="https://github.com/tjwalch/django-livereload-server">django-livereload-server</a><br>
+	<a href="https://matplotlib.org/">Matplotlib</a> for plots,<br>
+	<a href="https://bokeh.pydata.org/en/latest/">Bokeh</a> for graph preprocessing,<br>
+	<a href="https://networkx.github.io/">NetworkX</a> for graph processing,<br> 
+	<a href="https://seaborn.pydata.org/">Seaborn</a> for the heatmap,<br>
+	<a href="https://pypi.org/project/pybiomart/">PyBiomart</a> for gene name conversions,<br>
+	<a href="https://pypi.org/project/ndex2/">NDEx 2</a> for PPI data import,<br>
+	<a href="https://pandas.pydata.org/">Pandas</a> for internal data processing,<br>
+	<a href="https://pypi.org/project/gseapy/">GSEApy</a> is used for gene set enrichment analyses,<br>
+	<a href="https://scikit-learn.org/stable/">Scikit / sklearn</a> for clustering,<br>
+	<a href="https://lifelines.readthedocs.io/en/latest/lifelines.statistics.html">Lifelines</a> for survival analysis<br>
     </div>
 </div> 
   

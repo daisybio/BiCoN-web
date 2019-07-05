@@ -2812,7 +2812,12 @@ def check_input_files(ppistr,exprstr):
 def convert_gene_list(adjlist,filename):
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 	                  host='http://www.ensembl.org')
-	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	#print("biomart attributes")
+	#print(dataset.list_attributes().head(100))
+	#print(dataset.list_attributes().ix[:,0].str.contains("entrez"))
+	#print(dataset.list_attributes()[dataset.list_attributes().ix[:,0].str.match('entrez')])
+	#conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	# conv is a list of genes with ENSEMBL Id, gene name and Entrez ID
 	conv_genelist = conv['Gene name'].tolist()
 	retstr = ""
@@ -2905,7 +2910,7 @@ def read_ndex_file_4(fn):
 	print(node_dict_2)
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
-	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	conv_genelist = conv['Gene name'].tolist()
 	for item in tmp2:
 		#print(item)
@@ -2959,7 +2964,7 @@ def read_ndex_file_4(fn):
 	tmp4 = json.loads(edge_line_2)
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
-	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	ret = []
 	for item in tmp4:
 		print(item)
@@ -2986,7 +2991,7 @@ def import_ndex(name):
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
 	# get list of genes for later conversion
-	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
+	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	conv_genelist = conv['Gene name'].tolist()
 	# iterate over all nodes in network
 	for node_id, node in nice_cx_network.get_nodes():

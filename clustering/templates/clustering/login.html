@@ -71,6 +71,9 @@ tr:nth-child(even) {
                      <li>
                         <a href="infopage.html">How to</a>
                     </li>
+ 			<li>
+                        <a href="clustering_6_part_4.html">Analysis</a>
+                    </li>
                     <li>
                         <a>Logged in?</a>
 			{% if user.is_authenticated %}
@@ -111,6 +114,7 @@ tr:nth-child(even) {
             </div>
         </div>
 	<div style="padding:40px;margin:40px;border:1px solid #ccc">
+	{{text}} <br>
         <h1>Enter password and username:</h1>
         <form action="#" method="post" enctype="multipart/form-data">
                 {% csrf_token %}

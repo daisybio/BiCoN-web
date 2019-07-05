@@ -26,7 +26,12 @@ In this case, the address where the server runs is 0.0.0.0. This is the address 
 
 IN ADDITION, in order to allow the live updates of algorithm progress, open a terminal in the same directory as this file (not on the Docker container, but on your local computer) and type:
 
+python manage.py livereload 
+OR, to use your own secret key (my_secret_key):
+export SECRET_KEY="my_secret_key"
+and then
 python manage.py livereload
+in the same terminal.
 
 This gets the server running. You can then access the website by typing:
 

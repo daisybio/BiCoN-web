@@ -194,7 +194,7 @@ table {
     /*width: 100%;*/
     min-width: 500px;
 }
-
+/* entries of enrichment-result tables */
 table.dataTable {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -234,7 +234,7 @@ tr:nth-child(even) {
   overflow: hidden;
   background-color: #f1f1f1;
 }
-/**/ 
+/*buttons in input form*/ 
 .tab button {
     background-color: inherit;
     float: left;
@@ -310,15 +310,6 @@ tr:nth-child(even) {
     color:#D8D8D8;
 }
 
-.arrow-right {
-  width: 0; 
-  height: 0; 
-  border-top: 35px solid transparent;
-  border-bottom: 35px solid transparent;  
-  border-left: 35px solid green;
-margin-bottom: -20px;
-/*position:absolute;*/
-}
 /* result tabs */
 .tabcontent {
     display: none;
@@ -465,8 +456,10 @@ border:1px solid black;
 
 	<!--- buttons for the start page --->
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
+	<!--- this button opens the standard, 5-step input form--->
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
+	<!--- this button opens the one-step form for displaying old data --->
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
 	</div>
 	<!--- tab for selecting old data to display --->
@@ -515,10 +508,10 @@ border:1px solid black;
 	  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
 	  <div class="collapsible-content">
 	    <div class="content-inner">
-
+	<!--- invisible checkbox that is checked when collapsible is open, and unchecked if closed (used to pass parameter to view) ---> 
 	<label for="l_box1"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
 
-	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1" onchange="recalctotals()">	
+	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1">	
 	        <option value="1" selected="selected">APID</option>
 	        <option value="2">STRING</option>
 	        <option value="3">BioGrid</option>
@@ -642,7 +635,7 @@ $(document).ready(function() {
 
 
 
-	<!--- upload expression data (step 3) --->
+	<!--- upload metadata (step 3) --->
 	<div class="tab4" style="width:500px; height:300px" id="metad_upload">
 	<b>This step is optional.</b><br> If you do not want to upload metadata, you can
     	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
@@ -650,24 +643,8 @@ $(document).ready(function() {
 	<br>
 	<b>Upload file with Patient Data:</b> <br>
 	<input class="input" type="file" name="patientdata"><br> <b>Name of "survival" column:</b> <input class="input" type="text" name="survival_col"><br>
-	
-	
-	{% if false %}
-	<label for="l_box1"><input type="radio" name="redo_analysis" value="redo_analysis" id="l_box1">Redo analysis:</label>
-	<select name="input_own_file_redo" size="1"style="width:500px">	
-		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
-		{% endfor %}
-       	</select>
-		<label for="l_box1"><input type="radio" name="own_file" value="own_file" id="l_box1">Use own files:</label>
-		<br><br><h3>Use own uploaded files:</h3>
-	<select name="input_own_file" size="1"style="width:500px">	
-		{% for filename in list_of_files %}
-	        <option value="{{filename.f2}}">File(s) from: {{filename.f1}}</option>
-		{% endfor %}
-       	</select><br>
-	{% endif %}
 	</div>
+
 	<!--- algorithm parameters (step 4) --->
 	<div class="tab4" style="width:500px; height:300px" id="params">
 
@@ -686,7 +663,7 @@ $(document).ready(function() {
 	        <option value="20">20</option>
 	        <option value="45">45</option>
        	</select>
-
+	<!--- collapsible for advanced parameter input --->
 	 <div class="wrap-collabsible">
   <input id="collapsible" class="toggle" type="checkbox" style="display:none">
   <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
@@ -760,7 +737,7 @@ $('#collapsible').change(function () {
 });
 $('#selectall').trigger('change');
 </script>
-<!--- the previous-next buttons for the input form --->
+<!--- the previous-next buttons for the input form. invisible if input form is not open --->
 <div style="overflow:auto;position:relative;bottom:80px;">
   <div style="float:right;">
     <button type="button" id="prevBtn2" onclick="showTab3(0)" style="display:none; font-size:24px">Previous</button>
@@ -780,6 +757,7 @@ $('#selectall').trigger('change');
   <span class="step"><a id="myLink" href="#" onclick="showTab2(2);">3.<br>PPI<br><br></a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(3);">4.<br>Metadata<br><br></a></span>
   <span class="step"><a id="myLink" href="#" onclick="showTab2(4);">5.<br>Parameters<br><br></a></span>
+  <!--- separate step if user has clicked "show old analysis" button --->
   <span class="step2"><a id="myLink" href="#" onclick="showOldAnalysisTab();">Show old analysis<br><br></a></span>
 <div style="height:200px">
 </div>
@@ -965,6 +943,7 @@ if (n == 5) {
  } else {
 
   }
+// hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
@@ -1013,6 +992,7 @@ if (n == 5) {
  } else {
 
   }
+// hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
@@ -1212,7 +1192,7 @@ function fixStepIndicator(n) {
        {% load staticfiles %}
 		<!--- here the PPI graph is displayed --->
 		<!---<div id="graph-container" style="display: block;float:left"><img src={% static 'legend.png' %} width="132" height="218" style="position:absolute"> </div>--->
-<div id="graph-container" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;bottom:60px"> </div></div>
+<div id="graph-container" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;bottom:100px"> </div></div>
 	
 <div id="div-for-newline" style="clear:both">
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>

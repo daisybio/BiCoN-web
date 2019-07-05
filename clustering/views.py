@@ -5,6 +5,7 @@ from django.template import loader
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.hashers import check_password
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.views import generic
@@ -69,7 +70,8 @@ def login_2(request):
 			#return render(request,'polls/login.html')
 			return redirect('clustering/clustering_6_part_4.html')
 		else:
-			return render(request,'clustering/login.html')
+			text = "Username or password are incorrect"
+			return render(request,'clustering/login.html',{'text':text})
 			#return redirect('polls/clustering.html')
 	else:
 		return render(request,'clustering/login.html')
@@ -122,7 +124,8 @@ def delete_user(request):
 		print(username)
 		print(str(request.user.password))
 		print(password)
-		if(str(request.user) == username and str(request.user.password) == password):
+		if(str(request.user) == username and check_password(password,request.user.password)):
+			print("password found")
 			u = User.objects.get(username=username)
 			u.delete()
 			user_dir = "user_uploaded_files/" + username
@@ -957,7 +960,7 @@ def clustering_6_4(request):
 			ret_metadata_3 = ""
 			# check if plotly file exists and copy
 			if(os.path.isfile(path_plotly)):
-				copyfile(path_plotly,("clustering/static/userfiles/" + path_plotly_2))
+				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
 				print("plot copied to")
 				print(path_plotly)
@@ -1116,6 +1119,8 @@ def clustering_6_4(request):
 						copyfile(("/code/clustering/static/" + path_heatmap),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
+						if(os.path.isfile(path_metadata + "_2")):
+							copyfile((path_metadata+ "_2"),("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt_2"))
 						copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
 						copyfile(("/code/clustering/static/genelist_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist.txt"))
 						copyfile(("/code/clustering/static/genelist_1_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist_1.txt"))
@@ -1125,6 +1130,14 @@ def clustering_6_4(request):
 				ret_metadata1=ret_metadata[0]
 				ret_metadata2=ret_metadata[1]
 				ret_metadata3=ret_metadata[2]
+				# empty enrichment data from cache
+				enrichment_dict = cache.get('enrichment_dict',"")
+				if not(enrichment_dict == ""):
+					cache.set("enrichment_dict","")
+					cache.set("enrichment_dict_2","")
+					cache.set("enrichment_dict_3","")
+					cache.set("enrichment_dict_4","")
+					cache.set("enrichment_dict_5","")
 				# paths for showing results
 				# write list of genes to downloadable file
 				convert_gene_list.delay(adjlist,"/code/clustering/static/genelist_temp.txt")
@@ -1187,6 +1200,9 @@ def clustering_6_4(request):
 			has_clin_data = "false"
 			clinicaldf = ""
 			survival_col_name = ""
+			if('survival_col' in request.POST):
+				if(request.POST['survival_col']):
+					survival_col_name = request.POST['survival_col']
 			if(os.path.isfile(filename3)):
 				fh3 = open(filename3)
 				has_clin_data = "true"
@@ -1197,9 +1213,6 @@ def clustering_6_4(request):
 					survival_col_name = "SURVIVAL_COLUMN_MONTH"
 				clinical_stringio = StringIO(clinicalstr)
 				clinicaldf = pd.read_csv(clinical_stringio)
-			if('survival_col' in request.POST):
-				if(request.POST['survival_col']):
-					survival_col_name = request.POST['survival_col']
 			ppistr = fh2.read()
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
 				make_empty_figure.delay()
@@ -1228,6 +1241,13 @@ def clustering_6_4(request):
 				ret_metadata1 = ret_metadata[0]
 				ret_metadata2 = ret_metadata[1]
 				ret_metadata3 = ret_metadata[2]
+				enrichment_dict = cache.get('enrichment_dict',"")
+				if not(enrichment_dict == ""):
+					cache.set("enrichment_dict","")
+					cache.set("enrichment_dict_2","")
+					cache.set("enrichment_dict_3","")
+					cache.set("enrichment_dict_4","")
+					cache.set("enrichment_dict_5","")
 				#metd = list_metadata_3.apply_async(countdown=0)
 				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
 				output_plot_path = "output_plotly_" + session_id + ".html"
@@ -1378,13 +1398,14 @@ def clustering_6_4(request):
 				metd = list_metadata_5.apply_async(args=[(path_metadata + "_2")],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 			
 			output_plot_path = "output_plotly_" + session_id + ".html"
+			# write enrichment results to cache
 			if not(session_id_from_cache == 'has expired'):
 				session_id = session_id_from_cache
 				cache.set("enrichment_dict",enrichment_dict)
-				cache.set("enrichment_dict_1",enrichment_dict)
-				cache.set("enrichment_dict_2",enrichment_dict)
-				cache.set("enrichment_dict_3",enrichment_dict)
-				cache.set("enrichment_dict_4",enrichment_dict)
+				cache.set("enrichment_dict_2",enrichment_dict_2)
+				cache.set("enrichment_dict_3",enrichment_dict_3)
+				cache.set("enrichment_dict_4",enrichment_dict_4)
+				cache.set("enrichment_dict_5",enrichment_dict_5)
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':("userfiles/"+path_heatmap),'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
 'json_path':("userfiles/"+json_path + "?foo=bar"),'output_plot_path':("userfiles/"+output_plot_path),'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 		if('enr' not in request.POST):
@@ -1464,6 +1485,7 @@ def clustering_6_4(request):
 			ret_metadata2 = cache.get('ret_metadata2',"")
 			ret_metadata3 = cache.get('ret_metadata3',"")
 			p_val = cache.get('p_val',"")
+			# get enrichment results (in cache if user has hit reload button after running analysis)
 			enrichment_dict = cache.get('enrichment_dict',"")
 			enrichment_dict_2 = {}
 			enrichment_dict_3 = {}
