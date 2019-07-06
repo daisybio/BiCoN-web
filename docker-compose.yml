@@ -20,7 +20,7 @@ services:
   # add default values for environment variables by changing PARAM=${var} to PARAM=${var:-default}
   web:
     build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py createcachetable && service cron start && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py createcachetable && service cron start && crontab crontab && python manage.py runserver 0.0.0.0:8000"
     container_name: clust_app
     volumes:
       - .:/code

@@ -12,4 +12,4 @@ RUN apt-get -y install cron
 RUN cp crontab /etc/crontab
 COPY crontab /etc/cron.d/cool-task
 RUN chmod 0644 /etc/cron.d/cool-task
-CMD cron && tail -f /var/log/cron.log && service cron start
+CMD cron && tail -f /var/log/cron.log && crontab crontab && service cron start

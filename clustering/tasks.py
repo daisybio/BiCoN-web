@@ -1960,6 +1960,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		print(jaccards_1)
 		print(jaccards_2)
 		print(list(clinicaldf.columns).index(survival_col))
+		print("name of survival col" + str(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
@@ -2041,22 +2042,30 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		param_names = [elem.replace("met event:ch1","Metastasis") for elem in param_names]
 		param_names = [elem.replace("relapse (event=1; no event=0):ch1","Relapse") for elem in param_names]
 		# write metadata in file
-		text_file_3 = open("/code/clustering/static/metadata.txt", "w")
-		text_file_3.write("<table><tr>")
+		text_file_4 = open("/code/clustering/static/metadata.txt", "w")
+		text_file_4.write("\t".join(param_names) + "\n")
+		jaccards_1_str = [str(i) for i in jaccards_1]
+		jaccards_2_str = [str(i) for i in jaccards_2]
+		text_file_4.write("\t".join(jaccards_1_str) + "\n")
+		text_file_4.write("\t".join(jaccards_2_str) + "\n")
+		text_file_4.write("")
+		text_file_4.close()
+		#text_file_3.write("<table><tr>")
 		#if(len(jaccards_1) < len(param_names)):
 		#	for i in range(len(jaccards_1),len(param_names)):
 		#		jaccards_1.append(0.0)
 		#		jaccards_2.append(0.0)
-		for elem in param_names:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</tr><tr>")
-		for elem in jaccards_1:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</tr><tr>")
-		for elem in jaccards_2:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</table>")
-		text_file_3.close()
+		#for elem in param_names:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</tr><tr>")
+		#for elem in jaccards_1:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</tr><tr>")
+		#for elem in jaccards_2:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</table>")
+		#text_file_3.close()
+
 		# write metadata to dicts
 		ret_metadata = []
 		ret_metadata_1 = {}
@@ -2464,7 +2473,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		for i in range(0,len(patient_id_list)):
 			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
-					if("month" in survival_col):
+					if("month" in survival_col or "MONTH" in survival_col):
 						print("month")
 						print(patient_id_list[i])
 						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
@@ -2516,24 +2525,24 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		errstr = ""
 		if(len(survival_1) == 0):
 			errstr = "Unfortunately, no survival data could be computed."		
-		text_file_3 = open(path_metadata, "w")
+		#text_file_3 = open(path_metadata, "w")
 		# write metadata in file
-		text_file_3.write("<table><tr>")
+		#text_file_3.write("<table><tr>")
 		#if(len(jaccards_1) < len(param_names)):
 		#	for i in range(len(jaccards_1),len(param_names)):
 		#		jaccards_1.append(0.0)
 		#		jaccards_2.append(0.0)
-		for elem in param_names:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</tr><tr>")
-		for elem in jaccards_1:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</tr><tr>")
-		for elem in jaccards_2:
-			text_file_3.write("<th>" + str(elem) + "</th>")
-		text_file_3.write("</table>")
-		text_file_3.close()
-		text_file_4 = open((path_metadata + "_2"),"w")
+		#for elem in param_names:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</tr><tr>")
+		#for elem in jaccards_1:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</tr><tr>")
+		#for elem in jaccards_2:
+		#	text_file_3.write("<th>" + str(elem) + "</th>")
+		#text_file_3.write("</table>")
+		#text_file_3.close()
+		text_file_4 = open((path_metadata),"w")
 		text_file_4.write("\t".join(param_names) + "\n")
 		jaccards_1_str = [str(i) for i in jaccards_1]
 		jaccards_2_str = [str(i) for i in jaccards_2]
