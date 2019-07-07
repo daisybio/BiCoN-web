@@ -984,9 +984,13 @@ def clustering_6_4(request):
 				#metd = list_metadata_4.apply_async(args=[filename_for_old_metadata],countdown=0)
 				metd = list_metadata_5.apply_async(args=[filename_for_old_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
+				print(ret_metadata1)
 			cache.clear()
 			# set session ID in cache
 			cache.set('session_id',session_id)
+			cache.set('ret_metadata1', ret_metadata1)	
+			cache.set('ret_metadata2', ret_metadata2)	
+			cache.set('ret_metadata3', ret_metadata3)	
 			make_empty_figure.apply_async(countdown=10)
 			empty_log_file.apply_async(countdown=10)
 			# list old files
@@ -996,7 +1000,7 @@ def clustering_6_4(request):
 		        	username = str(request.user)
 		        	list_of_files = GraphForm.list_user_data_2(username)	
 		        	list_of_files_2 = GraphForm.list_user_data(username)              				
-			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata_1,'ret_metadata2':ret_metadata_2,'ret_metadata3':ret_metadata_3,'list_of_files_2':list_of_files_2})
+			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
 		# check if input files exist

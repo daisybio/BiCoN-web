@@ -464,7 +464,7 @@ border:1px solid black;
 	</div>
 	<!--- tab for selecting old data to display --->
 	<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
-	<label for="l_box1"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
+	<label for="display_old_results"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
@@ -479,17 +479,17 @@ border:1px solid black;
 
 	<input class="input" id="myfile_input" type="file" name="myfile" style="float:left">
 	{% if user.is_authenticated %}
-    	<label for="l_box1"><input type="checkbox" name="save_data" value="save_data" id="l_box1">  Save data</label>	
+    	<label for="save_data"><input type="checkbox" name="save_data" value="save_data" id="save_data">  Save data</label>	
    	{% endif %}
 	<br><br>
 
-	<label for="l_box1"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
+	<label for="predef_box"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
 	<select name="cancer_type" id="predef_input" size="1">	
 	        <option value="1">Lung Cancer</option>
 	        <option value="2">Breast Cancer</option>
        	</select><br><br>
 	{% if user.is_authenticated %}
-	<label for="l_box1"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
+	<label for="redo_box"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
 	        <option value="{{filename2.f2}}">File(s) from: {{filename2.f1}}</option>
@@ -509,7 +509,7 @@ border:1px solid black;
 	  <div class="collapsible-content">
 	    <div class="content-inner">
 	<!--- invisible checkbox that is checked when collapsible is open, and unchecked if closed (used to pass parameter to view) ---> 
-	<label for="l_box1"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
+	<label for="parse_ndex_file"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
 
 	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1">	
 	        <option value="1" selected="selected">APID</option>
@@ -639,7 +639,7 @@ $(document).ready(function() {
 	<div class="tab4" style="width:500px; height:300px" id="metad_upload">
 	<b>This step is optional.</b><br> If you do not want to upload metadata, you can
     	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
-	<label for="l_box1"><input type="checkbox" name="analyze_metadata" value="analyze_metadata" id="l_box1">Analyze Patient Metadata</label>
+	<label for="analyze_metadata"><input type="checkbox" name="analyze_metadata" value="analyze_metadata" id="analyze_metadata">Analyze Patient Metadata</label>
 	<br>
 	<b>Upload file with Patient Data:</b> <br>
 	<input class="input" type="file" name="patientdata"><br> <b>Name of "survival" column:</b> <input class="input" type="text" name="survival_col"><br>

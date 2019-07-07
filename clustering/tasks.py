@@ -64,7 +64,6 @@ from celery import shared_task
 #import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import mpld3
 from lifelines.statistics import logrank_test
 import math
 
@@ -991,8 +990,17 @@ def preprocess_clinical_file(clinical_str):
 def preprocess_file(expr_str):
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
 		#print(expr_str.split("\n")[0])	+
+		expr_str_split = expr_str.split("\n")	
+		if("cancer_type" not in expr_str_split[0]):
+			if("subtype" in expr_str_split[0]):
+				expr_str = expr_str.replace("subtype","cancer_type")
+		expr_str_first_colname = expr_str_split[0].split("\t")[0]
+		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+		print(expr_str_first_colname)
+		print(expr_str.split("\n")[0])
 		expr_stringio = StringIO(expr_str)	
 		exprdf = pd.read_csv(expr_stringio,sep='\t')
+		#return(expr_str)
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
 				if(len(column.unique()) == 2):
@@ -1014,6 +1022,14 @@ def preprocess_file(expr_str):
 	elif("," in expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
+			expr_str_split = expr_str.split("\n")	
+			if("cancer_type" not in expr_str_split[0]):
+				if("subtype" in expr_str_split[0]):
+					expr_str = expr_str.replace("subtype","cancer_type")
+			expr_str_first_colname = expr_str_split[0].split(",")[0]
+			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+			print(expr_str_first_colname)
+			print(expr_str.split("\n")[0])	
 			expr_str = expr_str.replace(",","\t")
 			#print(expr_str.split("\n")[0])
 			expr_str_split = expr_str.split("\n")
@@ -1033,33 +1049,33 @@ def preprocess_file(expr_str):
 						print(column_name)
 						expr_str = expr_str.replace(column_name,"cancer_type")	
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
-			#done1 = "false"
-			#for column_name, column in exprdf.transpose().iterrows():
-			#	if(not column_name.isdigit()):
-			#		if(len(column.unique()) < 5):
-			#			print(column_name)
-			#			expr_str = expr_str.replace(column_name,"cancer_type")	
-			#			expr_str_split[0] = expr_str_split[0].replace(column_name,"cancer_type")
-			#			print(list(column))
-			#			if(len(column.unique()) > 2 and done1 == "false"):
-			#				print(column)
-			#				expr_str_split_2 = []
-			#				expr_str_split_2.append(expr_str_split[0])
-			#				type1 = column.value_counts().index.tolist()[0]	
-			#				type2 = column.value_counts().index.tolist()[1]
-			#				print(type1)
-			#				print(type2)
-			#				print(len(list(column)))
-			#				for i in range(0,len(list(column))-1):
-			#					if(list(column)[i] == type1 or list(column)[i] == type2):
-			#						print(column[i])	
-			#						print(expr_str_split[i+1])
-			#						print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
-			#						expr_str_split_2.append(expr_str_split[i+1])
-			#				expr_str = "\n".join(expr_str_split_2)
-			#				done1 = "true"
-			#expr_stringio = StringIO(expr_str)
-			#exprdf = pd.read_csv(expr_stringio,sep='\t')
+			done1 = "false"
+			for column_name, column in exprdf.transpose().iterrows():
+				if(not column_name.isdigit()):
+					if(len(column.unique()) < 5):
+						print(column_name)
+						expr_str = expr_str.replace(column_name,"cancer_type")	
+						expr_str_split[0] = expr_str_split[0].replace(column_name,"cancer_type")
+						print(list(column))
+						if(len(column.unique()) > 2 and done1 == "false"):
+							print(column)
+							expr_str_split_2 = []
+							expr_str_split_2.append(expr_str_split[0])
+							type1 = column.value_counts().index.tolist()[0]	
+							type2 = column.value_counts().index.tolist()[1]
+							print(type1)
+							print(type2)
+							print(len(list(column)))
+							for i in range(0,len(list(column))-1):
+								if(list(column)[i] == type1 or list(column)[i] == type2):
+									print(column[i])	
+									print(expr_str_split[i+1])
+									print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
+									expr_str_split_2.append(expr_str_split[i+1])
+							expr_str = "\n".join(expr_str_split_2)
+							done1 = "true"
+			expr_stringio = StringIO(expr_str)
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
 			#print(list(set(exprdf["cancer_type"])))
 			#column.fillna("NA",inplace=True)
 			#print(column_name)
