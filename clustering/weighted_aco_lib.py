@@ -665,6 +665,8 @@ def aco_preprocessing_ownfile(fh, fh_ppi, col,log2, gene_list = None, size = Non
     print(size)
     if('cancer_type' in list(expr)):
     	col = 'cancer_type'
+    if('disease_type' in list(expr)):
+    	col = 'disease_type'
     else:
     	col = 'prognosis'
     val1,val2 = list(set(expr[col]))
@@ -769,6 +771,8 @@ def aco_preprocessing_strings(expr_str, ppi_str, col,log2, gene_list = None, siz
 	#TODO: check if column 'prognosis' or 'cancer type' exists, set column based on this info
     if('cancer_type' in list(expr)):
     	col = 'cancer_type'
+    elif('disease_type' in list(expr)):
+    	col = 'disease_type'
     else:
     	col = 'prognosis'
     val1,val2 = list(set(expr[col]))

@@ -631,6 +631,8 @@ def aco_preprocessing_ownfile(fh, fh_ppi, col,log2, gene_list = None, size = Non
 	#TODO: check if column 'prognosis' or 'cancer type' exists, set column based on this info
     if('cancer_type' in list(expr)):
     	col = 'cancer_type'
+    elif('disease_type' in list(expr)):
+    	col = 'disease_type'
     else:
     	col = 'prognosis'
     val1,val2 = list(set(expr[col]))
@@ -988,12 +990,115 @@ def preprocess_clinical_file(clinical_str):
 
 @shared_task(name="preprocess_file")
 def preprocess_file(expr_str):
+	expr_str = expr_str.replace("cancer_type","disease_type")
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
 		#print(expr_str.split("\n")[0])	+
 		expr_str_split = expr_str.split("\n")	
-		if("cancer_type" not in expr_str_split[0]):
+		if("disease_type" not in expr_str_split[0]):
 			if("subtype" in expr_str_split[0]):
-				expr_str = expr_str.replace("subtype","cancer_type")
+				expr_str = expr_str.replace("subtype","disease_type")
+		expr_str_first_colname = expr_str_split[0].split("\t")[0]
+		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+		#print(expr_str_first_colname)
+		#print(expr_str.split("\n")[0])
+		expr_stringio = StringIO(expr_str)	
+		exprdf = pd.read_csv(expr_stringio,sep='\t')
+		#return(expr_str)
+		for column_name, column in exprdf.transpose().iterrows():
+			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+				if(len(column.unique()) == 2):
+					print(column_name)
+					expr_str = expr_str.replace(column_name,"disease_type")	
+		return(expr_str)
+	elif(0 == 1):
+		if("\t" not in expr_str.split("\n")[0]):
+			expr_str = expr_str.replace(",","\t")
+			#print(expr_str)
+			expr_str = expr_str.replace("status","disease_type")
+			#expr_str = expr_str.replace("-0.","0.")
+			#print(expr_str.split("\n")[0])
+			#expr_stringio = StringIO(expr_str)
+			expr_str = expr_str.replace("CTL","MCI")
+			#exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#print(list(set(exprdf["cancer_type"])))
+			return(expr_str)
+	elif("," in expr_str):
+		# replace comma by tab if file is CSV and not TSV
+		if("\t" not in expr_str.split("\n")[0]):
+			expr_str_split = expr_str.split("\n")	
+			# replace "subtype" by "cancer type"
+			if("disease_type" not in expr_str):
+				if("subtype" in expr_str):
+					expr_str = expr_str.replace("subtype","disease_type")
+			expr_str_first_colname = expr_str_split[0].split(",")[0]
+			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+			#print(expr_str_first_colname)
+			#print(expr_str.split("\n")[0])	
+			expr_str = expr_str.replace(",","\t")
+			#print(expr_str.split("\n")[0])
+			expr_str_split = expr_str.split("\n")
+			# remove entries after given length if expression data file is too big
+			if(len(expr_str_split) > 300):
+				expr_str = "\n".join(expr_str_split[:200])
+			else:
+				expr_str = "\n".join(expr_str_split)
+			expr_stringio = StringIO(expr_str)
+			expr_str = expr_str.replace("MCI","CTL")
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			# find column with two unique entries that represents disease type
+			for column_name, column in exprdf.transpose().iterrows():
+				if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+					if(len(column.unique()) == 2):
+						print(column_name)
+						expr_str = expr_str.replace(column_name,"disease_type")	
+			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
+			done1 = "false"
+			for column_name, column in exprdf.transpose().iterrows():
+				if(not column_name.isdigit()):
+					if(len(column.unique()) < 5):
+						print(column_name)
+						expr_str = expr_str.replace(column_name,"disease_type")	
+						expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
+						#print(list(column))
+						if(len(column.unique()) > 2 and done1 == "false"):
+							expr_str_split_2 = []
+							expr_str_split_2.append(expr_str_split[0])
+							type1 = column.value_counts().index.tolist()[0]	
+							type2 = column.value_counts().index.tolist()[1]
+							print(type1)
+							print(type2)
+							#print(len(list(column)))
+							for i in range(0,len(list(column))-1):
+								if(list(column)[i] == type1 or list(column)[i] == type2):
+									print(column[i])	
+									#print(expr_str_split[i+1])
+									print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
+									expr_str_split_2.append(expr_str_split[i+1])
+							expr_str = "\n".join(expr_str_split_2)
+							done1 = "true"
+			expr_stringio = StringIO(expr_str)
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#print(list(set(exprdf["cancer_type"])))
+			#column.fillna("NA",inplace=True)
+			#print(column_name)
+			#print(column)
+			#coluniq = column.unique()
+			#for 
+			#print(expr_str)
+			return(expr_str)
+
+
+@shared_task(name="preprocess_file_OLD")
+def preprocess_file_OLD(expr_str):
+	if(len(expr_str.split("\n")[0].split("\t")) > 2):
+		#print(expr_str.split("\n")[0])	+
+		expr_str_split = expr_str.split("\n")	
+		#if("cancer_type" not in expr_str_split[0]):
+		#	if("subtype" in expr_str_split[0]):
+		#		expr_str = expr_str.replace("subtype","cancer_type")
+		if("disease_type" not in expr_str_split[0]):
+			if("subtype" in expr_str_split[0]):
+				expr_str = expr_str.replace("subtype","disease_type")
 		expr_str_first_colname = expr_str_split[0].split("\t")[0]
 		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
 		print(expr_str_first_colname)
@@ -1023,6 +1128,7 @@ def preprocess_file(expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
 			expr_str_split = expr_str.split("\n")	
+			# replace "subtype" by "cancer type"
 			if("cancer_type" not in expr_str_split[0]):
 				if("subtype" in expr_str_split[0]):
 					expr_str = expr_str.replace("subtype","cancer_type")
@@ -1041,8 +1147,7 @@ def preprocess_file(expr_str):
 			expr_stringio = StringIO(expr_str)
 			expr_str = expr_str.replace("MCI","CTL")
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
-
-			#### comment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given (and uncomment lines specified further below)
+			# find column with two unique entries that represents disease type
 			for column_name, column in exprdf.transpose().iterrows():
 				if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
 					if(len(column.unique()) == 2):
@@ -1296,13 +1401,27 @@ def list_metadata_5(path):
 
 @shared_task(name="algo_output_task_new")
 def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,size):
-	col = "cancer_type"
+	#col = "cancer_type"
+	col = "disease_type"
 	#size = 2000
 	log2 = True
+	expr_stringio = StringIO(expr_str)
+	exprdf = pd.read_csv(expr_stringio,sep='\t')
+	#check if string contains negative numbers
+	if("-" in expr_str.split("\n")):
+		print("log2_2 is false")
+		log2_2 = False
+	else:
+		print("log2_2 is true")
+		log2_2 = True
+	print(exprdf.iloc[:,[2]])
+	if("-" in exprdf.iloc[:, [2]]):
+		print("log2_2_ false 2")
+		log2_2 = False
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
-	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = int(size), sample= None)
+	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Starting model run...")	
@@ -1485,7 +1604,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 
 @shared_task(name="algo_output_task")
 def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,size):
-	col = "cancer_type"
+	col = "disease_type"
+	#col = "cancer_type"
 	#size = 2000
 	log2 = True
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
