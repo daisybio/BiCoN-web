@@ -1415,7 +1415,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 		print("log2_2 is true")
 		log2_2 = True
 	print(exprdf.iloc[:,[2]])
-	if("-" in exprdf.iloc[:, [2]]):
+	if(exprdf.iloc[:, [2]].to_string().__contains__('-')):
 		print("log2_2_ false 2")
 		log2_2 = False
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
@@ -2416,6 +2416,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		ret_metadata.append(ret_metadata_1)
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
+		patientids_metadata = []
 	else:
 		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")
@@ -2444,6 +2445,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_cols = []
 		ctr = 0
 		print(patientids_metadata)
+	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
 		group1_has = []
@@ -2638,7 +2640,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_2.append(float(patientData[key]))
 		print(survival_1)
 		# calculate p-value for survival times
-		if(survival_col in list(clinicaldf.columns)):
+		if(survival_col in list(clinicaldf.columns) and len(survival_1) > 0 and len(survival_2) > 0):
 			surv_results = logrank_test(survival_1,survival_2)
 			p_val = surv_results.p_value
 			print("p value" + str(p_val))
@@ -2755,6 +2757,23 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		else:
 			with open(output_plot_path, "w") as text_file_2:
         			text_file_2.write(errstr)
+	else:
+		ret_metadata = []
+		text_file_3 = open(path_metadata, "w")
+		text_file_3.write("NA")
+		text_file_3.close()	
+		plot_div = ""	
+		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		with open(output_plot_path, "w") as text_file_2:
+        		text_file_2.write("")
+		# fill empty metadata arrays
+		ret_metadata = []
+		ret_metadata_1 = {}
+		ret_metadata_2 = {}
+		ret_metadata_3 = {}
+		ret_metadata.append(ret_metadata_1)
+		ret_metadata.append(ret_metadata_2)
+		ret_metadata.append(ret_metadata_3)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")

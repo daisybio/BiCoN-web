@@ -65,14 +65,16 @@ What runs where:
 
 There are 4 docker containers that each run a task or a server that is necessary for the web application:
 
-- Livereload: A python-based application/library for Django needed for a good display of the loading page. Livereload makes every file reload automatically when it is changed.
+- Livereload (named clust_app_livereload_1): A python-based application/library for Django needed for a good display of the loading page. Livereload makes every file reload automatically when it is changed.
 There appears to still be a bug with livereload on Docker, so it is possible that this part of the server will be replaced by javascript code with the same functionality.
 
-- RabbitMQ: Needed as server where celery executes its tasks. Must run in the background for celery to run properly.
+- RabbitMQ (clust_app_rabbit_1): Needed as server where celery executes its tasks. Must run in the background for celery to run properly.
 
-- Celery: Used as queuing system to execute tasks synchronously. Executes all computationally intensive tasks such as running the algorithm or processing results.
+- Celery (celery_container): Used as queuing system to execute tasks synchronously. Executes all computationally intensive tasks such as running the algorithm or processing results.
 
-- Django: The server for running and processing requests. This container is where the actual server runs and where paths to files can be referenced.
+- Django (clust_app): The server for running and processing requests. This container is where the actual server runs and where paths to files can be referenced.
+
+as well as a fifth container for the database needed for Django, called clust_app_db_1.
 
 There is a shared volume that can be accessed by all containers under /code. This is needed to transfer files from one to another container by the server.
 
@@ -139,7 +141,8 @@ If a logged-in user wants to display old results, there is a list of stored resu
 How the cache works:
 #####################################
 
-In order to keep result data visible to the user after hitting reload or running an enrichment analysis, the metadata (if existing) and paths to the result files are kept as variables in the cache. Currently, the cache timeout is set as 10000 seconds to enable long sessions for users. This can be changed (e.g. to five minutes) in "settings.py" by modifying the line below "CACHES=" to (e.g.) "timeout: 300".
+In order to keep result data visible to the user after hitting reload or running an enrichment analysis, the metadata (if existing) and paths to the result files are kept as variables in the cache. If a user submits an "empty" request (e.g. by hitting the reload button), or runs an enrichment analysis, the views.py script will look up whether these variables are in the cache, and returns a page with a link to the corresponding result files. The Session ID is also stored as a variable in the cache.
+Currently, the cache timeout is set as 10000 seconds to enable long sessions for users. This can be changed (e.g. to five minutes) in "settings.py" by modifying the line below "CACHES=" to (e.g.) "timeout: 300".
 
 #####################################
 How the templates work:
@@ -158,22 +161,28 @@ In views.py, methods are defined that run code after the user accesses a web pag
 #### 4. Troubleshooting: ############
 #####################################
 
+If you want to run bash commands on one of the containers (e.g. for troubleshooting), you can select the ID of the container by typing
+sudo docker ps
+and you get the ID of the container (YOUR_CONTAINER_ID) based on name. Then type 
+sudo docker exec -it YOUR_CONTAINER_ID /bin/bash
+and you can now run bash commands on the container.
+
 Some Errors that might occur:
 
 - Celery does not start properly and RabbitMQ produces an error upon starting:
 
-After usable space on the server was totally full, this error can occur. It is possibly solved by typing
+After usable space on the server was totally full, this error can occur. It is possibly solved by typing in a shell on the clust_app_rabbit_1 container and running
  sudo rabbitmqctl stop
  sudo rabbitmq-server
 
-If this does not help, then a log file of the RabbitMQ server was corrupted. This is no big deal and can be solved by running
+If this does not help, then a log file of the RabbitMQ server was corrupted. This is no big deal and can be solved by running (on a shell in the clust_app_rabbit_1 container)
  mkdir -p /tmp/badrabbit/ 
  sudo mv /var/lib/rabbitmq/mnesia/rabbit[[[COMPUTER_NAME]]]/queues/* /tmp/badrabbit/;
 substitute COMPUTER_NAME by the name of your computer/the server in the shell, that is shown in the terminal at the start of each line.
 
 - RabbitMQ does not do anything after running a request:
 
-If this happens, look for a line in the output of RabbitMQ that says that the memory is insufficient. RabbitMQ needs at least 50 MB of free memory on the system, otherwise it will not take any requests from Celery. 
+If this happens, look for a line in the output of RabbitMQ that says that the memory is insufficient. RabbitMQ needs at least 50 MB of free memory on the system, otherwise it will not take any requests from Celery. Your request will be run again as soon as there is more than 50 MB of free memory.
 
 - The database gives a "duplicate table" error on the shell:
 e.g. "psycopg2.errors.DuplicateTable: relation "clustering_graphform" already exists"

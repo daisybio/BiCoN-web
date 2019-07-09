@@ -1466,7 +1466,7 @@ def clustering_6_4(request):
    				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
    				text_file.write("")
-			cache.set('analysis_running','analysis_running')
+			#cache.set('analysis_running','analysis_running')
 		ret_metadata = ""
 		# check if session already exists for current user (e.g. when user has hit the reload button)
 		session_id_from_cache = cache.get('session_id', 'has_expired')
