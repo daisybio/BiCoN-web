@@ -1415,9 +1415,17 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 		print("log2_2 is true")
 		log2_2 = True
 	print(exprdf.iloc[:,[2]])
-	if(exprdf.iloc[:, [2]].to_string().__contains__('-')):
-		print("log2_2_ false 2")
-		log2_2 = False
+	#for i in range(1,len(exprdf.columns)-1):
+	for i in range(1,2):
+		if(log2_2):
+			for j in range(1, min(len(exprdf.index)-1,10000)):
+				if(log2_2 and str(exprdf.columns[i]) != "disease_type"):
+					print(exprdf.iloc[j][i])
+					print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1))
+					print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit())
+					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
+						print("log2_2_ false 2")
+						log2_2 = False	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)

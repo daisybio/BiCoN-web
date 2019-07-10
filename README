@@ -102,20 +102,20 @@ You can change the port on which the website is running by modifying the command
  python manage.py runserver 0.0.0.0:8000 
 and substituting 0.0.0.0 by another address.
 
-Most of the settings for the server are in settings.py, such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified to change a specific setting. It is possible to add default values for the input variables (e.g. ['*'] for accepted_hosts) in settings.py by changing
+Most of the settings for the server are in "clust_app/clust_app/settings.py", such as the communication between Django, Celery and RabbitMQ. There are comments which line is used to do what, and what must be modified to change a specific setting. It is possible to add default values for the input variables (e.g. ['*'] for accepted_hosts) in "clust_app/clust_app/settings.py" by changing
 
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS")
 to
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", ['*'])
 Then, the input variables become optional, and the server will run with the default values if none are given.
 
-Templates (HTML pages visible to the user) are connected in a file called "urls.py" with a function that processes the request for each template. If you want to change the link for one of the pages, add a line below "urlpatterns" in this form:
+Templates (HTML pages visible to the user) are connected in a file at "clustering/urls.py" with a function that processes the request for each template. If you want to change the link for one of the pages, add a line below "urlpatterns" in this form:
 url(r'new_address.html', views.your_view),
-with your_view as the name of the method in views.py that is used to process a request submitted via "new_address.html" (e.g. the method for clustering_6_part_4.html is called clustering_6_4).
+with your_view as the name of the method in "clustering/views.py" that is used to process a request submitted via "new_address.html" (e.g. the method for clustering_6_part_4.html is called clustering_6_4).
 
-Files with results are stored in a static directory for which the location is defined in settings.py. This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. In some cases, files are copied from the shared volume to the container running the Django server. 
+Files with results are stored in a static directory for which the location is defined in "clust_app/clust_app/settings.py". This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. In some cases, files are copied from the shared volume to the container running the Django server. 
 
-The code needed for running a request is in three different files:
+The code needed for running a request is in three different files, in the folder "clustering":
 - views.py - processes the request, will be described below.
 - tasks.py - running the algorithm on the queuing system and pre/postprocessing files
 - weighted_aco_lib - parts of the algorithm that are connected to a method in tasks.py
@@ -130,7 +130,7 @@ For every run of the algorithm, files are created with the heatmap, json data fo
 How a request runs on the server:
 #####################################
 
-If you submit a request, several steps are executed in views.py. 
+If you submit a request, several steps are executed (on the clust_app container) in views.py. 
 For the loading page, the gif with loading symbol is copied to its place so that it is visible in the page. The current status of the run is written and read from a log file.
 Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. There are lines of code in this script that, when uncommented, automatically select the two biggest clusters if more than two clinical patient groups exist in the expression file. Automatically, a column containing information on pre-defined clinical clusters is recognized and assigned a standard title ("disease_type"). Patient identifiers are taken from the first column, and gene IDs from the first row.
 Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10. These tasks are executed via Celery, and their results are written on the shared volume (under /code). In algo_output_task, the algorithm itself is run. A preprocessing script (aco_preprocessing_strings) in weighted_aco_lib.py is run, the script also automatically recognizes whether the expression data are log2-values (if they contain negative values) and ant runs are executed via the ants() method in weighted_aco_lib.py. The output data (clusters of patients and genes) are taken as an input in script_output_task and there are processed to output format (json and png). They are stored by the methods run in the celery container in a directory on the shared volume and copied by views.py, which is run on the django container, to the local static files directory.
