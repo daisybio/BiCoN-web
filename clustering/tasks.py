@@ -1407,7 +1407,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	log2 = True
 	expr_stringio = StringIO(expr_str)
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
-	#check if string contains negative numbers
+	#check if string contains negative numbers.
 	if("-" in expr_str.split("\n")):
 		print("log2_2 is false")
 		log2_2 = False
@@ -1416,13 +1416,16 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 		log2_2 = True
 	print(exprdf.iloc[:,[2]])
 	#for i in range(1,len(exprdf.columns)-1):
-	for i in range(1,2):
-		if(log2_2):
-			for j in range(1, min(len(exprdf.index)-1,10000)):
+	### this checks whether the expression data contain negative numbers
+	for i in range(2,4):
+		if(log2_2 and i>len(exprdf.columns)):
+			# check only first 1000 lines of column 2 and 3
+			for j in range(1, min(len(exprdf.index)-1,1000)):
 				if(log2_2 and str(exprdf.columns[i]) != "disease_type"):
-					print(exprdf.iloc[j][i])
-					print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1))
-					print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit())
+					#print(exprdf.iloc[j][i])
+					#print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1))
+					#print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit())
+					# make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
 					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
 						print("log2_2_ false 2")
 						log2_2 = False	

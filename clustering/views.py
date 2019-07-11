@@ -1081,6 +1081,7 @@ def clustering_6_4(request):
 						result_ndex = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf")
 						ppistr = result_ndex.get()
 					elif(ndex_file_id == "2"):
+						#result_ndex = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf")
 						result_ndex = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf")
 						ppistr = result_ndex.get()
 					elif(ndex_file_id == "3"):
