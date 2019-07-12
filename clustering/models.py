@@ -121,6 +121,7 @@ class GraphForm(models.Model):
 		outfile3.close()
 	def save_user_data_3(exprstr,ppistr,clinicalstr,username):
 		user_dir = "user_uploaded_files/" + username
+		# check if directory with stored files for user exists
 		if not(os.path.isdir(user_dir)):
 			os.mkdir(user_dir)
 		#if not(os.path.isdir(foobar + "/bla")):
@@ -137,10 +138,12 @@ class GraphForm(models.Model):
 		#str2 = prot_fn.read().decode('utf-8')
 		#str3 = clinical_fn.read().decode('utf-8')
 		#print(str1)
+		# make filenames with current date
 		filename_1 = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
 		filename_2 = user_dir + "/" + filename_1 + "_expr.txt"
 		filename_3 = user_dir + "/" + filename_1 + "_prot.txt"
 		filename_4 = user_dir + "/" + filename_1 + "_clin.txt"
+		# write strings to files
 		outfile1 = open(filename_2, "w")
 		outfile1.write(exprstr)
 		outfile1.close()
@@ -204,6 +207,7 @@ class GraphForm(models.Model):
 
 
 	def list_user_data(username):
+		# function to list all files with stored input files for a given user.
 		print("listing user data")
 		user_dir = "user_uploaded_files/" + username
 		fileslist = os.listdir(user_dir)
@@ -212,12 +216,15 @@ class GraphForm(models.Model):
 		for f in fileslist:
 			if "_expr.txt" in f:
 				#print(f)
+				# get date from filename
 				f_split=f.split("_")
 				f_new = f_split[0] + "/" + f_split[1] + "/" + f_split[2] + ", " + f_split[3] + ":" + f_split[4]
 				print(f_new)
 				ret1 = "user_uploaded_files/" + username + "/" + f
+				# get name of PPI file
 				fn_temp = f.split("_expr.txt")[0] + "_prot.txt"
 				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
+				#f1: the date in nice format, f2: the filename (used as input variable in form)
 				bar.append({'f1':f_new,'f2':ret1})
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]
@@ -225,18 +232,22 @@ class GraphForm(models.Model):
 	
 
 	def list_user_data_2(username):
+		# function to list all files with stored result files (heatmap, PPI) for a given user.
 		print("listing user data 2")
 		user_dir = "user_uploaded_files/" + username
 		fileslist = os.listdir(user_dir)
 		bar = []
 		for f in fileslist:
 			if "_json.json" in f:
+				# get date from filename
 				f_split=f.split("_")				
 				f_new = f_split[0] + "/" + f_split[1] + "/" + f_split[2] + ", " + f_split[3] + ":" + f_split[4]
 				print(f_new)
 				ret1 = "user_uploaded_files/" + username + "/" + f
+				# get name of heatmap file
 				fn_temp = f.split("_json.json")[0] + "_heatmap.png"
 				ret2 = "user_uploaded_files/" + username + "/" + fn_temp
+				#f1: the date in nice format, f2: the filename (used as input variable in form)
 				bar.append({'f1':f_new,'f2':ret1})
 				#time_temp = f.split("_")
 				#time_actual = time_temp[0] + "-" + time_temp[1] + "-" + time_temp[2] + " at " + time_temp[3] + ":" + time_temp[4]

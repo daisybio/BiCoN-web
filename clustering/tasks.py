@@ -988,6 +988,22 @@ def preprocess_clinical_file(clinical_str):
 			clinical_str = clinical_str.replace(",","\t")
 	return clinical_str
 
+@shared_task(name="preprocess_ppi_file")
+def preprocess_ppi_file(ppistr):
+	ppistr_split = ppistr.split("\n")
+	# check if file is csv or tsv and convert it to tsv format
+	if("\t" not in ppistr_split[2]):
+		ppistr = ppistr.replace(",","\t")
+		ppistr_split = ppistr.split("\n")
+	ppistr_split_new = []
+	# take only the right two columns
+	for line in ppistr_split:
+		if(len(line.split("\t")) > 2):
+			line_length = len(line.split("\t"))
+			line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
+		ppistr_split_new.append(line)
+	return("\n".join(ppistr_split_new))
+				
 @shared_task(name="preprocess_file")
 def preprocess_file(expr_str):
 	expr_str = expr_str.replace("cancer_type","disease_type")
@@ -1408,7 +1424,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	expr_stringio = StringIO(expr_str)
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
 	#check if string contains negative numbers.
-	if("-" in expr_str.split("\n")):
+	if("-" in expr_str.split("\n")[2]):
 		print("log2_2 is false")
 		log2_2 = False
 	else:

@@ -868,6 +868,7 @@ function showTab(n) {
   } else {
     document.getElementById("prevBtn").style.display = "inline";
   }
+  // last tab has no next button
   if (n == (x.length - 1)) {
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "inline";
@@ -876,7 +877,7 @@ function showTab(n) {
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
   }
-
+  // no next and submit button on page 0 (where the user can choose between starting a new run or showing old results)
  if (n == 0) {
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";

@@ -27,7 +27,7 @@ from clustering.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
 #from clustering.script3 import run_algo,algo_output,algo_output_ownfile,algo_output_ownfile_2,algo_output_ownfile_3
 #from polls.tasks import make_empty_figure,algo_output_task,script_output_task,empty_log_file,write_to_file_1,add_loading_image,remove_loading_image,script_output_task_2,show_old_data,script_output_task_3,write_metadata_to_file,list_metadata,metadata_to_string,script_output_task_4,read_ndex_file,read_ndex_file_2,read_ndex_file_3,list_metadata_2,list_metadata,script_output_task_7,script_output_task_8,script_output_task_9,list_metadata_3,run_enrichment,read_kegg_enrichment,run_go_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,import_ndex,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4
-from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file
+from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file,preprocess_ppi_file
 from django.core.cache import cache
 import os.path
 from django.core.mail import send_mail
@@ -1069,6 +1069,8 @@ def clustering_6_4(request):
 				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
+					result3 = preprocess_ppi_file.delay(ppistr)
+					ppistr = result3.get()
 					result4 = check_input_files.delay(ppistr,exprstr)
 					errstr = result4.get()
 					if(errstr != ""):
