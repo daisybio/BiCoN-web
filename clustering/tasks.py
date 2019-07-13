@@ -1010,9 +1010,11 @@ def preprocess_file(expr_str):
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
 		#print(expr_str.split("\n")[0])	+
 		expr_str_split = expr_str.split("\n")	
+		# replace column name for disease type
 		if("disease_type" not in expr_str_split[0]):
 			if("subtype" in expr_str_split[0]):
 				expr_str = expr_str.replace("subtype","disease_type")
+		# remove name of first column (left upper corner)
 		expr_str_first_colname = expr_str_split[0].split("\t")[0]
 		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
 		#print(expr_str_first_colname)
@@ -1020,6 +1022,7 @@ def preprocess_file(expr_str):
 		expr_stringio = StringIO(expr_str)	
 		exprdf = pd.read_csv(expr_stringio,sep='\t')
 		#return(expr_str)
+		# check for column with two unique entries (pre-defined clusters)
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 				if(len(column.unique()) == 2):
@@ -1092,6 +1095,8 @@ def preprocess_file(expr_str):
 									expr_str_split_2.append(expr_str_split[i+1])
 							expr_str = "\n".join(expr_str_split_2)
 							done1 = "true"
+			########################
+
 			expr_stringio = StringIO(expr_str)
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
 			#print(list(set(exprdf["cancer_type"])))
@@ -2122,7 +2127,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		print(group1_has)
 		print(jaccards_1)
 		print(jaccards_2)
-		print(list(clinicaldf.columns).index(survival_col))
+		#print(list(clinicaldf.columns).index(survival_col))
 		print("name of survival col" + str(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
 		# check if there is a column with survival data
