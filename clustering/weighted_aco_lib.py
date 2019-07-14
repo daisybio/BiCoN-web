@@ -163,6 +163,11 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
         	#print("foobar")
         	text_file.write("Iteration # "+ str(count_big+1))
         	text_file.close()
+
+        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+        	#print("foobar")
+        	text_file.write("Iteration # "+ str(count_big+1))
+        	text_file.close()
         av_score = av_score/K
         avs.append(round(av_score,2))
         #print(scores)
@@ -197,6 +202,7 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
             #plt.legend()
             #this was not commented before #plt.show(block=False)
             plt.savefig("/code/clustering/static/progress_" + session_id + ".png")
+            plt.savefig("/code/clustering/static/progress.png")
             plt.close(fig)
         if len(set(score_change[:3])) ==1 and len(score_change)>3:
             flag = True

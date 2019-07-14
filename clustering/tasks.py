@@ -1452,6 +1452,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 						log2_2 = False	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
+	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+   		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
@@ -1501,6 +1503,9 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	
 	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
+		text_file.write("Progress of the algorithm is shown below...")
+
+	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
@@ -1929,16 +1934,16 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	# Array PatientData is for storing survival information
 	patientData = {}
 	# write lists of genes in files, needed for enrichment analysis
-	with open("genelist.txt","w") as text_file_4:
+	with open("/code/clustering/static/genelist.txt","w") as text_file_4:
 		for i in G_list:
 			text_file_4.write(str(i) + "\n")
 	text_file_4.close()
-	with open("genelist_1.txt","w") as text_file_5:
+	with open("/code/clustering/static/genelist_1.txt","w") as text_file_5:
 		for i in G_list:
 			if(i in genes1):
 				text_file_5.write(str(i) + "\n")
 	text_file_5.close()
-	with open("genelist_2.txt","w") as text_file_6:
+	with open("/code/clustering/static/genelist_2.txt","w") as text_file_6:
 		for i in G_list:
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
@@ -2185,9 +2190,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		# make arrays with survival time of patients in both groups
 		for key in patientData:
 			if key in group1_ids:
-				survival_1.append(patientData[key])
+				survival_1.append(float(patientData[key]))
 			elif key in group2_ids:
-				survival_2.append(patientData[key])
+				survival_2.append(float(patientData[key]))
 		print(survival_1)
 		p_val = ""
 		# calculate p-value for survival times
@@ -2242,8 +2247,14 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		#for i in range(0, len(param_names)):
 		for i in range(0, len(jaccards_1)):
 			ret_metadata_1[i] = param_names[i]
-			ret_metadata_2[i] = jaccards_1[i]
-			ret_metadata_3[i] = jaccards_2[i]
+			if(len(str(jaccards_1[i])) > 4):
+				ret_metadata_2[i] = str(jaccards_1[i])[:4]
+			else:
+				ret_metadata_2[i] = jaccards_1[i]
+			if(len(str(jaccards_2[i])) > 4):
+				ret_metadata_3[i] = str(jaccards_2[i])[:4]
+			else:
+				ret_metadata_3[i] = jaccards_2[i]
 		ret_metadata.append(ret_metadata_1)
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
@@ -2728,8 +2739,14 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#for i in range(0, len(param_names)):
 		for i in range(0, len(jaccards_1)):
 			ret_metadata_1[i] = param_names[i]
-			ret_metadata_2[i] = jaccards_1[i]
-			ret_metadata_3[i] = jaccards_2[i]
+			if(len(str(jaccards_1[i])) > 4):
+				ret_metadata_2[i] = str(jaccards_1[i])[:4]
+			else:
+				ret_metadata_2[i] = jaccards_1[i]
+			if(len(str(jaccards_2[i])) > 4):
+				ret_metadata_3[i] = str(jaccards_2[i])[:4]
+			else:
+				ret_metadata_3[i] = jaccards_2[i]
 		ret_metadata.append(ret_metadata_1)
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
@@ -2822,6 +2839,7 @@ def run_enrichment_2(path,pval_enr,out_dir):
 	fh1 = open(path)
 	gene_list = []
 	lines = fh1.readlines()
+	print(lines)
 	#lines = lines[1:]
 	# read gene list line for line from file
 	for line in lines:

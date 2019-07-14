@@ -288,12 +288,24 @@ def clustering_6_new(request):
 			analysis_running = cache.get('analysis_running', 'none')
 			if (analysis_running == 'none'):
 				cache.set('analysis_running','analysis_running')
-			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+			if ('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				lgmin = int(request.POST['L_g_min'])
+				lgmax = int(request.POST['L_g_max'])
+			else:
+				lgmin = 10
+				lgmax = 20
+			#if ('L_g_min' in request.POST and 'L_g_max' in request.POST):
+			if(1 == 1):
 				if(save_data in ["save_data"]):
 					if request.user.is_authenticated:
 						print("saving data is true")
-				lgmin = int(request.POST['L_g_min'])
-				lgmax = int(request.POST['L_g_max'])
+				#lgmin = int(request.POST['L_g_min'])
+				#lgmax = int(request.POST['L_g_max'])
+				# assign standard result size
+				if(request.POST['L_g_min'] == ""):
+					lgmin = 10
+				if(request.POST['L_g_max'] == ""):
+					lgmax = 20
 				clinicalstr = ""
 				clinicaldf = ""
 				# configure loading page
@@ -485,6 +497,11 @@ def clustering_6_new(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
+				## assign standard result size
+				#if(request.POST['L_g_min'] == ""):
+				#	lgmin = 10
+				#if(request.POST['L_g_max'] == ""):
+				#	lgmax = 20
 				if(gene_set_size == ""):
 					gene_set_size = 2000
 				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
@@ -779,6 +796,11 @@ def clustering_6_4_part_2(request):
 						print("saving data is true")
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
+				## assign standard result size
+				#if(request.POST['L_g_min'] == ""):
+				#	lgmin = 10
+				#if(request.POST['L_g_max'] == ""):
+				#	lgmax = 20
 				clinicalstr = ""
 				clinicaldf = ""
 				# configure loading page
@@ -980,6 +1002,11 @@ def clustering_6_4_part_2(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
+				## assign standard result size
+				#if(request.POST['L_g_min'] == ""):
+				#	lgmin = 10
+				#if(request.POST['L_g_max'] == ""):
+				#	lgmax = 20
 				if(gene_set_size == ""):
 					gene_set_size = 2000
 				# run algorithm
@@ -1284,6 +1311,11 @@ def clustering_6_4(request):
 						print("saving data is true")
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
+				## assign standard result size
+				#if(request.POST['L_g_min'] == ""):
+				#	lgmin = 10
+				#if(request.POST['L_g_max'] == ""):
+				#	lgmax = 20
 				clinicalstr = ""
 				clinicaldf = ""
 				# configure loading page
@@ -1495,6 +1527,11 @@ def clustering_6_4(request):
 				make_empty_figure.delay()
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
+				## assign standard result size
+				#if(request.POST['L_g_min'] == ""):
+				#	lgmin = 10
+				#if(request.POST['L_g_max'] == ""):
+				#	lgmax = 20
 				if(gene_set_size == ""):
 					gene_set_size = 2000
 				# run algorithm
@@ -1598,6 +1635,7 @@ def clustering_6_4(request):
 			genelist2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
 			#kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
 			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
+			print(genelist)
 			if(enr_type == "kegg_enrichment"):
 				result1 = run_enrichment_2.delay(("/code/clustering/static/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_kegg/" + session_id))
 				result2 = run_enrichment_2.delay(("/code/clustering/static/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_kegg/" + session_id))

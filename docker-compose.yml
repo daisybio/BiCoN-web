@@ -7,7 +7,7 @@ services:
   # livereload is needed to update images after change, for a display of the loading page.
   livereload:
     build: .
-    command: bash -c "python3 manage.py livereload"
+    command: bash -c "python3 manage.py livereload extra /code/clustering/static/"
     environment: 
         - SECRET_KEY=${secret_key}
     volumes:

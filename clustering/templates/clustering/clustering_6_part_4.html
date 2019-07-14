@@ -814,6 +814,34 @@ if (document.getElementById('display_old_results').checked){
     }
 }
 </script>
+
+<script>
+// check input data - if old results are displayed, no uploads or parameters are needed
+function checkInp2()
+{
+// return true if old results is checked (no additional input parameters needed)
+if (document.getElementById('display_old_results').checked){
+    return true;
+}// check if minimal and maximal number of genes was given
+  var x=document.forms["myForm"]["L_g_min"].value;
+  var y=document.forms["myForm"]["L_g_max"].value;
+if (x == "" || x == null, y == "" || y == null) 
+  {
+    return true;
+  }
+  if (isNaN(x)) 
+  {
+    alert("Input for minimal number of genes must be a number");
+    return false;
+  }
+
+  if (isNaN(y)) 
+  {
+    alert("Input for maximal number of genes must be a number");
+    return false;
+  }  // parseFloat converts input from field L_g_min to float
+}
+</script>
 <br><br><br><br>
 <script>
 // display collapsible content if the label is clicked
@@ -1121,6 +1149,7 @@ if(document.getElementById('myfile_input').value=='' && (document.getElementById
   currentTab = currentTab -1;
   //showTab(currentTab);
 }
+
 }
 }
 
@@ -1193,7 +1222,7 @@ function fixStepIndicator(n) {
        {% load staticfiles %}
 		<!--- here the PPI graph is displayed --->
 		<!---<div id="graph-container" style="display: block;float:left"><img src={% static 'legend.png' %} width="132" height="218" style="position:absolute"> </div>--->
-<div id="graph-container" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;bottom:100px"> </div></div>
+<div id="graph-container" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;bottom:70px"> </div></div>
 	
 <div id="div-for-newline" style="clear:both">
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>
