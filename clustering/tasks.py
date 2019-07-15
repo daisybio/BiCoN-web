@@ -996,6 +996,16 @@ def preprocess_ppi_file(ppistr):
 		ppistr = ppistr.replace(",","\t")
 		ppistr_split = ppistr.split("\n")
 	ppistr_split_new = []
+	len_first_line = 0
+	len_second_line = 0	
+	for elem in ppistr_split[0].split("\t"):
+		if(elem != ""):
+			len_first_line = len_first_line + 1
+	for elem in ppistr_split[1].split("\t"):
+		if(elem != ""):
+			len_second_line = len_second_line + 1
+	if(len_second_line > len_first_line):
+		del ppistr_split[0]
 	# take only the right two columns
 	for line in ppistr_split:
 		if(len(line.split("\t")) > 2):
