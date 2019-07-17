@@ -537,6 +537,8 @@ def clustering_6_new(request):
 		enrichment_dict_3 = {}
 		enrichment_dict_4 = {}
 		enrichment_dict_5 = {}
+		if not(os.path.isfile("genelist.txt") and os.path.isfile("genelist_1.txt") and os.path.isfile("genelist_2.txt")):
+				return render(request,'clustering/clustering_6.html',{'errstr':""})
 		if(enr_type == "kegg_enrichment"):
 			result1 = run_enrichment_2.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_kegg")
 			result2 = run_enrichment_2.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_kegg")
@@ -1155,7 +1157,7 @@ def clustering_6_4_part_2(request):
 			else:
 				session_id = request.session._get_or_create_session_key()
 			if not(session_id == ""):
-				if(os.path.isfile("/code/clustering/static/metadata_" + session_id + ".txt"):
+				if(os.path.isfile("/code/clustering/static/metadata_" + session_id + ".txt")):
 					metd = list_metadata_5.apply_async(args=["/code/clustering/static/metadata_" + session_id + ".txt"],countdown=0)
 					(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
 					metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
@@ -1647,6 +1649,8 @@ def clustering_6_4(request):
 			genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
 			genelist1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
 			genelist2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
+			if not(os.path.isfile(genelist) and os.path.isfile(genelist1) and os.path.isfile(genelist2)):
+				return render(request,'clustering/clustering_6_part_4.html',{'errstr':""})
 			#kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
 			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
 			#print(genelist)
@@ -1769,6 +1773,8 @@ def clustering_6_4(request):
 		if (analysis_running == 'none'):
 			if(os.path.isfile("clustering/static/loading_1.gif")):
 				os.unlink("clustering/static/loading_1.gif")
+			if(os.path.isfile("clustering/static/progress.png")):
+				os.unlink("clustering/static/progress.png")
 			remove_loading_image.delay()	
 			#print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:

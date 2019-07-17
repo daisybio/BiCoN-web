@@ -1018,7 +1018,6 @@ def preprocess_ppi_file(ppistr):
 def preprocess_file(expr_str):
 	expr_str = expr_str.replace("cancer_type","disease_type")
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
-		#print(expr_str.split("\n")[0])	+
 		expr_str_split = expr_str.split("\n")	
 		# replace column name for disease type
 		if("disease_type" not in expr_str_split[0]):
@@ -1036,21 +1035,9 @@ def preprocess_file(expr_str):
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 				if(len(column.unique()) == 2):
-					print(column_name)
+					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
 		return(expr_str)
-	elif(0 == 1):
-		if("\t" not in expr_str.split("\n")[0]):
-			expr_str = expr_str.replace(",","\t")
-			#print(expr_str)
-			expr_str = expr_str.replace("status","disease_type")
-			#expr_str = expr_str.replace("-0.","0.")
-			#print(expr_str.split("\n")[0])
-			#expr_stringio = StringIO(expr_str)
-			expr_str = expr_str.replace("CTL","MCI")
-			#exprdf = pd.read_csv(expr_stringio,sep='\t')
-			#print(list(set(exprdf["cancer_type"])))
-			return(expr_str)
 	elif("," in expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
@@ -1085,7 +1072,6 @@ def preprocess_file(expr_str):
 			for column_name, column in exprdf.transpose().iterrows():
 				if(not column_name.isdigit()):
 					if(len(column.unique()) < 5):
-						print(column_name)
 						expr_str = expr_str.replace(column_name,"disease_type")	
 						expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
 						#print(list(column))
@@ -1094,14 +1080,9 @@ def preprocess_file(expr_str):
 							expr_str_split_2.append(expr_str_split[0])
 							type1 = column.value_counts().index.tolist()[0]	
 							type2 = column.value_counts().index.tolist()[1]
-							print(type1)
-							print(type2)
 							#print(len(list(column)))
 							for i in range(0,len(list(column))-1):
 								if(list(column)[i] == type1 or list(column)[i] == type2):
-									print(column[i])	
-									#print(expr_str_split[i+1])
-									print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
 									expr_str_split_2.append(expr_str_split[i+1])
 							expr_str = "\n".join(expr_str_split_2)
 							done1 = "true"
@@ -1109,13 +1090,6 @@ def preprocess_file(expr_str):
 
 			expr_stringio = StringIO(expr_str)
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
-			#print(list(set(exprdf["cancer_type"])))
-			#column.fillna("NA",inplace=True)
-			#print(column_name)
-			#print(column)
-			#coluniq = column.unique()
-			#for 
-			#print(expr_str)
 			return(expr_str)
 
 
@@ -1225,7 +1199,8 @@ def preprocess_file_OLD(expr_str):
 @shared_task(name="add_loading_image")
 def add_loading_image():
 	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
-	copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
+	if(os.path.isfile("/code/clustering/static/loading.gif")):
+		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
 
 @shared_task(name="remove_loading_image")
 def remove_loading_image():
@@ -1376,18 +1351,13 @@ def list_metadata_5(path):
     	return(emptydict,emptydict,emptydict)
     # remove html from metadata file and replace table elements by tab
     emptydict = {}
-    print(len(lines.split('\n')))
     # if no data in file, remove empty dictionaries
     if(len(lines.split('\n')) < 3):
-    	print("basdbasdbasdb")
     	return(emptydict,emptydict,emptydict)
     # read content from lines
     line0 = lines.split('\n')[0].split('\t')
     line1 = lines.split('\n')[1].split('\t')
     line2 = lines.split('\n')[2].split('\t')
-    print(line0)
-    print(line1)
-    print(line2)
     ret = []
     dict3 = {}
     dict1 = {}
@@ -1401,29 +1371,12 @@ def list_metadata_5(path):
     dict3['gr1'] = line1
     dict3['gr2'] = line2
     dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
-    #for elem in line0:
-    #	print(ctr)
-    #	dict0[ctr] = line0[ctr]
-    #	dict1[elem] = line1[ctr]
-    #	dict2[elem] = line2[ctr]
-    #	ctr = ctr + 1
     # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
     for i in range(0,len(line0)-1):
-    	#print(ctr)
-    	print(line0[i])
     	dict0[i] = line0[i]
     	dict1[dict0[i]] = line1[i]
     	dict2[dict0[i]] = line2[i]
     	ctr = ctr + 1
-    #ret.append(dict1)
-    print(dict0)
-    print(dict1)
-    print(dict2)
-    #ret.append(dict1)
-    #ret.append(dict2)
-    #ret.append({'group':"Group 1",line0[0]:line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
     return(dict0,dict1,dict2)
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
@@ -1440,10 +1393,10 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
 	#check if string contains negative numbers.
 	if("-" in expr_str.split("\n")[2]):
-		print("log2_2 is false")
+		print("expression data are logarithmized")
 		log2_2 = False
 	else:
-		print("log2_2 is true")
+		print("expression data not logarithmized")
 		log2_2 = True
 	print(exprdf.iloc[:,[2]])
 	#for i in range(1,len(exprdf.columns)-1):
@@ -1453,12 +1406,9 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 			# check only first 1000 lines of column 2 and 3
 			for j in range(1, min(len(exprdf.index)-1,1000)):
 				if(log2_2 and str(exprdf.columns[i]) != "disease_type"):
-					#print(exprdf.iloc[j][i])
-					#print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1))
-					#print(str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit())
 					# make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
 					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
-						print("log2_2_ false 2")
+						print("expression data are logarithmized")
 						log2_2 = False	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
@@ -1497,37 +1447,13 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	#print(a)
-	#print(type(a))
-	#print(type(b))
-	#print(type(n))
-	#print(type(m))
-	#print(type(H))
-	#print(H)
-	#print(type(GE))	
-	#print(GE)
-	#print(type(G))
-	#print(G)
-	#print(type(clusters))
-	#print(clusters)
-	
-	
 	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
-
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
-	#result_99= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = True, save 	= None, show_nets = False)
-	#print(result_99.get())
-	#solution,t_best,sc,conv= result_99.get()
-	#solution,t_best,sc,conv= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
-	
-	
-	
-	
 	print("######################################################################")
 	print("RESULTS ANALYSIS")
 	print("total time " + str(round((end - start)/60,2))+ " minutes")
@@ -1625,18 +1551,6 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
 	row_colors = species.map(lut)
 	plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
-	#g = sns.clustermap(GE_small.T, row_colors=row_colors,col_colors = col_colors,figsize=(15, 10))
-	#for label in values:
-	#    g.ax_col_dendrogram.bar(0, 0, color=lut[label],
-	#                            label=label, linewidth=0)
-	#g.ax_col_dendrogram.legend(loc="upper center", ncol=2,bbox_to_anchor=(0.55, 1.5),
-	#                            borderaxespad=0.)
-	#ax = g.ax_heatmap
-	#ax.set_xlabel("Genes")
-	#ax.set_ylabel("Patients")
-	
-	#plotting convergence
-	#fig, ax = plt.subplots(figsize=(10, 7))
 	plt.clf()
 	plt.boxplot(conv/2,
 	                        vert=True,  # vertical box alignment
@@ -1690,34 +1604,11 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	#print(a)
-	#print(type(a))
-	#print(type(b))
-	#print(type(n))
-	#print(type(m))
-	#print(type(H))
-	#print(H)
-	#print(type(GE))	
-	#print(GE)
-	#print(type(G))
-	#print(G)
-	#print(type(clusters))
-	#print(clusters)
-	
-	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
 	solution,t_best,sc,conv= lib.ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
-	#result_99= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = True, save 	= None, show_nets = False)
-	#print(result_99.get())
-	#solution,t_best,sc,conv= result_99.get()
-	#solution,t_best,sc,conv= ants_2.delay(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
-	
-	
-	
-	
 	print("######################################################################")
 	print("RESULTS ANALYSIS")
 	print("total time " + str(round((end - start)/60,2))+ " minutes")
@@ -1815,18 +1706,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
 	row_colors = species.map(lut)
 	plt.savefig("/code/clustering/static/ntw.png")
-	#g = sns.clustermap(GE_small.T, row_colors=row_colors,col_colors = col_colors,figsize=(15, 10))
-	#for label in values:
-	#    g.ax_col_dendrogram.bar(0, 0, color=lut[label],
-	#                            label=label, linewidth=0)
-	#g.ax_col_dendrogram.legend(loc="upper center", ncol=2,bbox_to_anchor=(0.55, 1.5),
-	#                            borderaxespad=0.)
-	#ax = g.ax_heatmap
-	#ax.set_xlabel("Genes")
-	#ax.set_ylabel("Patients")
-	
-	#plotting convergence
-	#fig, ax = plt.subplots(figsize=(10, 7))
 	plt.clf()
 	plt.boxplot(conv/2,
 	                        vert=True,  # vertical box alignment
@@ -1852,7 +1731,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	def color_for_graph(v):
 		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
 		v = v*2
-		#tmp98 = int(v + (0.5 if v > 0 else -0.5))
 		tmp98 = int(v)
 		if(v < -4):
 			tmp98 = -4
@@ -1866,8 +1744,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	#read file with PPI, calculate expression difference of respective genes between groups
 	G_list = list(G2.nodes())
 	G = nx.Graph()
-	#print(G_list)
-	#print(genes1)
 	# make node objects for genes
 	ctr = 0
 	for G_tmp in genes_all:
@@ -2426,7 +2302,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	plt.savefig(path_heatmap)
 	path_heatmap_2 = "/code/clustering/static/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap_2)
-	#script, div = components(plot)	
 	plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
@@ -2480,24 +2355,24 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		print(clinicaldf.columns)
+		#print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		print(clinicaldf_col_names)
+		#print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
 		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
-			print("basdbasdfbasfbafs")
+			#print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			print(clinicaldf_col_names_new)
+			#print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
 		param_names = []
 		param_values = []
 		param_cols = []
 		ctr = 0
-		print(patientids_metadata)
+		#print(patientids_metadata)
 	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
@@ -2551,7 +2426,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					#print(column_name)
 					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						print(sorted(coluniq3))
+						#print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
@@ -2618,10 +2493,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						group1_has.append(tmp95)				
 						group2_has.append(tmp94)
 			ctr = ctr + 1
-		print(param_names)
-		print(patients_0)
-		print(patients_1)
-		print(param_cols)
+		#print(param_names)
+		#print(patients_0)
+		#print(patients_1)
+		#print(param_cols)
 		jaccards_1 = []
 		jaccards_2 = []
 		param_names_final = []
@@ -2633,12 +2508,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					param_names_final.append(param_names[i])
 					jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
 					jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
-		print(param_names_final)
-		print(group1_has)
-		print(jaccards_1)
-		print(jaccards_2)
+		#print(param_names_final)
+		#print(group1_has)
+		#print(jaccards_1)
+		#print(jaccards_2)
 		#print(list(clinicaldf.columns).index(survival_col))
-		print(list(clinicaldf.iloc[:,42]))
+		#print(list(clinicaldf.iloc[:,42]))
 		# get list of patient ids
 		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
 			patient_id_list = list(clinicaldf.index)
@@ -2647,9 +2522,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-			print("survival col")
-			print(survival_col_nbr)
-			print(list(clinicaldf.iloc[:,survival_col_nbr]))
+			print("survival column found")
+			#print(survival_col_nbr)
+			#print(list(clinicaldf.iloc[:,survival_col_nbr]))
 			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
 			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
@@ -2665,13 +2540,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 					if("month" in survival_col or "MONTH" in survival_col):
-						print("month")
-						print(patient_id_list[i])
+						#print("month")
+						#print(patient_id_list[i])
 						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
 						patientData.update({patient_id_list[i]:survivalcol_list_temp})
 					else:
 						patientData.update({patient_id_list[i]:survivalcol_list[i]})
-					print(survivalcol_list[i])				
+					#print(survivalcol_list[i])				
 		age1 = 0
 		ct1 = 0.001
 		age2 = 0
@@ -2691,12 +2566,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 				survival_1.append(float(patientData[key]))
 			elif key in group2_ids:
 				survival_2.append(float(patientData[key]))
-		print(survival_1)
+		#print(survival_1)
 		# calculate p-value for survival times
 		if(survival_col in list(clinicaldf.columns) and len(survival_1) > 0 and len(survival_2) > 0):
 			surv_results = logrank_test(survival_1,survival_2)
 			p_val = surv_results.p_value
-			print("p value" + str(p_val))
 		else:
 			p_val = ""
 		# count survival times in both arrays
@@ -2716,23 +2590,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		errstr = ""
 		if(len(survival_1) == 0):
 			errstr = "Unfortunately, no survival data could be computed."		
-		#text_file_3 = open(path_metadata, "w")
-		# write metadata in file
-		#text_file_3.write("<table><tr>")
-		#if(len(jaccards_1) < len(param_names)):
-		#	for i in range(len(jaccards_1),len(param_names)):
-		#		jaccards_1.append(0.0)
-		#		jaccards_2.append(0.0)
-		#for elem in param_names:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</tr><tr>")
-		#for elem in jaccards_1:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</tr><tr>")
-		#for elem in jaccards_2:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</table>")
-		#text_file_3.close()
 		text_file_4 = open((path_metadata),"w")
 		text_file_4.write("\t".join(param_names) + "\n")
 		jaccards_1_str = [str(i) for i in jaccards_1]
@@ -2792,21 +2649,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		shape='hv'))
 		surv_data_for_graph = [trace1,trace2]
 		layout = dict(showlegend=False,
-		#legend=dict(
-		#yanchor="bottom",
-		#traceorder='reversed',
-		#orientation="h",
-		#font=dict(size=16)
 		xaxis=dict(
         	title='Time in years'),
 		yaxis=dict(
         	title='percentage of patients'))
 		fig = dict(data=surv_data_for_graph,layout=layout)		
-		#fig = dict(data=data99, layout=layout)
-		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
-		#print(output_plot_path)
 		if(survival_col not in list(clinicaldf.columns)):
 			with open(output_plot_path, "w") as text_file_2:
         			text_file_2.write("")
@@ -2836,8 +2685,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
         	text_file.write("Done!")
-	#print(ret_metadata)
-	#return(script,div,plot_1,plot_div,ret_metadata,path99,path_metadata,output_plot_path,json_path)
 	return(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val)
 
 
@@ -2849,14 +2696,11 @@ def run_enrichment_2(path,pval_enr,out_dir):
 	fh1 = open(path)
 	gene_list = []
 	lines = fh1.readlines()
-	print(lines)
-	#lines = lines[1:]
 	# read gene list line for line from file
 	for line in lines:
 		line.replace("\\n","")
 		gene_list.append(line)
-	print("baabababa")
-	print(pval_enr)
+	print("running enrichment analysis")
 	enr = gp.enrichr(gene_list=gene_list,
                  description='test_name',
                  # gene_sets='KEGG_2016',
@@ -2865,7 +2709,6 @@ def run_enrichment_2(path,pval_enr,out_dir):
                  outdir=out_dir,
                  cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
                 )
-	print(enr.results)
 	return(enr.results)
 
 @shared_task(name="run_go_enrichment_2")
@@ -2878,17 +2721,13 @@ def run_go_enrichment_2(path,pval_enr,out_dir):
 	for line in lines:
 		line.replace("\\n","")
 		gene_list.append(line)
-	print("baabababa")
-	print(pval_enr)
+	print("running enrichment analysis")
 	enr = gp.enrichr(gene_list=gene_list,
                  description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
                  gene_sets=['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'],
                  outdir=out_dir,
-                 cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
+                 cutoff=float(pval_enr)
                 )
-	print(type(enr.results))
 	return(enr.results)
 
 
@@ -2897,19 +2736,15 @@ def run_reac_enrichment(path,pval_enr,out_dir):
 	fh1 = open(path)
 	gene_list = []
 	lines = fh1.readlines()
-	#lines = lines[1:]
 	for line in lines:
 		line.replace("\\n","")
 		gene_list.append(line)
 	enr = gp.enrichr(gene_list=gene_list,
                  description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
                  gene_sets=['Reactome_2013','Reactome_2016'],
                  outdir=out_dir,
-                 cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
+                 cutoff=float(pval_enr)
                 )
-	print(type(enr.results))
 	return(enr.results)
 
 
@@ -2925,9 +2760,6 @@ def read_kegg_enrichment(path,pval_enr):
 		if(ctr > 0):	
 			# check p-value
 			if(float(lineSplit[3]) < float(pval_enr)):
-				#print(lineSplit[3])
-				#for i in range(0,len(lineSplit)):
-				#	tmp[i] = lineSplit[i]
 				#ret_dict.append(tmp)
 				# append genes, enrichment term, p-value etc to list
 				for i in range(0,5):
@@ -2955,16 +2787,10 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 		if(ctr > 0):	
 			# check p-value
 			if(float(lineSplit[3]) < float(pval_enr)):
-				#print(lineSplit[3])
-				#for i in range(0,len(lineSplit)):
-				#	tmp[i] = lineSplit[i]
-				#ret_dict.append(tmp)
-				#temp_dict.update({lineSplit[0]:tmp})
 				# append genes, enrichment term, p-value etc to list
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
-				#ret_dict.append(tmp)
 				temp_dict.update({lineSplit[1]:tmp})
 		ctr = ctr + 1
 	# file 2 and array 2 is results for genes in cluster 2
@@ -2974,10 +2800,6 @@ def read_kegg_enrichment_2(path1,path2,pval_enr):
 		lineSplit = line.split("\t")
 		if(ctr2 > 0):	
 			if(float(lineSplit[3]) < float(pval_enr)):
-				#print(lineSplit[3])
-				#for i in range(0,len(lineSplit)):
-				#	tmp[i] = lineSplit[i]
-				#ret_dict.append(tmp)
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
 				tmp[5] = lineSplit[9]
@@ -3004,8 +2826,8 @@ def check_input_files(ppistr,exprstr):
 	errstr = ""
 	ppi_stringio = StringIO(ppistr)
 	ppidf = pd.read_csv(ppi_stringio,sep='\t')
-	print(ppidf)
-	print(ppidf.iloc[0,:])
+	#print(ppidf)
+	#print(ppidf.iloc[0,:])
 	# check if PPI file has at least 2 columns
 	if(len(ppidf.columns) < 2):
 		errstr = errstr + "Input file must contain two columns with interaction partners.\n"
@@ -3016,14 +2838,14 @@ def check_input_files(ppistr,exprstr):
 	# check if PPI file contains lines with two protein IDs
 	for i in range(len(ppidf.index)):
 		if(contains_numbers == "false"):
-			print(i)
+			#print(i)
 			curr_elem = str(ppidf.iloc[[i], 0].values[0])
 			#curr_elem = ppidf.iloc[[i], 0].split("\t")
 			#curr_elem_1 = curr_elem[0]
 			#curr_elem_2 = curr_elem[len(curr_elem)-1]
 			curr_elem_2 = str(ppidf.iloc[[i], 1].values[0])
-			print(curr_elem)
-			print(curr_elem_2)
+			#print(curr_elem)
+			#print(curr_elem_2)
 			if(curr_elem.isdigit() and curr_elem_2.isdigit()):
 				contains_numbers = "true"
 	if(contains_numbers == "false"):
@@ -3036,11 +2858,6 @@ def check_input_files(ppistr,exprstr):
 def convert_gene_list(adjlist,filename):
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 	                  host='http://www.ensembl.org')
-	#print("biomart attributes")
-	#print(dataset.list_attributes().head(100))
-	#print(dataset.list_attributes().ix[:,0].str.contains("entrez"))
-	#print(dataset.list_attributes()[dataset.list_attributes().ix[:,0].str.match('entrez')])
-	#conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene'])
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	# conv is a list of genes with ENSEMBL Id, gene name and Entrez ID
 	conv_genelist = conv['Gene name'].tolist()
@@ -3090,15 +2907,6 @@ def read_ndex_file_4(fn):
 		lines5 = fn.split("{\"nodes\":[")
 		lines3 = lines5[1].split("]},")[0] + "]]]"
 		lines4 = lines5[0].split("{\"edges\":[")[1][:-4]
-	#lines4 = lines4 + "}"
-	#lines4 = lines4[:-4]
-	#lines = fn.split("\n")
-	#lines[3].replace("@","")
-	#lines[3].replace("uniprot:","uniprot")
-	#lines[3].replace("signor:","signor")
-	#lines[3].replace(" ","")
-	#lines[3].replace("ncbigene:","")
-	#lines[3].replace("\\n","")
 	# remove signs to allow automatic json to array conversion
 	lines3.replace("@","")
 	lines3.replace("uniprot:","uniprot")
@@ -3107,25 +2915,17 @@ def read_ndex_file_4(fn):
 	lines3.replace("ncbigene:","")
 	lines3.replace("\\n","")
 	lines33 = lines3[:-3].replace("}]","")
-	#print(lines33)
-	#lines[3].replace("
-	#node_line = lines[3][11:-3].replace("ncbigene:","")
 	node_line = lines33.replace("ncbigene:","")
-	#print(node_line)
 	nodelinesplit = node_line.split(", ")
-	#print(nodelinesplit)
 	dictlist = []
 	node_dict = {}
 	if not(node_line.endswith("}")):
 		node_line = node_line + "}"
 	node_line_2 = "[" + node_line + "]"
-	#print(nodelinesplit[len(nodelinesplit)-1])
 	tmp2 = json.loads(node_line_2)
-	#print(tmp2)
 	node_dict_2 = {}
 	if not(lines6 == ""):
 		lines6 = "[" + lines6
-		#print(lines6[:-4])
 		tmp4 = json.loads(lines6[:-4])
 		for item in tmp4:
 			if(item['n'] == "GeneName_A"):
@@ -3137,8 +2937,6 @@ def read_ndex_file_4(fn):
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	conv_genelist = conv['Gene name'].tolist()
 	for item in tmp2:
-		#print(item)
-		#tmp = json.loads(item)
 		dictlist.append(item)
 		if('r' in item):
 			if(any(c.islower() for c in item['r'])):
@@ -3151,7 +2949,6 @@ def read_ndex_file_4(fn):
 			else:
 				node_dict[item['@id']] = item['r']
 				print(item)
-				#print(tmp['@id'])
 		else:
 			if(item['n'].isdigit()):
 				print(item)
@@ -3165,26 +2962,15 @@ def read_ndex_file_4(fn):
 					node_dict[item['@id']] = gene_nbr1
 					print(gene_nbr1)
 	print(node_dict)
-	#print(dictlist)
-	#lines[4].replace("@","")
-	#lines[4].replace("uniprot:","uniprot")
-	#lines[4].replace("signor:","signor")
-	#lines[4].replace(" ","")
-	#lines[4].replace("\\n","")
 	lines4.replace("@","")
 	lines4.replace("uniprot:","uniprot")
 	lines4.replace("signor:","signor")
 	lines4.replace(" ","")
-	#lines4 = lines4.replace("\\n","")
 	lines4 = lines4.replace("]","")
 	edge_line = lines4.rstrip()
 	edge_line_2 = "[" + edge_line + "]"
-	#print(edge_line_2)
 	edgelinesplit = edge_line.split(", ")	
-	#print(edgelinesplit)
 	edgelist = []
-	#tmp4 = json.loads(edge_line_2.replace('\r\n', '\\r\\n').rstrip())
-	#tmp4 = json.loads(edge_line_2.replace('\r\n', '').rstrip())
 	tmp4 = json.loads(edge_line_2)
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
@@ -3192,7 +2978,6 @@ def read_ndex_file_4(fn):
 	ret = []
 	for item in tmp4:
 		print(item)
-		#dictlist.append(tmp)
 		if(item['s'] in node_dict and item['t'] in node_dict):
 			source = node_dict[item['s']]
 			target = node_dict[item['t']]
@@ -3223,7 +3008,6 @@ def import_ndex(name):
 		# node has ID and "name"
 		current_node['id'] = node_id
 		current_node['n'] = node.get('n')
-		#current_node['r'] = node.get('r')
 		if(name=="9c38ce6e-c564-11e8-aaa6-0ac135e8bacf"):
 			# get GeneName for node
 			curr_gene_name = nice_cx_network.get_node_attribute_value(node_id,'GeneName_A')
@@ -3234,7 +3018,6 @@ def import_ndex(name):
 				# check if NCBI ID was found
 				if not(math.isnan(float(gene_nbr1))):
 					node_dict[node_id] = str(int(gene_nbr1))	
-				#print(gene_nbr1)
 		else:
 			# if gene name is stored in node name
 			curr_gene_name = current_node['n']				
@@ -3243,7 +3026,6 @@ def import_ndex(name):
 				gene_nbr1 = conv.loc[gene_nbr,'NCBI gene ID'].values[0]
 				if not(math.isnan(float(gene_nbr1))):
 					node_dict[node_id] = str(int(gene_nbr1))
-				#print(gene_nbr1)
 		tmp4.append(current_node)
 	edgelist = []
 	ret = ""

@@ -532,7 +532,7 @@ border:1px solid black;
 	<label for="redo_box"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
+	        <option value="{{filename2.f2}}">Filename:{{filename2.f1}}</option>
 		{% endfor %}
        	</select>
 	<br><br>
@@ -715,7 +715,7 @@ $(document).ready(function() {
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
-	        <option value="{{filename.f1}}">Filename:{{filename.f1}}</option>
+	        <option value="{{filename.f2}}">Filename:{{filename.f1}}</option>
 		{% endfor %}
        	</select><br>
 	</div>
@@ -732,14 +732,14 @@ $(document).ready(function() {
 	<label for="l_box1"><input type="radio" name="redo_analysis" value="redo_analysis" id="l_box1">Redo analysis:</label>
 	<select name="input_own_file_redo" size="1"style="width:500px">	
 		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f1}}">Filename:{{filename2.f1}}</option>
+	        <option value="{{filename2.f2}}">Filename:{{filename2.f1}}</option>
 		{% endfor %}
        	</select>
 		<label for="l_box1"><input type="radio" name="own_file" value="own_file" id="l_box1">Use own files:</label>
 		<br><br><h3>Use own uploaded files:</h3>
 	<select name="input_own_file" size="1"style="width:500px">	
 		{% for filename in list_of_files %}
-	        <option value="{{filename.f1}}">Filename:{{filename.f1}}</option>
+	        <option value="{{filename.f2}}">Filename:{{filename.f1}}</option>
 		{% endfor %}
        	</select><br>
 	{% endif %}
@@ -1266,6 +1266,36 @@ function nextPrev(n) {
   // Exit the function if any field in the current tab is invalid:
   //if (n == 1) return false;
   // Hide the current tab:
+// skip metadata step if using predefined expression file, skip PPI+ metadata steps if using own data
+if(n == 1 || n == 2 || n == 3){
+//alert("n == 1");
+//check if redo-analysis checkbox box exists (to avoid error)
+if(typeof( document.getElementById('redo_box')) != 'undefined' &&  document.getElementById('redo_box') != null){
+if(document.getElementById('myfile_input').value!='' && (document.getElementById('predef_box').checked === true  || document.getElementById('redo_box').checked === true)){
+    alert("Please select/upload only one file with expression data.");
+    //currentTab = currentTab -1;
+    currentTab = currentTab - n;
+    return false;
+  //showTab(currentTab);
+}
+if(document.getElementById('predef_box').checked === true  && document.getElementById('redo_box').checked === true )
+{
+    alert("Please select/upload only one file with expression data.");
+    currentTab = currentTab -n;
+    return false;
+  //showTab(currentTab);
+}
+}
+else{
+if(document.getElementById('myfile_input').value!='' && (document.getElementById('predef_box').checked === true)){
+alert("Please select/upload only one file with expression data.");
+    //currentTab = currentTab -1;
+    currentTab = currentTab - n;
+    return false;
+}
+}
+
+}
   // skip metadata step when predefined expression file is used
   if(currentTab == 2){
   if(n==1){
@@ -1292,6 +1322,7 @@ function nextPrev(n) {
 }
 }
  // skip PPI + metadata steps if own old data are used
+if(typeof( document.getElementById('redo_box')) != 'undefined' &&  document.getElementById('redo_box') != null){
  if(currentTab == 1){
  if(n==1){
  if(document.getElementById('redo_box').checked === true ){
@@ -1305,7 +1336,9 @@ function nextPrev(n) {
 }
 }
 }
+}
  // skip steps when going back (if own data used) 
+if(typeof( document.getElementById('redo_box')) != 'undefined' &&  document.getElementById('redo_box') != null){
  if(currentTab == 4){
  if(n == -1){
  if(document.getElementById('redo_box').checked === true ){
@@ -1313,6 +1346,7 @@ function nextPrev(n) {
   n = -3;
   x[2].style.display = "none";
   x[3].style.display = "none";
+}
 }
 }
 }
@@ -1358,9 +1392,11 @@ if(document.getElementById('protfile_input').value=='' && (document.getElementBy
   currentTab = currentTab -1;
   //showTab(currentTab);
 }
+if(typeof( document.getElementById('redo_box')) != 'undefined' &&  document.getElementById('redo_box') != null){
 if(document.getElementById('redo_box').checked === true ){
   currentTab = 4;
     document.getElementsByClassName("step")[3].className += " finish";
+}
 }
 }
 }
@@ -1375,21 +1411,7 @@ if(document.getElementById('redo_box').checked === true ){
 
 // new
 // alert if multiple files are selected for PPI or expression data
-if(n == 1 || n == 2 || n == 3){
-//alert("n == 1");
-if(document.getElementById('myfile_input').value!='' && (document.getElementById('predef_box').checked === true  || document.getElementById('redo_box').checked === true)){
-    alert("Please select/upload only one file with expression data.");
-    //currentTab = currentTab -1;
-    currentTab = currentTab - n;
-  //showTab(currentTab);
-}
-if(document.getElementById('predef_box').checked === true  && document.getElementById('redo_box').checked === true )
-{
-    alert("Please select/upload only one file with expression data.");
-    currentTab = currentTab -n;
-  //showTab(currentTab);
-}
-}
+
 // end of new code
 if(n==1){
     document.getElementsByClassName("step")[currentTab-1].className += " finish";
@@ -1399,11 +1421,14 @@ if(n==1){
   if((currentTab == 4 || currentTab == 3) && document.getElementById('predef_box').checked === true && n > 0){
   //alert("showing tab 4");
   showTab(4);
-} else if ((currentTab ==  4|| currentTab == 3 || currentTab == 2) && document.getElementById('redo_box').checked === true && n > 0){
+} else if(typeof( document.getElementById('redo_box')) != 'undefined' &&  document.getElementById('redo_box') != null){
+ if((currentTab ==  4|| currentTab == 3 || currentTab == 2) && document.getElementById('redo_box').checked === true && n > 0){
   //alert("showing tab 4");
   showTab(4);
-} else if ((currentTab ==  4|| currentTab == 3 || currentTab == 2) && document.getElementById('redo_box').checked === true && n < 0){
+}
+if ((currentTab ==  4|| currentTab == 3 || currentTab == 2) && document.getElementById('redo_box').checked === true && n < 0){
   showTab(1);
+}
 } else if ((currentTab == 4 || currentTab == 3) && document.getElementById('predef_box').checked === true && n < 0){
   showTab(2);
 }
