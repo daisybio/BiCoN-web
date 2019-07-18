@@ -84,7 +84,7 @@ from bokeh.models.graphs import from_networkx
 from bokeh.transform import linear_cmap
 from bokeh.models import ColumnDataSource, LabelSet
 from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
-from biomart import BiomartServer
+#from biomart import BiomartServer
 from bokeh.embed import components
 from bokeh.palettes import Spectral4
 from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
@@ -184,13 +184,18 @@ def hi(A_j,n,m):
 def make_empty_figure():
 	fig = plt.figure(figsize=(10,8))
 	plt.savefig("/code/clustering/static/progress.png")
+	#plt.savefig("/code/clustering/static/userfiles/progress.png")
 	plt.close(fig)
 
 @shared_task(name="empty_log_file")
 def empty_log_file():
-    text_file = open("/code/clustering/static/output_console.txt", "w")
-    text_file.write("")
-    text_file.close()
+	text_file = open("/code/clustering/static/output_console.txt", "w")
+	text_file.write("")
+	text_file.close()
+	if(os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
+    		text_file = open("/code/clustering/static/output_console.txt", "w")
+    		text_file.write("")
+    		text_file.close()
 
 
 @shared_task(name="write_pval")
@@ -1410,14 +1415,16 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
 						print("expression data are logarithmized")
 						log2_2 = False	
-	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
-	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
    		text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
 	#L_g_min = int(input())
@@ -1447,7 +1454,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
+	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
@@ -1550,6 +1558,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	species = grouping_p[0]
 	lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
 	row_colors = species.map(lut)
+	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
 	plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
 	plt.boxplot(conv/2,
@@ -1559,6 +1568,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
 	#plt.show(bplot1)
+	plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
 	plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
@@ -2262,7 +2272,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	#json_path = "/code/clustering/static/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)	
-	json_path_2 = "/code/clustering/static/ppi_" + session_id + ".json"
+	#json_path_2 = "/code/clustering/static/ppi_" + session_id + ".json"
+	json_path_2 = "/code/clustering/userfiles/static/ppi_" + session_id + ".json"
 	with open(json_path_2, "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
@@ -2300,16 +2311,20 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
 	#path_heatmap = "/code/clustering/static/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
-	path_heatmap_2 = "/code/clustering/static/heatmap_" + session_id + ".png"
+	#path_heatmap_2 = "/code/clustering/static/heatmap_" + session_id + ".png"
+	path_heatmap_2 = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap_2)
 	plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
 	# write lists of genes in files, needed for enrichment analysis
-	path_genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
-	path_genelist_1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
-	path_genelist_2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
+	#path_genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
+	#path_genelist_1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
+	#path_genelist_2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
+	path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
+	path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
+	path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
 	with open(path_genelist,"w") as text_file_4:
 		for i in G_list:
 			text_file_4.write(str(i) + "\n")
@@ -2324,7 +2339,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
-	path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
+	#path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
+	path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 	# if no metadata given, write an empty metadata file
 	p_val = ""
 	if(clinicalstr == "empty"):
@@ -2333,7 +2349,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write("")
 		# fill empty metadata arrays
@@ -2655,7 +2672,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
         	title='percentage of patients'))
 		fig = dict(data=surv_data_for_graph,layout=layout)		
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		if(survival_col not in list(clinicaldf.columns)):
 			with open(output_plot_path, "w") as text_file_2:
         			text_file_2.write("")
@@ -2671,7 +2689,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
+		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
         		text_file_2.write("")
 		# fill empty metadata arrays
@@ -3038,7 +3057,7 @@ def import_ndex(name):
 			curr_edge_str = str(node_dict[source]) + "\t" + str(node_dict[target]) + "\n"
 			edgelist.append([node_dict[source],node_dict[target]])
 			ret = ret + curr_edge_str
-	print(node_dict)
+	#print(node_dict)
 	# return tab separated string
 	return(ret)
 

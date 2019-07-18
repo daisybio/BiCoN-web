@@ -242,10 +242,10 @@ border:1px solid black;
                     <li class="active">
                         <a href="#">Home</a>
                     </li>
-                    <li>
-                        <a href="clustering_6_part_4.html">Analysis</a>
+                     <li>
+                        <a href="infopage.html">How to</a>
                     </li>
-			<li>
+                    <li>
                         <a>Logged in?</a>
 			{% if user.is_authenticated %}
     			User: {{ user.get_username }}
@@ -256,12 +256,14 @@ border:1px solid black;
    			{% else %}
 			<a href="login.html">Login</a>
    			{% endif %} 
-                    </li>
-			<li>
+                    </li><li>
 			<a href="signup.html">Sign up</a>
-		    </li><li>
+		    </li>
+			{% if user.is_authenticated %}
+			<li>
 			<a href="delete_user.html">Delete user account</a>
 		    </li>
+			{% endif %}
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -290,7 +292,7 @@ border:1px solid black;
 	<div style="padding:40px;margin:40px;border:1px solid #ccc;min-width:1400px">
 
         <h3> Sources </h3>
-	The two built-in expression datasets are from the following sources:
+	The two built-in expression datasets are from the following sources:<br>
 	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse2603">Breast Cancer</a><br>
 	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE30219">Lung Cancer</a><br><br>
 	The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/">NDEx Bio</a> webserver and contain datasets from the following sources: <a href="http://www.hprd.org/">Human Protein Reference Database</a> (<a href="http://www.ndexbio.org/#/network/1093e665-86da-11e7-a10d-0ac135e8bacf">link to source</a>), <a href="http://cicblade.dep.usal.es:8080/APID/init.action">Agile Protein Interactions Database</a> (<a href="http://www.ndexbio.org/#/network/9c38ce6e-c564-11e8-aaa6-0ac135e8bacf">link to source</a>), <a href="https://string-db.org/">STRING</a> database (<a href="http://www.ndexbio.org/#/network/275bd84e-3d18-11e8-a935-0ac135e8bacf">link to source</a>), and from <a href="https://thebiogrid.org/">BioGrid</a> (<a href="http://www.ndexbio.org/#/network/becec556-86d4-11e7-a10d-0ac135e8bacf">link to source</a>).<br><br>
