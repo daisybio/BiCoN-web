@@ -1578,11 +1578,29 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	col = "disease_type"
 	#col = "cancer_type"
 	#size = 2000
-	log2 = True
+	log2_2 = True
+	if("-" in expr_str.split("\n")[2]):
+		print("expression data are logarithmized")
+		log2_2 = False
+	else:
+		print("expression data not logarithmized")
+		log2_2 = True
+	print(exprdf.iloc[:,[2]])
+	#for i in range(1,len(exprdf.columns)-1):
+	### this checks whether the expression data contain negative numbers
+	for i in range(2,4):
+		if(log2_2 and i>len(exprdf.columns)):
+			# check only first 1000 lines of column 2 and 3
+			for j in range(1, min(len(exprdf.index)-1,1000)):
+				if(log2_2 and str(exprdf.columns[i]) != "disease_type"):
+					# make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
+					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
+						print("expression data are logarithmized")
+						log2_2 = False	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
    		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
-	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = True, gene_list = None, size = int(size), sample= None)
+	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
    		text_file.write("Starting model run...")	
@@ -2273,7 +2291,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)	
 	#json_path_2 = "/code/clustering/static/ppi_" + session_id + ".json"
-	json_path_2 = "/code/clustering/userfiles/static/ppi_" + session_id + ".json"
+	json_path_2 = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
 	with open(json_path_2, "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()

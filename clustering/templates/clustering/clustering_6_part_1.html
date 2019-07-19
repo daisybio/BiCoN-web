@@ -400,6 +400,9 @@ border:1px solid black;
                      <li>
                         <a href="infopage.html">How to</a>
                     </li>
+			<li>
+                        <a href="#">Analysis</a>
+                    </li>
                     <li>
                         <a>Logged in?</a>
 			{% if user.is_authenticated %}
@@ -413,9 +416,12 @@ border:1px solid black;
    			{% endif %} 
                     </li><li>
 			<a href="signup.html">Sign up</a>
-		    </li><li>
+		    </li>
+			{% if user.is_authenticated %}
+			<li>
 			<a href="delete_user.html">Delete user account</a>
 		    </li>
+			{% endif %}
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
