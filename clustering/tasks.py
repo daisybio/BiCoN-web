@@ -1573,6 +1573,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
 
+
+
 @shared_task(name="algo_output_task")
 def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,size):
 	col = "disease_type"
@@ -2931,7 +2933,7 @@ def read_ndex_file_4(fn):
 		if("cyTableColumn" in lines5[1]):
 			lines4 = lines5[1].split("{\"edges\":[")[1].split("{\"cyTableColumn\":[")[0]
 			lines4 = lines4[:-4]
-		# take protein name from networkAttributes if it is defined there
+		# take protein name from networkAttributes if it is defined there.
 		elif("networkAttributes" in lines5[1]):
 			lines4 = lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[0]
 			lines4 = lines4[:-4]
@@ -2944,6 +2946,7 @@ def read_ndex_file_4(fn):
 		lines5 = fn.split("{\"nodes\":[")
 		lines3 = lines5[1].split("]},")[0] + "]]]"
 		lines4 = lines5[0].split("{\"edges\":[")[1][:-4]
+	# lines3 contains the nodes, lines4 the edges, lines6 contains nodeAttributes (information from the ndex file usable for the conversion from node IDs to gene IDs)
 	# remove signs to allow automatic json to array conversion
 	lines3.replace("@","")
 	lines3.replace("uniprot:","uniprot")
@@ -2955,17 +2958,22 @@ def read_ndex_file_4(fn):
 	node_line = lines33.replace("ncbigene:","")
 	nodelinesplit = node_line.split(", ")
 	dictlist = []
+	# node dict is later filled with keys (node IDs) and the values are NCBI gene IDs
 	node_dict = {}
 	if not(node_line.endswith("}")):
 		node_line = node_line + "}"
 	node_line_2 = "[" + node_line + "]"
 	tmp2 = json.loads(node_line_2)
 	node_dict_2 = {}
+	# iterate over lines in nodeAttributes
 	if not(lines6 == ""):
 		lines6 = "[" + lines6
+		# get array with nodeAttributes for current line
 		tmp4 = json.loads(lines6[:-4])
+		# if node element has attribute "GeneName_A", then the NCBI ID is given in the nodeAttributes
 		for item in tmp4:
 			if(item['n'] == "GeneName_A"):
+				# use node ID and NCBI ID
 				node_dict_2[item['po']] = item['v']
 				print(str(item['po']) + " " + str(item['v']))
 	print(node_dict_2)
@@ -2975,6 +2983,7 @@ def read_ndex_file_4(fn):
 	conv_genelist = conv['Gene name'].tolist()
 	for item in tmp2:
 		dictlist.append(item)
+		# write conversion from node ID to gene ID in dictionary, based on nodeAttributes from the data
 		if('r' in item):
 			if(any(c.islower() for c in item['r'])):
 				gene_name = item['n']
@@ -2988,9 +2997,11 @@ def read_ndex_file_4(fn):
 				print(item)
 		else:
 			if(item['n'].isdigit()):
+				# if gene ID is in node attributes
 				print(item)
 				node_dict[item['@id']] = item['n']
 			elif (item['n'] in node_dict_2):
+				# otherwise use conversion table to convert gene ID to NCBI ID
 				gene_name = node_dict_2[item['n']]
 				print(gene_name)
 				if(gene_name in conv_genelist):
@@ -2999,6 +3010,7 @@ def read_ndex_file_4(fn):
 					node_dict[item['@id']] = gene_nbr1
 					print(gene_nbr1)
 	print(node_dict)
+	# remove signs from string to allow json conversion
 	lines4.replace("@","")
 	lines4.replace("uniprot:","uniprot")
 	lines4.replace("signor:","signor")
@@ -3009,10 +3021,12 @@ def read_ndex_file_4(fn):
 	edgelinesplit = edge_line.split(", ")	
 	edgelist = []
 	tmp4 = json.loads(edge_line_2)
+	# get dictionary with gene names and NCBI IDs (entrezgene_id)
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
 	conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name','entrezgene_id'])
 	ret = []
+	# convert node IDs in edges to NCBI IDs
 	for item in tmp4:
 		print(item)
 		if(item['s'] in node_dict and item['t'] in node_dict):
@@ -3033,6 +3047,7 @@ def import_ndex(name):
 	# import NDEx from server based on UUID (network contains lists with nodes and edges)
 	nice_cx_network = ndex2.create_nice_cx_from_server(server='public.ndexbio.org', uuid=name)
 	tmp4 = []
+	# node_dict is for the conversion from Node ID to NCBI ID
 	node_dict = {}
 	dataset = Dataset(name='hsapiens_gene_ensembl',
 		                  host='http://www.ensembl.org')
@@ -3045,6 +3060,7 @@ def import_ndex(name):
 		# node has ID and "name"
 		current_node['id'] = node_id
 		current_node['n'] = node.get('n')
+		# gene names are stored in the GeneName variable in this network
 		if(name=="9c38ce6e-c564-11e8-aaa6-0ac135e8bacf"):
 			# get GeneName for node
 			curr_gene_name = nice_cx_network.get_node_attribute_value(node_id,'GeneName_A')

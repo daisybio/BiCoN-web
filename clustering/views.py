@@ -183,7 +183,7 @@ def clustering_6_new(request):
 				cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+   				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -366,7 +366,7 @@ def clustering_6_new(request):
 								survival_col_name = request.POST['survival_col']
 				session_id = ""
 				# assign standard value to gene set size
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
 				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
@@ -483,7 +483,7 @@ def clustering_6_new(request):
 				#	lgmin = 10
 				#if(request.POST['L_g_max'] == ""):
 				#	lgmax = 20
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
@@ -676,7 +676,7 @@ def clustering_6_4_part_2(request):
 				cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+   				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -854,7 +854,7 @@ def clustering_6_4_part_2(request):
 				# start session for storing result data			
 				session_id = request.session._get_or_create_session_key()
 				# assign standard value to gene set size
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
 				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
@@ -991,7 +991,7 @@ def clustering_6_4_part_2(request):
 				#	lgmin = 10
 				#if(request.POST['L_g_max'] == ""):
 				#	lgmax = 20
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm
 				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
@@ -1152,9 +1152,9 @@ def clustering_6_4_part_2(request):
 			print("enr in request")
 		# get current session id and result files for session
 		session_id = request.session._get_or_create_session_key()
-		path_heatmap = "test_" + session_id + ".png"
-		json_path = "ppi_" + session_id + ".json"
-		output_plot_path = "output_plotly_" + session_id + ".html"
+		path_heatmap = "userfiles/test_" + session_id + ".png"
+		json_path = "userfiles/ppi_" + session_id + ".json"
+		output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 		if('ppi_path' in request.POST and 'heatmap_path' in request.POST and 'plot_path' in request.POST):
 			print(request.POST.get('ppi_path'))
 			path_heatmap = request.POST.get('heatmap_path')
@@ -1265,7 +1265,7 @@ def clustering_6_4(request):
 			#	cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+   				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -1453,13 +1453,13 @@ def clustering_6_4(request):
 								survival_col_name = request.POST['survival_col']
 				session_id = ""
 				session_id_from_cache = cache.get("session_id","none")
-				if(session_id_from_cache == "none"):
+				if(session_id_from_cache == "none" or session_id_from_cache == ""):
 					# start session for storing result data			
 					session_id = request.session._get_or_create_session_key()
 				else:
 					session_id = session_id_from_cache
 				# assign standard value to gene set size
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
 				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
@@ -1550,7 +1550,7 @@ def clustering_6_4(request):
 				copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("clustering/static/userfiles/genelist_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
-				path_heatmap = "heatmap_" + session_id + ".png"
+				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 				# save session ID and metadata in cache
 				cache.set('session_id', session_id)	
 				cache.set('ret_metadata1', ret_metadata1)	
@@ -1590,6 +1590,7 @@ def clustering_6_4(request):
 				fh3 = open(filename3)
 				has_clin_data = "true"
 				clinicalstr = fh3.read()
+				# get survival column name (standard name assigned)
 				if("SURVIVAL_COLUMN_MONTH" in clinicalstr):
 					survival_col_name = "SURVIVAL_COLUMN_MONTH"
 				elif("SURVIVAL_COLUMN" in clinicalstr):
@@ -1606,10 +1607,10 @@ def clustering_6_4(request):
 				#	lgmin = 10
 				#if(request.POST['L_g_max'] == ""):
 				#	lgmax = 20
-				if(gene_set_size == ""):
+				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				session_id_from_cache = cache.get('session_id', 'has expired')
-				if (session_id_from_cache == 'has expired'):
+				if (session_id_from_cache == 'has expired' or session_id_from_cache == ""):
 					session_id = request.session._get_or_create_session_key()
 				else:
 					session_id = session_id_from_cache
@@ -1640,11 +1641,11 @@ def clustering_6_4(request):
 					cache.set("enrichment_dict_5","")
 				#metd = list_metadata_3.apply_async(countdown=0)
 				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				output_plot_path = "output_plotly_" + session_id + ".html"
+				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 				#json_path = "test15_" + session_id + ".json"
 				#path_heatmap = "test_" + session_id + ".png"
-				json_path = "ppi_" + session_id + ".json"
-				path_heatmap = "heatmap_" + session_id + ".png"
+				json_path = "userfiles/ppi_" + session_id + ".json"
+				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 				#json_path = "ppi_" + session_id + ".json"
 				#path_heatmap = "heatmap_" + session_id + ".png"
 				#metd = list_metadata_3.apply_async(countdown=0)
@@ -1816,7 +1817,7 @@ def clustering_6_4(request):
 			request.POST._mutable = mutable
 		# get session id from cache
 		session_id_from_cache = cache.get('session_id', 'has expired')
-		if not(session_id_from_cache == 'has expired'):
+		if not(session_id_from_cache == 'has expired' or session_id_from_cache == ""):
 			#path_heatmap = "heatmap_" + session_id_from_cache + ".png"
 			#json_path = "ppi_" + session_id_from_cache + ".json"
 			#path_metadata = "metadata_" + session_id_from_cache + ".txt"
@@ -1876,7 +1877,7 @@ def clustering_6_4(request):
 		ret_metadata2 = ""
 		ret_metadata3 = ""
 		# display results from most recent analysis
-		if not (session_id_from_cache == "has_expired"):
+		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
 			#cache.set('session_id',session_id_from_cache)
 			# take result files from storage
 			path_heatmap = "userfiles/heatmap_" + session_id_from_cache + ".png"
