@@ -183,7 +183,7 @@ def clustering_6_new(request):
 				cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -240,9 +240,9 @@ def clustering_6_new(request):
 			list_of_files = ""
 			list_of_files_2 = ""
 			if request.user.is_authenticated:
-		        	username = str(request.user)
-		        	list_of_files = GraphForm.list_user_data_2(username)	
-		        	list_of_files_2 = GraphForm.list_user_data(username)              				
+				username = str(request.user)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)              				
 			return render(request, 'clustering/clustering_6.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
@@ -292,8 +292,8 @@ def clustering_6_new(request):
 				# configure loading page
 				add_loading_image.delay()
 				with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   					text_file.write("Your request is being processed...")
-   					text_file.close()
+					text_file.write("Your request is being processed...")
+					text_file.close()
 				make_empty_figure.delay()
 				clinicalstr = "empty"
 				clinicaldf = ""
@@ -421,9 +421,9 @@ def clustering_6_new(request):
 				# save uploaded files if specified
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
 				if request.user.is_authenticated:
-			        	username = str(request.user)
-			        	list_of_files = GraphForm.list_user_data_2(username)	
-			        	list_of_files_2 = GraphForm.list_user_data(username)              
+					username = str(request.user)
+					list_of_files = GraphForm.list_user_data_2(username)	
+					list_of_files_2 = GraphForm.list_user_data(username)              
 				# remove the loading-gif and progress image, clear cache             
 				remove_loading_image.delay()
 				#cache.clear()				
@@ -458,7 +458,7 @@ def clustering_6_new(request):
 	if('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			with open("clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+				text_file.write("Your request is being processed...")
 			add_loading_image.delay()
 			filename1 = request.POST.get("input_own_file_redo")
 			fh1 = open(filename1)
@@ -676,7 +676,7 @@ def clustering_6_4_part_2(request):
 				cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -737,9 +737,9 @@ def clustering_6_4_part_2(request):
 			list_of_files = ""
 			list_of_files_2 = ""
 			if request.user.is_authenticated:
-		        	username = str(request.user)
-		        	list_of_files = GraphForm.list_user_data_2(username)	
-		        	list_of_files_2 = GraphForm.list_user_data(username)              				
+				username = str(request.user)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)              				
 			return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
@@ -778,8 +778,8 @@ def clustering_6_4_part_2(request):
 				# configure loading page
 				add_loading_image.delay()
 				with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   					text_file.write("Your request is being processed...")
-   					text_file.close()
+					text_file.write("Your request is being processed...")
+					text_file.close()
 				make_empty_figure.delay()
 				clinicalstr = "empty"
 				clinicaldf = ""
@@ -910,11 +910,11 @@ def clustering_6_4_part_2(request):
 				# save uploaded files if specified
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
 				if request.user.is_authenticated:
-			        	request.session['done'] = "true"
-			        	cache.set("done","done")
-			        	username = str(request.user)
-			        	list_of_files = GraphForm.list_user_data_2(username)	
-			        	list_of_files_2 = GraphForm.list_user_data(username)              
+					request.session['done'] = "true"
+					cache.set("done","done")
+					username = str(request.user)
+					list_of_files = GraphForm.list_user_data_2(username)	
+					list_of_files_2 = GraphForm.list_user_data(username)              
 				# remove the loading-gif and progress image, clear cache             
 				remove_loading_image.delay()
 				cache.clear()				
@@ -935,7 +935,7 @@ def clustering_6_4_part_2(request):
 				copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("clustering/static/userfiles/genelist_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
-				path_heatmap = "heatmap_" + session_id + ".png"
+				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 				# save session ID and metadata in cache
 				cache.set('session_id', session_id)	
 				cache.set('ret_metadata1', ret_metadata1)	
@@ -943,6 +943,7 @@ def clustering_6_4_part_2(request):
 				cache.set('ret_metadata3', ret_metadata3)	
 				cache.set('json_path', json_path)	
 				cache.set('p_val', p_val)
+				cache.set("done","done")
 				cache.set('analysis_running','analysis_running')
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"		
@@ -954,7 +955,7 @@ def clustering_6_4_part_2(request):
 			if (analysis_running == 'none'):
 				cache.set('analysis_running','analysis_running')
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+				text_file.write("Your request is being processed...")
 			add_loading_image.delay()
 			# get expression file
 			filename1 = request.POST.get("input_own_file_redo")
@@ -1023,11 +1024,11 @@ def clustering_6_4_part_2(request):
 					cache.set("enrichment_dict_5","")
 				#metd = list_metadata_3.apply_async(countdown=0)
 				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				output_plot_path = "output_plotly_" + session_id + ".html"
+				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 				#json_path = "test15_" + session_id + ".json"
 				#path_heatmap = "test_" + session_id + ".png"
-				json_path = "ppi_" + session_id + ".json"
-				path_heatmap = "heatmap_" + session_id + ".png"
+				json_path = "userfiles/ppi_" + session_id + ".json"
+				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 				#json_path = "ppi_" + session_id + ".json"
 				#path_heatmap = "heatmap_" + session_id + ".png"
 				#metd = list_metadata_3.apply_async(countdown=0)
@@ -1265,7 +1266,7 @@ def clustering_6_4(request):
 			#	cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			filename1 = request.POST.get("input_own_file")
 			# get name of selected file, and path/name of other stored result files from same run
 			path_json = filename1
@@ -1326,9 +1327,9 @@ def clustering_6_4(request):
 			list_of_files = ""
 			list_of_files_2 = ""
 			if request.user.is_authenticated:
-		        	username = str(request.user)
-		        	list_of_files = GraphForm.list_user_data_2(username)	
-		        	list_of_files_2 = GraphForm.list_user_data(username)              				
+				username = str(request.user)
+				list_of_files = GraphForm.list_user_data_2(username)	
+				list_of_files_2 = GraphForm.list_user_data(username)              				
 			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
@@ -1379,8 +1380,8 @@ def clustering_6_4(request):
 				# configure loading page
 				add_loading_image.delay()
 				with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   					text_file.write("Your request is being processed...")
-   					text_file.close()
+					text_file.write("Your request is being processed...")
+					text_file.close()
 				make_empty_figure.delay()
 				clinicalstr = "empty"
 				clinicaldf = ""
@@ -1523,9 +1524,9 @@ def clustering_6_4(request):
 				# save uploaded files if specified
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
 				if request.user.is_authenticated:
-			        	username = str(request.user)
-			        	list_of_files = GraphForm.list_user_data_2(username)	
-			        	list_of_files_2 = GraphForm.list_user_data(username)              
+					username = str(request.user)
+					list_of_files = GraphForm.list_user_data_2(username)	
+					list_of_files_2 = GraphForm.list_user_data(username)              
 				# remove the loading-gif and progress image, clear cache             
 				remove_loading_image.delay()
 				cache.clear()				
@@ -1569,7 +1570,7 @@ def clustering_6_4(request):
 			if (analysis_running == 'none'):
 				cache.set('analysis_running','analysis_running')
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("Your request is being processed...")
+				text_file.write("Your request is being processed...")
 			add_loading_image.delay()
 			# get expression file
 			filename1 = request.POST.get("input_own_file_redo")
@@ -1699,9 +1700,9 @@ def clustering_6_4(request):
 		list_of_files = ""
 		list_of_files_2 = ""
 		if request.user.is_authenticated:
-	        	username = str(request.user)
-	        	list_of_files = GraphForm.list_user_data_2(username)	
-	        	list_of_files_2 = GraphForm.list_user_data(username)              
+			username = str(request.user)
+			list_of_files = GraphForm.list_user_data_2(username)	
+			list_of_files_2 = GraphForm.list_user_data(username)              
 		session_id_from_cache = cache.get('session_id', 'has expired')
 		if not(session_id_from_cache == 'has expired'):
 			session_id = session_id_from_cache
@@ -1852,9 +1853,9 @@ def clustering_6_4(request):
 			remove_loading_image.delay()	
 			#print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			#cache.set('analysis_running','analysis_running')
 		ret_metadata = ""
 		# check if session already exists for current user (e.g. when user has hit the reload button)
@@ -2111,9 +2112,9 @@ def clustering_6_part_3_2(request):
 			remove_loading_image.delay()	
 			#print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
-   				text_file.write("")
+				text_file.write("")
 			#cache.set('analysis_running','analysis_running')
 		ret_metadata = ""
 		# check if session already exists for current user (e.g. when user has hit the reload button)

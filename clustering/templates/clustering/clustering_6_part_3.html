@@ -497,7 +497,7 @@ border:1px solid black;
        {% load staticfiles %}
 		<!--- here the PPI graph is displayed --->
 		<!---<div id="graph-container" style="display: block;float:left"><img src={% static 'legend.png' %} width="132" height="218" style="position:absolute"> </div>--->
-<div id="graph-container" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;top:650px"> </div></div>
+<div id="graph-container-2" style="display: block;float:left"><div id="legend_div" style="float:left"><img src={% static 'legend.png' %} width="132" height="218" style="display:block"><img src={% static 'ppi_cluster_legend.png' %} style="position:absolute;left:20px;top:650px"> <div id="graph-container" style="display: block;float:left"></div></div>
 	
 <div id="div-for-newline" style="clear:both">
                 <p>In the above graph, interactions between analysed genes are shown. The color corresponds to the mean difference in expression level between both groups.</p>

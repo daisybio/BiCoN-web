@@ -1348,41 +1348,41 @@ def list_metadata_4(path):
 
 @shared_task(name="list_metadata_5")
 def list_metadata_5(path):
-    # used for reading metadata
-    fh1 = open(path)
-    lines = fh1.read()
-    emptydict = {}
-    if(lines == "NA"):
-    	return(emptydict,emptydict,emptydict)
-    # remove html from metadata file and replace table elements by tab
-    emptydict = {}
-    # if no data in file, remove empty dictionaries
-    if(len(lines.split('\n')) < 3):
-    	return(emptydict,emptydict,emptydict)
-    # read content from lines
-    line0 = lines.split('\n')[0].split('\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    ret = []
-    dict3 = {}
-    dict1 = {}
-    dict2 = {}
-    dict0 = {}
-    list0 = []
-    list1 = []
-    list2 = []
-    ctr = 0
-    dict3['params'] = line0
-    dict3['gr1'] = line1
-    dict3['gr2'] = line2
-    dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
-    # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
-    for i in range(0,len(line0)-1):
-    	dict0[i] = line0[i]
-    	dict1[dict0[i]] = line1[i]
-    	dict2[dict0[i]] = line2[i]
-    	ctr = ctr + 1
-    return(dict0,dict1,dict2)
+	# used for reading metadata
+	fh1 = open(path)
+	lines = fh1.read()
+	emptydict = {}
+	if(lines == "NA"):
+		return(emptydict,emptydict,emptydict)
+	# remove html from metadata file and replace table elements by tab
+	emptydict = {}
+	# if no data in file, remove empty dictionaries
+	if(len(lines.split('\n')) < 3):
+		return(emptydict,emptydict,emptydict)
+	# read content from lines
+	line0 = lines.split('\n')[0].split('\t')
+	line1 = lines.split('\n')[1].split('\t')
+ 	line2 = lines.split('\n')[2].split('\t')
+	ret = []
+	dict3 = {}
+	dict1 = {}
+	dict2 = {}
+	dict0 = {}
+	list0 = []
+	list1 = []
+	list2 = []
+	ctr = 0
+	dict3['params'] = line0
+	dict3['gr1'] = line1
+ 	dict3['gr2'] = line2
+	dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
+	# dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
+	for i in range(0,len(line0)-1):
+		dict0[i] = line0[i]
+		dict1[dict0[i]] = line1[i]
+		dict2[dict0[i]] = line2[i]
+		ctr = ctr + 1
+	return(dict0,dict1,dict2)
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
@@ -1417,15 +1417,15 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 						log2_2 = False	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
-   		text_file.write("Your files are being processed...")
+		text_file.write("Your files are being processed...")
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
-   		text_file.write("Your files are being processed...")
+		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
-   		text_file.write("Starting model run...")	
+		text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
 	#L_g_min = int(input())
 	print("How many genes you want per cluster (maximum):")
@@ -1471,9 +1471,9 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	jac_1_ret = jacindices[0]
 	jac_2_ret = jacindices[1]
 	if lib.jac(group1,solution[1][0])>lib.jac(group1,solution[1][1]):
-	    values = [val1,val2]
+		values = [val1,val2]
 	else:
-	    values = [val2,val1]
+		values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
 	new_genes = solution[0][0]+solution[0][1]
@@ -1481,7 +1481,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
-	    mapping[rev_labels_B[line["query"]]] = line["symbol"]
+		mapping[rev_labels_B[line["query"]]] = line["symbol"]
 	###m plotting networks
 	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
@@ -1502,11 +1502,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	vmax = 2
 	pos = nx.spring_layout(G_small)
 	ec = nx.draw_networkx_edges(G_small,pos)
-	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,
-	                             vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
-	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,
-	                             alpha=1.0,
-	                             vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
+	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
 	nx.draw_networkx_labels(G_small,pos,font_size = 15,font_weight='bold')
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
@@ -1530,10 +1527,10 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	grouping_p = []
 	p_num = list(GE.columns)
 	for p in p_num:
-	    if p in solution[1][0]:
-	        grouping_p.append(values[0])
-	    else:
-	        grouping_p.append(values[1])
+		if p in solution[1][0]:
+			grouping_p.append(values[0])
+		else:
+			grouping_p.append(values[1])
 	grouping_p = pd.DataFrame(grouping_p,index = p_num)
 	grouping_g = []
 	
@@ -1542,13 +1539,12 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
 	for g in g_num:
-	    if g in new_genes1 :
-	        grouping_g.append(values[0])
-	    elif  g in new_genes2 :
-	        grouping_g.append(values[1])
-	    else:
-	        grouping_g.append(3)
-	        
+		if g in new_genes1 :
+			grouping_g.append(values[0])
+		elif  g in new_genes2 :
+			grouping_g.append(values[1])
+		else:
+			grouping_g.append(3)
 	grouping_g = pd.DataFrame(grouping_g,index = g_num)
 	
 	species = grouping_g[grouping_g[0]!=3][0]
@@ -1561,9 +1557,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
 	plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
-	plt.boxplot(conv/2,
-	                        vert=True,  # vertical box alignment
-	                        patch_artist=True)  # will be used to label x-ticks
+	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
@@ -1600,12 +1594,12 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 						print("expression data are logarithmized")
 						log2_2 = False	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   		text_file.write("Your files are being processed...")
+		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	print(group1_ids)	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
-   		text_file.write("Starting model run...")	
+		text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
 	#L_g_min = int(input())
 	print("How many genes you want per cluster (maximum):")
@@ -1648,9 +1642,9 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	jac_1_ret = jacindices[0]
 	jac_2_ret = jacindices[1]
 	if lib.jac(group1,solution[1][0])>lib.jac(group1,solution[1][1]):
-	    values = [val1,val2]
+		values = [val1,val2]
 	else:
-	    values = [val2,val1]
+		values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
 	new_genes = solution[0][0]+solution[0][1]
@@ -1658,7 +1652,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
-	    mapping[rev_labels_B[line["query"]]] = line["symbol"]
+		mapping[rev_labels_B[line["query"]]] = line["symbol"]
 	###m plotting networks
 	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
@@ -1679,11 +1673,8 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	vmax = 2
 	pos = nx.spring_layout(G_small)
 	ec = nx.draw_networkx_edges(G_small,pos)
-	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,
-	                             vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
-	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,
-	                             alpha=1.0,
-	                             vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
+	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
 	nx.draw_networkx_labels(G_small,pos,font_size = 15,font_weight='bold')
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
@@ -1707,10 +1698,10 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	grouping_p = []
 	p_num = list(GE.columns)
 	for p in p_num:
-	    if p in solution[1][0]:
-	        grouping_p.append(values[0])
-	    else:
-	        grouping_p.append(values[1])
+		if p in solution[1][0]:
+			grouping_p.append(values[0])
+		else:
+			grouping_p.append(values[1])
 	grouping_p = pd.DataFrame(grouping_p,index = p_num)
 	grouping_g = []
 	
@@ -1719,13 +1710,12 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
 	for g in g_num:
-	    if g in new_genes1 :
-	        grouping_g.append(values[0])
-	    elif  g in new_genes2 :
-	        grouping_g.append(values[1])
-	    else:
-	        grouping_g.append(3)
-	        
+		if g in new_genes1 :
+			grouping_g.append(values[0])
+		elif  g in new_genes2 :
+			grouping_g.append(values[1])
+		else:
+			grouping_g.append(3)
 	grouping_g = pd.DataFrame(grouping_g,index = g_num)
 	
 	species = grouping_g[grouping_g[0]!=3][0]
@@ -1737,9 +1727,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	row_colors = species.map(lut)
 	plt.savefig("/code/clustering/static/ntw.png")
 	plt.clf()
-	plt.boxplot(conv/2,
-	                        vert=True,  # vertical box alignment
-	                        patch_artist=True)  # will be used to label x-ticks
+	plt.boxplot(conv/2,vert=True,patch_artist=True) # vertical box alignment # will be used to label x-ticks
 	
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
@@ -1872,7 +1860,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		text_file_3.close()	
 		plot_div = ""
 		with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-        		text_file_2.write("")
+			text_file_2.write("")
 		ret_metadata = []
 		ret_metadata_1 = {}
 		ret_metadata_2 = {}
@@ -2212,24 +2200,25 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		#orientation="h",
 		#font=dict(size=16)
 		xaxis=dict(
-        	title='Time in years'),
+		# vertical box alignment
+		title='Time in years'),
 		yaxis=dict(
-        	title='percentage of patients'))
+		title='percentage of patients'))
 		#fig = dict(data=data99, layout=layout)
 		fig = dict(data=data99,layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		if(survival_col not in list(clinicaldf.columns)):
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-        			text_file_2.write("")
+				text_file_2.write("")
 		else:
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-        			text_file_2.write(plot_div)
+				text_file_2.write(plot_div)
 		#with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-        	#	text_file_2.write(plot_div)
+		#	text_file_2.write(plot_div)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
-        	text_file.write("Done!")
+		text_file.write("Done!")
 	print(ret_metadata)
 	return(script,div,plot_1,plot_div,ret_metadata,p_val)
 
@@ -2372,7 +2361,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
-        		text_file_2.write("")
+			text_file_2.write("")
 		# fill empty metadata arrays
 		ret_metadata = []
 		ret_metadata_1 = {}
@@ -2687,22 +2676,22 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		surv_data_for_graph = [trace1,trace2]
 		layout = dict(showlegend=False,
 		xaxis=dict(
-        	title='Time in years'),
+		title='Time in years'),
 		yaxis=dict(
-        	title='percentage of patients'))
+		title='percentage of patients'))
 		fig = dict(data=surv_data_for_graph,layout=layout)		
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		if(survival_col not in list(clinicaldf.columns)):
 			with open(output_plot_path, "w") as text_file_2:
-        			text_file_2.write("")
+				text_file_2.write("")
 		elif(errstr == ""):
 			with open(output_plot_path, "w") as text_file_2:
-        			text_file_2.write(plot_div)
+				text_file_2.write(plot_div)
 		else:
 			with open(output_plot_path, "w") as text_file_2:
-        			text_file_2.write(errstr)
+				text_file_2.write(errstr)
 	else:
 		ret_metadata = []
 		text_file_3 = open(path_metadata, "w")
@@ -2712,7 +2701,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
-        		text_file_2.write("")
+			text_file_2.write("")
 		# fill empty metadata arrays
 		ret_metadata = []
 		ret_metadata_1 = {}
@@ -2723,7 +2712,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		ret_metadata.append(ret_metadata_3)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
-        	text_file.write("Done!")
+		text_file.write("Done!")
 	return(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val)
 
 
