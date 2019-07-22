@@ -656,6 +656,110 @@ def aco_preprocessing(path_expr, path_ppi, col,log2, gene_list = None, size = No
     return B,G,H,n,m,GE,A_new,group1_true_ids,group2_true_ids,labels_B,rev_labels_B,val1,val2
 
 
+
+def aco_preprocessing_strings_2(expr_str, ppi_str, col,log2, gene_list = None, size = None, sample= None):
+    # path_expr - path for gene expression
+    # path_ppi - path for ppi
+    # col - split variable name (ONLY TWO CLASSES)
+    # log2 - log2 transform
+    #gene_list - preselected genes (if any)
+    #size -  if genes are not preselected specify size of the gene set  for standard deviation selection
+    # sample = None - all patients, otherwise specify fraction of patients taken
+    EXPRDATA = StringIO(expr_str)
+    expr = pd.read_csv(EXPRDATA,sep = "\t") 
+    expr = expr.set_index("Unnamed: 0")
+	#TODO: check if column 'prognosis' or 'cancer type' exists, set column based on this info
+    if('cancer_type' in list(expr)):
+    	col = 'cancer_type'
+    else:
+    	col = 'prognosis'
+    #val1,val2 = list(set(expr[col]))
+    #group1_true = list(expr[expr[col]==val1].index)
+    #group2_true = list(expr[expr[col]==val2].index)
+    patients_new = list(expr.index)
+    #if sample!=None:
+    #    idx = list(expr.index)
+    #    new_idx = np.random.choice(idx,int(sample*len(idx)),False)
+    #    expr = expr.loc[new_idx]
+    #    group1_true = list(expr[expr[col]==val1].index)
+    #    group2_true = list(expr[expr[col]==val2].index)
+    #    patients_new = group1_true+group2_true
+
+    expr = expr.loc[patients_new]
+    PPIDATA = StringIO(ppi_str)    
+    net = pd.read_csv(PPIDATA,sep = "\t", header= None)
+    nodes_ppi = set(net[0]).union(set(net[1]))
+    genes_ge = list(set(expr.columns) - set([col]))
+    new_genes = [int(x) for x in genes_ge]
+    intersec_genes = set.intersection(set(new_genes), set(nodes_ppi))
+    genes_for_expr = [str(x) for x in list(intersec_genes)]
+    expr = expr[genes_for_expr]
+    #20188 genes
+    if log2:
+        expr = np.log2(expr)
+    z_scores = stats.zscore(expr) 
+    z_scores = pd.DataFrame(z_scores,columns = expr.columns, index = expr.index)
+    if gene_list !=None and size == None:# gene list is given
+        new_genes = [str(gene) for gene in gene_list] 
+        
+    elif gene_list == None and size!= None: #std selection
+        std_genes = expr[genes_for_expr].std()
+        std_genes, genes_for_expr = zip(*sorted(zip(std_genes, genes_for_expr)))
+        genes_for_expr = genes_for_expr[len(std_genes)-size:]
+        new_genes = list(genes_for_expr)
+    elif gene_list == None and size == None: #all genes
+        new_genes = genes_for_expr
+    else:
+        print("please specify gene selection method: predifined list, standart deviation filtering or none of them")
+        return()
+
+    expr = expr[new_genes]
+    z_scores = z_scores[new_genes].values
+    
+    labels_B = dict()
+    rev_labels_B = dict()
+    node = 0
+    #nodes = set(deg_nodes + genes_aco)
+    for g in new_genes:
+       labels_B[node] = g
+       rev_labels_B[g] = node
+       node = node+1
+    for p in patients_new:
+       labels_B[node] = p
+       rev_labels_B[p] = node
+       node = node+1
+    
+
+    #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+    #sim = scaler.fit_transform(expr)
+    data_aco = pd.DataFrame(z_scores,columns= new_genes, index= patients_new)
+    data_aco = data_aco.T
+    n,m = data_aco.shape
+    
+    GE = pd.DataFrame(data_aco.values,index = np.arange(n), columns=np.arange(n,n+m))
+    t = 2
+    b = np.matrix(data_aco>t)
+    b_sp = csr_matrix(b)
+    B = bipartite.from_biadjacency_matrix(b_sp)
+    
+    
+    G = nx.Graph()
+    G.add_nodes_from(np.arange(n))
+    for row in net.itertuples():
+        node1 = str(row[1])
+        node2 = str(row[2])
+        if node1 in set(new_genes) and node2 in set(new_genes):    
+            G.add_edge(rev_labels_B[node1],rev_labels_B[node2])
+    A_new= nx.adj_matrix(G).todense()
+
+    H = HI_big(data_aco, gtg_weight = 1, gtp_weight=1 ,ptp_weight = 1)
+    
+    #group1_true_ids= [rev_labels_B[x] for x in group1_true]
+    #group2_true_ids= [rev_labels_B[x] for x in group2_true]
+    #print(group1_true + "babaaba")
+    return B,G,H,n,m,GE,A_new,labels_B,rev_labels_B
+
+
 def aco_preprocessing_ownfile(fh, fh_ppi, col,log2, gene_list = None, size = None, sample= None):
     # path_expr - path for gene expression
     # path_ppi - path for ppi

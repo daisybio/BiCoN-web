@@ -634,9 +634,9 @@ def clustering_6_4_part_2(request):
 		print("done")
 	if not(os.path.isdir("/code/clustering/static/userfiles")):
 		os.mkdir("/code/clustering/static/userfiles")
-	#if('session_id' in request.POST):
-	#	print(request.POST['session_id'])
-	#print("in clustering")
+	done_from_cache = cache.get("done","")
+	if(done_from_cache == "done"):
+		return(clustering_6_part_3_2(request))
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -1391,6 +1391,8 @@ def clustering_6_4(request):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
 					result10 = preprocess_file.delay(exprstr)
 					exprstr = result10.get()
+					#result10 = preprocess_file.delay(exprstr)
+					#(exprstr,nbr_col) = result10.get()
 				# read predefined expression file and clinical data
 				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 					cancer_type = request.POST.get("cancer_type")
@@ -1464,6 +1466,7 @@ def clustering_6_4(request):
 					gene_set_size = 2000
 				# run algorithm and read results
 				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				#result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
