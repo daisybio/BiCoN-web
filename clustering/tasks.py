@@ -1099,6 +1099,87 @@ def preprocess_file(expr_str):
 			#return(expr_str,nbr_col)
 			return(expr_str)
 
+	
+@shared_task(name="preprocess_file_2")
+def preprocess_file_2(expr_str):
+	expr_str = expr_str.replace("cancer_type","disease_type")
+	if(len(expr_str.split("\n")[0].split("\t")) > 2):
+		expr_str_split = expr_str.split("\n")	
+		# replace column name for disease type
+		if("disease_type" not in expr_str_split[0]):
+			if("subtype" in expr_str_split[0]):
+				expr_str = expr_str.replace("subtype","disease_type")
+		# remove name of first column (left upper corner)
+		expr_str_first_colname = expr_str_split[0].split("\t")[0]
+		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+		#print(expr_str_first_colname)
+		#print(expr_str.split("\n")[0])
+		expr_stringio = StringIO(expr_str)	
+		exprdf = pd.read_csv(expr_stringio,sep='\t')
+		#return(expr_str)
+		# check for column with two unique entries (pre-defined clusters)
+		for column_name, column in exprdf.transpose().iterrows():
+			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+				if(len(column.unique()) == 2):
+					#print(column_name)
+					expr_str = expr_str.replace(column_name,"disease_type")	
+		return(expr_str)
+	elif("," in expr_str):
+		# replace comma by tab if file is CSV and not TSV
+		if("\t" not in expr_str.split("\n")[0]):
+			expr_str_split = expr_str.split("\n")	
+			# replace "subtype" by "cancer type"
+			if("disease_type" not in expr_str):
+				if("subtype" in expr_str):
+					expr_str = expr_str.replace("subtype","disease_type")
+			expr_str_first_colname = expr_str_split[0].split(",")[0]
+			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
+			#print(expr_str_first_colname)
+			#print(expr_str.split("\n")[0])	
+			expr_str = expr_str.replace(",","\t")
+			#print(expr_str.split("\n")[0])
+			expr_str_split = expr_str.split("\n")
+			# remove entries after given length if expression data file is too big
+			if(len(expr_str_split) > 300):
+				expr_str = "\n".join(expr_str_split[:200])
+			else:
+				expr_str = "\n".join(expr_str_split)
+			expr_stringio = StringIO(expr_str)
+			expr_str = expr_str.replace("MCI","CTL")
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			# find column with two unique entries that represents disease type
+			for column_name, column in exprdf.transpose().iterrows():
+				if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+					if(len(column.unique()) == 2):
+						print(column_name)
+						expr_str = expr_str.replace(column_name,"disease_type")	
+			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
+			done1 = "false"
+			for column_name, column in exprdf.transpose().iterrows():
+				if(not column_name.isdigit()):
+					if(len(column.unique()) < 6):
+						nbr_col = len(column.unique())
+						expr_str = expr_str.replace(column_name,"disease_type")	
+						expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
+						#print(list(column))
+						if(len(column.unique()) > 2 and done1 == "false"):
+							expr_str_split_2 = []
+							expr_str_split_2.append(expr_str_split[0])
+							type1 = column.value_counts().index.tolist()[0]	
+							type2 = column.value_counts().index.tolist()[1]
+							#print(len(list(column)))
+							for i in range(0,len(list(column))-1):
+								if(list(column)[i] == type1 or list(column)[i] == type2):
+									expr_str_split_2.append(expr_str_split[i+1])
+							expr_str = "\n".join(expr_str_split_2)
+							done1 = "true"
+			########################
+
+			expr_stringio = StringIO(expr_str)
+			exprdf = pd.read_csv(expr_stringio,sep='\t')
+			#return(expr_str,nbr_col)
+			return(expr_str,nbr_col)
+
 
 @shared_task(name="preprocess_file_OLD")
 def preprocess_file_OLD(expr_str):
@@ -1571,7 +1652,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 
 
 ## method for more than 2 pre-defined clusters
-@shared_task(name="algo_output_task_new")
+@shared_task(name="algo_output_task_2")
 def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,size,clusters_param):
 	#col = "cancer_type"
 	col = "disease_type"
@@ -1691,8 +1772,12 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	vmax = 2
 	pos = nx.spring_layout(G_small)
 	ec = nx.draw_networkx_edges(G_small,pos)
-	nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
-	nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	if(clusters_param == 2):
+		nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
+		nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	else:
+		nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap)
+		nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap)
 	nx.draw_networkx_labels(G_small,pos,font_size = 15,font_weight='bold')
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
@@ -2015,7 +2100,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
 	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
-	if(col_colors == ""):
+	#if(col_colors1 == ""):
+	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
 		g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
@@ -2506,7 +2592,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
 	# make heatmap
-	if(col_colors == ""):
+	#if(col_colors1 == ""):
+	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
 		g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	

@@ -25,7 +25,7 @@ import shutil
 import clustering
 from clustering.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
-from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file,preprocess_ppi_file
+from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,list_metadata_3,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,list_metadata_4,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file,preprocess_ppi_file,preprocess_file_2,algo_output_task_2
 from django.core.cache import cache
 import os.path
 from django.core.mail import send_mail
@@ -636,7 +636,8 @@ def clustering_6_4_part_2(request):
 		os.mkdir("/code/clustering/static/userfiles")
 	done_from_cache = cache.get("done","")
 	if(done_from_cache == "done"):
-		return(clustering_6_part_3_2(request))
+		print("done in cache")
+		#return(clustering_6_part_3_2(request))
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -943,7 +944,7 @@ def clustering_6_4_part_2(request):
 				cache.set('ret_metadata3', ret_metadata3)	
 				cache.set('json_path', json_path)	
 				cache.set('p_val', p_val)
-				cache.set("done","done")
+				cache.set('done',"done")
 				cache.set('analysis_running','analysis_running')
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"		
@@ -1169,6 +1170,23 @@ def clustering_6_4_part_2(request):
 		ret_metadata = ""
 		metdata_dict = ""
 		done_from_cache = cache.get("done","")
+		analysis_running = cache.get('analysis_running', 'none')
+		# if no analysis is running, remove loading image and text. this is to make sure after an incomplete analysis no "leftover" text with the status of last run is displayed
+		if (analysis_running == 'none'):
+			if(os.path.isfile("clustering/static/loading_1.gif")):
+				os.unlink("clustering/static/loading_1.gif")
+			if(os.path.isfile("clustering/static/progress.png")):
+				os.unlink("clustering/static/progress.png")
+			if(os.path.isfile("/code/clustering/static/progress.png")):
+				os.unlink("/code/clustering/static/progress.png")
+			remove_loading_image.delay()	
+			#print("removed loading image")
+			with open("/code/clustering/static/output_console.txt", "w") as text_file:
+				text_file.write("")
+			with open("clustering/static/output_console.txt", "w") as text_file:
+				text_file.write("")
+			#cache.set('analysis_running','analysis_running')
+		
 		if not (request.user.is_authenticated):
 			cache.clear()
 		else:
@@ -1389,10 +1407,10 @@ def clustering_6_4(request):
 				# read expression file
 				if('myfile' in request.FILES):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
-					result10 = preprocess_file.delay(exprstr)
-					exprstr = result10.get()
 					#result10 = preprocess_file.delay(exprstr)
-					#(exprstr,nbr_col) = result10.get()
+					#exprstr = result10.get()
+					result10 = preprocess_file_2.delay(exprstr)
+					(exprstr,nbr_col) = result10.get()
 				# read predefined expression file and clinical data
 				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 					cancer_type = request.POST.get("cancer_type")
@@ -1406,6 +1424,7 @@ def clustering_6_4(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "disease free survival in months:ch1"
+						nbr_col = 2
 					else:
 						fh1 = open("clustering/data/breast_cancer_expr.csv")
 						exprstr = fh1.read()
@@ -1415,6 +1434,7 @@ def clustering_6_4(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "mfs (yr):ch1"
+						nbr_col = 2
 				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -1465,8 +1485,8 @@ def clustering_6_4(request):
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
-				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				#result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
