@@ -1123,7 +1123,27 @@ def preprocess_file_2(expr_str):
 				if(len(column.unique()) == 2):
 					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
-		return(expr_str)
+					nbr_col = 2
+		done1 = "false"
+		for column_name, column in exprdf.transpose().iterrows():
+			if(not column_name.isdigit()):
+				if(len(column.unique()) < 6):
+					nbr_col = len(column.unique())
+					expr_str = expr_str.replace(column_name,"disease_type")	
+					expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
+					#print(list(column))
+					if(len(column.unique()) > 2 and done1 == "false"):
+						expr_str_split_2 = []
+						expr_str_split_2.append(expr_str_split[0])
+						type1 = column.value_counts().index.tolist()[0]	
+						type2 = column.value_counts().index.tolist()[1]
+						#print(len(list(column)))
+						for i in range(0,len(list(column))-1):
+							if(list(column)[i] == type1 or list(column)[i] == type2):
+								expr_str_split_2.append(expr_str_split[i+1])
+						expr_str = "\n".join(expr_str_split_2)
+						done1 = "true"			
+		return(expr_str,nbr_col)
 	elif("," in expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
@@ -1153,6 +1173,7 @@ def preprocess_file_2(expr_str):
 					if(len(column.unique()) == 2):
 						print(column_name)
 						expr_str = expr_str.replace(column_name,"disease_type")	
+						nbr_col = 2
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
 			done1 = "false"
 			for column_name, column in exprdf.transpose().iterrows():
