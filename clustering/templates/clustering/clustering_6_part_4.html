@@ -473,7 +473,9 @@ border:1px solid black;
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
 	<!--- this button opens the one-step form for displaying old data --->
+	{% if user.is_authenticated %}
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
+	{% endif %}
 	</div>
 	<!--- tab for selecting old data to display --->
 	<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
@@ -1223,7 +1225,6 @@ function fixStepIndicator(n) {
 <div class="row" id="ppi">
 {% endif %}
             <article class="col-md-8 article-intro">
-{{json_path}}		
 		
                 <h1>PPI Graph</h1>
                 <h3>
@@ -1291,14 +1292,17 @@ function fixStepIndicator(n) {
                 <h1>Survival Information</h1>
 	<!--- load the survival graph --->
 	{{output_plot_path_2}}
-	<object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object><br>
-	<img src={% static 'legend_1.png' %} style="position:absolute"><br><br>
-                <h3>
-                    <a href="#">Survival of patients</a>
-                </h3>
+	
 {% if output_plot_path == "empty" %}
 
 {% else %}
+
+<object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object><br>
+	<img src={% static 'legend_1.png' %} style="position:absolute"><br><br>
+                <h3>
+                    <a href="#">Survival of patients</a>
+                </h3><br>
+
 <p>In the above graph, survival time for patients of both groups is shown (Fractions of patients in the respective group that are alive at time X).</p> 
 {% if pval is None %}
 <!---<object type="text/html" data="{% static 'pvalue.txt' %}" width="400" height="100"></object>--->

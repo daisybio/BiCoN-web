@@ -1009,6 +1009,7 @@ def preprocess_ppi_file(ppistr):
 	for elem in ppistr_split[1].split("\t"):
 		if(elem != ""):
 			len_second_line = len_second_line + 1
+	# delete first row if it contains title columns
 	if(len_second_line > len_first_line):
 		del ppistr_split[0]
 	# take only the right two columns
@@ -1018,7 +1019,9 @@ def preprocess_ppi_file(ppistr):
 			line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
 		ppistr_split_new.append(line)
 	return("\n".join(ppistr_split_new))
-				
+
+
+# Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information	
 @shared_task(name="preprocess_file")
 def preprocess_file(expr_str):
 	expr_str = expr_str.replace("cancer_type","disease_type")
@@ -1042,7 +1045,6 @@ def preprocess_file(expr_str):
 				if(len(column.unique()) == 2):
 					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
-		return(expr_str)
 	elif("," in expr_str):
 		# replace comma by tab if file is CSV and not TSV
 		if("\t" not in expr_str.split("\n")[0]):
@@ -1117,6 +1119,7 @@ def preprocess_file_2(expr_str):
 		expr_stringio = StringIO(expr_str)	
 		exprdf = pd.read_csv(expr_stringio,sep='\t')
 		#return(expr_str)
+		done1 = "false"
 		# check for column with two unique entries (pre-defined clusters)
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
@@ -1124,7 +1127,8 @@ def preprocess_file_2(expr_str):
 					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
 					nbr_col = 2
-		done1 = "false"
+					done1 = "true"
+		# check for column with less than 6 unique entries (pre-defined clusters)
 		for column_name, column in exprdf.transpose().iterrows():
 			if(not column_name.isdigit()):
 				if(len(column.unique()) < 6):
@@ -1320,134 +1324,6 @@ def remove_loading_image():
 ################## used for metadata display #####################
 ##################################################################
 
-@shared_task(name="list_metadata_3")
-def list_metadata_3():
-    fh1 = open("/code/clustering/static/metadata.txt")
-    lines = fh1.read()
-    emptydict = {}
-    if(lines == "NA"):
-    	return(emptydict,emptydict,emptydict)
-    lines = lines.replace('<table><tr><th>','')
-    lines = lines.replace('<tr><th>','')
-    lines = lines.replace('</th></table>','')
-    lines = lines.replace('</table>','')
-    lines = lines.replace('</th></tr>','\n')
-    lines = lines.replace('</th><th>','\t')
-    emptydict = {}
-    print(len(lines.split('\n')))
-    if(len(lines.split('\n')) < 3):
-    	print("basdbasdbasdb")
-    	return(emptydict,emptydict,emptydict)
-    line0 = lines.split('\n')[0].split('\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    print(line0)
-    print(line1)
-    print(line2)
-    ret = []
-    dict3 = {}
-    dict1 = {}
-    dict2 = {}
-    dict0 = {}
-    list0 = []
-    list1 = []
-    list2 = []
-    ctr = 0
-    dict3['params'] = line0
-    dict3['gr1'] = line1
-    dict3['gr2'] = line2
-    dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
-    #for elem in line0:
-    #	print(ctr)
-    #	dict0[ctr] = line0[ctr]
-    #	dict1[elem] = line1[ctr]
-    #	dict2[elem] = line2[ctr]
-    #	ctr = ctr + 1
-    for i in range(0,len(line0)-1):
-    	#print(ctr)
-    	print(line0[i])
-    	dict0[i] = line0[i]
-    	dict1[dict0[i]] = line1[i]
-    	dict2[dict0[i]] = line2[i]
-    	ctr = ctr + 1
-    #ret.append(dict1)
-    print(dict0)
-    print(dict1)
-    print(dict2)
-    #ret.append(dict1)
-    #ret.append(dict2)
-    #ret.append({'group':"Group 1",line0[0]:line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
-    return(dict0,dict1,dict2)
-
-
-@shared_task(name="list_metadata_4")
-def list_metadata_4(path):
-    # used for reading metadata
-    fh1 = open(path)
-    lines = fh1.read()
-    emptydict = {}
-    if(lines == "NA"):
-    	return(emptydict,emptydict,emptydict)
-    # remove html from metadata file and replace table elements by tab
-    lines = lines.replace('<table><tr><th>','')
-    lines = lines.replace('<tr><th>','')
-    lines = lines.replace('</th></table>','')
-    lines = lines.replace('</table>','')
-    lines = lines.replace('</th></tr>','\n')
-    lines = lines.replace('</th><th>','\t')
-    emptydict = {}
-    print(len(lines.split('\n')))
-    # if no data in file, remove empty dictionaries
-    if(len(lines.split('\n')) < 3):
-    	print("basdbasdbasdb")
-    	return(emptydict,emptydict,emptydict)
-    # read content from lines
-    line0 = lines.split('\n')[0].split('\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    print(line0)
-    print(line1)
-    print(line2)
-    ret = []
-    dict3 = {}
-    dict1 = {}
-    dict2 = {}
-    dict0 = {}
-    list0 = []
-    list1 = []
-    list2 = []
-    ctr = 0
-    dict3['params'] = line0
-    dict3['gr1'] = line1
-    dict3['gr2'] = line2
-    dict3['all'] = zip(dict3['params'],dict3['gr1'],dict3['gr2'])
-    #for elem in line0:
-    #	print(ctr)
-    #	dict0[ctr] = line0[ctr]
-    #	dict1[elem] = line1[ctr]
-    #	dict2[elem] = line2[ctr]
-    #	ctr = ctr + 1
-    # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
-    for i in range(0,len(line0)-1):
-    	#print(ctr)
-    	print(line0[i])
-    	dict0[i] = line0[i]
-    	dict1[dict0[i]] = line1[i]
-    	dict2[dict0[i]] = line2[i]
-    	ctr = ctr + 1
-    #ret.append(dict1)
-    print(dict0)
-    print(dict1)
-    print(dict2)
-    #ret.append(dict1)
-    #ret.append(dict2)
-    #ret.append({'group':"Group 1",line0[0]:line1[0],'bm':line1[1],'lymph':line1[2],'metastasis':line1[3],'path_er':line1[4],'path_pr':line1[5],'prognosis_good':line1[6]})
-    #ret.append({'group':"Group 2",'lm':line2[0],'bm':line2[1],'lymph':line2[2],'metastasis':line2[3],'path_er':line2[4],'path_pr':line2[5],'prognosis_good':line2[6]})
-    #return(dict3['params'],dict3['gr1'],dict3['gr2'])    
-    return(dict0,dict1,dict2)
-
 
 
 @shared_task(name="list_metadata_5")
@@ -1487,6 +1363,8 @@ def list_metadata_5(path):
 		dict2[dict0[i]] = line2[i]
 		ctr = ctr + 1
 	return(dict0,dict1,dict2)
+
+
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
@@ -3200,11 +3078,12 @@ def convert_gene_list(adjlist,filename):
 		prot_2 = elem[1]
 		# read which element of list the gene is and read NCBI ID
 		gene_nbr_1 = conv.index[conv['Gene name'] == prot_1]
-		gene_nbr_1_2 = conv.loc[gene_nbr_1,'NCBI gene ID'].values[0]
 		gene_nbr_2 = conv.index[conv['Gene name'] == prot_2]
-		gene_nbr_2_2 = conv.loc[gene_nbr_2,'NCBI gene ID'].values[0]
-		# write genes into tab separated string
-		retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
+		if(str(gene_nbr_1).isdigit() and str(gene_nbr_2).isdigit()):
+			gene_nbr_1_2 = conv.loc[gene_nbr_1,'NCBI gene ID'].values[0]
+			gene_nbr_2_2 = conv.loc[gene_nbr_2,'NCBI gene ID'].values[0]
+			# write genes into tab separated string
+			retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
 	#return(retstr)
 	with open(filename, "w") as text_file:
 		text_file.write(retstr)
