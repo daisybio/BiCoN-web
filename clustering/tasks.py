@@ -1464,7 +1464,8 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
-		mapping[rev_labels_B[line["query"]]] = line["symbol"]
+		if("symbol" in line):
+			mapping[rev_labels_B[line["query"]]] = line["symbol"]
 	###m plotting networks
 	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
@@ -1650,7 +1651,8 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
-		mapping[rev_labels_B[line["query"]]] = line["symbol"]
+		if("symbol" in line):
+			mapping[rev_labels_B[line["query"]]] = line["symbol"]
 	###m plotting networks
 	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
@@ -1825,7 +1827,8 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
-		mapping[rev_labels_B[line["query"]]] = line["symbol"]
+		if("symbol" in line):
+			mapping[rev_labels_B[line["query"]]] = line["symbol"]
 	###m plotting networks
 	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    

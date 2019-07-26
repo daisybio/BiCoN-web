@@ -466,7 +466,9 @@ border:1px solid black;
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
 	<!--- this button opens the one-step form for displaying old data --->
+	{% if user.is_authenticated %}
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
+	{% endif %}
 	</div>
 	<!--- tab for selecting old data to display --->
 	<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">

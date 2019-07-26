@@ -525,6 +525,7 @@ border:1px solid black;
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% endif %} 
+	<br><br><br><br>
 </div>
 </article>
             
@@ -548,6 +549,7 @@ border:1px solid black;
             </article>
         </div>
 <!--- this </div> was new --->
+
 
        {% load staticfiles %}
 <!--- tab for survival plot --->
@@ -625,7 +627,7 @@ The log-rank test gives a p-value of: {{pval}}
             
         </div>
 <!--- this </div> was new --->
-</div>
+<!---</div>--->
 <!--- tab for enrichment --->
 	{% if enrichment_open %}
 	<div class="row" id="kegg_enrichment">
@@ -806,11 +808,12 @@ The log-rank test gives a p-value of: {{pval}}
 </table></p>
   </div>
 
-</article> 
+</article>
+<!--- this </div> was new ---> 
+</div>
 </div><!--- tab content ---><!--- end kegg enrichment -->
-<!---</div>----> <!--- this <! was new --->
-</div><!--- results --->
-
+<div id="div_for_new_analysis"  >
+<br><br>
 <form action="polls/clustering_6_part_1.html" name="myForm2" method="post" enctype="multipart/form-data"> {% csrf_token %}
 <input type="hidden" id="newAnalysis" name="newAnalysis" value="newAnalysis">                
 <!---<a name="Content"></a><button type="button" style="display:inline;" onclick="location.href='polls/clustering_6_part_1.html';" id="start_new_analysis_button"><br><b>Start a new analysis</b><br><br></button>--->
@@ -818,6 +821,12 @@ The log-rank test gives a p-value of: {{pval}}
 <!---<button type="submit" style="display:inline;" onclick="location.href='polls/clustering_6_part_1.html';" id="start_new_analysis_button"><br><b>Start a new analysis</b><br><br></button>-->
 <!---<input type="submit" value="Start a new Analysis" />-->
 </form>  
+</div>
+</div>
+
+
+
+</div><!--- results --->
         </div><!--- overall wrapper div--->
         <!-- /.row -->
 
@@ -1023,7 +1032,7 @@ s.refresh();
 			</div>
         </div>
         
-        <div class="small-print">
+        <div class="small-print" style="clear:both">
         	<div class="container">
         		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
         		<p>Copyright &copy; Example.com 2015 </p>

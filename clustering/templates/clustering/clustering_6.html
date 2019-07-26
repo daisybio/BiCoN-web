@@ -515,7 +515,9 @@ border:1px solid black;
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
 	<div class="divider" style="height:5px"/>
+	{% if user.is_authenticated %}
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
+	{% endif %}
 	<!---<button type="button" onclick="redoOldAnalysisTab()" id="redo_old_analysis_button"><h3>Redo old analysis</h3></button>-->
 	<!--- border-radius: 4px; border-style:solid;outline: 4px; -->
 	</div>

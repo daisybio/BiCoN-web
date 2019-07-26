@@ -622,21 +622,22 @@ def clustering_6_4_part_2(request):
 		print(request.POST['newAnalysis'])
 		request.POST._mutable = True
 		done_from_cache = cache.get("done","")
+		print(done_from_cache)
 		if(request.POST['newAnalysis'] != "false"):
 			if('done' in request.session):
 				if(request.session['done'] == "true"):
 					#set done parameter to false if user has clicked return on result page
 					request.session['done'] = "False"
-				if(done_from_cache == "done" or done_from_cache == 'done'):
-					print("done from cache")
-					#set done parameter to false if user has clicked return on result page
-					cache.set('done',"False")
+			if(done_from_cache == "done" or done_from_cache == 'done'):
+				print("done from cache")
+				#set done parameter to false if user has clicked return on result page
+				cache.set('done',"False")
 			# remove parameter from request.POST to allow later switching to result page
 			request.POST['newAnalysis'] = "false"
 	#if(request.session['done'] == "true"):
-	if('done' in request.session):
-		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
-		print("done")
+	#if('done' in request.session):
+	#	return HttpResponseRedirect('polls/clustering_6_part_3.html')
+	#	print("done")
 	if not(os.path.isdir("/code/clustering/static/userfiles")):
 		os.mkdir("/code/clustering/static/userfiles")
 	done_from_cache = cache.get("done","")
@@ -851,7 +852,7 @@ def clustering_6_4_part_2(request):
 				if('analyze_metadata' in request.POST and 'patientdata' in request.FILES):
 					if(request.FILES['patientdata']):
 						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
-						clinicalstr_first_line = clinicalstr.split("\n")[0]
+						clinicalstr_first_line = clinicalstr.split("\n")[1]
 						if(len(clinicalstr_first_line.split("\t")) > len(clinicalstr_first_line.split(","))):
 							#print("converting file to csv")
 							clinicalstr = clinicalstr.replace("\t",",")
@@ -1080,7 +1081,7 @@ def clustering_6_4_part_2(request):
 				cache.set('p_val', p_val)
 				cache.set('done',"done")
 				remove_loading_image.delay()	
-				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
+				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2})
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"
@@ -1180,8 +1181,8 @@ def clustering_6_4_part_2(request):
 		if('enr' in request.POST):
 			print("enr in request")
 		# get current session id and result files for session
-		session_id = request.session._get_or_create_session_key()
-		path_heatmap = "userfiles/test_" + session_id + ".png"
+		#session_id = request.session._get_or_create_session_key()
+		path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 		json_path = "userfiles/ppi_" + session_id + ".json"
 		output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 		if('ppi_path' in request.POST and 'heatmap_path' in request.POST and 'plot_path' in request.POST):
@@ -1256,7 +1257,7 @@ def clustering_6_4_part_2(request):
 			print(request.session['done'])
 			if(request.session['done'] == "true"): 
 				session_id = request.session._get_or_create_session_key()
-				path_heatmap = "userfiles/test_" + session_id + ".png"
+				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_metadata = "userfiles/metadata_" + session_id + ".txt"
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
@@ -1271,7 +1272,7 @@ def clustering_6_4_part_2(request):
 				session_id = request.session._get_or_create_session_key()
 			else:
 				session_id = session_id_from_cache
-			path_heatmap = "userfiles/test_" + session_id + ".png"
+			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			path_metadata = "userfiles/metadata_" + session_id + ".txt"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
@@ -1504,7 +1505,7 @@ def clustering_6_4(request):
 				if('analyze_metadata' in request.POST and 'patientdata' in request.FILES):
 					if(request.FILES['patientdata']):
 						clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
-						clinicalstr_first_line = clinicalstr.split("\n")[0]
+						clinicalstr_first_line = clinicalstr.split("\n")[1]
 						if(len(clinicalstr_first_line.split("\t")) > len(clinicalstr_first_line.split(","))):
 							print("converting metadata to csv format")
 							clinicalstr = clinicalstr.replace("\t",",")
@@ -2233,8 +2234,8 @@ def clustering_6_part_3_2(request):
 			cache.set('p_val', p_val)	
 			return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val})
 		session_id = request.session._get_or_create_session_key()
-		path99 = "test_" + session_id + ".png"
-		json_path = "test15_" + session_id + ".json"
+		path99 = "heatmap_" + session_id + ".png"
+		json_path = "ppi_" + session_id + ".json"
 		path_metadata = "metadata_" + session_id + ".txt"
 		output_plot_path = "output_plotly_" + session_id + ".html"
 		cache.clear()
