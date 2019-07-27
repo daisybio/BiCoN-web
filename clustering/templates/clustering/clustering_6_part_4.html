@@ -1291,9 +1291,8 @@ function fixStepIndicator(n) {
             <article class="col-md-12 article-intro">
                 <h1>Survival Information</h1>
 	<!--- load the survival graph --->
-	{{output_plot_path_2}}
 	
-{% if output_plot_path == "empty" %}
+{% if has_survival_plot == "false" %}
 
 {% else %}
 
@@ -1319,9 +1318,10 @@ The log-rank test gives a p-value of: {{pval}}
 		<h3>
                     <a href="#">Metadata of patients</a>
                 </h3>
+{% if ret_metadata1 == "" %}
+{%else%}
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients in Cluster 1 has a lung metastasis).</p>
             
-{{ret_metadata}}
 <table style="max-width:1200px;">
 <tr>
 <!--- iterate over tables of metadata and display as table--->
@@ -1343,7 +1343,8 @@ The log-rank test gives a p-value of: {{pval}}
   <th>{{value}}</th>
 {% endfor %}
 </tr> 
-</table>       
+</table>   
+{%endif%}    
 </article> 
         </div>
 <!--- tab for convergence plot --->

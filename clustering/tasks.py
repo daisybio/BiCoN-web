@@ -1699,6 +1699,7 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	plt.rc('legend', fontsize=30)
 	
 	grouping_p = []
+	grouping_g = []
 	p_num = list(GE.columns)
 	
 	GE_small = GE.T[genes1+genes2]
@@ -1719,7 +1720,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		    else:
 		        grouping_p.append(values[1])
 		grouping_p = pd.DataFrame(grouping_p,index = p_num)
-		grouping_g = []
 		grouping_g = pd.DataFrame(grouping_g,index = g_num)	
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
@@ -1734,7 +1734,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
-	
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
 	#plt.show(bplot1)
@@ -2049,6 +2048,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		ret_metadata.append(ret_metadata_1)
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
+		patientids_metadata = []
 	else:
 		# read clinical data line by line, read title column in separate array
 		clinicalLines = clinicalstr.split("\n")
@@ -2059,24 +2059,25 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		print(clinicaldf.columns)
+		#print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		print(clinicaldf_col_names)
+		#print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
 		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
-			print("basdbasdfbasfbafs")
+			#print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			print(clinicaldf_col_names_new)
+			#print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
 		param_names = []
 		param_values = []
 		param_cols = []
 		ctr = 0
-		print(patientids_metadata)
+		#print(patientids_metadata)
+	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
 		group1_has = []
@@ -2389,9 +2390,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		fig = dict(data=data99,layout=layout)
 		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		if(survival_col not in list(clinicaldf.columns)):
+		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
 				text_file_2.write("")
+			output_plot_path = "empty"
 		else:
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
 				text_file_2.write(plot_div)
@@ -2547,6 +2549,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
 			text_file_2.write("")
+		output_plot_path = "empty"
 		# fill empty metadata arrays
 		ret_metadata = []
 		ret_metadata_1 = {}
@@ -2868,15 +2871,17 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
-		if(survival_col not in list(clinicaldf.columns)):
+		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open(output_plot_path, "w") as text_file_2:
 				text_file_2.write("")
+			output_plot_path = "empty"
 		elif(errstr == ""):
 			with open(output_plot_path, "w") as text_file_2:
 				text_file_2.write(plot_div)
 		else:
 			with open(output_plot_path, "w") as text_file_2:
 				text_file_2.write(errstr)
+			output_plot_path = "empty"
 	else:
 		ret_metadata = []
 		text_file_3 = open(path_metadata, "w")
@@ -2887,6 +2892,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
 			text_file_2.write("")
+		output_plot_path = "empty"
 		# fill empty metadata arrays
 		ret_metadata = []
 		ret_metadata_1 = {}
