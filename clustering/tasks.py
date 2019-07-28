@@ -1014,11 +1014,27 @@ def preprocess_ppi_file(ppistr):
 		del ppistr_split[0]
 	# take only the right two columns
 	for line in ppistr_split:
-		if(len(line.split("\t")) > 2):
-			line_length = len(line.split("\t"))
-			line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
-		ppistr_split_new.append(line)
-	return("\n".join(ppistr_split_new))
+		#print(line)
+		if(len(line.split("\t")) > 1):
+			if(len(line.split("\t")) > 2):
+				line_length = len(line.split("\t"))
+				line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
+			#print(line.split("\t")[0])
+			#print(str(line.split("\t")[1]) + "end")
+			#print(str(line.split("\t")[0]).isdigit())
+			#print(str(line.split("\t")[1]).strip().replace("\n","").isdigit())
+			if(str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n","")).isdigit()):				
+				ppistr_split_new.append(line)
+				#print(line)
+				#print((ppistr_split_new[0]))
+	ppistr = "\n".join(ppistr_split_new)		
+	#for line in ppistr_split:
+	#	if(len(line.split("\t")) > 2):
+	#		line_length = len(line.split("\t"))
+	#		line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
+	#	ppistr_split_new.append(line)
+	#return("\n".join(ppistr_split_new))
+	return(ppistr)
 
 
 # Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information	
@@ -1658,7 +1674,11 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
+	print("genes1")
+	print(genes1)
+	print("patients1")
 	patients1, patients2 = solution[1]
+	print(patients1)
 	#print(patients1)
 	#print(group1)
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
@@ -1720,7 +1740,9 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		    else:
 		        grouping_p.append(values[1])
 		grouping_p = pd.DataFrame(grouping_p,index = p_num)
-		grouping_g = pd.DataFrame(grouping_g,index = g_num)	
+		grouping_g = pd.DataFrame(grouping_g,index = g_num)
+		print(grouping_p)
+		print(grouping_g)	
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
 		col_colors = species.map(lut)
@@ -1971,7 +1993,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#with open("/code/clustering/static/test15.json", "w") as text_file:
 	with open("/code/clustering/static/ppi.json", "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
@@ -2006,7 +2027,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
 		g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
-	#g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)			
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
@@ -2309,22 +2329,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		text_file_4.write("\t".join(jaccards_2_str) + "\n")
 		text_file_4.write("")
 		text_file_4.close()
-		#text_file_3.write("<table><tr>")
-		#if(len(jaccards_1) < len(param_names)):
-		#	for i in range(len(jaccards_1),len(param_names)):
-		#		jaccards_1.append(0.0)
-		#		jaccards_2.append(0.0)
-		#for elem in param_names:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</tr><tr>")
-		#for elem in jaccards_1:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</tr><tr>")
-		#for elem in jaccards_2:
-		#	text_file_3.write("<th>" + str(elem) + "</th>")
-		#text_file_3.write("</table>")
-		#text_file_3.close()
-
 		# write metadata to dicts
 		ret_metadata = []
 		ret_metadata_1 = {}
@@ -2388,7 +2392,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		title='percentage of patients'))
 		#fig = dict(data=data99, layout=layout)
 		fig = dict(data=data99,layout=layout)
-		#plot_div=plotly.offline.plot(fig, auto_open=False,include_plotlyjs = False, output_type='div')
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
@@ -2397,9 +2400,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		else:
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
 				text_file_2.write(plot_div)
-		#with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
-		#	text_file_2.write(plot_div)
-		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
 		text_file.write("Done!")
 	print(ret_metadata)
@@ -2460,13 +2460,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	json_path = "/code/clustering/static/test15_" + session_id + ".json"
-	#json_path = "/code/clustering/static/ppi_" + session_id + ".json"
+	#json_path = "/code/clustering/static/test15_" + session_id + ".json"
+	#with open(json_path, "w") as text_file:
+	#	text_file.write(jsn3)	
+	json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
-		text_file.write(jsn3)	
-	#json_path_2 = "/code/clustering/static/ppi_" + session_id + ".json"
-	json_path_2 = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
-	with open(json_path_2, "w") as text_file:
 		text_file.write(jsn3)		
 	output_notebook()
 	# configure plot
@@ -2504,20 +2502,15 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
-	#path_heatmap = "/code/clustering/static/heatmap_" + session_id + ".png"
+	#path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
+	#plt.savefig(path_heatmap)
+	path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
-	#path_heatmap_2 = "/code/clustering/static/heatmap_" + session_id + ".png"
-	path_heatmap_2 = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
-	plt.savefig(path_heatmap_2)
 	plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
 	# write lists of genes in files, needed for enrichment analysis
-	#path_genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
-	#path_genelist_1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
-	#path_genelist_2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
 	path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
 	path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
 	path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
@@ -2535,17 +2528,16 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
-	#path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
 	path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 	# if no metadata given, write an empty metadata file
 	p_val = ""
 	if(clinicalstr == "empty"):
+		print("clinical string empty")
 		ret_metadata = []
 		text_file_3 = open(path_metadata, "w")
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
 			text_file_2.write("")
@@ -2586,8 +2578,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_values = []
 		param_cols = []
 		ctr = 0
+		print(patientids_metadata)
 		#print(patientids_metadata)
-	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
+	#if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
+	if not(clinicalstr == "empty"):
 		patients_0 = []
 		patients_1 = []
 		group1_has = []

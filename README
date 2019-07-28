@@ -153,6 +153,7 @@ If a logged-in user wants to display old results, there is a list of stored resu
 The version of the page with separate pages for input and results redirects the user to the result page after running the analysis. A parameter in the cache is set to "done" so that if the user hits reload or runs an enrichment analysis, he stays on the result page. The user can go back to the input page by clicking "start new analysis". If the user presses this button, an form is submitted with an input parameter "new analysis", and in the method in views.py, the "done" parameter is set to false and the user is redirected to the input page.
 
 
+
 #####################################
 How the cache works:
 #####################################

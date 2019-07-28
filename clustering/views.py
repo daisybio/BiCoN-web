@@ -1520,6 +1520,7 @@ def clustering_6_4(request):
 						if('survival_col' in request.POST):
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
+						print(clinicalstr)
 				session_id = ""
 				session_id_from_cache = cache.get("session_id","none")
 				if(session_id_from_cache == "none" or session_id_from_cache == ""):
@@ -1536,12 +1537,14 @@ def clustering_6_4(request):
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
+				print(group1_ids)
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				has_survival_plot = "true"
 				print(output_plot_path)
 				if(output_plot_path == "empty"):
 					has_survival_plot = "false"
+				print(has_survival_plot)
 				#output_plot_path = "output_plotly_" + session_id + ".html"
 				#json_path = "ppi_" + session_id + ".json"
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
