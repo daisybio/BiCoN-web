@@ -25,7 +25,7 @@ import shutil
 import clustering
 from clustering.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
-from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file,preprocess_ppi_file,preprocess_file_2,algo_output_task_2
+from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,show_old_data,import_ndex,script_output_task_9,read_kegg_enrichment,read_ndex_file_4,run_enrichment_2,run_go_enrichment_2,run_reac_enrichment,read_kegg_enrichment_2,convert_gene_list,check_input_files,script_output_task_10,preprocess_file,write_pval,algo_output_task_new,list_metadata_5,preprocess_clinical_file,preprocess_ppi_file,preprocess_file_2,algo_output_task_2,algo_output_task_3
 from django.core.cache import cache
 import os.path
 from django.core.mail import send_mail
@@ -370,7 +370,7 @@ def clustering_6_new(request):
 			if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 				gene_set_size = 2000
 				# run algorithm and read results
-			result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+			result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_col)
 			#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 			(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
 			#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
@@ -489,7 +489,7 @@ def clustering_6_new(request):
 				#	lgmax = 20
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
+				result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				if not(has_clin_data == "true"):
 					clinicalstr = "empty"
@@ -1520,7 +1520,6 @@ def clustering_6_4(request):
 						if('survival_col' in request.POST):
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
-						print(clinicalstr)
 				session_id = ""
 				session_id_from_cache = cache.get("session_id","none")
 				if(session_id_from_cache == "none" or session_id_from_cache == ""):

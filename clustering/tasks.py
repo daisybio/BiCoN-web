@@ -1088,7 +1088,7 @@ def preprocess_file(expr_str):
 			for column_name, column in exprdf.transpose().iterrows():
 				if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 					if(len(column.unique()) == 2):
-						print(column_name)
+						#print(column_name)
 						expr_str = expr_str.replace(column_name,"disease_type")	
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
 			done1 = "false"
@@ -1191,7 +1191,7 @@ def preprocess_file_2(expr_str):
 			for column_name, column in exprdf.transpose().iterrows():
 				if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 					if(len(column.unique()) == 2):
-						print(column_name)
+						#print(column_name)
 						expr_str = expr_str.replace(column_name,"disease_type")	
 						nbr_col = 2
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
@@ -1567,6 +1567,219 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
 
+
+## method for more than 2 pre-defined clusters
+@shared_task(name="algo_output_task_3")
+def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,size,clusters_param):
+	#col = "cancer_type"
+	col = "disease_type"
+	#size = 2000
+	log2 = True
+	expr_stringio = StringIO(expr_str)
+	exprdf = pd.read_csv(expr_stringio,sep='\t')
+	#check if string contains negative numbers.
+	if("-" in expr_str.split("\n")[2]):
+		print("expression data are logarithmized")
+		log2_2 = False
+	else:
+		print("expression data not logarithmized")
+		log2_2 = True
+	#print(exprdf.iloc[:,[2]])
+	#print(list(exprdf.iloc[:,0]))
+	#for i in range(1,len(exprdf.columns)-1):
+	### this checks whether the expression data contain negative numbers
+	for i in range(2,4):
+		if(log2_2 and i>len(exprdf.columns)):
+			# check only first 1000 lines of column 2 and 3
+			for j in range(1, min(len(exprdf.index)-1,1000)):
+				if(log2_2 and str(exprdf.columns[i]) != "disease_type"):
+					# make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
+					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
+						print("expression data are logarithmized")
+						log2_2 = False	
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+		text_file.write("Your files are being processed...")
+	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+		text_file.write("Your files are being processed...")
+	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
+	if(clusters_param == 2):
+		B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
+	else:
+		B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
+	#print(group1_ids)	
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
+	with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+		text_file.write("Starting model run...")	
+	print("How many genes you want per cluster (minimum):")
+	#L_g_min = int(input())
+	print("How many genes you want per cluster (maximum):")
+	#L_g_max = int(input())
+	imp.reload(lib)
+	
+	# =============================================================================
+	# #GENERAL PARAMETERS:
+	# =============================================================================
+	clusters = clusters_param # other options are currently unavailable
+	K = int(nbr_ants) # number of ants
+	eps = float(epsilon) # stopping criteria: score_max-score_av<eps
+	b = float(hi_sig) #HI significance
+	evaporation  = float(evap)
+	a = float(pher_sig) #pheramone significance
+	times =int(nbr_iter) #max amount of iterations
+	#times =45 #max amount of iterations
+	# =============================================================================
+	# #NETWORK SIZE PARAMETERS:
+	# =============================================================================
+	cost_limit = 20 # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
+	#L_g_min = 10 # minimum # of genes per group
+	#L_g_max = 20 # minimum # of genes per group
+	
+	th = 1# the coefficient to define the search radipus which is supposed to be bigger than 
+	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
+	#bigger th - less genes are considered (can lead to empty paths if th is too high)
+	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
+	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
+	with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:	
+		text_file.write("Progress of the algorithm is shown below...")
+	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
+		text_file.write("Progress of the algorithm is shown below...")
+	start = time.time()
+	solution,t_best,sc,conv= lib.ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
+	end = time.time()
+	print("######################################################################")
+	print("RESULTS ANALYSIS")
+	print("total time " + str(round((end - start)/60,2))+ " minutes")
+	print("jaccard indexes:")
+	jac_1_ret = ""	
+	jac_2_ret = ""
+	if(clusters_param == 2):
+		jacindices = lib.jac_matrix(solution[1],[group1,group2])
+		print(jacindices)
+		jac_1_ret = jacindices[0]
+		jac_2_ret = jacindices[1]
+		if lib.jac(group1,solution[1][0])>lib.jac(group1,solution[1][1]):
+			values = [val1,val2]
+		else:
+			values = [val2,val1]
+	# mapping to gene names (for now with API)
+	mg = mygene.MyGeneInfo()
+	new_genes = solution[0][0]+solution[0][1]
+	new_genes_entrez = [labels_B[x] for x in new_genes]
+	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
+	mapping =dict()
+	for line in out:
+		if("symbol" in line):
+			mapping[rev_labels_B[line["query"]]] = line["symbol"]
+	###m plotting networks
+	new_genes1 = [mapping[key] for key in mapping if key in solution[0][0] ]     
+	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
+	
+	genes1,genes2 = solution[0]
+	#print("genes1")
+	#print(genes1)
+	#print("patients1")
+	patients1, patients2 = solution[1]
+	#print(patients1)
+	patients1_ids = []
+	patients2_ids = []
+	for elem in patients1:	
+		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+			patients1_ids.append(curr_patient_id)
+
+	for elem in patients2:	
+		if(elem-2000 < len(list(exprdf.index))):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+			patients2_ids.append(curr_patient_id)
+	#print("patients 1 ids")
+	#print(patients1_ids)
+	#print(patients1)
+	#print(group1)
+	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
+	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
+	
+	G_small = nx.subgraph(G,genes1+genes2)
+	G_small = nx.relabel_nodes(G_small,mapping)
+	
+	plt.figure(figsize=(15,15))
+	cmap=plt.cm.RdYlGn
+	vmin = -2
+	vmax = 2
+	pos = nx.spring_layout(G_small)
+	ec = nx.draw_networkx_edges(G_small,pos)
+	if(clusters_param == 2):
+		nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap, label = values[0] )
+		nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap, label = values[1])
+	else:
+		nc1 = nx.draw_networkx_nodes(G_small,nodelist =new_genes1, pos = pos,node_color=means1, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "^",cmap =cmap)
+		nc2 = nx.draw_networkx_nodes(G_small,nodelist =new_genes2, pos = pos,node_color=means2, node_size=600,alpha=1.0,vmin=vmin, vmax=vmax,node_shape = "o",cmap =cmap)
+	nx.draw_networkx_labels(G_small,pos,font_size = 15,font_weight='bold')
+	ret2 = means1 + means2
+	ret3 = new_genes1 + new_genes2
+	adjlist = []
+	for line99 in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line99.split()
+		adjlist.append([lineSplit[0],lineSplit[1]])
+	plt.legend(frameon  = True)
+	plt.colorbar(nc1)
+	plt.axis('off')
+	print(list(G_small.nodes()))
+	### plotting expression data
+	plt.rc('font', size=30)          # controls default text sizes
+	plt.rc('axes', titlesize=20)     # fontsize of the axes title
+	plt.rc('axes', labelsize=20)    # fontsize of the x and y labels
+	plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
+	plt.rc('ytick', labelsize=10)    # fontsize of the tick labels
+	plt.rc('legend', fontsize=30)
+	
+	grouping_p = []
+	grouping_g = []
+	p_num = list(GE.columns)
+	print("list of columns")
+	print(p_num)
+	GE_small = GE.T[genes1+genes2]
+	GE_small. rename(columns=mapping, inplace=True)
+	GE_small = GE_small.T
+	g_num = list(GE_small.index)
+	if(clusters_param == 2):
+		for g in g_num:
+		    if g in new_genes1 :
+		        grouping_g.append(values[0])
+		    elif  g in new_genes2 :
+		        grouping_g.append(values[1])
+		    else:
+		        grouping_g.append(3)
+		for p in p_num:
+		    if p in solution[1][0]:
+		        grouping_p.append(values[0])
+		    else:
+		        grouping_p.append(values[1])
+		grouping_p = pd.DataFrame(grouping_p,index = p_num)
+		grouping_g = pd.DataFrame(grouping_g,index = g_num)
+		print(grouping_p)
+		print(grouping_g)	
+		species = grouping_g[grouping_g[0]!=3][0]
+		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
+		col_colors = species.map(lut)
+		species = grouping_p[0]
+		lut = {values[0]: '#4FB6D3',values[1]: '#22863E'}
+		row_colors = species.map(lut)
+	else:
+		col_colors = ""
+		row_colors = ""
+	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
+	plt.savefig("/code/clustering/static/ntw.png")
+	plt.clf()
+	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
+	plt.xlabel("iterations")
+	plt.ylabel("score per subnetwork")
+	#plt.show(bplot1)
+	plt.savefig("/code/clustering/static/userfiles/conv.png")
+	plt.savefig("/code/clustering/static/conv.png")
+	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
+
+
 ## method for more than 2 pre-defined clusters
 @shared_task(name="algo_output_task_2")
 def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,size,clusters_param):
@@ -1583,7 +1796,8 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	else:
 		print("expression data not logarithmized")
 		log2_2 = True
-	print(exprdf.iloc[:,[2]])
+	#print(exprdf.iloc[:,[2]])
+	#print(list(exprdf.iloc[:,0]))
 	#for i in range(1,len(exprdf.columns)-1):
 	### this checks whether the expression data contain negative numbers
 	for i in range(2,4):
@@ -1674,11 +1888,24 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
-	print("genes1")
-	print(genes1)
-	print("patients1")
+	#print("genes1")
+	#print(genes1)
+	#print("patients1")
 	patients1, patients2 = solution[1]
-	print(patients1)
+	#print(patients1)
+	patients1_ids = []
+	patients2_ids = []
+	for elem in patients1:	
+		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+			patients1_ids.append(curr_patient_id)
+
+	for elem in patients2:	
+		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+			patients2_ids.append(curr_patient_id)
+	#print("patients 1 ids")
+	#print(patients1_ids)
 	#print(patients1)
 	#print(group1)
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
@@ -1721,7 +1948,8 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	grouping_p = []
 	grouping_g = []
 	p_num = list(GE.columns)
-	
+	print("list of columns")
+	print(p_num)
 	GE_small = GE.T[genes1+genes2]
 	GE_small. rename(columns=mapping, inplace=True)
 	GE_small = GE_small.T
@@ -1761,7 +1989,7 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	#plt.show(bplot1)
 	plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
 	plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
-	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1,patients2,jac_1_ret,jac_2_ret)
+	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
 
 
 
