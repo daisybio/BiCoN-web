@@ -1819,7 +1819,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	else:
 		B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
-	#print(group1_ids)	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
 		text_file.write("Starting model run...")	
@@ -1851,7 +1850,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
 	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
@@ -1888,26 +1886,25 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
-	#print("genes1")
-	#print(genes1)
-	#print("patients1")
+	#print(str(len(genes1) + len(genes2)))
 	patients1, patients2 = solution[1]
-	#print(patients1)
 	patients1_ids = []
 	patients2_ids = []
+	print("length of list")
+	print(len(list(exprdf.iloc[:,0])))
+	#nbr_of_genes = len(genes1) + len(genes2)
+	nbr_first_patient = patients1[0]
+	if(float(patients2[0]) < float(patients1[0])):
+		nbr_first_patient = patients2[0]
 	for elem in patients1:	
-		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+		print(elem-nbr_first_patient)
+		if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
 			patients1_ids.append(curr_patient_id)
-
 	for elem in patients2:	
-		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
+		if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+			curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
 			patients2_ids.append(curr_patient_id)
-	#print("patients 1 ids")
-	#print(patients1_ids)
-	#print(patients1)
-	#print(group1)
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
 	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
 	
@@ -1936,7 +1933,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
 	plt.axis('off')
-	print(list(G_small.nodes()))
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
 	plt.rc('axes', titlesize=20)     # fontsize of the axes title
@@ -1948,12 +1944,14 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	grouping_p = []
 	grouping_g = []
 	p_num = list(GE.columns)
-	print("list of columns")
-	print(p_num)
+	#print("list of columns")
+	#print(p_num)
 	GE_small = GE.T[genes1+genes2]
 	GE_small. rename(columns=mapping, inplace=True)
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
+	print("list ge small index")
+	print(len(list(GE_small.index)))
 	if(clusters_param == 2):
 		for g in g_num:
 		    if g in new_genes1 :
@@ -1969,8 +1967,8 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		        grouping_p.append(values[1])
 		grouping_p = pd.DataFrame(grouping_p,index = p_num)
 		grouping_g = pd.DataFrame(grouping_g,index = g_num)
-		print(grouping_p)
-		print(grouping_g)	
+		#print(grouping_p)
+		#print(grouping_g)	
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
 		col_colors = species.map(lut)
@@ -1986,7 +1984,6 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
-	#plt.show(bplot1)
 	plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
 	plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
@@ -2084,8 +2081,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	
 	genes1,genes2 = solution[0]
 	patients1, patients2 = solution[1]
-	#print(patients1)
-	#print(group1)
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
 	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
 	
@@ -2156,7 +2151,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
-	#plt.show(bplot1)
 	plt.savefig("/code/clustering/static/conv.png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
@@ -2258,7 +2252,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	#plt.savefig("/code/clustering/static/test.png")
 	plt.savefig("/code/clustering/static/heatmap.png")
 	script, div = components(plot)	
 	plot_1=plt.gcf()
@@ -2307,24 +2300,19 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		#print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		#print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
-		# get patient ids either from first column or from index
+		# get patient ids either from first column or from index, add one empty element at the beginning of the column names
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
-			#print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			#print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
 		param_names = []
 		param_values = []
 		param_cols = []
 		ctr = 0
-		#print(patientids_metadata)
 	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
@@ -2375,7 +2363,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					column = column.replace('NTL','NA')
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					#print(column_name)
 					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
 						print(sorted(coluniq3))
@@ -2404,7 +2391,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						group2_has.append(current_patients_2)
 			else:
 				if(len(coluniq) == 2):
-					#print(coluniq)
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -2466,7 +2452,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		print(group1_has)
 		print(jaccards_1)
 		print(jaccards_2)
-		#print(list(clinicaldf.columns).index(survival_col))
 		print("name of survival col" + str(survival_col))
 		print(list(clinicaldf.iloc[:,42]))
 		# check if there is a column with survival data
@@ -2621,6 +2606,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		#fig = dict(data=data99, layout=layout)
 		fig = dict(data=data99,layout=layout)
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
+		# write survival plot to file, if survival data exist
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open("/code/clustering/static/output_plotly.html", "w") as text_file_2:
 				text_file_2.write("")
@@ -2651,8 +2637,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	G_list = list(G2.nodes())
 	ctr = 0
 	G = nx.Graph()
-	#print(G_list)
-	#print("genes in cluster 1:" + genes1)
 	# make node objects for genes
 	for G_tmp in genes_all:
 		genes.update({G_tmp:0})	
@@ -2688,9 +2672,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	#json_path = "/code/clustering/static/test15_" + session_id + ".json"
-	#with open(json_path, "w") as text_file:
-	#	text_file.write(jsn3)	
 	json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)		
@@ -2721,8 +2702,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
 	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
-	# make heatmap
-	#if(col_colors1 == ""):
+	# make heatmap (include pre-defined clusters if they were given)
 	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
@@ -2730,8 +2710,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	#path_heatmap = "/code/clustering/static/test_" + session_id + ".png"
-	#plt.savefig(path_heatmap)
 	path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
 	plot_1=plt.gcf()
@@ -2789,17 +2767,13 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		clinicaldf.replace(['NaN','nan','?','--'],['NA','NA','NA','NA'], inplace=True)
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
-		#print(clinicaldf.columns)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		#print(clinicaldf_col_names)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
 		# get patient ids either from first column or from index
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
-			#print("basdbasdfbasfbafs")
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
 			clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
-			#print(clinicaldf_col_names_new)
 		if("GSM" not in patientids_metadata[0]):
 			patientids_metadata = list(clinicaldf.index)
 		param_names = []
@@ -2807,9 +2781,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_cols = []
 		ctr = 0
 		print(patientids_metadata)
-		#print(patientids_metadata)
 	#if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
-	if not(clinicalstr == "empty"):
+	if not(clinicalstr == "empty" or ((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
 		group1_has = []
@@ -2859,10 +2832,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 					column = column.replace('NTL','NA')
 					coluniq2 = column.unique()
 					coluniq3 = [str(w) for w in coluniq2]
-					#print(column_name)
 					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
 					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						#print(sorted(coluniq3))
 						col_as_list = [str(i) for i in column]
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
@@ -2875,18 +2846,17 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						tmp95 = []
-						tmp94 = []
+						current_patients_group_1 = []
+						current_patients_group_2 = []
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
-								tmp95.append(all_patients[i])
+								current_patients_group_1.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
-								tmp94.append(all_patients[i])
-						group1_has.append(tmp95)				
-						group2_has.append(tmp94)
+								current_patients_group_2.append(all_patients[i])
+						group1_has.append(current_patients_group_1)				
+						group2_has.append(current_patients_group_2)
 			else:
 				if(len(coluniq) == 2):
-					#print(coluniq)
 					column = column.replace('Good Prognosis','1')
 					column = column.replace('Bad Prognosis','0')
 					column = column.replace('yes','1')
@@ -2918,16 +2888,16 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						param_names.append(column_name)
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
-						tmp95 = []
-						tmp94 = []
+						current_patients_group_1 = []
+						current_patients_group_2 = []
 						# check for which patients metadata variable is available and write in the array
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
-								tmp95.append(all_patients[i])
+								current_patients_group_1.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
-								tmp94.append(all_patients[i])
-						group1_has.append(tmp95)				
-						group2_has.append(tmp94)
+								current_patients_group_2.append(all_patients[i])
+						group1_has.append(current_patients_group_1)				
+						group2_has.append(current_patients_group_2)
 			ctr = ctr + 1
 		#print(param_names)
 		#print(patients_0)
