@@ -728,8 +728,9 @@ def aco_preprocessing_strings_2(expr_str, ppi_str, col,log2, gene_list = None, s
        labels_B[node] = p
        rev_labels_B[p] = node
        node = node+1
-    
-
+    print(new_genes)
+    print("new patients")
+    print(patients_new)
     #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
     #sim = scaler.fit_transform(expr)
     data_aco = pd.DataFrame(z_scores,columns= new_genes, index= patients_new)
@@ -902,9 +903,13 @@ def aco_preprocessing_strings(expr_str, ppi_str, col,log2, gene_list = None, siz
     net = pd.read_csv(PPIDATA,sep = "\t", header= None)
     nodes_ppi = set(net[0]).union(set(net[1]))
     genes_ge = list(set(expr.columns) - set([col]))
+    print("genes ge")
+    print(len(list(set(expr.columns) - set([col]))))
     new_genes = [int(x) for x in genes_ge]
+    print(len(new_genes))
     intersec_genes = set.intersection(set(new_genes), set(nodes_ppi))
     genes_for_expr = [str(x) for x in list(intersec_genes)]
+    print(len(genes_for_expr))
     expr = expr[genes_for_expr]
     #20188 genes
     if log2:
@@ -936,11 +941,17 @@ def aco_preprocessing_strings(expr_str, ppi_str, col,log2, gene_list = None, siz
        labels_B[node] = g
        rev_labels_B[g] = node
        node = node+1
+    print(patients_new)
+    #node = 0
     for p in patients_new:
        labels_B[node] = p
        rev_labels_B[p] = node
+       print("patient " + str(p))
        node = node+1
     
+    print(new_genes)
+    print("new patients")
+    print(patients_new)
 
     #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
     #sim = scaler.fit_transform(expr)
@@ -1043,6 +1054,12 @@ def aco_preprocessing_strings_2(expr_str, ppi_str, col,log2, gene_list = None, s
        labels_B[node] = g
        rev_labels_B[g] = node
        node = node+1
+    print("genes new ")
+    print(new_genes)
+    print(len(new_genes))
+    print("patients new ")
+    print(patients_new)
+    print(len(patients_new))
     for p in patients_new:
        labels_B[node] = p
        rev_labels_B[p] = node

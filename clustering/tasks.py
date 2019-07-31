@@ -1874,8 +1874,12 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 			values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
+	print("solution[0]")
+	print(solution[0])
+	print(solution[1])
 	new_genes = solution[0][0]+solution[0][1]
 	new_genes_entrez = [labels_B[x] for x in new_genes]
+	print(new_genes_entrez)
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
@@ -1890,21 +1894,31 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	patients1, patients2 = solution[1]
 	patients1_ids = []
 	patients2_ids = []
-	print("length of list")
-	print(len(list(exprdf.iloc[:,0])))
+	#print("length of list")
+	#print(len(list(exprdf.iloc[:,0])))
+	#print("rev labels b")
+	#print(rev_labels_B)
+	#print("labels b")
+	#print(labels_B)
 	#nbr_of_genes = len(genes1) + len(genes2)
-	nbr_first_patient = patients1[0]
-	if(float(patients2[0]) < float(patients1[0])):
-		nbr_first_patient = patients2[0]
-	for elem in patients1:	
-		print(elem-nbr_first_patient)
-		if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
-			patients1_ids.append(curr_patient_id)
-	for elem in patients2:	
-		if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
-			patients2_ids.append(curr_patient_id)
+	#nbr_first_patient = patients1[0]
+	#if(float(patients2[0]) < float(patients1[0])):
+	#	nbr_first_patient = patients2[0]
+	#for elem in patients1:	
+	#	print(elem-nbr_first_patient)
+	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
+	#		patients1_ids.append(curr_patient_id)
+	#for elem in patients2:	
+	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
+	#		patients2_ids.append(curr_patient_id)
+	for elem in patients1:
+		if(elem in labels_B):
+			patients1_ids.append(labels_B[elem])
+	for elem in patients2:
+		if(elem in labels_B):
+			patients2_ids.append(labels_B[elem])
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
 	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
 	
@@ -1952,6 +1966,7 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	g_num = list(GE_small.index)
 	print("list ge small index")
 	print(len(list(GE_small.index)))
+	print(len(list(GE.columns)))
 	if(clusters_param == 2):
 		for g in g_num:
 		    if g in new_genes1 :
