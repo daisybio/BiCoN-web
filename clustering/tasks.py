@@ -1388,9 +1388,7 @@ def list_metadata_5(path):
 
 @shared_task(name="algo_output_task_new")
 def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,size):
-	#col = "cancer_type"
 	col = "disease_type"
-	#size = 2000
 	log2 = True
 	expr_stringio = StringIO(expr_str)
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
@@ -1402,7 +1400,6 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 		print("expression data not logarithmized")
 		log2_2 = True
 	print(exprdf.iloc[:,[2]])
-	#for i in range(1,len(exprdf.columns)-1):
 	### this checks whether the expression data contain negative numbers
 	for i in range(2,4):
 		if(log2_2 and i>len(exprdf.columns)):
@@ -1420,8 +1417,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
-	#B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
-	print(group1_ids)	
+	#print(group1_ids)	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
 		text_file.write("Starting model run...")	
@@ -1514,7 +1510,7 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
 	plt.axis('off')
-	print(list(G_small.nodes()))
+	#print(list(G_small.nodes()))
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
 	plt.rc('axes', titlesize=20)     # fontsize of the axes title
@@ -1567,7 +1563,6 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,group1_ids,group2_ids,jac_1_ret,jac_2_ret)
 
 
-
 ## method for more than 2 pre-defined clusters
 @shared_task(name="algo_output_task_3")
 def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,size,clusters_param):
@@ -1607,7 +1602,6 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	else:
 		B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
-	#print(group1_ids)	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
 		text_file.write("Starting model run...")	
@@ -1639,13 +1633,12 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:	
 	with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
-	solution,t_best,sc,conv= lib.ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
+	solution,t_best,sc,conv=  lib.ants(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
 	print("######################################################################")
 	print("RESULTS ANALYSIS")
@@ -1664,8 +1657,12 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 			values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
+	#print("solution[0]")
+	#print(solution[0])
+	#print(solution[1])
 	new_genes = solution[0][0]+solution[0][1]
 	new_genes_entrez = [labels_B[x] for x in new_genes]
+	#print(new_genes_entrez)
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
@@ -1676,26 +1673,35 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
-	#print("genes1")
-	#print(genes1)
-	#print("patients1")
+	#print(str(len(genes1) + len(genes2)))
 	patients1, patients2 = solution[1]
-	#print(patients1)
 	patients1_ids = []
 	patients2_ids = []
-	for elem in patients1:	
-		if(elem-2000 < len(list(exprdf.iloc[:,0]))):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
-			patients1_ids.append(curr_patient_id)
-
-	for elem in patients2:	
-		if(elem-2000 < len(list(exprdf.index))):
-			curr_patient_id = list(exprdf.iloc[:,0])[elem-2000]
-			patients2_ids.append(curr_patient_id)
-	#print("patients 1 ids")
-	#print(patients1_ids)
-	#print(patients1)
-	#print(group1)
+	#print("length of list")
+	#print(len(list(exprdf.iloc[:,0])))
+	#print("rev labels b")
+	#print(rev_labels_B)
+	#print("labels b")
+	#print(labels_B)
+	#nbr_of_genes = len(genes1) + len(genes2)
+	#nbr_first_patient = patients1[0]
+	#if(float(patients2[0]) < float(patients1[0])):
+	#	nbr_first_patient = patients2[0]
+	#for elem in patients1:	
+	#	print(elem-nbr_first_patient)
+	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
+	#		patients1_ids.append(curr_patient_id)
+	#for elem in patients2:	
+	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
+	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
+	#		patients2_ids.append(curr_patient_id)
+	for elem in patients1:
+		if(elem in labels_B):
+			patients1_ids.append(labels_B[elem])
+	for elem in patients2:
+		if(elem in labels_B):
+			patients2_ids.append(labels_B[elem])
 	means1 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes1]
 	means2 = [np.mean(GE[patients1].loc[gene])-np.mean(GE[patients2].loc[gene]) for gene in genes2]
 	
@@ -1724,7 +1730,6 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
 	plt.axis('off')
-	print(list(G_small.nodes()))
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
 	plt.rc('axes', titlesize=20)     # fontsize of the axes title
@@ -1736,12 +1741,15 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	grouping_p = []
 	grouping_g = []
 	p_num = list(GE.columns)
-	print("list of columns")
-	print(p_num)
+	#print("list of columns")
+	#print(p_num)
 	GE_small = GE.T[genes1+genes2]
 	GE_small. rename(columns=mapping, inplace=True)
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
+	#print("list ge small index")
+	#print(len(list(GE_small.index)))
+	#print(len(list(GE.columns)))
 	if(clusters_param == 2):
 		for g in g_num:
 		    if g in new_genes1 :
@@ -1757,8 +1765,8 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		        grouping_p.append(values[1])
 		grouping_p = pd.DataFrame(grouping_p,index = p_num)
 		grouping_g = pd.DataFrame(grouping_g,index = g_num)
-		print(grouping_p)
-		print(grouping_g)	
+		#print(grouping_p)
+		#print(grouping_g)	
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
 		col_colors = species.map(lut)
@@ -1768,16 +1776,16 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	else:
 		col_colors = ""
 		row_colors = ""
-	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
+	plt.savefig("/code/clustering/static/userfiles/ntw.png")
 	plt.savefig("/code/clustering/static/ntw.png")
 	plt.clf()
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
-	#plt.show(bplot1)
 	plt.savefig("/code/clustering/static/userfiles/conv.png")
 	plt.savefig("/code/clustering/static/conv.png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
+
 
 
 ## method for more than 2 pre-defined clusters
@@ -1874,12 +1882,12 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 			values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
-	print("solution[0]")
-	print(solution[0])
-	print(solution[1])
+	#print("solution[0]")
+	#print(solution[0])
+	#print(solution[1])
 	new_genes = solution[0][0]+solution[0][1]
 	new_genes_entrez = [labels_B[x] for x in new_genes]
-	print(new_genes_entrez)
+	#print(new_genes_entrez)
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
@@ -1964,9 +1972,9 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	GE_small. rename(columns=mapping, inplace=True)
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
-	print("list ge small index")
-	print(len(list(GE_small.index)))
-	print(len(list(GE.columns)))
+	#print("list ge small index")
+	#print(len(list(GE_small.index)))
+	#print(len(list(GE.columns)))
 	if(clusters_param == 2):
 		for g in g_num:
 		    if g in new_genes1 :
@@ -2017,7 +2025,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	else:
 		print("expression data not logarithmized")
 		log2_2 = True
-	print(exprdf.iloc[:,[2]])
+	#print(exprdf.iloc[:,[2]])
 	#for i in range(1,len(exprdf.columns)-1):
 	### this checks whether the expression data contain negative numbers
 	for i in range(2,4):
@@ -2033,7 +2041,7 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
-	print(group1_ids)	
+	#print(group1_ids)	
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
 		text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
@@ -2120,7 +2128,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
 	plt.axis('off')
-	print(list(G_small.nodes()))
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
 	plt.rc('axes', titlesize=20)     # fontsize of the axes title
@@ -2128,8 +2135,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	plt.rc('xtick', labelsize=15)    # fontsize of the tick labels
 	plt.rc('ytick', labelsize=10)    # fontsize of the tick labels
 	plt.rc('legend', fontsize=30)
-	
-	
 	grouping_p = []
 	p_num = list(GE.columns)
 	for p in p_num:
@@ -2551,8 +2556,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		# write metadata in file
 		text_file_4 = open("/code/clustering/static/metadata.txt", "w")
 		text_file_4.write("\t".join(param_names) + "\n")
-		jaccards_1_str = [str(i) for i in jaccards_1]
-		jaccards_2_str = [str(i) for i in jaccards_2]
+		jaccards_1_str = [str(i)[:4] for i in jaccards_1]
+		jaccards_2_str = [str(i)[:4] for i in jaccards_2]
 		text_file_4.write("\t".join(jaccards_1_str) + "\n")
 		text_file_4.write("\t".join(jaccards_2_str) + "\n")
 		text_file_4.write("")
@@ -3013,8 +3018,8 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			errstr = "Unfortunately, no survival data could be computed."		
 		text_file_4 = open((path_metadata),"w")
 		text_file_4.write("\t".join(param_names) + "\n")
-		jaccards_1_str = [str(i) for i in jaccards_1]
-		jaccards_2_str = [str(i) for i in jaccards_2]
+		jaccards_1_str = [str(i)[:4] for i in jaccards_1]
+		jaccards_2_str = [str(i)[:4] for i in jaccards_2]
 		text_file_4.write("\t".join(jaccards_1_str) + "\n")
 		text_file_4.write("\t".join(jaccards_2_str) + "\n")
 		text_file_4.write("")

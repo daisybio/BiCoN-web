@@ -1540,10 +1540,13 @@ def clustering_6_4(request):
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				has_survival_plot = "true"
-				print(output_plot_path)
+				#print(output_plot_path)
 				if(output_plot_path == "empty"):
+					cache.set("has_survival_plot","false")
 					has_survival_plot = "false"
-				print(has_survival_plot)
+				else:
+					cache.set("has_survival_plot","true")
+				#print(has_survival_plot)
 				#output_plot_path = "output_plotly_" + session_id + ".html"
 				#json_path = "ppi_" + session_id + ".json"
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
@@ -1704,7 +1707,10 @@ def clustering_6_4(request):
 				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				has_survival_plot = "true"
 				if(output_plot_path == "empty"):
+					cache.set("has_survival_plot","false")
 					has_survival_plot = "false"
+				else:
+					cache.set("has_survival_plot","true")
 				ret_metadata1 = ""
 				ret_metadata2 = ""
 				ret_metadata3 = ""
@@ -1894,6 +1900,10 @@ def clustering_6_4(request):
 			request.POST._mutable = True
 			request.POST['enr'] = "true"
 			request.POST._mutable = mutable
+		has_survival_plot = ""
+		surv_from_cache = cache.get('has_survival_plot','none')
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
 		# get session id from cache
 		session_id_from_cache = cache.get('session_id', 'has expired')
 		if not(session_id_from_cache == 'has expired' or session_id_from_cache == ""):
@@ -1917,7 +1927,7 @@ def clustering_6_4(request):
 			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"	
-		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':"true"})
+		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
 	else:		
 		analysis_running = cache.get('analysis_running', 'none')
 		# if no analysis is running, remove loading image and text. this is to make sure after an incomplete analysis no "leftover" text with the status of last run is displayed
@@ -1955,6 +1965,10 @@ def clustering_6_4(request):
 		ret_metadata1 = ""
 		ret_metadata2 = ""
 		ret_metadata3 = ""
+		has_survival_plot = ""
+		surv_from_cache = cache.get('has_survival_plot','none')
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
 		# display results from most recent analysis
 		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
 			#cache.set('session_id',session_id_from_cache)
@@ -1988,7 +2002,7 @@ def clustering_6_4(request):
 			cache.set('ret_metadata2', ret_metadata2)	
 			cache.set('ret_metadata3', ret_metadata3)	
 			cache.set('p_val', p_val)	
-			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':"true"})
+			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot})
 		cache.clear()
 		cache.set('analysis_running', analysis_running)
 		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':"true"})
