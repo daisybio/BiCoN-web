@@ -1253,13 +1253,13 @@ function fixStepIndicator(n) {
 {% if user.is_authenticated %}
      <br><br><b>
 	Download the network 
-     <a href={% static 'ntw.png' %} download> as png </a> or
+     <a href={% static 'userfiles/ntw.png' %} download> as png </a> or
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% else %}
 	<b>
 	Download the network 
-     <a href={% static 'ntw.png' %} download> as png </a> or
+     <a href={% static 'userfiles/ntw.png' %} download> as png </a> or
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% endif %} 

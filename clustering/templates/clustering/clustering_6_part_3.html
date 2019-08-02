@@ -495,7 +495,6 @@ border:1px solid black;
 <div class="row" id="ppi">
 {% endif %}
             <article class="col-md-12 article-intro">
-{{json_path}}		
 		
                 <h1>PPI Graph</h1>
                 <h3>
@@ -579,12 +578,14 @@ The log-rank test gives a p-value of: {{pval}}
 <div class="tabcontent" id="patient_metadata">
             <article class="col-md-12 article-intro">
                 <h1>Patient Data</h1>
+{% if not ret_metadata1 %}
+{%else%}
 		<h3>
                     <a href="#">Metadata of patients</a>
                 </h3>
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients in Cluster 1 has a lung metastasis).</p>
             
-{{ret_metadata1}}
+
 <table style="max-width:1200px;">
 <tr>
 <!--- iterate over tables of metadata and display as table--->
@@ -606,7 +607,8 @@ The log-rank test gives a p-value of: {{pval}}
   <th>{{value}}</th>
 {% endfor %}
 </tr> 
-</table>       
+</table>   
+{%endif%}    
 </article> 
         </div>
 <!--- tab for convergence plot --->

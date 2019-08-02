@@ -1657,12 +1657,8 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 			values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
-	#print("solution[0]")
-	#print(solution[0])
-	#print(solution[1])
 	new_genes = solution[0][0]+solution[0][1]
 	new_genes_entrez = [labels_B[x] for x in new_genes]
-	#print(new_genes_entrez)
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
@@ -1673,29 +1669,9 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
-	#print(str(len(genes1) + len(genes2)))
 	patients1, patients2 = solution[1]
 	patients1_ids = []
 	patients2_ids = []
-	#print("length of list")
-	#print(len(list(exprdf.iloc[:,0])))
-	#print("rev labels b")
-	#print(rev_labels_B)
-	#print("labels b")
-	#print(labels_B)
-	#nbr_of_genes = len(genes1) + len(genes2)
-	#nbr_first_patient = patients1[0]
-	#if(float(patients2[0]) < float(patients1[0])):
-	#	nbr_first_patient = patients2[0]
-	#for elem in patients1:	
-	#	print(elem-nbr_first_patient)
-	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
-	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
-	#		patients1_ids.append(curr_patient_id)
-	#for elem in patients2:	
-	#	if((elem-nbr_first_patient < len(list(exprdf.iloc[:,0]))) and elem >= nbr_first_patient):
-	#		curr_patient_id = list(exprdf.iloc[:,0])[elem-nbr_first_patient]
-	#		patients2_ids.append(curr_patient_id)
 	for elem in patients1:
 		if(elem in labels_B):
 			patients1_ids.append(labels_B[elem])
@@ -1776,6 +1752,18 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	else:
 		col_colors = ""
 		row_colors = ""
+		for g in g_num:
+		    if g in new_genes1 :
+		        grouping_g.append("cluster1")
+		    elif  g in new_genes2 :
+		        grouping_g.append("cluster2")
+		    else:
+		        grouping_g.append(3)
+		grouping_g = pd.DataFrame(grouping_g,index = g_num)
+		species = grouping_g[grouping_g[0]!=3][0]
+		lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
+		col_colors = species.map(lut)
+		print(col_colors)
 	plt.savefig("/code/clustering/static/userfiles/ntw.png")
 	plt.savefig("/code/clustering/static/ntw.png")
 	plt.clf()
@@ -2001,14 +1989,26 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	else:
 		col_colors = ""
 		row_colors = ""
+		for g in g_num:
+		    if g in new_genes1 :
+		        grouping_g.append("cluster1")
+		    elif  g in new_genes2 :
+		        grouping_g.append("cluster2")
+		    else:
+		        grouping_g.append(3)
+		grouping_g = pd.DataFrame(grouping_g,index = g_num)
+		species = grouping_g[grouping_g[0]!=3][0]
+		lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
+		col_colors = species.map(lut)
+		print(col_colors)
 	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
-	plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
+	#plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
 	plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
-	plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
+	#plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
 
 
@@ -2268,7 +2268,10 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
-		g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
+		if(isinstance(row_colors1, str)):
+			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1)	
+		else:
+			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
@@ -2726,7 +2729,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
-		g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
+		if(isinstance(row_colors1, str)):
+			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1)	
+		else:
+			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
+	
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
@@ -2789,7 +2796,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		clinicaldf.replace(['na'],['NA'], inplace=True)
 		clinicaldf_col_names = list(clinicaldf.columns)
 		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
-		# get patient ids either from first column or from index
+		# get patient ids either from first column or from index, add one empty element at the beginning of the column names
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
 			clinicaldf_col_names_temp = ['empty']
 			clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names

@@ -876,8 +876,10 @@ def clustering_6_4_part_2(request):
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
-				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()	
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
@@ -931,13 +933,6 @@ def clustering_6_4_part_2(request):
 				convert_gene_list.delay(adjlist,"/code/clustering/static/genelist_temp.txt")
 				# save uploaded files if specified
 				# render list of previously uploaded files if user is logged in (needed if user submits another request)
-				if request.user.is_authenticated:
-					request.session['done'] = "true"
-					cache.set("done","done")
-					cache.set('done',"done")
-					username = str(request.user)
-					list_of_files = GraphForm.list_user_data_2(username)	
-					list_of_files_2 = GraphForm.list_user_data(username)              
 				# remove the loading-gif and progress image, clear cache             
 				remove_loading_image.delay()
 				cache.clear()				
@@ -948,7 +943,15 @@ def clustering_6_4_part_2(request):
 				remove_loading_image.delay()
 				if(os.path.isfile("clustering/static/loading_1.gif")):
 					os.unlink("clustering/static/loading_1.gif")
-				cache.clear()				
+				cache.clear()	
+				if request.user.is_authenticated:
+					request.session['done'] = "true"
+					cache.set("done","done")
+					cache.set('done',"done")
+					username = str(request.user)
+					list_of_files = GraphForm.list_user_data_2(username)	
+					list_of_files_2 = GraphForm.list_user_data(username)              
+				cache.set("has_survival_plot",has_survival_plot)	
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
 				# copy static files from shared directory to static-file-dir on web container
@@ -1020,19 +1023,22 @@ def clustering_6_4_part_2(request):
 				#	lgmax = 20
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
+				if (session_id_from_cache == 'has expired'):
+					session_id = request.session._get_or_create_session_key()
+				else:
+					session_id = session_id_from_cache
+				
 				# run algorithm
-				result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
+				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# check if clinical data exist				
 				if not(has_clin_data == "true"):
 					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
 				session_id_from_cache = cache.get('session_id', 'has expired')
-				if (session_id_from_cache == 'has expired'):
-					session_id = request.session._get_or_create_session_key()
-				else:
-					session_id = session_id_from_cache
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				has_survival_plot = "true"
@@ -1086,6 +1092,7 @@ def clustering_6_4_part_2(request):
 				cache.set('ret_metadata3', ret_metadata3)	
 				cache.set('p_val', p_val)
 				cache.set('done',"done")
+				cache.set("has_survival_plot",has_survival_plot)
 				remove_loading_image.delay()	
 				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot})
 	elif('enrichment_type' in request.POST):
@@ -1532,11 +1539,11 @@ def clustering_6_4(request):
 					gene_set_size = 2000
 				# run algorithm and read results
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
-				print(group1_ids)
+				#print(group1_ids)
 				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				has_survival_plot = "true"
@@ -1694,9 +1701,11 @@ def clustering_6_4(request):
 				else:
 					session_id = session_id_from_cache
 				# run algorithm
-				result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
 				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# check if clinical data exist				
 				if not(has_clin_data == "true"):
 					survival_col_name = ""
@@ -1776,6 +1785,11 @@ def clustering_6_4(request):
 		# set analysis running parameter to allow display of "loading"-gif + text
 		if (analysis_running == 'none'):
 			cache.set('analysis_running','analysis_running')
+		surv_from_cache = cache.get('has_survival_plot','none')
+		print(surv_from_cache)
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
+
 		enrichment_dict = {}
 		enrichment_dict_2 = {}
 		enrichment_dict_3 = {}
@@ -1894,7 +1908,7 @@ def clustering_6_4(request):
 				cache.set("enrichment_dict_4",enrichment_dict_4)
 				cache.set("enrichment_dict_5",enrichment_dict_5)
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path_heatmap,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
-'json_path':(json_path + "?foo=bar"),'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':"true"})
+'json_path':(json_path + "?foo=bar"),'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
 		if('enr' not in request.POST):
 			mutable = request.POST._mutable
 			request.POST._mutable = True
@@ -1902,6 +1916,7 @@ def clustering_6_4(request):
 			request.POST._mutable = mutable
 		has_survival_plot = ""
 		surv_from_cache = cache.get('has_survival_plot','none')
+		print(surv_from_cache)
 		if(surv_from_cache == "false"):
 			has_survival_plot = "false"
 		# get session id from cache
@@ -1969,6 +1984,7 @@ def clustering_6_4(request):
 		surv_from_cache = cache.get('has_survival_plot','none')
 		if(surv_from_cache == "false"):
 			has_survival_plot = "false"
+		
 		# display results from most recent analysis
 		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
 			#cache.set('session_id',session_id_from_cache)
@@ -1997,15 +2013,19 @@ def clustering_6_4(request):
 				enrichment_dict_4 = cache.get('enrichment_dict_4',"")
 				enrichment_dict_5 = cache.get('enrichment_dict_5',"")
 			cache.clear()	
+			if(surv_from_cache == "false"):
+				has_survival_plot = "false"
+				cache.set("has_survival_plot","false")
 			cache.set('session_id', session_id_from_cache)	
 			cache.set('ret_metadata1', ret_metadata1)	
 			cache.set('ret_metadata2', ret_metadata2)	
 			cache.set('ret_metadata3', ret_metadata3)	
 			cache.set('p_val', p_val)	
+			
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot})
 		cache.clear()
 		cache.set('analysis_running', analysis_running)
-		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':"true"})
+		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':has_survival_plot})
 
 
 def clustering_6_part_2_2(request):
