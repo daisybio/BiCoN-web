@@ -1292,9 +1292,7 @@ function fixStepIndicator(n) {
                 <h1>Survival Information</h1>
 	<!--- load the survival graph --->
 
-{% if has_survival_plot == "false" %}
-
-{% else %}
+{% if has_survival_plot == "true" %}
 
 <object type="text/html" data="{% static output_plot_path %}" width="800" height="500"></object><br>
 	<img src={% static 'legend_1.png' %} style="position:absolute"><br><br>
@@ -1308,6 +1306,8 @@ function fixStepIndicator(n) {
 {% else %}
 The log-rank test gives a p-value of: {{pval}}
 {% endif %}
+{% else %}
+
 {% endif %}
 </article> 
         </div>

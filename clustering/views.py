@@ -2,7 +2,7 @@ from django.shortcuts import render
 from io import StringIO
 from django.http import HttpResponse
 from django.template import loader
-from django.shortcuts import render
+##from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import check_password
@@ -16,8 +16,8 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response,render
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+##from django.http import HttpResponseRedirect
+##from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from shutil import copyfile
 import shutil
@@ -31,23 +31,23 @@ import os.path
 from django.core.mail import send_mail
 
 ### *ACTUAL* imports (that have dependencies other than django and my own stuff) ####
-import networkx as nx
+##import networkx as nx
 #from biomart import BiomartServer
 #from bokeh.palettes import Spectral4
-from pybiomart import Dataset
-import seaborn as sns
+##from pybiomart import Dataset
+##import seaborn as sns
 import pandas as pd
-from numpy import array
-import matplotlib.patches as mpatches
-import numpy as np
+##from numpy import array
+##import matplotlib.patches as mpatches
+##import numpy as np
 import matplotlib.pyplot as plt
-import mpld3
-from plotly.offline import plot_mpl
-import plotly
-import plotly.plotly as py
-import plotly.graph_objs as go
-import plotly.io as pio
-import plotly.offline
+##import mpld3
+##from plotly.offline import plot_mpl
+##import plotly
+##import plotly.plotly as py
+##import plotly.graph_objs as go
+##import plotly.io as pio
+##import plotly.offline
 
 
 def logout_2(request):
@@ -378,7 +378,8 @@ def clustering_6_new(request):
 			#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 			# make plots and process results	
 			result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-			(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+			#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+			(plot_div,ret_metadata,p_val) = result2.get()
 			output_plot_path = "output_plotly.html"
 			json_path = "ppi.json"
 			path_metadata = "/code/clustering/static/metadata.txt"
@@ -458,7 +459,7 @@ def clustering_6_new(request):
 			cache.set('analysis_running','analysis_running')	
 			if(clinicalstr == "empty"):
 				output_plot_path = "empty"		
-			return render(request, 'clustering/clustering_6.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"", 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
+			return render(request, 'clustering/clustering_6.html', {'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
 	if('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			with open("clustering/static/output_console.txt", "w") as text_file:
@@ -495,7 +496,8 @@ def clustering_6_new(request):
 					clinicalstr = "empty"
 					ret_metadata = ""
 				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-				(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+				(plot_div,ret_metadata,p_val) = result2.get()
 				#plot2 = "test.png"
 				cache.clear()			
 				make_empty_figure.apply_async(countdown=10)
@@ -503,7 +505,7 @@ def clustering_6_new(request):
 				list_of_files = GraphForm.list_user_data_2(username)	
 				list_of_files_2 = GraphForm.list_user_data(username)      
 				remove_loading_image.delay()
-				return render(request, 'clustering/clustering_6.html', {'form':"",'images':"",'div':"",'script':"", 'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
+				return render(request, 'clustering/clustering_6.html', {'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"
@@ -1116,6 +1118,11 @@ def clustering_6_4_part_2(request):
 			session_id = request.session._get_or_create_session_key() 
 		else:
 			session_id = session_id_from_cache
+		has_survival_plot = ""
+		surv_from_cache = cache.get('has_survival_plot','none')
+		print(surv_from_cache)
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
 		# one if loop for each enrichment type due to complicated naming of result files
 		if(enr_type == "kegg_enrichment"):
 			# run enrichment and write to directories
@@ -1205,7 +1212,7 @@ def clustering_6_4_part_2(request):
 			output_plot_path = request.POST.get('plot_path')
 		#return clustering_6(request)
 		#return HttpResponseRedirect('polls/clustering_6.html')
-		return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':"true"})
+		return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
 
 	else:		
 		#remove_loading_image.delay()
@@ -1785,6 +1792,7 @@ def clustering_6_4(request):
 		# set analysis running parameter to allow display of "loading"-gif + text
 		if (analysis_running == 'none'):
 			cache.set('analysis_running','analysis_running')
+		has_survival_plot = ""
 		surv_from_cache = cache.get('has_survival_plot','none')
 		print(surv_from_cache)
 		if(surv_from_cache == "false"):
@@ -1814,6 +1822,7 @@ def clustering_6_4(request):
 			genelist1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
 			genelist2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
 			if not(os.path.isfile(genelist) and os.path.isfile(genelist1) and os.path.isfile(genelist2)):
+				print("gene list not found")
 				return render(request,'clustering/clustering_6_part_4.html',{'errstr':""})
 			#kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
 			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"

@@ -13,49 +13,49 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
-from scipy.stats.stats import pearsonr
-import plotly
-import plotly.plotly as py
-import plotly.graph_objs as go
-import plotly.io as pio
-import plotly.offline
+##from scipy.stats.stats import pearsonr
+##import plotly
+##import plotly.plotly as py
+##import plotly.graph_objs as go
+##import plotly.io as pio
+##import plotly.offline
 #from .models import Choice, Question
 from datetime import datetime
-from networkx.readwrite import json_graph
-import json
+##from networkx.readwrite import json_graph
+##import json
 from django.shortcuts import render_to_response,render
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+##from django.http import HttpResponseRedirect
+##from django.urls import reverse
 import clustering
 #from polls.models import Document
-from clustering.forms import DocumentForm
+##from clustering.forms import DocumentForm
 #from polls.models import Upload,UploadForm
-import numpy as np
-import matplotlib.pyplot as plt
+##import numpy as np
+##import matplotlib.pyplot as plt
 #import mpld3
 
-import seaborn as sns
-import pandas as pd
-from numpy import array
+##import seaborn as sns
+##import pandas as pd
+##from numpy import array
 
 import matplotlib.patches as mpatches
 
 
-import networkx as nx
-from bokeh.io import show, output_notebook, output_file, save
-from bokeh.plotting import figure
-from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
-from bokeh.models.graphs import from_networkx
-from bokeh.transform import linear_cmap
-from bokeh.models import ColumnDataSource, LabelSet
-from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
-from biomart import BiomartServer
-from bokeh.embed import components
-from bokeh.palettes import Spectral4
-from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
+#import networkx as nx
+#from bokeh.io import show, output_notebook, output_file, save
+#from bokeh.plotting import figure
+#from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
+#from bokeh.models.graphs import from_networkx
+#from bokeh.transform import linear_cmap
+#from bokeh.models import ColumnDataSource, LabelSet
+#from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
+#from biomart import BiomartServer
+#from bokeh.embed import components
+#from bokeh.palettes import Spectral4
+#from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
 
-from pybiomart import Dataset
+##from pybiomart import Dataset
 
 from django.forms import ModelForm
 

@@ -21,11 +21,11 @@ from multiprocessing import Pool
 import time
 import pandas as pd
 import numpy as np
-import itertools
+#import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.algorithms import bipartite
-import scipy.sparse as sparse
+#import scipy.sparse as sparse
 from scipy.sparse import csr_matrix
 #from scipy.misc import logsumexp
 #from IPython.display import Audio, display
@@ -77,7 +77,7 @@ import matplotlib.patches as mpatches
 
 
 import networkx as nx
-from bokeh.io import show, output_notebook, output_file, save
+#from bokeh.io import show, output_notebook, output_file, save
 from bokeh.plotting import figure
 from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
 from bokeh.models.graphs import from_networkx
@@ -86,7 +86,7 @@ from bokeh.models import ColumnDataSource, LabelSet
 from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
 #from biomart import BiomartServer
 from bokeh.embed import components
-from bokeh.palettes import Spectral4
+#from bokeh.palettes import Spectral4
 from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
 
 from pybiomart import Dataset
@@ -209,145 +209,6 @@ def write_pval(pval,filename):
 #### Olgas code again #################################################
 #######################################################################
 
-@shared_task(name="ants_2")
-def ants_2(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
-    ge = GE.values
-    H =H.astype(np.short)
-    N = neigborhood(H,n,th)
-    patients = np.arange(n,n+m)  
-    #text_file = open("/home/quirin/testproject/polls/static/output_console.txt", "w")
-    #text_file.write("bababa")
-    #text_file.close()
-    cost = H/10
-    cost = np.max(cost)-cost
-    scores = []
-    avs = []
-    count_big = 0
-    max_total_score = 0
-    max_round_score = -100
-    av_score = 0
-    st = time.time()
-    t0 = np.ones((n+m,n+m))*5
-    t0 = t0.astype(np.short)
-    probs= prob_upd(H,t0,a,b,n,th,N)
-    end = time.time()
-    flag = False
-    score_change = []
-    print ("Running time statistics:")
-    print ("###############################################################")
-    print("the joint graph has "+ str(n+m) + " nodes")
-    print("probability update takes "+str(round(end-st,3)))
-    W = 0
-    while np.abs(max_round_score-av_score)>eps and count_big<times and (W<m/3):
-        av_score = 0
-        W = 0
-        max_round_score = 0
-        scores_per_round = []
-
-        for i in range(K):
-            #for each ant
-            st = time.time()
-            tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,i,cost_limit,L_g_min,L_g_max,G,ge,print_runs)
-            end = time.time()
-            W = W+wars
-            if count_big ==0 and i ==0:
-                print("one ant run takes "+str(round(end-st,3)))
-            scores_per_round.append(tot_score)
-            av_score = av_score + tot_score
-            if tot_score > max_round_score:
-                max_round_score = tot_score
-                solution = (gene_groups,patients_groups)
-                full_scores = new_scores
-                solution_big = (no_int,patients_groups)
-            if count_big ==0 and i ==K-1:
-                gs = 1.5*max_round_score
-
-                t_max = (1/evaporation)*gs
-                t_min = 0
-   
-                t0 = np.ones((n+m,n+m))*t_max
-        #after all ants have finished:
-        scores.append(scores_per_round)
-        
-        #saving rhe best overall solution
-        if max_round_score>max_total_score:
-            max_total_score = max_round_score
-            best_solution = solution
-            max_full_scores = full_scores 
-            solution_big_best = solution_big
-        score_change.append(round(max_round_score,3))
-        print("Iteration # "+ str(count_big+1))
-        print("best round score: " + str(round(max_round_score,3)))
-        print("average score: " + str(round(av_score/K,3)))
-        print("foobar")
-        with open("/code/clustering/static/output_console.txt", "w") as text_file:
-        	#print("foobar")
-        	text_file.write("Iteration # "+ str(count_big+1) + " completed. \n" + "Best round score: " + str(round(max_round_score,3)) + "\n" + "Average score: " + str(round(av_score/K,3)))
-        	text_file.close()
-        av_score = av_score/K
-        avs.append(round(av_score,2))
-        #print(scores)
-        print(avs)
-        #pher. and prob. updates
-        t = pher_upd(t0,t_min,evaporation,max_full_scores,solution_big_best,flag)
-        t0 = np.copy(t)
-        
-        probs= prob_upd(H,t,a,b,n,th,N)
-        
-        #visualization options:
-        
-        if show_pher:
-            fig = plt.figure(figsize=(18,12))
-            ax = fig.add_subplot(111)
-            t_max = np.max(t)   
-            cax = ax.matshow(t, interpolation='nearest',cmap=plt.cm.RdPu,vmin = t_min,vmax = t_max)
-            plt.colorbar(cax)
-            plt.title("Pheramones")
-            plt.show(block=False)
-            plt.close(fig)
-
-        count_big = count_big +1
-        if show_nets:
-            features(solution, GE,G)    
-        if show_plot:
-            fig = plt.figure(figsize=(10,8))
-            plt.boxplot(np.asarray(scores).T,manage_xticks = True, patch_artist=True)
-            if opt!=None:
-                plt.axhline(y=opt,label = "optimal solution score", c = "r")
-            #plt.ylim((0,1))
-            #plt.legend()
-            #this was not commented before #plt.show(block=False)
-            plt.savefig("/code/clustering/static/progress.png")
-            plt.close(fig)
-        if len(set(score_change[:3])) ==1 and len(score_change)>3:
-            flag = True
-    if save != None:
-        fig = plt.figure(figsize=(10,8))
-        plt.boxplot(np.asarray(scores).T,manage_xticks = True)
-        if opt!=None:
-            plt.axhline(y=opt,label = "optimal solution score", c = "r")
-        #plt.legend()
-        plt.savefig(save+".png")
-        plt.close(fig)
-        
-    #after the solutution is found we make sure to cluster patients the last time with that exact solution:
-    data_new = ge[solution[0][0]+solution[0][1],:]
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
-    labels = kmeans.labels_
-    patients_groups =[]
-    for clust in range(clusters):
-        wh = np.where(labels == clust)[0]
-        group_p = [patients[i] for i in wh]
-        patients_groups.append(group_p)
-    if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
-        patients_groups = patients_groups[::-1]
-    best_solution = [best_solution[0],patients_groups]
-    
-    print("best total score: "+str(max_total_score))
-    #print_clusters(GE,best_solution)
-    #features(best_solution, GE,G)
-    return(best_solution,t,max_total_score,np.asarray(scores).T)
-    
 def neigborhood(H,n,th):
     N_per_patient = []
     dim = len(H)
@@ -380,79 +241,6 @@ def prob_upd(H,t,a,b,n,th,N_per_patient):
     return(P_per_patient)
         
 
-
-
-def ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,count_small,cost_limit,L_g_min,L_g_max,G,ge,print_runs):
-    if print_runs:
-        print(str(count_big)+"."+str(count_small) + " run")
-    paths = []
-    wars = 0
-    #set an ant on every patient
-    
-    for walk in range(m):
-        k = cost_limit
-        path = []
-        start = patients[walk]
-        Nn = N[walk] #neigbohood
-        path.append(start)
-        go = True
-        P = probs[walk]            
-        while go == True:
-            P_new = P[start,:]
-            #if there is any node inside the radious - keep mooving
-            if np.sum(P_new)> 0.5:
-                #transition:
-                tr = np.random.choice(Nn,1,False,p = P_new)[0]
-                c = cost[patients[walk],tr]
-                #if there is any cost left we keep going
-                if k-c >0:
-                    path.append(tr)
-                    start = tr
-                    k = k - c
-                #if not we are done and we save only genes from the path
-                else:
-                    go = False
-            #no node to go - we are done and we save only genes from the path
-            else:
-                go = False
-        path = np.asarray(path)
-        #we are saving only genes
-        path = path[path<n]
-        paths.append(path)
-        if len(path) == 0:
-            wars = wars+1
-            print("WARNING: emply path found")
-    data_new = ge[list(set(flatten(paths))),:]
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
-    labels = kmeans.labels_
-    gene_groups_set =[]
-    patients_groups =[]
-    for clust in range(clusters):
-        wh = np.where(labels == clust)[0]
-        group_g = [paths[i] for i in wh]
-        group_g = flatten(group_g)
-        gene_groups_set.append(set(group_g))
-        #save only most common genes for a group
-        group_p = [patients[i] for i in wh]
-        patients_groups.append(group_p)
-        
-    #delete intersecting genes between groups
-    
-    I = set.intersection(*gene_groups_set)
-    no_int =[list(gene_groups_set[i].difference(I)) for i in range(clusters)]
-    gene_groups = no_int
-    
-    # make sure that gene clusters correspond to patients clusters:
-    if np.mean(ge[gene_groups[0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[gene_groups[1],:][:,(np.asarray(patients_groups[0])-n)]):
-        patients_groups = patients_groups[::-1]
-     
-    gene_groups,sizes= clean_net(gene_groups,patients_groups, clusters,L_g_min,G,GE)
-    
-
-        
-    new_scores = score(G,patients_groups,gene_groups,n,m,ge,sizes,L_g_min,L_g_max)
-    tot_score = new_scores[0][0]*new_scores[0][1]+new_scores[1][0]*new_scores[1][1]   
-    return(tot_score,gene_groups,patients_groups,new_scores,wars,no_int)
     
 def pher_upd(t,t_min,p,scores,solution,flag):
     t = t*(1-p)
@@ -621,109 +409,6 @@ def aco_preprocessing(path_expr, path_ppi, col,log2, gene_list = None, size = No
         if node1 in set(new_genes) and node2 in set(new_genes):    
             G.add_edge(rev_labels_B[node1],rev_labels_B[node2])
     A_new= nx.adj_matrix(G).todense()
-
-
-def aco_preprocessing_ownfile(fh, fh_ppi, col,log2, gene_list = None, size = None, sample= None):
-    # path_expr - path for gene expression
-    # path_ppi - path for ppi
-    # col - split variable name (ONLY TWO CLASSES)
-    # log2 - log2 transform
-    #gene_list - preselected genes (if any)
-    #size -  if genes are not preselected specify size of the gene set  for standard deviation selection
-    # sample = None - all patients, otherwise specify fraction of patients taken
-    expr = pd.read_csv(fh,sep = "\t") 
-    expr = expr.set_index("Unnamed: 0")
-	#TODO: check if column 'prognosis' or 'cancer type' exists, set column based on this info
-    if('cancer_type' in list(expr)):
-    	col = 'cancer_type'
-    elif('disease_type' in list(expr)):
-    	col = 'disease_type'
-    else:
-    	col = 'prognosis'
-    val1,val2 = list(set(expr[col]))
-    group1_true = list(expr[expr[col]==val1].index)
-    group2_true = list(expr[expr[col]==val2].index)
-    patients_new = group1_true+group2_true
-    if sample!=None:
-        idx = list(expr.index)
-        new_idx = np.random.choice(idx,int(sample*len(idx)),False)
-        expr = expr.loc[new_idx]
-        group1_true = list(expr[expr[col]==val1].index)
-        group2_true = list(expr[expr[col]==val2].index)
-        patients_new = group1_true+group2_true
-
-    expr = expr.loc[patients_new]    
-    net = pd.read_csv(fh_ppi,sep = "\t", header= None)
-    nodes_ppi = set(net[0]).union(set(net[1]))
-    genes_ge = list(set(expr.columns) - set([col]))
-    new_genes = [int(x) for x in genes_ge]
-    intersec_genes = set.intersection(set(new_genes), set(nodes_ppi))
-    genes_for_expr = [str(x) for x in list(intersec_genes)]
-    expr = expr[genes_for_expr]
-    #20188 genes
-    if log2:
-        expr = np.log2(expr)
-    z_scores = stats.zscore(expr) 
-    z_scores = pd.DataFrame(z_scores,columns = expr.columns, index = expr.index)
-    if gene_list !=None and size == None:# gene list is given
-        new_genes = [str(gene) for gene in gene_list] 
-        
-    elif gene_list == None and size!= None: #std selection
-        std_genes = expr[genes_for_expr].std()
-        std_genes, genes_for_expr = zip(*sorted(zip(std_genes, genes_for_expr)))
-        genes_for_expr = genes_for_expr[len(std_genes)-size:]
-        new_genes = list(genes_for_expr)
-    elif gene_list == None and size == None: #all genes
-        new_genes = genes_for_expr
-    else:
-        print("please specify gene selection method: predifined list, standart deviation filtering or none of them")
-        return()
-
-    expr = expr[new_genes]
-    z_scores = z_scores[new_genes].values
-    
-    labels_B = dict()
-    rev_labels_B = dict()
-    node = 0
-    #nodes = set(deg_nodes + genes_aco)
-    for g in new_genes:
-       labels_B[node] = g
-       rev_labels_B[g] = node
-       node = node+1
-    for p in patients_new:
-       labels_B[node] = p
-       rev_labels_B[p] = node
-       node = node+1
-    
-
-    #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-    #sim = scaler.fit_transform(expr)
-    data_aco = pd.DataFrame(z_scores,columns= new_genes, index= patients_new)
-    data_aco = data_aco.T
-    n,m = data_aco.shape
-    
-    GE = pd.DataFrame(data_aco.values,index = np.arange(n), columns=np.arange(n,n+m))
-    t = 2
-    b = np.matrix(data_aco>t)
-    b_sp = csr_matrix(b)
-    B = bipartite.from_biadjacency_matrix(b_sp)
-    
-    
-    G = nx.Graph()
-    G.add_nodes_from(np.arange(n))
-    for row in net.itertuples():
-        node1 = str(row[1])
-        node2 = str(row[2])
-        if node1 in set(new_genes) and node2 in set(new_genes):    
-            G.add_edge(rev_labels_B[node1],rev_labels_B[node2])
-    A_new= nx.adj_matrix(G).todense()
-
-    H = HI_big(data_aco, gtg_weight = 1, gtp_weight=1 ,ptp_weight = 1)
-    
-    group1_true_ids= [rev_labels_B[x] for x in group1_true]
-    group2_true_ids= [rev_labels_B[x] for x in group2_true]
-    
-    return B,G,H,n,m,GE,A_new,group1_true_ids,group2_true_ids,labels_B,rev_labels_B,val1,val2
 
 
 def HI_big(data_aco, gtg_weight = 1, gtp_weight=1 ,ptp_weight = 1):
@@ -1347,14 +1032,14 @@ def list_metadata_5(path):
 	# used for reading metadata
 	fh1 = open(path)
 	lines = fh1.read()
-	emptydict = {}
+	#emptydict = {}
 	if(lines == "NA"):
-		return(emptydict,emptydict,emptydict)
+		return({},{},{})
 	# remove html from metadata file and replace table elements by tab
-	emptydict = {}
+	#emptydict = {}
 	# if no data in file, remove empty dictionaries
 	if(len(lines.split('\n')) < 3):
-		return(emptydict,emptydict,emptydict)
+		return({},{},{})
 	# read content from lines
 	line0 = lines.split('\n')[0].split('\t')
 	line1 = lines.split('\n')[1].split('\t')
@@ -1364,9 +1049,6 @@ def list_metadata_5(path):
 	dict1 = {}
 	dict2 = {}
 	dict0 = {}
-	list0 = []
-	list1 = []
-	list2 = []
 	ctr = 0
 	dict3['params'] = line0
 	dict3['gr1'] = line1
@@ -1504,8 +1186,11 @@ def algo_output_task_new(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,ev
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
 	adjlist = []
-	for line99 in nx.generate_edgelist(G_small,data=False):	
-		lineSplit = line99.split()
+	#for line99 in nx.generate_edgelist(G_small,data=False):	
+	#	lineSplit = line99.split()
+	#	adjlist.append([lineSplit[0],lineSplit[1]])
+	for line in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
@@ -1700,8 +1385,11 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
 	adjlist = []
-	for line99 in nx.generate_edgelist(G_small,data=False):	
-		lineSplit = line99.split()
+	#for line99 in nx.generate_edgelist(G_small,data=False):	
+	#	lineSplit = line99.split()
+	#	adjlist.append([lineSplit[0],lineSplit[1]])
+	for line in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
@@ -1937,9 +1625,13 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
 	adjlist = []
-	for line99 in nx.generate_edgelist(G_small,data=False):	
-		lineSplit = line99.split()
+	#for line99 in nx.generate_edgelist(G_small,data=False):	
+	#	lineSplit = line99.split()
+	#	adjlist.append([lineSplit[0],lineSplit[1]])
+	for line in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
+	
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
 	plt.axis('off')
@@ -2122,8 +1814,11 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
 	adjlist = []
-	for line99 in nx.generate_edgelist(G_small,data=False):	
-		lineSplit = line99.split()
+	#for line99 in nx.generate_edgelist(G_small,data=False):	
+	#	lineSplit = line99.split()
+	#	adjlist.append([lineSplit[0],lineSplit[1]])
+	for line in nx.generate_edgelist(G_small,data=False):	
+		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
 	plt.legend(frameon  = True)
 	plt.colorbar(nc1)
@@ -2188,15 +1883,15 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	def color_for_graph(v):
 		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
 		v = v*2
-		tmp98 = int(v)
+		v_int = int(v)
 		if(v < -4):
-			tmp98 = -4
+			v_int = -4
 		if(v > 3):
-			tmp98 = 3
-		return(cmap_custom[tmp98])
+			v_int = 3
+		return(cmap_custom[v_int])
 	
 	nodecolors = []
-	names = []
+	#names = []
 	genes = {}
 	#read file with PPI, calculate expression difference of respective genes between groups
 	G_list = list(G2.nodes())
@@ -2211,7 +1906,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		G.add_node(G_tmp, Name=G_tmp, d=float(means[ctr]),color=color_for_graph(means[ctr]),type=tp,label=G_tmp)
 		nodecolors.append(color_for_graph(means[ctr]))
 		ctr = ctr + 1
-		names.append(G_tmp)
+		#names.append(G_tmp)
 	ctr = 0
 	# make edge objects for PPI
 	for edg in adjlist:
@@ -2223,7 +1918,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	for k in pos:	
 		x_pos[k] = pos[k][0]
 		y_pos[k] = pos[k][1]
-	edgl = {}
+	#edgl = {}
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,x_pos,'x')
 	nx.set_node_attributes(G,y_pos,'y')
@@ -2237,7 +1932,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
 	with open("/code/clustering/static/ppi.json", "w") as text_file:
 		text_file.write(jsn3)		
-	output_notebook()
+	#output_notebook()
 	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
 	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
@@ -2276,8 +1971,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	plt.savefig("/code/clustering/static/heatmap.png")
-	script, div = components(plot)	
-	plot_1=plt.gcf()
+	#script, div = components(plot)	
+	#plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
@@ -2335,7 +2030,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		param_names = []
 		param_values = []
 		param_cols = []
-		ctr = 0
+		#ctr = 0
 	if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
@@ -2614,7 +2309,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		hoverinfo='name',
 		line=dict(
 		shape='hv'))
-		data99 = [trace1,trace2]
+		#data99 = [trace1,trace2]
+		data_for_graph = [trace1,trace2]
 		layout = dict(showlegend=False,
 		#legend=dict(
 		#yanchor="bottom",
@@ -2627,7 +2323,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		yaxis=dict(
 		title='percentage of patients'))
 		#fig = dict(data=data99, layout=layout)
-		fig = dict(data=data99,layout=layout)
+		fig = dict(data=data_for_graph,layout=layout)
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		# write survival plot to file, if survival data exist
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
@@ -2640,7 +2336,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
 		text_file.write("Done!")
 	print(ret_metadata)
-	return(script,div,plot_1,plot_div,ret_metadata,p_val)
+	#return(script,div,plot_1,plot_div,ret_metadata,p_val)
+	return(plot_div,ret_metadata,p_val)
 
 ### Processing of algorithm output with using session ID
 @shared_task(name="script_output_task_10")
@@ -2649,12 +2346,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	def color_for_graph(v):
 		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
 		v = v*2
-		tmp98 = int(v)
+		v_int = int(v)
 		if(v < -4):
-			tmp98 = -4
+			v_int = -4
 		if(v > 3):
-			tmp98 = 3
-		return(cmap_custom[tmp98])
+			v_int = 3
+		return(cmap_custom[v_int])
 	nodecolors = []
 	genes = {}
 	G_list = list(G2.nodes())
@@ -2698,7 +2395,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)		
-	output_notebook()
+	#output_notebook()
 	# configure plot
 	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
@@ -2739,7 +2436,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax.set_ylabel("Patients")
 	path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
-	plot_1=plt.gcf()
+	#plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
@@ -2806,7 +2503,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_names = []
 		param_values = []
 		param_cols = []
-		ctr = 0
+		#ctr = 0
 		print(patientids_metadata)
 	#if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 	if not(clinicalstr == "empty" or ((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(group1_ids)):
