@@ -78,16 +78,16 @@ import matplotlib.patches as mpatches
 
 import networkx as nx
 #from bokeh.io import show, output_notebook, output_file, save
-from bokeh.plotting import figure
-from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
-from bokeh.models.graphs import from_networkx
-from bokeh.transform import linear_cmap
-from bokeh.models import ColumnDataSource, LabelSet
-from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
+##from bokeh.plotting import figure
+##from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
+##from bokeh.models.graphs import from_networkx
+##from bokeh.transform import linear_cmap
+##from bokeh.models import ColumnDataSource, LabelSet
+##from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
 #from biomart import BiomartServer
-from bokeh.embed import components
+##from bokeh.embed import components
 #from bokeh.palettes import Spectral4
-from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
+##from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
 
 from pybiomart import Dataset
 
@@ -117,69 +117,6 @@ def create_random_user_accounts(total):
 ########################################################
 
 
-def jac(x,y):
-    if len(x)>0 and len(y)>0:
-        return len(set(x).intersection(set(y)))/len((set(x).union(set(y))))
-    else:
-        return(0)
-    
-def jac_matrix(true,pred):
-    res = np.zeros((len(true),len(true)))
-    for i in range(len(true)):
-        for j in range(len(true)):
-            res[i,j] = jac(true[i],pred[j])
-    cand1 = (res[0][0],res[1][1])
-    cand2 = (res[0][1],res[1][0])
-    if sum(cand1)>sum(cand2):
-        return(cand1)
-    else:
-        return(cand2)
-    
-def matches(true1,true2,pred1,pred2):
-    cand1 = (round(len(set(pred1).intersection(set(true2)))*100/len(true2)),
-             round(len(set(pred2).intersection(set(true1)))*100/len(true1)))
-    cand2 = (round(len(set(pred1).intersection(set(true1)))*100/len(true1)),
-             round(len(set(pred2).intersection(set(true2)))*100/len(true2)))
-    if sum(cand1)>sum(cand2):
-        ans = cand1
-    else:
-        ans = cand2
-    print(str(ans[0])+"%                  " + str(ans[1])+"%")
-    
-
-
-def joined_net(B,G):
-    #joined net
-    A_b = nx.adjacency_matrix(B).todense()
-    A_b = A_b *1 ## trick to switch from boolean
-    A_g = nx.adjacency_matrix(G).todense()
-    n = len(A_g)
-    A = A_b
-    A[:n,:n] = A_g  
-    return(A)
-
-
-
-
-
-def hi(A_j,n,m):
-    H = np.zeros((n+m,n+m))
-    P = LA.matrix_power(A_j, 2)
-    for node1 in range(n+m):
-            for node2 in range(node1+1,n+m):
-                if P[node1,node2] >0:
-                    node_intersec = np.sum(np.multiply(A_j[node1,:],A_j[node2,:]))+A_j[node1,node2]
-                    deg_node1 = np.sum(A_j[node1,:])
-                    deg_node2 = np.sum(A_j[node2,:])
-                    if node1<n and node2<n: #both beling to X
-                        H[node1,node2] = node_intersec/(deg_node1+deg_node2+2)
-                    if node1>=n and node2>=n: #both belong to Y
-                        H[node1,node2] = 0.5*node_intersec/(deg_node1+deg_node2)
-                    if (node2>=n) and (node1 <n): #node1 in X, node2 in Y or the other way around
-                        H[node1,node2] = 4*node_intersec/(deg_node1+deg_node2)
-                    H[node2,node1] = H[node1,node2]
-    return(H*10)
-
 @shared_task(name="make_empty_figure")
 def make_empty_figure():
 	fig = plt.figure(figsize=(10,8))
@@ -208,452 +145,6 @@ def write_pval(pval,filename):
 #######################################################################
 #### Olgas code again #################################################
 #######################################################################
-
-def neigborhood(H,n,th):
-    N_per_patient = []
-    dim = len(H)
-    for i in range(n,dim):
-        if th<0:
-            N = np.where(H[i,:]>0.001)[0]
-        else:
-            rad = np.mean(H[i,:]) + th*np.std(H[i,:])
-            N = np.where(H[i,:]>rad)[0]
-        #N = np.where(H[i,:]>0)[0]
-        N_per_patient.append(N)
-    return N_per_patient
-    
-def prob_upd(H,t,a,b,n,th,N_per_patient):
-    P_per_patient = []
-    dim = len(H)
-    temp_t = np.power(t,a)
-    temp_H = np.power(H,b)
-    temp = temp_t*temp_H 
-    for i in range(n,dim):
-        N_temp = N_per_patient[i-n]
-        P = temp[:,N_temp]
-        s = np.sum(P,axis = 1)
-        s[s <1.e-4] = 1
-        sum_p = 1/s
-        sum_p = sum_p[:,None]
-        P_new = P*sum_p[:np.newaxis]
-        P_per_patient.append(P_new)
-
-    return(P_per_patient)
-        
-
-    
-def pher_upd(t,t_min,p,scores,solution,flag):
-    t = t*(1-p)
-    t_new = np.copy(t)
-    score = scores[0][0]*scores[0][1]+scores[1][0]*scores[1][1]
-    for i in range(len(solution[0])):
-        group_g = solution[0][i]
-        group_p = solution[1][i]
-        #score = scores[i][0]*scores[i][1]
-        #ge_score = new_scores[i][0]*10
-        #ppi_score = new_scores[i][1]*10
-        for g1 in group_g:
-            for p1 in group_p:
-                t_new[g1,p1] = t[g1,p1]+ score
-                t_new[p1,g1] = t[p1,g1]+ score
-            for g2 in group_g:
-                t_new[g1,g2] = t[g1,g2]+ score
-
-
-    t_new[t_new < t_min] = t_min
-            
-    
-    return(t_new)
-
-def h_upd(H,scores,solution,p):
-    H_new = np.copy(H)
-    H_new = H*(1-p)
-    score = (scores[0][0]*scores[0][1]+scores[1][0]*scores[1][1])*2
-    for i in range(len(solution[0])):
-        group_g = solution[0][i]
-        group_p = solution[1][i]
-        #score = scores[i][0]*scores[i][1]
-        #ge_score = new_scores[i][0]*10
-        #ppi_score = new_scores[i][1]*10
-        for g1 in group_g:
-            for p1 in group_p:
-                H_new[g1,p1] = H[g1,p1]+ score
-                H_new[p1,g1] = H[p1,g1]+ score
-            for g2 in group_g:
-                H_new[g1,g2] = H[g1,g2]+ score
-
-
-    return(H_new)
-    
-    
-    
-    
-def score(G,patients_groups,gene_groups,n,m,ge,sizes,L_g_min,L_g_max):
-    clusters = len(patients_groups)
-    conf_matrix = np.zeros((clusters,clusters))
-    conect_ppi = []
-    for i in range(clusters): #over genes
-        group_g = np.asarray(gene_groups[i])
-        s = sizes[i]
-        if len(group_g)>0:
-            for j in range(clusters): #over patients
-                group_p = np.asarray(patients_groups[j])
-                if len(group_p)>0:
-                # gene epression inside the group
-                    conf_matrix[i,j] = np.mean(ge[group_g,:][:,(group_p-n)])
-            #ppi score    
-            con_ppi = 1
-            if s<L_g_min:
-                con_ppi = s/L_g_min
-            elif s>L_g_max:
-                con_ppi = L_g_max/s
-            conect_ppi.append(con_ppi)
-        else:
-            conect_ppi.append(0)           
-    ans = []
-    for i in range(clusters):
-        all_ge = np.sum(conf_matrix[i,:])
-        in_group = conf_matrix[i,i]
-        out_group = all_ge - in_group
-        ge_con = in_group-out_group
-        #scaled = scaleBetween(num,0,0.5,0,1)
-        ans.append((ge_con ,conect_ppi[i]))
-        
-    return(ans)
-    
-
-def aco_preprocessing(path_expr, path_ppi, col,log2, gene_list = None, size = None, sample= None):
-    # path_expr - path for gene expression
-    # path_ppi - path for ppi
-    # col - split variable name (ONLY TWO CLASSES)
-    # log2 - log2 transform
-    #gene_list - preselected genes (if any)
-    #size -  if genes are not preselected specify size of the gene set  for standard deviation selection
-    # sample = None - all patients, otherwise specify fraction of patients taken
-    expr = pd.read_csv(path_expr,sep = "\t") 
-    expr = expr.set_index("Unnamed: 0")
-    val1,val2 = list(set(expr[col]))
-    group1_true = list(expr[expr[col]==val1].index)
-    group2_true = list(expr[expr[col]==val2].index)
-    patients_new = group1_true+group2_true
-    if sample!=None:
-        idx = list(expr.index)
-        new_idx = np.random.choice(idx,int(sample*len(idx)),False)
-        expr = expr.loc[new_idx]
-        group1_true = list(expr[expr[col]==val1].index)
-        group2_true = list(expr[expr[col]==val2].index)
-        patients_new = group1_true+group2_true
-
-    expr = expr.loc[patients_new]    
-    net = pd.read_csv(path_ppi,sep = "\t", header= None)
-    nodes_ppi = set(net[0]).union(set(net[1]))
-    genes_ge = list(set(expr.columns) - set([col]))
-    new_genes = [int(x) for x in genes_ge]
-    intersec_genes = set.intersection(set(new_genes), set(nodes_ppi))
-    genes_for_expr = [str(x) for x in list(intersec_genes)]
-    expr = expr[genes_for_expr]
-    #20188 genes
-    if log2:
-        expr = np.log2(expr)
-    z_scores = stats.zscore(expr) 
-    z_scores = pd.DataFrame(z_scores,columns = expr.columns, index = expr.index)
-    if gene_list !=None and size == None:# gene list is given
-        new_genes = [str(gene) for gene in gene_list] 
-        
-    elif gene_list == None and size!= None: #std selection
-        std_genes = expr[genes_for_expr].std()
-        std_genes, genes_for_expr = zip(*sorted(zip(std_genes, genes_for_expr)))
-        genes_for_expr = genes_for_expr[len(std_genes)-size:]
-        new_genes = list(genes_for_expr)
-    elif gene_list == None and size == None: #all genes
-        new_genes = genes_for_expr
-    else:
-        print("please specify gene selection method: predifined list, standart deviation filtering or none of them")
-        return()
-
-    expr = expr[new_genes]
-    z_scores = z_scores[new_genes].values
-    
-    labels_B = dict()
-    rev_labels_B = dict()
-    node = 0
-    #nodes = set(deg_nodes + genes_aco)
-    for g in new_genes:
-       labels_B[node] = g
-       rev_labels_B[g] = node
-       node = node+1
-    for p in patients_new:
-       labels_B[node] = p
-       rev_labels_B[p] = node
-       node = node+1
-    
-
-    #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
-    #sim = scaler.fit_transform(expr)
-    data_aco = pd.DataFrame(z_scores,columns= new_genes, index= patients_new)
-    data_aco = data_aco.T
-    n,m = data_aco.shape
-    
-    GE = pd.DataFrame(data_aco.values,index = np.arange(n), columns=np.arange(n,n+m))
-    t = 2
-    b = np.matrix(data_aco>t)
-    b_sp = csr_matrix(b)
-    B = bipartite.from_biadjacency_matrix(b_sp)
-    
-    
-    G = nx.Graph()
-    G.add_nodes_from(np.arange(n))
-    for row in net.itertuples():
-        node1 = str(row[1])
-        node2 = str(row[2])
-        if node1 in set(new_genes) and node2 in set(new_genes):    
-            G.add_edge(rev_labels_B[node1],rev_labels_B[node2])
-    A_new= nx.adj_matrix(G).todense()
-
-
-def HI_big(data_aco, gtg_weight = 1, gtp_weight=1 ,ptp_weight = 1):
-    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))#
-    H_g_to_g = (data_aco.T.corr())*gtg_weight
-    H_p_to_p = data_aco.corr()*ptp_weight
-    H_g_to_g = scaler.fit_transform(H_g_to_g)
-    H_p_to_p = scaler.fit_transform(H_p_to_p)
-    H_g_to_p = scaler.fit_transform(data_aco)
-    H_full_up = np.concatenate([H_g_to_g,H_g_to_p*gtp_weight], axis = 1)
-    H_full_down = np.concatenate([H_g_to_p.T*gtp_weight,H_p_to_p], axis = 1)
-    H_full =  np.concatenate([H_full_up,H_full_down], axis = 0)*10
-#    H_full[H_full < 1] = 1
-#    np.fill_diagonal(H_full, 1)
-    np.fill_diagonal(H_full, 0)
-    return(H_full)
-    
-
-def most_common(lst,top,L_g):
-    data = Counter(lst)
-    l = len(data)
-    take = int(top*l)
-    if take == 0:
-        take = 1
-    if take <L_g:
-        take = L_g
-    count = data.most_common(take)
-    genes = [x[0] for x in count]
-    return genes
-
-
-
-def scaleBetween(unscaledNum, minAllowed, maxAllowed, min_cur, max_cur):
-  return (maxAllowed - minAllowed) * (unscaledNum - min_cur) / (max_cur
-         - min_cur) + minAllowed
-def print_clusters(GE,solution):
-    grouping_p = []
-    p_num = list(GE.columns)
-    for p in p_num:
-        if p in solution[1][0]:
-            grouping_p.append(1)
-        else:
-            grouping_p.append(2)
-    grouping_p = pd.DataFrame(grouping_p,index = p_num)
-    grouping_g = []
-    g_num = list(GE.index)
-    for g in g_num:
-        if g in solution[0][0]:
-            grouping_g.append(1)
-        elif  g in solution[0][1]:
-            grouping_g.append(2)
-        else:
-            grouping_g.append(3)
-            
-    grouping_g = pd.DataFrame(grouping_g,index = g_num)
-    species = grouping_p[0]
-    lut = {1: '#A52A2A', 2: '#7FFFD4'}
-    row_colors = species.map(lut)
-    species = grouping_g[0]
-    lut = {1: '#A52A2A', 2: '#7FFFD4', 3:'#FAEBD7'}
-    col_colors = species.map(lut)
-    sns.clustermap(GE.T, row_colors=row_colors, col_colors = col_colors,figsize=(15, 10))
-    
-def features(solution, GE,G,pos = None):
-    genes1,genes2 = solution[0]
-    patients1, patients2 = solution[1]
-    
-    means1 = list(np.mean(GE[patients1].loc[genes1],axis = 1)-np.mean(GE[patients2].loc[genes1],axis = 1).values)
-    means2 = list(np.mean(GE[patients1].loc[genes2],axis = 1)-np.mean(GE[patients2].loc[genes2],axis = 1).values)
-    G_small = nx.subgraph(G,genes1+genes2)
-    
-    fig = plt.figure(figsize=(15,10))
-    vmin = min(means1+means2)
-    vmax = max(means1+means2)
-    if pos == None:
-        pos = nx.spring_layout(G_small)
-    ec = nx.draw_networkx_edges(G_small,pos)
-    nc1 = nx.draw_networkx_nodes(G_small,nodelist =genes1, pos = pos,node_color=means1, node_size=200,alpha=1.0,
-                                 vmin=vmin, vmax=vmax,node_shape = "^",cmap =plt.cm.viridis)
-    nc2 = nx.draw_networkx_nodes(G_small,nodelist =genes2, pos = pos,node_color=means2, node_size=200,
-                                 alpha=1.0,
-                                 vmin=vmin, vmax=vmax,node_shape = "o",cmap =plt.cm.viridis)
-    nx.draw_networkx_labels(G_small,pos)
-    plt.colorbar(nc1)
-    plt.axis('off')
-    
-    plt.show(block=False)
-    plt.close(fig)
-    
-def stability_plot(data, labels, name = None):
-    jaccards = []
-    for categ in data:       
-        jk = []
-        for i in range(len(categ)):
-            for j in range(i+1,len(categ)):
-                jk.append(jac(categ[i],categ[j]))
-        jaccards.append(jk)
-    fig, ax = plt.subplots(figsize=(15, 10))
-    bplot1 = ax.boxplot(jaccards,
-                             vert=True,  # vertical box alignment
-                             patch_artist=True,  # fill with color
-                             labels=labels)  # will be used to label x-ticks
-    plt.ylabel("jaccard index")
-    plt.xlabel("required gene module")
-    plt.ylim(0,1)
-    if name!=None:
-        plt.savefig(name+".png")
-    plt.show(block=False)
-    plt.close(fig)
-
-
-    
-    
-def clean_net(gene_groups,patients_groups, clusters,L_g,G,GE):    
-    genes_components = []
-    sizes = []
-    for clust in range(clusters):
-        group_g = gene_groups[clust]
-        if clust == 0:
-            not_clust = 1
-        else:
-            not_clust = 0
-        if len(group_g)>=L_g:
-            g = nx.subgraph(G,group_g)
-            comp_big = max(nx.connected_component_subgraphs(g), key=len)
-            dg = dict(nx.degree(comp_big))
-            ones = [x for x in dg if dg[x]==1]
-            nodes = list(comp_big.nodes)
-            size_comp = len(nodes)
-            max_out = len(nodes)- L_g
-            while max_out >0:
-                dif = np.mean(GE[patients_groups[clust]].loc[ones],axis = 1)-np.mean(GE[patients_groups[not_clust]].loc[ones],axis = 1)
-                dif = dif.sort_values()
-                ones = list(dif[dif<2].index)
-                if len(ones)>0:
-                    if len(ones)<=max_out:
-                        outsiders = list(ones)
-                    if len(ones) > max_out:
-                        outsiders = list(ones)[:max_out]
-     
-                    nodes  = list(set(nodes) - set(outsiders))
-                    g = nx.subgraph(G,nodes)
-                    comp_big = g
-                    dg = dict(nx.degree(comp_big))
-                    ones = [x for x in dg if dg[x]==1]
-                    nodes = list(comp_big.nodes)
-                    size_comp = len(nodes)
-                    max_out = len(nodes)- L_g
-                else:
-                    max_out = 0
-                    
-            group_g = nodes
-        elif len(group_g)>0:
-            g = nx.subgraph(G,group_g)
-            comp_big = max(nx.connected_component_subgraphs(g), key=len)
-            nodes = list(comp_big.nodes)
-            size_comp = len(nodes)
-        else:
-            size_comp = 0
-            
-        genes_components.append(group_g)
-        sizes.append(size_comp)
-    return genes_components,sizes
-
-def sim_data(genes1,genes2,background,patients1,patients2,dens):
-    n = genes1+genes2+background
-    m = patients1 +patients2
-    
-    
-    genes = np.arange(n)
-    groups_genes = list(np.ones(genes1))+list(np.ones(genes2)*2)+list(np.ones(background)*3)
-    groups_p = [1 if node<patients1 else 2 for node in range(m)]
-    
-    to_sparce = 0.3 #to sparcify bipartite
-    to_mix = 0.99 # to mix edges berween groups
-    b = np.zeros((n,m))
-    ge = np.random.normal(0,1,n*m).reshape(n,m)
-
-    for patient in range(m):
-        for gene in range(n):
-            p_gr = groups_p[patient]
-            g_gr = groups_genes[gene]
-            if p_gr ==1 and g_gr == 1: #all up
-                ge[gene,patient] = np.random.normal(1,0.35,1)
-            elif p_gr ==2 and g_gr == 2:
-                ge[gene,patient] = np.random.normal(1,0.35,1) #also up
-            elif p_gr ==1 and g_gr == 2:
-                ge[gene,patient] = np.random.normal(-1,0.35,1) #down
-            elif p_gr ==2 and g_gr == 1:
-                ge[gene,patient] = np.random.normal(-1,0.35,1) #down
-    for patient in range(m):
-        for gene in range(genes1+genes2):
-            prob = np.random.uniform(0,1)
-            if prob>0.9:
-                ge[gene,patient] = np.random.normal(0,1,1)
-                
-    for gene in range(genes1+genes2,n):
-        prob = np.random.uniform(0,1)
-        if prob<0.05:
-
-
-            for patient in range(m):
-                if groups_p[patient] ==1: #all up
-                    ge[gene,patient] = np.random.normal(0.3,0.35,1)
-                else:
-                    ge[gene,patient] = np.random.normal(-0.3,0.35,1)
-        if prob>0.05 and prob<0.1:
-            for patient in range(m):
-                if groups_p[patient] ==1: #all up
-                    ge[gene,patient] = np.random.normal(-0.3,0.35,1)
-                else:
-                    ge[gene,patient] = np.random.normal(0.3,0.35,1)
-                    
-                
-    g1 = nx.barabasi_albert_graph(genes1,1)
-    g2 = nx.barabasi_albert_graph(genes2,1)
-    g3 = nx.barabasi_albert_graph(background, 1)
-    G = nx.disjoint_union(g1,g2)
-    G = nx.disjoint_union(G,g3)
-    for _ in range( int(dens*n)):
-        node1 = np.random.randint(0,genes1)
-        node2 = np.random.randint(genes1,genes1+genes2)
-        node3_1 = np.random.randint(genes1+genes2,n)
-        node3_2 = np.random.randint(genes1+genes2,n)
-        G.add_edges_from([(node1,node3_1),
-                          (node2,node3_2)])
-     
-    d =  nx.density(G)
-    count = 0 
-    while d>0.002 and count<10:
-        
-        node3_1 = np.random.randint(genes1+genes2,n)
-        node3_2 = np.random.randint(genes1+genes2,n)
-        count = count+1
-        if G.has_edge(node3_1,node3_2):
-            G.remove_edge(node3_1,node3_2)
-            d =  nx.density(G) 
-        
-    #A_g = nx.adj_matrix(G).todense() *1
-    b_sp = csr_matrix(b) #sparse matrix for making bipartite graph
-    B = bipartite.from_biadjacency_matrix(b_sp)
-    
-    GE = pd.DataFrame(ge,index = np.arange(n),columns = np.arange(n,n+m))
-    H = HI_big(GE,1,1,1)
-    return(B,GE,G,H,d,n,m)
 
 
 ########################################################
@@ -906,108 +397,6 @@ def preprocess_file_2(expr_str):
 			#return(expr_str,nbr_col)
 			return(expr_str,nbr_col)
 
-
-@shared_task(name="preprocess_file_OLD")
-def preprocess_file_OLD(expr_str):
-	if(len(expr_str.split("\n")[0].split("\t")) > 2):
-		#print(expr_str.split("\n")[0])	+
-		expr_str_split = expr_str.split("\n")	
-		#if("cancer_type" not in expr_str_split[0]):
-		#	if("subtype" in expr_str_split[0]):
-		#		expr_str = expr_str.replace("subtype","cancer_type")
-		if("disease_type" not in expr_str_split[0]):
-			if("subtype" in expr_str_split[0]):
-				expr_str = expr_str.replace("subtype","disease_type")
-		expr_str_first_colname = expr_str_split[0].split("\t")[0]
-		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-		print(expr_str_first_colname)
-		print(expr_str.split("\n")[0])
-		expr_stringio = StringIO(expr_str)	
-		exprdf = pd.read_csv(expr_stringio,sep='\t')
-		#return(expr_str)
-		for column_name, column in exprdf.transpose().iterrows():
-			if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
-				if(len(column.unique()) == 2):
-					print(column_name)
-					expr_str = expr_str.replace(column_name,"cancer_type")	
-		return(expr_str)
-	elif(0 == 1):
-		if("\t" not in expr_str.split("\n")[0]):
-			expr_str = expr_str.replace(",","\t")
-			#print(expr_str)
-			expr_str = expr_str.replace("status","cancer_type")
-			#expr_str = expr_str.replace("-0.","0.")
-			#print(expr_str.split("\n")[0])
-			#expr_stringio = StringIO(expr_str)
-			expr_str = expr_str.replace("CTL","MCI")
-			#exprdf = pd.read_csv(expr_stringio,sep='\t')
-			#print(list(set(exprdf["cancer_type"])))
-			return(expr_str)
-	elif("," in expr_str):
-		# replace comma by tab if file is CSV and not TSV
-		if("\t" not in expr_str.split("\n")[0]):
-			expr_str_split = expr_str.split("\n")	
-			# replace "subtype" by "cancer type"
-			if("cancer_type" not in expr_str_split[0]):
-				if("subtype" in expr_str_split[0]):
-					expr_str = expr_str.replace("subtype","cancer_type")
-			expr_str_first_colname = expr_str_split[0].split(",")[0]
-			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-			print(expr_str_first_colname)
-			print(expr_str.split("\n")[0])	
-			expr_str = expr_str.replace(",","\t")
-			#print(expr_str.split("\n")[0])
-			expr_str_split = expr_str.split("\n")
-			# remove entries after given length if expression data file is too big
-			if(len(expr_str_split) > 300):
-				expr_str = "\n".join(expr_str_split[:200])
-			else:
-				expr_str = "\n".join(expr_str_split)
-			expr_stringio = StringIO(expr_str)
-			expr_str = expr_str.replace("MCI","CTL")
-			exprdf = pd.read_csv(expr_stringio,sep='\t')
-			# find column with two unique entries that represents disease type
-			for column_name, column in exprdf.transpose().iterrows():
-				if((not column_name.isdigit()) and (not (column_name == "cancer_type"))):
-					if(len(column.unique()) == 2):
-						print(column_name)
-						expr_str = expr_str.replace(column_name,"cancer_type")	
-			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
-			done1 = "false"
-			for column_name, column in exprdf.transpose().iterrows():
-				if(not column_name.isdigit()):
-					if(len(column.unique()) < 5):
-						print(column_name)
-						expr_str = expr_str.replace(column_name,"cancer_type")	
-						expr_str_split[0] = expr_str_split[0].replace(column_name,"cancer_type")
-						print(list(column))
-						if(len(column.unique()) > 2 and done1 == "false"):
-							print(column)
-							expr_str_split_2 = []
-							expr_str_split_2.append(expr_str_split[0])
-							type1 = column.value_counts().index.tolist()[0]	
-							type2 = column.value_counts().index.tolist()[1]
-							print(type1)
-							print(type2)
-							print(len(list(column)))
-							for i in range(0,len(list(column))-1):
-								if(list(column)[i] == type1 or list(column)[i] == type2):
-									print(column[i])	
-									print(expr_str_split[i+1])
-									print(expr_str_split[i+1].split("\t")[len(expr_str_split[i+1].split("\t"))-1])
-									expr_str_split_2.append(expr_str_split[i+1])
-							expr_str = "\n".join(expr_str_split_2)
-							done1 = "true"
-			expr_stringio = StringIO(expr_str)
-			exprdf = pd.read_csv(expr_stringio,sep='\t')
-			#print(list(set(exprdf["cancer_type"])))
-			#column.fillna("NA",inplace=True)
-			#print(column_name)
-			#print(column)
-			#coluniq = column.unique()
-			#for 
-			#print(expr_str)
-			return(expr_str)
 
 
 @shared_task(name="add_loading_image")
@@ -1392,7 +781,10 @@ def algo_output_task_3(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
 	plt.legend(frameon  = True)
-	plt.colorbar(nc1)
+	try:
+		plt.colorbar(nc1)
+	except:
+		print("no colorbar found")
 	plt.axis('off')
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
@@ -1633,7 +1025,10 @@ def algo_output_task_2(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap
 		adjlist.append([lineSplit[0],lineSplit[1]])
 	
 	plt.legend(frameon  = True)
-	plt.colorbar(nc1)
+	try:
+		plt.colorbar(nc1)
+	except:
+		print("no colorbar found")
 	plt.axis('off')
 	### plotting expression data
 	plt.rc('font', size=30)          # controls default text sizes
@@ -1933,31 +1328,31 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	with open("/code/clustering/static/ppi.json", "w") as text_file:
 		text_file.write(jsn3)		
 	#output_notebook()
-	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
+	##plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
-	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
+	##plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
 	# create bokeh graph
-	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
+	##graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
 	# add name to node data
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]	
-	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	graph.selection_policy = NodesAndLinkedEdges()
-	graph.inspection_policy = EdgesAndLinkedNodes()
-	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
+	##graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]	
+	##graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
+	##graph.selection_policy = NodesAndLinkedEdges()
+	##graph.inspection_policy = EdgesAndLinkedNodes()
+	##graph.node_renderer.data_source.data['Name'] = list(G.nodes())
 	# get graph coordinates on layout
-	x,y = zip(*graph.layout_provider.graph_layout.values())
-	node_labels = nx.get_node_attributes(G, 'Name')
-	z = tuple([(bar-0.1) for bar in x])
+	##x,y = zip(*graph.layout_provider.graph_layout.values())
+	##node_labels = nx.get_node_attributes(G, 'Name')
+	##z = tuple([(bar-0.1) for bar in x])
 	#make bokeh graph with transparent labels
-	source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	plot.renderers.append(graph)
-	plot.renderers.append(labels2)
-	plot.add_layout(labels2)
+	##source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
+	##labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
+	##graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
+	##plot.renderers.append(graph)
+	##plot.renderers.append(labels2)
+	##plot.add_layout(labels2)
 	#begin making heatmap here
-	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
+	##red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
+	##blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
 	#if(col_colors1 == ""):
 	if(isinstance(col_colors1, str)):
@@ -2397,30 +1792,30 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file.write(jsn3)		
 	#output_notebook()
 	# configure plot
-	plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
+	##plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
 	# add tools to the plot
-	plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
+	##plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
+	##graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
 	# add name to node data
-	graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
+	##graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]
 	# configure graph
-	graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	graph.selection_policy = NodesAndLinkedEdges()
-	graph.inspection_policy = EdgesAndLinkedNodes()
-	graph.node_renderer.data_source.data['Name'] = list(G.nodes())
-	x,y = zip(*graph.layout_provider.graph_layout.values())
-	node_labels = nx.get_node_attributes(G, 'Name')
-	z = tuple([(bar-0.1) for bar in x])
+	##graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
+	##graph.selection_policy = NodesAndLinkedEdges()
+	##graph.inspection_policy = EdgesAndLinkedNodes()
+	##graph.node_renderer.data_source.data['Name'] = list(G.nodes())
+	##x,y = zip(*graph.layout_provider.graph_layout.values())
+	##node_labels = nx.get_node_attributes(G, 'Name')
+	##z = tuple([(bar-0.1) for bar in x])
 	#make bokeh graph with transparent labels
-	source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	plot.renderers.append(graph)
-	plot.renderers.append(labels2)
-	plot.add_layout(labels2)
+	##source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
+	##labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
+	##graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
+	##plot.renderers.append(graph)
+	##plot.renderers.append(labels2)
+	##plot.add_layout(labels2)
 	#begin making heatmap here
-	red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	blue_patch = mpatches.Patch(color='#22863E', label='ADK')
+	##red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
+	##blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
 	# make heatmap (include pre-defined clusters if they were given)
 	if(isinstance(col_colors1, str)):

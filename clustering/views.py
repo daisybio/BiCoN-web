@@ -317,6 +317,7 @@ def clustering_6_new(request):
 					fh4.flush()
 					fh4.close()
 					survival_col_name = "disease free survival in months:ch1"
+					nbr_col = 2
 				else:
 					fh1 = open("clustering/data/breast_cancer_expr.csv")
 					exprstr = fh1.read()
@@ -326,6 +327,7 @@ def clustering_6_new(request):
 					fh4.flush()
 					fh4.close()
 					survival_col_name = "mfs (yr):ch1"
+					#nbr_col = 2
 			# read PPI file
 			if('protfile' in request.FILES):
 				ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -370,16 +372,19 @@ def clustering_6_new(request):
 			if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 				gene_set_size = 2000
 				# run algorithm and read results
-			result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_col)
-			#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
-			(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
-			#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-			#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
-			#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
-			# make plots and process results	
-			result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-			#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
-			(plot_div,ret_metadata,p_val) = result2.get()
+			try:
+				result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_col)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
+				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
+				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
+				# make plots and process results	
+				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
+				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+				(plot_div,ret_metadata,p_val) = result2.get()
+			except:
+				return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
 			output_plot_path = "output_plotly.html"
 			json_path = "ppi.json"
 			path_metadata = "/code/clustering/static/metadata.txt"
@@ -490,14 +495,18 @@ def clustering_6_new(request):
 				#	lgmax = 20
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
-				result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
 				if not(has_clin_data == "true"):
 					clinicalstr = "empty"
 					ret_metadata = ""
-				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
-				(plot_div,ret_metadata,p_val) = result2.get()
+				try:				
+					result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
+					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()				
+					result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
+					#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
+					(plot_div,ret_metadata,p_val) = result2.get()
+				except:
+					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
+			
 				#plot2 = "test.png"
 				cache.clear()			
 				make_empty_figure.apply_async(countdown=10)
@@ -505,6 +514,13 @@ def clustering_6_new(request):
 				list_of_files = GraphForm.list_user_data_2(username)	
 				list_of_files_2 = GraphForm.list_user_data(username)      
 				remove_loading_image.delay()
+				# copy static files from shared directory to static-file-dir on web container
+				copyfile(("/code/clustering/static/heatmap.png"),("clustering/static/userfiles/heatmap.png"))	
+				copyfile(("/code/clustering/static/ppi.json"),("clustering/static/userfiles/ppi.json"))
+				copyfile(("/code/clustering/static/output_plotly.html"),("clustering/static/userfiles/output_plotly.html"))
+				copyfile(("/code/clustering/static/genelist.txt"),("clustering/static/userfiles/genelist.txt"))
+				copyfile(("/code/clustering/static/genelist_1.txt"),("clustering/static/userfiles/genelist_1.txt"))
+				copyfile(("/code/clustering/static/genelist_2.txt"),("clustering/static/userfiles/genelist_2.txt"))
 				return render(request, 'clustering/clustering_6.html', {'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
@@ -815,6 +831,7 @@ def clustering_6_4_part_2(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "disease free survival in months:ch1"
+						nbr_col = 2
 					else:
 						fh1 = open("clustering/data/breast_cancer_expr.csv")
 						exprstr = fh1.read()
@@ -824,6 +841,7 @@ def clustering_6_4_part_2(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "mfs (yr):ch1"
+						nbr_col = 2
 				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -881,11 +899,14 @@ def clustering_6_4_part_2(request):
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
 				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()	
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
-				# make plots and process results	
-				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
-				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				try:
+					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
+					# make plots and process results	
+					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				except:
+					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
 				has_survival_plot = "true"
 				if(output_plot_path == "empty"):
 					has_survival_plot = "false"
@@ -1029,20 +1050,23 @@ def clustering_6_4_part_2(request):
 					session_id = request.session._get_or_create_session_key()
 				else:
 					session_id = session_id_from_cache
-				
-				# run algorithm
-				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# check if clinical data exist				
 				if not(has_clin_data == "true"):
 					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
 				session_id_from_cache = cache.get('session_id', 'has expired')
-				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
-				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				# run algorithm
+				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
+				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
+				try:
+					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
+					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				except:
+					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
+			
 				has_survival_plot = "true"
 				if(output_plot_path == "empty"):
 					has_survival_plot = "false"
