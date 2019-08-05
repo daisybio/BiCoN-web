@@ -196,8 +196,6 @@ def clustering_6_new(request):
 			# get locations to copy old result files to
 			json_path = "userfiles/ppi.json"
 			path_heatmap_2 = "userfiles/heatmap.png"
-			#json_path = "ppi_" + session_id + ".json"
-			#path_heatmap_2 = "heatmap_" + session_id + ".png"
 			path_metadata_2 = "userfiles/metadata.txt"
 			path_plotly_2 = "userfiles/output_plotly.html"
 			# copy files to static directory
@@ -214,21 +212,19 @@ def clustering_6_new(request):
 			if(os.path.isfile(path_plotly)):
 				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
-				print("plot copied to")
-				print(path_plotly)
-				print(output_plot_path_2)
+				#print("plot copied to")
+				#print(path_plotly)
+				#print(output_plot_path_2)
 			# read metadata (must copy file to shared volume for processing via celery)
-			#if(os.path.isfile(path_metadata+"_2")):
 			if(os.path.isfile(path_metadata)):
-				print("found metadata")
-				print(path_metadata)
+				#print("found metadata")
+				#print(path_metadata)
 				copyfile(path_metadata,("/code/clustering/static/metadata.txt"))
 				filename_for_old_metadata = "/code/clustering/static/metadata.txt"
-				print(filename_for_old_metadata)
-				#metd = list_metadata_4.apply_async(args=[filename_for_old_metadata],countdown=0)
+				#print(filename_for_old_metadata)
 				metd = list_metadata_5.apply_async(args=[filename_for_old_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				print(ret_metadata1)
+				#print(ret_metadata1)
 			cache.clear()
 			# set session ID in cache
 			cache.set('ret_metadata1', ret_metadata1)	
@@ -276,9 +272,9 @@ def clustering_6_new(request):
 				lgmin = 10
 				lgmax = 20
 			#if ('L_g_min' in request.POST and 'L_g_max' in request.POST):
-			if(save_data in ["save_data"]):
-				if request.user.is_authenticated:
-					print("saving data is true")
+			#if(save_data in ["save_data"]):
+			#	if request.user.is_authenticated:
+			#		print("saving data is true")
 			#lgmin = int(request.POST['L_g_min'])
 			#lgmax = int(request.POST['L_g_max'])
 			# assign standard result size
@@ -302,13 +298,11 @@ def clustering_6_new(request):
 				exprstr = request.FILES['myfile'].read().decode('utf-8')
 				result10 = preprocess_file_2.delay(exprstr)
 				(exprstr,nbr_col) = result10.get()
-				#result10 = preprocess_file.delay(exprstr)
-				#exprstr = result10.get()
 			# read predefined expression file and clinical data
 			elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 				cancer_type = request.POST.get("cancer_type")
 				if(cancer_type == "1"):
-					print("babababababa")
+					#print("babababababa")
 					fh1 = open("clustering/data/lung_cancer_expr.csv")
 					exprstr = fh1.read()
 					clinicaldf = pd.read_csv("clustering/data/lung_cancer_clinical.csv")
@@ -327,7 +321,7 @@ def clustering_6_new(request):
 					fh4.flush()
 					fh4.close()
 					survival_col_name = "mfs (yr):ch1"
-					#nbr_col = 2
+					nbr_col = 2
 			# read PPI file
 			if('protfile' in request.FILES):
 				ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -360,7 +354,7 @@ def clustering_6_new(request):
 					clinicalstr = request.FILES['patientdata'].read().decode('utf-8')
 					clinicalstr_first_line = clinicalstr.split("\n")[0]
 					if(len(clinicalstr_first_line.split("\t")) > len(clinicalstr_first_line.split(","))):
-						print("is tsv")
+						#print("is tsv")
 						clinicalstr = clinicalstr.replace("\t",",")
 					clinical_stringio = StringIO(clinicalstr)
 					clinicaldf = pd.read_csv(clinical_stringio)
@@ -374,14 +368,9 @@ def clustering_6_new(request):
 				# run algorithm and read results
 			try:
 				result1 = algo_output_task_3.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_col)
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
-				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 				# make plots and process results	
 				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
 				(plot_div,ret_metadata,p_val) = result2.get()
 			except:
 				return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
@@ -393,7 +382,7 @@ def clustering_6_new(request):
 			#path_heatmap = "heatmap_" + session_id + ".png"
 			if(save_data in ["save_data"]):
 				if request.user.is_authenticated:
-					print("saving data in views.py")
+					#print("saving data in views.py")
 					username = str(request.user)
 					if not (survival_col_name == ""):
 						if("month" in survival_col_name):
@@ -407,8 +396,6 @@ def clustering_6_new(request):
 					copyfile(("/code/clustering/static/heatmap.png"),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 					copyfile(("/code/clustering/static/ppi.json"),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 					copyfile( "/code/clustering/static/metadata.txt",("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
-					#if(os.path.isfile("metadata.txt" + "_2")):
-					#	copyfile(("metadata.txt"+ "_2"),("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt_2"))
 					copyfile(("/code/clustering/static/output_plotly.html"),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
 					copyfile(("/code/clustering/static/genelist.txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist.txt"))
 					copyfile(("/code/clustering/static/genelist_1.txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist_1.txt"))
@@ -439,14 +426,9 @@ def clustering_6_new(request):
 			#cache.clear()				
 			make_empty_figure.apply_async(countdown=10)
 			empty_log_file.apply_async(countdown=10)
-			#if request.user.is_authenticated:
-			#	request.session['done'] = "true"
-			#remove_loading_image.delay()
 			if(os.path.isfile("clustering/static/loading_1.gif")):
 				os.unlink("clustering/static/loading_1.gif")
 			cache.clear()				
-			#make_empty_figure.apply_async(countdown=10)
-			#empty_log_file.apply_async(countdown=10)
 			# copy static files from shared directory to static-file-dir on web container
 			copyfile(("/code/clustering/static/heatmap.png"),("clustering/static/userfiles/heatmap.png"))	
 			copyfile(("/code/clustering/static/ppi.json"),("clustering/static/userfiles/ppi.json"))
@@ -481,8 +463,6 @@ def clustering_6_new(request):
 				fh3 = open(filename3)
 				has_clin_data = "true"
 				clinicalstr = fh3.read()
-			#path_json = filename1
-			#path_heatmap = filename1.split("_json.json")[0] + "_heatmap.png"
 			ppistr = fh2.read()
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
 				make_empty_figure.delay()
@@ -603,10 +583,6 @@ def clustering_6_new(request):
 			enrichment_dict_2 = result5.get()
 			#enrichment_dict_3 = result6.get()
 			enrichment_dict_3 = {}		
-		#print(request.POST.get("newAnalysis"))
-		#print(request.POST['newAnalysis'])
-		#return clustering_6(request)
-		#return HttpResponseRedirect('polls/clustering_6.html')
 		return render(request,'clustering/clustering_6.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true"})
 	else:		
 		#remove_loading_image.delay()
@@ -647,22 +623,18 @@ def clustering_6_4_part_2(request):
 					#set done parameter to false if user has clicked return on result page
 					request.session['done'] = "False"
 			if(done_from_cache == "done" or done_from_cache == 'done'):
-				print("done from cache")
+				#print("done from cache")
 				#set done parameter to false if user has clicked return on result page
 				cache.set('done',"False")
 			# remove parameter from request.POST to allow later switching to result page
 			request.POST['newAnalysis'] = "false"
-	#if(request.session['done'] == "true"):
-	#if('done' in request.session):
-	#	return HttpResponseRedirect('polls/clustering_6_part_3.html')
-	#	print("done")
 	if not(os.path.isdir("/code/clustering/static/userfiles")):
 		os.mkdir("/code/clustering/static/userfiles")
 	done_from_cache = cache.get("done","")
 	print(done_from_cache)
-	if(done_from_cache == "done"):
-		print("done in cache")
-		#return(clustering_6_part_3_2(request))
+	#if(done_from_cache == "done"):
+	#	print("done in cache")
+	#	return(clustering_6_part_3_2(request))
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -680,16 +652,6 @@ def clustering_6_4_part_2(request):
 	epsilon = request.POST.get("stopcr",0.02) 
 	hi_sig = request.POST.get("hisig",1)
 	pher_sig = request.POST.get("pher",1)
-	#fig = plt.figure(figsize=(10,8))
-	#plt.savefig("polls/static/progress.png")
-	#plt.close(fig)
-	#for key, value in request.POST.items():
-	#	print(key)
-	#	print(value)
-	#if(('myfile' in request.POST) or ('predef_file' in request.POST)):
-	#	print("in request")
-	#if(('protfile' in request.POST) or (('parse_ndex_file' in request.POST) and ('ndex_name_2' in request.POST))):
-	#	print("in request 2")
 	# check if the user has uploaded or chosen an expression and a PPI file
 	#if(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
 		# check if these files are not empty and exist
@@ -716,8 +678,6 @@ def clustering_6_4_part_2(request):
 			session_id = request.session._get_or_create_session_key() 
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			path_heatmap_2 = "userfiles/heatmap_" + session_id + ".png"
-			#json_path = "ppi_" + session_id + ".json"
-			#path_heatmap_2 = "heatmap_" + session_id + ".png"
 			path_metadata_2 = "userfiles/metadata_" + session_id + ".txt"
 			path_plotly_2 = "userfiles/output_plotly_" + session_id + ".html"
 			# copy files to static directory
@@ -734,23 +694,12 @@ def clustering_6_4_part_2(request):
 			if(os.path.isfile(path_plotly)):
 				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
-				#print("plot copied to")
-				#print(path_plotly)
-				#print(output_plot_path_2)
 			# read metadata (must copy file to shared volume for processing via celery)
-			#if(os.path.isfile(path_metadata+"_2")):
 			if(os.path.isfile(path_metadata)):
-				#print("found metadata")
-				#print(path_metadata)
 				copyfile(path_metadata,("/code/clustering/static/userfiles/metadata_" + session_id + ".txt"))
 				filename_for_old_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
-				#copyfile(path_metadata,("/code/clustering/static/metadata_" + session_id + ".txt"))
-				#filename_for_old_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
-				#print(filename_for_old_metadata)
-				#metd = list_metadata_4.apply_async(args=[filename_for_old_metadata],countdown=0)
 				metd = list_metadata_5.apply_async(args=[filename_for_old_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				#print(ret_metadata1)
 			cache.clear()
 			# set session ID in cache
 			cache.set('session_id',session_id)
@@ -790,9 +739,9 @@ def clustering_6_4_part_2(request):
 			if (analysis_running == 'none'):
 				cache.set('analysis_running','analysis_running')
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
-				if(save_data in ["save_data"]):
-					if request.user.is_authenticated:
-						print("saving data is true")
+				#if(save_data in ["save_data"]):
+				#	if request.user.is_authenticated:
+				#		print("saving data is true")
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
 				## assign standard result size
@@ -881,9 +830,7 @@ def clustering_6_4_part_2(request):
 						if('survival_col' in request.POST):
 							if(request.POST['survival_col']):
 								survival_col_name = request.POST['survival_col']
-				#session_id = ""
 				# start session for storing result data			
-				#session_id = request.session._get_or_create_session_key()
 				session_id = ""
 				session_id_from_cache = cache.get("session_id","none")
 				if(session_id_from_cache == "none" or session_id_from_cache == ""):
@@ -896,9 +843,6 @@ def clustering_6_4_part_2(request):
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
-				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()	
 				try:
 					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
@@ -914,8 +858,6 @@ def clustering_6_4_part_2(request):
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
-				#json_path = "ppi_" + session_id + ".json"
-				#path_heatmap = "heatmap_" + session_id + ".png"
 				if(save_data in ["save_data"]):
 					if request.user.is_authenticated:
 						print("saving data")
@@ -1057,8 +999,6 @@ def clustering_6_4_part_2(request):
 					ret_metadata = ""
 				session_id_from_cache = cache.get('session_id', 'has expired')
 				# run algorithm
-				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
 				try:
 					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
@@ -1083,27 +1023,16 @@ def clustering_6_4_part_2(request):
 					cache.set("enrichment_dict_3","")
 					cache.set("enrichment_dict_4","")
 					cache.set("enrichment_dict_5","")
-				#metd = list_metadata_3.apply_async(countdown=0)
-				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
-				#json_path = "test15_" + session_id + ".json"
-				#path_heatmap = "test_" + session_id + ".png"
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
-				#json_path = "ppi_" + session_id + ".json"
-				#path_heatmap = "heatmap_" + session_id + ".png"
-				#metd = list_metadata_3.apply_async(countdown=0)
-				#path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				if(has_clin_data == "true"):
 					#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
 					if(os.path.isfile(path_metadata)):
 						metd = list_metadata_5.apply_async(args=[path_metadata],countdown=0)
 						(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				#result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
 				cache.clear()	
-				#cache.set('session_id',session_id)		
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
 				list_of_files = ""
@@ -1131,7 +1060,7 @@ def clustering_6_4_part_2(request):
 		if('group_for_enr' in request.POST):
 			group_for_enr = request.POST.get('group_for_enr')
 			#print(pval_enr)
-		print("enrichment type")
+		#print("enrichment type")
 		enrichment_dict = {}
 		enrichment_dict_2 = {}
 		enrichment_dict_3 = {}
@@ -1214,9 +1143,7 @@ def clustering_6_4_part_2(request):
 			enrichment_dict = {}
 			enrichment_dict_2 = result5.get()
 			#enrichment_dict_3 = result6.get()
-			enrichment_dict_3 = {}		
-		#print(request.POST.get("newAnalysis"))
-		#print(request.POST['newAnalysis'])
+			enrichment_dict_3 = {}	
 		if('enr' not in request.POST):
 			mutable = request.POST._mutable
 			request.POST._mutable = True
@@ -1225,7 +1152,6 @@ def clustering_6_4_part_2(request):
 		if('enr' in request.POST):
 			print("enr in request")
 		# get current session id and result files for session
-		#session_id = request.session._get_or_create_session_key()
 		path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 		json_path = "userfiles/ppi_" + session_id + ".json"
 		output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
@@ -1234,12 +1160,9 @@ def clustering_6_4_part_2(request):
 			path_heatmap = request.POST.get('heatmap_path')
 			json_path = request.POST.get('ppi_path')
 			output_plot_path = request.POST.get('plot_path')
-		#return clustering_6(request)
-		#return HttpResponseRedirect('polls/clustering_6.html')
 		return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
 
-	else:		
-		#remove_loading_image.delay()
+	else:
 		ret_metadata = ""
 		metdata_dict = ""
 		done_from_cache = cache.get("done","")
@@ -1255,12 +1178,10 @@ def clustering_6_4_part_2(request):
 			if(os.path.isfile("/code/clustering/static/progress.png")):
 				os.unlink("/code/clustering/static/progress.png")
 			remove_loading_image.delay()	
-			#print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
-			#cache.set('analysis_running','analysis_running')
 		
 		if not (request.user.is_authenticated):
 			cache.clear()
@@ -1285,20 +1206,11 @@ def clustering_6_4_part_2(request):
 			cache.set('analysis_running','analysis_running')
 			cache.set('session_id',session_id)
 			cache.set('done',done_from_cache)
-			#metd = list_metadata.apply_async(countdown=0)
-			#metd = list_metadata_3.apply_async(countdown=0)
 			print(ret_metadata1) 
-			print("iubaerb")
-			#result2 = read_kegg_enrichment.delay("/code/clustering/data/test/enrichr_kegg/KEGG_2013.test_name.enrichr.reports.txt",pval_enr)
-			##result2 = read_kegg_enrichment.delay("data/test/enrichr_kegg")	
-			#enrichment_dict = result2.get()
-			#(ret_metadata,is_lungc) = metd.get()  
-			#return render(request,'polls/clustering_6.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'is_lungc':is_lungc})
-		#make_empty_figure.apply_async(countdown=2)
-		#empty_log_file.apply_async(countdown=2)	
+			#print("iubaerb")
 		if('done' in request.session):
-			print("clustering 6 part 3")
-			print(request.session['done'])
+			#print("clustering 6 part 3")
+			#print(request.session['done'])
 			if(request.session['done'] == "true"): 
 				session_id = request.session._get_or_create_session_key()
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
@@ -1308,10 +1220,10 @@ def clustering_6_4_part_2(request):
 				return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true"})		
 		# this redirects the user to the result page if the done parameter is true (e.g. reloading page after an analysis)
 		if(done_from_cache=="done"):
-			print("clustering 6 part 3")
-			print(done_from_cache)
+			#print("clustering 6 part 3")
+			#print(done_from_cache)
 			session_id_from_cache = cache.get("session_id","none")
-			print(session_id_from_cache)
+			#print(session_id_from_cache)
 			if(session_id_from_cache == "none"):
 				session_id = request.session._get_or_create_session_key()
 			else:
@@ -1349,7 +1261,6 @@ def clustering_6_4(request):
 	list_of_files = ""
 	list_of_files_2 = ""
 	save_data = request.POST.get("save_data", None)
-	#print("save data parameter" + str(save_data))
 	gene_set_size = request.POST.get("gene_set_size",2000)
 	nbr_iter = request.POST.get("nbr_iter",45)
 	nbr_ants = request.POST.get("nbr_ants",30)
@@ -1363,9 +1274,6 @@ def clustering_6_4(request):
 	if('input_own_file' in request.POST and 'display_old_results' in request.POST and request.user.is_authenticated):
 		if(request.POST['input_own_file'] and request.POST['display_old_results']):
 			# configure loading page
-			#analysis_running = cache.get('analysis_running', 'none')
-			#if (analysis_running == 'none'):
-			#	cache.set('analysis_running','analysis_running')
 			make_empty_figure.delay()
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
@@ -1382,8 +1290,6 @@ def clustering_6_4(request):
 			session_id = request.session._get_or_create_session_key() 
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			path_heatmap_2 = "userfiles/heatmap_" + session_id + ".png"
-			#json_path = "ppi_" + session_id + ".json"
-			#path_heatmap_2 = "heatmap_" + session_id + ".png"
 			path_metadata_2 = "userfiles/metadata_" + session_id + ".txt"
 			path_plotly_2 = "userfiles/output_plotly_" + session_id + ".html"
 			# copy files to static directory
@@ -1400,16 +1306,8 @@ def clustering_6_4(request):
 			if(os.path.isfile(path_plotly)):
 				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
-				#print("plot copied to")
-				#print(path_plotly)
-				#print(output_plot_path_2)
 			# read metadata (must copy file to shared volume for processing via celery)
-			#if(os.path.isfile(path_metadata+"_2")):
 			if(os.path.isfile(path_metadata)):
-				#print("found metadata")
-				#print(path_metadata)
-				#copyfile(path_metadata,("/code/clustering/static/metadata_" + session_id + ".txt"))
-				#filename_for_old_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
 				copyfile(path_metadata,("/code/clustering/static/userfiles/metadata_" + session_id + ".txt"))
 				filename_for_old_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				#print(filename_for_old_metadata)
@@ -1467,16 +1365,12 @@ def clustering_6_4(request):
 			#	lgmax = 20
 			#if(1 == 1):
 			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
-				if(save_data in ["save_data"]):
-					if request.user.is_authenticated:
-						print("saving data is true")
+				#if(save_data in ["save_data"]):
+				#	if request.user.is_authenticated:
+				#		print("saving data is true")
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])
 				## assign standard result size
-				#if(request.POST['L_g_min'] == ""):
-				#	lgmin = 10
-				#if(request.POST['L_g_max'] == ""):
-				#	lgmax = 20
 				clinicalstr = ""
 				clinicaldf = ""
 				# configure loading page
@@ -1491,15 +1385,13 @@ def clustering_6_4(request):
 				# read expression file
 				if('myfile' in request.FILES):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
-					#result10 = preprocess_file.delay(exprstr)
-					#exprstr = result10.get()
 					result10 = preprocess_file_2.delay(exprstr)
 					(exprstr,nbr_col) = result10.get()
 				# read predefined expression file and clinical data
 				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 					cancer_type = request.POST.get("cancer_type")
 					if(cancer_type == "1"):
-						print("babababababa")
+						#print("babababababa")
 						fh1 = open("clustering/data/lung_cancer_expr.csv")
 						exprstr = fh1.read()
 						clinicaldf = pd.read_csv("clustering/data/lung_cancer_clinical.csv")
@@ -1569,35 +1461,26 @@ def clustering_6_4(request):
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# run algorithm and read results
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id)
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
-				# make plots and process results	
-				#print(group1_ids)
-				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
-				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				try:
+					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
+					# make plots and process results	
+					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				except:
+					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
 				has_survival_plot = "true"
-				#print(output_plot_path)
 				if(output_plot_path == "empty"):
 					cache.set("has_survival_plot","false")
 					has_survival_plot = "false"
 				else:
 					cache.set("has_survival_plot","true")
-				#print(has_survival_plot)
-				#output_plot_path = "output_plotly_" + session_id + ".html"
-				#json_path = "ppi_" + session_id + ".json"
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
-				#path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
-				#path_heatmap = "heatmap_" + session_id + ".png"
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
-				#json_path = "ppi_" + session_id + ".json"
-				#path_heatmap = "heatmap_" + session_id + ".png"
 				if(save_data in ["save_data"]):
 					if request.user.is_authenticated:
-						#print("saving data in views.py")
 						username = str(request.user)
 						# replace name of survival column by "survival column"
 						if not (survival_col_name == ""):
@@ -1613,8 +1496,6 @@ def clustering_6_4(request):
 						copyfile(("/code/clustering/static/" + path_heatmap),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
-						#if(os.path.isfile(path_metadata + "_2")):
-						#	copyfile((path_metadata+ "_2"),("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt_2"))
 						copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
 						if(os.path.isfile("/code/clustering/static/userfiles/genelist_" + session_id + ".txt")):
 							copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist.txt"))
@@ -1648,22 +1529,13 @@ def clustering_6_4(request):
 				cache.clear()				
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
-				#if request.user.is_authenticated:
-				#	request.session['done'] = "true"
-				#remove_loading_image.delay()
 				# remove loading gif
 				if(os.path.isfile("clustering/static/loading_1.gif")):
 					os.unlink("clustering/static/loading_1.gif")
-				#cache.clear()				
-				#make_empty_figure.apply_async(countdown=10)
-				#empty_log_file.apply_async(countdown=10)
 				# copy static files from shared directory to static-file-dir on web container
 				copyfile(("/code/clustering/static/" + path_heatmap),("clustering/static/" + path_heatmap))	
 				copyfile(("/code/clustering/static/" + json_path),("clustering/static/" + json_path))
 				copyfile(("/code/clustering/static/" + output_plot_path),("clustering/static/" + output_plot_path))
-				#copyfile(("/code/clustering/static/genelist_" + session_id + ".txt"),("clustering/static/userfiles/genelist_" + session_id + ".txt"))
-				#copyfile(("/code/clustering/static/genelist_1_" + session_id + ".txt"),("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
-				#copyfile(("/code/clustering/static/genelist_2_" + session_id + ".txt"),("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("clustering/static/userfiles/genelist_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
@@ -1720,10 +1592,6 @@ def clustering_6_4(request):
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
 				## assign standard result size
-				#if(request.POST['L_g_min'] == ""):
-				#	lgmin = 10
-				#if(request.POST['L_g_max'] == ""):
-				#	lgmax = 20
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				session_id_from_cache = cache.get('session_id', 'has expired')
@@ -1732,19 +1600,19 @@ def clustering_6_4(request):
 				else:
 					session_id = session_id_from_cache
 				# run algorithm
-				#result1 = algo_output_task_new.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size)
-				#result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size)
-				#(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
-				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
-				# check if clinical data exist				
 				if not(has_clin_data == "true"):
 					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
-				
-				result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
-				(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				try:
+					result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
+					# check if clinical data exist				
+					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
+					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
+				except:
+					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
+
 				has_survival_plot = "true"
 				if(output_plot_path == "empty"):
 					cache.set("has_survival_plot","false")
@@ -1764,27 +1632,15 @@ def clustering_6_4(request):
 					cache.set("enrichment_dict_3","")
 					cache.set("enrichment_dict_4","")
 					cache.set("enrichment_dict_5","")
-				#metd = list_metadata_3.apply_async(countdown=0)
-				#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
-				#json_path = "test15_" + session_id + ".json"
-				#path_heatmap = "test_" + session_id + ".png"
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
-				#json_path = "ppi_" + session_id + ".json"
-				#path_heatmap = "heatmap_" + session_id + ".png"
-				#metd = list_metadata_3.apply_async(countdown=0)
-				#path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 				if(has_clin_data == "true"):
-					#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
 					if(os.path.isfile(path_metadata)):
 						metd = list_metadata_5.apply_async(args=[path_metadata],countdown=0)
 						(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get()
-				#result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
-				#(div,script,plot1,plot_div,ret_metadata,p_val) = result2.get()
 				cache.clear()	
-				#cache.set('session_id',session_id)		
 				make_empty_figure.apply_async(countdown=10)
 				empty_log_file.apply_async(countdown=10)
 				list_of_files = ""
@@ -1799,9 +1655,7 @@ def clustering_6_4(request):
 				cache.set('ret_metadata3', ret_metadata3)	
 				cache.set('p_val', p_val)
 				remove_loading_image.delay()	
-				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot})
-				#return render(request, 'polls/clustering_6.html', {'form':"",'images':"",'div':"",'script':"",'plot2':plot2, 'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_dat':ret_metadata})
-	
+				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot})	
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"	
@@ -1839,17 +1693,12 @@ def clustering_6_4(request):
 		else:
 			session_id = request.session._get_or_create_session_key()
 		if not(session_id == ""):
-			#genelist = "/code/clustering/static/genelist_" + session_id + ".txt"
-			#genelist1 = "/code/clustering/static/genelist_1_" + session_id + ".txt"
-			#genelist2 = "/code/clustering/static/genelist_2_" + session_id + ".txt"
 			genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
 			genelist1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
 			genelist2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
 			if not(os.path.isfile(genelist) and os.path.isfile(genelist1) and os.path.isfile(genelist2)):
 				print("gene list not found")
 				return render(request,'clustering/clustering_6_part_4.html',{'errstr':""})
-			#kegg_dir = "/code/clustering/data/test/enrichr_kegg/" + session_id
-			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
 			#print(genelist)
 			if(enr_type == "kegg_enrichment"):
 				result1 = run_enrichment_2.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_kegg/" + session_id))
@@ -1918,15 +1767,9 @@ def clustering_6_4(request):
 				enrichment_dict_2 = result5.get()
 				enrichment_dict_3 = result6.get()
 			# give links to result files from last analysis
-			#path_heatmap = "test_" + session_id + ".png"
-			#json_path = "test15_" + session_id + ".json"
-			#path_heatmap = "heatmap_" + session_id + ".png"
-			#json_path = "ppi_" + session_id + ".json"
 			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 			json_path = "userfiles/ppi_" + session_id + ".json"
-			#path_metadata = "/code/clustering/static/metadata_" + session_id + ".txt"
 			path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
-			#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
 			if(os.path.isfile(path_metadata)):
 				metd = list_metadata_5.apply_async(args=[path_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 			
@@ -1955,10 +1798,6 @@ def clustering_6_4(request):
 		# get session id from cache
 		session_id_from_cache = cache.get('session_id', 'has expired')
 		if not(session_id_from_cache == 'has expired' or session_id_from_cache == ""):
-			#path_heatmap = "heatmap_" + session_id_from_cache + ".png"
-			#json_path = "ppi_" + session_id_from_cache + ".json"
-			#path_metadata = "metadata_" + session_id_from_cache + ".txt"
-			#output_plot_path = "output_plotly_" + session_id_from_cache + ".html"
 			path_heatmap = "userfiles/heatmap_" + session_id_from_cache + ".png"
 			json_path = "userfiles/ppi_" + session_id_from_cache + ".json"
 			path_metadata = "userfiles/metadata_" + session_id_from_cache + ".txt"
@@ -1969,9 +1808,6 @@ def clustering_6_4(request):
 		else:	
 			session_id = request.session._get_or_create_session_key()
 			# create new session if session id does not exist in cache
-			#path_heatmap = "heatmap_" + session_id + ".png"
-			#json_path = "ppi_" + session_id + ".json"
-			#output_plot_path = "output_plotly_" + session_id + ".html"
 			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"	
@@ -1997,19 +1833,11 @@ def clustering_6_4(request):
 		# check if session already exists for current user (e.g. when user has hit the reload button)
 		session_id_from_cache = cache.get('session_id', 'has_expired')
 		# get session ID and create list of previously saved files if user is authenticated
-		if (request.user.is_authenticated):	
-			#session_id = request.session._get_or_create_session_key()
+		if (request.user.is_authenticated):
 			username = str(request.user)
 			list_of_files = GraphForm.list_user_data_2(username)
 			list_of_files_2 = GraphForm.list_user_data(username)
 			#cache.clear()
-			#ret_metadata1 = ""
-			#ret_metadata2 = ""
-			#ret_metadata3 = ""
-			#if(os.path.isfile("/code/clustering/static/metadata_" + session_id + ".txt")):
-			#	metd = list_metadata_5.apply_async(args=["/code/clustering/static/metadata_" + session_id + ".txt"],countdown=0)
-			#	(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
-			#metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
 		ret_metadata1 = ""
 		ret_metadata2 = ""
 		ret_metadata3 = ""
@@ -2020,15 +1848,10 @@ def clustering_6_4(request):
 		
 		# display results from most recent analysis
 		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
-			#cache.set('session_id',session_id_from_cache)
 			# take result files from storage
 			path_heatmap = "userfiles/heatmap_" + session_id_from_cache + ".png"
 			json_path = "userfiles/ppi_" + session_id_from_cache + ".json"
-			#path_heatmap = "userfiles/test_" + session_id_from_cache + ".png"
-			#json_path = "userfiles/test15_" + session_id_from_cache + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id_from_cache + ".html"
-			#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
-			#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
 			# take metadata from cache
 			ret_metadata1 = cache.get('ret_metadata1',"")
 			ret_metadata2 = cache.get('ret_metadata2',"")
@@ -2098,7 +1921,7 @@ def errorpage(request):
 def clustering_6_part_3_2(request):
 	#if('session_id' in request.POST):
 	#	print(request.POST['session_id'])
-	print("basdbasdbasdbasdbs")
+	#print("basdbasdbasdbasdbs")
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -2270,28 +2093,15 @@ def clustering_6_part_3_2(request):
 			#username = str(request.user)
 			list_of_files = GraphForm.list_user_data_2(username)
 			list_of_files_2 = GraphForm.list_user_data(username)
-			#cache.clear()
-			#ret_metadata1 = ""
-			#ret_metadata2 = ""
-			#ret_metadata3 = ""
-			#if(os.path.isfile("/code/clustering/static/metadata_" + session_id + ".txt")):
-			#	metd = list_metadata_5.apply_async(args=["/code/clustering/static/metadata_" + session_id + ".txt"],countdown=0)
-			#	(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
-			#metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
 		ret_metadata1 = ""
 		ret_metadata2 = ""
 		ret_metadata3 = ""
 		# display results from most recent analysis
 		if not (session_id_from_cache == "has_expired"):
-			#cache.set('session_id',session_id_from_cache)
 			# take result files from storage
 			path_heatmap = "userfiles/heatmap_" + session_id_from_cache + ".png"
 			json_path = "userfiles/ppi_" + session_id_from_cache + ".json"
-			#path_heatmap = "userfiles/test_" + session_id_from_cache + ".png"
-			#json_path = "userfiles/test15_" + session_id_from_cache + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id_from_cache + ".html"
-			#metd = list_metadata_4.apply_async(args=[path_metadata],countdown=0)
-			#(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
 			# take metadata from cache
 			ret_metadata1 = cache.get('ret_metadata1',"")
 			ret_metadata2 = cache.get('ret_metadata2',"")

@@ -728,9 +728,9 @@ def aco_preprocessing_strings_2(expr_str, ppi_str, col,log2, gene_list = None, s
        labels_B[node] = p
        rev_labels_B[p] = node
        node = node+1
-    print(new_genes)
-    print("new patients")
-    print(patients_new)
+    #print(new_genes)
+    #print("new patients")
+    #print(patients_new)
     #scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
     #sim = scaler.fit_transform(expr)
     data_aco = pd.DataFrame(z_scores,columns= new_genes, index= patients_new)
