@@ -298,6 +298,7 @@ def preprocess_file(expr_str):
 @shared_task(name="preprocess_file_2")
 def preprocess_file_2(expr_str):
 	expr_str = expr_str.replace("cancer_type","disease_type")
+	nbr_col = 1
 	if(len(expr_str.split("\n")[0].split("\t")) > 2):
 		expr_str_split = expr_str.split("\n")	
 		# replace column name for disease type
@@ -1309,34 +1310,7 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
 	with open("/code/clustering/static/ppi.json", "w") as text_file:
 		text_file.write(jsn3)		
-	#output_notebook()
-	##plot = figure(x_range=(-1.5, 1.5), y_range=(-1.5, 1.5))
-	# add tools to the plot
-	##plot.add_tools(HoverTool(tooltips=None),TapTool(),BoxSelectTool())
-	# create bokeh graph
-	##graph = from_networkx(G, nx.spring_layout, scale=1, center=(0,0))		
-	# add name to node data
-	##graph.node_renderer.data_source.data['d'] = [genes[i] for i in G.nodes]	
-	##graph.edge_renderer.selection_glyph = MultiLine(line_color="#000000", line_width=4)
-	##graph.selection_policy = NodesAndLinkedEdges()
-	##graph.inspection_policy = EdgesAndLinkedNodes()
-	##graph.node_renderer.data_source.data['Name'] = list(G.nodes())
-	# get graph coordinates on layout
-	##x,y = zip(*graph.layout_provider.graph_layout.values())
-	##node_labels = nx.get_node_attributes(G, 'Name')
-	##z = tuple([(bar-0.1) for bar in x])
-	#make bokeh graph with transparent labels
-	##source = ColumnDataSource(data=dict(x=x, y=y,Name=[node_labels[i] for i in genes.keys()]))
-	##labels2 = LabelSet(x='x', y='y', text='Name',text_font_size="8pt",x_offset=-20, source=source,background_fill_color='white',background_fill_alpha=0.0,level='glyph',render_mode='canvas')
-	##graph.node_renderer.glyph = Circle(size=60, fill_color=linear_cmap('d', 'Spectral8', -2.5, 2.5))
-	##plot.renderers.append(graph)
-	##plot.renderers.append(labels2)
-	##plot.add_layout(labels2)
-	#begin making heatmap here
-	##red_patch = mpatches.Patch(color='#4FB6D3', label='SCC')
-	##blue_patch = mpatches.Patch(color='#22863E', label='ADK')
 	colordict={0:'#BB0000',1:'#0000BB'}
-	#if(col_colors1 == ""):
 	if(isinstance(col_colors1, str)):
 		g = sns.clustermap(T, figsize=(13, 13))			
 	else:
@@ -1348,8 +1322,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
 	plt.savefig("/code/clustering/static/heatmap.png")
-	#script, div = components(plot)	
-	#plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
@@ -1528,10 +1500,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 						group1_has.append(current_patients_1)				
 						group2_has.append(current_patients_2)
 			ctr = ctr + 1
-		#print(param_names)
-		#print(patients_0)
-		#print(patients_1)
-		#print(param_cols)
 		jaccards_1 = []
 		jaccards_2 = []
 		param_names_final = []
@@ -1543,18 +1511,9 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 					param_names_final.append(param_names[i])
 					jaccards_1.append(lib.jac(group1_has[i],patients_0[i]))
 					jaccards_2.append(lib.jac(group2_has[i],patients_1[i]))
-		#print(param_names_final)
-		#print(group1_has)
-		#print(jaccards_1)
-		#print(jaccards_2)
-		#print("name of survival col" + str(survival_col))
-		#print(list(clinicaldf.iloc[:,42]))
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-			#print("survival col")
-			#print(survival_col_nbr)
-			#print(list(clinicaldf.iloc[:,survival_col_nbr]))
 		# get list of patient ids
 		if("GSM" not in list(clinicaldf.iloc[:,0])[1]):
 			patient_id_list = list(clinicaldf.index)
@@ -1563,9 +1522,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		# check if there is a column with survival data
 		if(survival_col in list(clinicaldf.columns)):
 			survival_col_nbr = list(clinicaldf.columns).index(survival_col)
-			#print("survival col")
-			#print(survival_col_nbr)
-			#print(list(clinicaldf.iloc[:,survival_col_nbr]))
 			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
 			survivalcol_list = list(clinicaldf.iloc[:,survival_col_nbr])
 			clinicaldf.iloc[:,survival_col_nbr].fillna("NA",inplace=True)
@@ -1581,21 +1537,13 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 			# check if survival column contains number. divide by 12 if it is given in months
 			if(survivalcol_list[i] != "--" and survivalcol_list[i] != "name:ch1" and survivalcol_list[i] != "NA" and survivalcol_list[i].replace('.','',1).isdigit()):
 					if("month" in survival_col):
-						#print("month")
-						#print(patient_id_list[i])
 						survivalcol_list_temp = float(survivalcol_list[i]) / 12.0
 						patientData.update({patient_id_list[i]:survivalcol_list_temp})
 					else:
 						patientData.update({patient_id_list[i]:survivalcol_list[i]})
-		age1 = 0
-		ct1 = 0.001
-		age2 = 0
-		ct2 = 0.001
 		ret_metadata = []
 		survival_1 = []
 		survival_2 = []
-		survival_mean_1 = 0
-		survival_mean_2 = 0
 		ctr_surv_1 = 0.001
 		sum_surv_1 = 0
 		ctr_surv_2 = 0.001
@@ -1606,13 +1554,11 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				survival_1.append(float(patientData[key]))
 			elif key in group2_ids:
 				survival_2.append(float(patientData[key]))
-		#print(survival_1)
 		p_val = ""
 		# calculate p-value for survival times
 		if(survival_col in list(clinicaldf.columns)):
 			surv_results = logrank_test(survival_1,survival_2)
 			p_val = surv_results.p_value
-			#print("p value" + str(p_val))
 		# count survival times in both arrays
 		for elem in survival_1:
 			sum_surv_1 = sum_surv_1 + float(elem)
@@ -1620,8 +1566,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 		for elem in survival_2:
 			sum_surv_2 = sum_surv_2 + float(elem)
 			ctr_surv_2 = ctr_surv_2 + 1
-		survival_mean_1 = sum_surv_1 / ctr_surv_1
-		survival_mean_2 = sum_surv_2 / ctr_surv_2
 		# replace some abbreviated clinical terms by proper description
 		param_names = [elem.replace("bm event:ch1","Breast Metastasis") for elem in param_names]
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
@@ -1711,8 +1655,6 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 				text_file_2.write(plot_div)
 	with open("/code/clustering/static/output_console.txt", "w") as text_file:
 		text_file.write("Done!")
-	#print(ret_metadata)
-	#return(script,div,plot_1,plot_div,ret_metadata,p_val)
 	return(plot_div,ret_metadata,p_val)
 
 ### Processing of algorithm output with using session ID
@@ -1786,7 +1728,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax.set_ylabel("Patients")
 	path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
-	#plot_1=plt.gcf()
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
@@ -1853,8 +1794,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		param_names = []
 		param_values = []
 		param_cols = []
-		#ctr = 0
-		#print(patientids_metadata)
 	#if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
 	if not(clinicalstr == "empty" or ((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
@@ -2012,15 +1951,9 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 						patientData.update({patient_id_list[i]:survivalcol_list_temp})
 					else:
 						patientData.update({patient_id_list[i]:survivalcol_list[i]})
-		age1 = 0
-		ct1 = 0.001
-		age2 = 0
-		ct2 = 0.001
 		ret_metadata = []
 		survival_1 = []
 		survival_2 = []
-		survival_mean_1 = 0
-		survival_mean_2 = 0
 		ctr_surv_1 = 0.001
 		sum_surv_1 = 0
 		ctr_surv_2 = 0.001
@@ -2044,8 +1977,6 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		for elem in survival_2:
 			sum_surv_2 = sum_surv_2 + float(elem)
 			ctr_surv_2 = ctr_surv_2 + 1
-		survival_mean_1 = sum_surv_1 / ctr_surv_1
-		survival_mean_2 = sum_surv_2 / ctr_surv_2
 		# replace some abbreviated clinical terms by proper description
 		param_names = [elem.replace("bm event:ch1","Breast Metastasis") for elem in param_names]
 		param_names = [elem.replace("lm event:ch1","Lung Metastasis") for elem in param_names]
@@ -2307,21 +2238,13 @@ def check_input_files(ppistr,exprstr):
 	# check if PPI file contains lines with two protein IDs
 	for i in range(len(ppidf.index)):
 		if(contains_numbers == "false"):
-			#print(i)
 			curr_elem = str(ppidf.iloc[[i], 0].values[0])
-			#curr_elem = ppidf.iloc[[i], 0].split("\t")
-			#curr_elem_1 = curr_elem[0]
-			#curr_elem_2 = curr_elem[len(curr_elem)-1]
 			curr_elem_2 = str(ppidf.iloc[[i], 1].values[0])
-			#print(curr_elem)
-			#print(curr_elem_2)
 			if(curr_elem.isdigit() and curr_elem_2.isdigit()):
 				contains_numbers = "true"
 	if(contains_numbers == "false"):
 		errstr = errstr + "\n" + "Input file must contain lines with Entrez IDs of interaction partners.\n"
-		#errstr = errstr + "\n \n "
 	return(errstr)
-		#for j in range(len(df.columns)):
 				
 @shared_task(name="convert_gene_list")
 def convert_gene_list(adjlist,filename):

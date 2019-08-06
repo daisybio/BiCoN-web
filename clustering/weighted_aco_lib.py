@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from networkx.algorithms import bipartite
 import scipy.sparse as sparse
 from scipy.sparse import csr_matrix
-from IPython.display import Audio, display
+#from IPython.display import Audio, display
 from sklearn.cluster.bicluster import SpectralCoclustering
 from collections import Counter
 import collections

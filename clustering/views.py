@@ -1250,7 +1250,7 @@ def clustering_6_4(request):
 	analysis_running = cache.get('analysis_running', 'none')
 	print(analysis_running)
 	session_id_from_cache = cache.get('session_id', 'has expired')
-	print(session_id_from_cache)
+	print("session ID: " +str(session_id_from_cache))
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -1845,7 +1845,10 @@ def clustering_6_4(request):
 		surv_from_cache = cache.get('has_survival_plot','none')
 		if(surv_from_cache == "false"):
 			has_survival_plot = "false"
-		
+		if(session_id_from_cache == 'has_expired' or session_id_from_cache == ""):	
+			session_id = request.session._get_or_create_session_key()
+			cache.set('session_id',session_id)
+			print("session ID: " + str(session_id))
 		# display results from most recent analysis
 		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
 			# take result files from storage
