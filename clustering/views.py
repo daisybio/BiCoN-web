@@ -1845,10 +1845,6 @@ def clustering_6_4(request):
 		surv_from_cache = cache.get('has_survival_plot','none')
 		if(surv_from_cache == "false"):
 			has_survival_plot = "false"
-		if(session_id_from_cache == 'has_expired' or session_id_from_cache == ""):	
-			session_id = request.session._get_or_create_session_key()
-			cache.set('session_id',session_id)
-			print("session ID: " + str(session_id))
 		# display results from most recent analysis
 		if not (session_id_from_cache == 'has_expired' or session_id_from_cache == ""):
 			# take result files from storage
@@ -1880,11 +1876,20 @@ def clustering_6_4(request):
 			cache.set('ret_metadata2', ret_metadata2)	
 			cache.set('ret_metadata3', ret_metadata3)	
 			cache.set('p_val', p_val)	
-			
-			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot})
+			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
+			progress_file = "userfiles/progress_" + session_id_from_cache + ".txt"
+			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file})
 		cache.clear()
+		if(session_id_from_cache == 'has_expired' or session_id_from_cache == ""):	
+			session_id = request.session._get_or_create_session_key()
+			cache.set('session_id',session_id)
+			print("session ID: " + str(session_id))
+		else:
+			session_id = session_id_from_cache
+		output_console_file = "userfiles/output_console_" + session_id + ".txt"
+		progress_file = "userfiles/progress_"+ + session_id + ".txt"
 		cache.set('analysis_running', analysis_running)
-		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':has_survival_plot})
+		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file})
 
 
 def clustering_6_part_2_2(request):
