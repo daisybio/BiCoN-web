@@ -15,6 +15,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 #
 
 #*/5 * * * * cp /clust_app/clustering/static/conv_0qtpgo1ar62kk74jcat1llxrit1x758f.png /clust_app/clustering/static/userfiles/conv_0qtpgo1ar62kk74jcat1llxrit1x758f.png 
-*/5 * * * * find /clust_app/clustering/static/userfiles/* -mmin +5 -type f -delete
-*/5 * * * * find /code/clustering/static/userfiles/* -mmin +59 -type f -delete
+*/59 * * * * find /clust_app/clustering/static/userfiles/* -mmin +59 -type f -delete
+*/59 * * * * find /code/clustering/static/userfiles/* -mmin +59 -type f -delete
 #  
