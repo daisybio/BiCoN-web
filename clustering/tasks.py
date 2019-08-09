@@ -136,6 +136,25 @@ def empty_log_file():
     		text_file.close()
 
 
+
+@shared_task(name="make_empty_figure_2")
+def make_empty_figure_2(session_id):
+	fig = plt.figure(figsize=(10,8))
+	plt.savefig("/code/clustering/static/progress_" + session_id + ".png")
+	#plt.savefig("/code/clustering/static/userfiles/progress.png")
+	plt.close(fig)
+
+@shared_task(name="empty_log_file_2")
+def empty_log_file_2(session_id):
+	text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
+	text_file.write("")
+	text_file.close()
+	if(os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
+    		text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
+    		text_file.write("")
+    		text_file.close()
+
+
 @shared_task(name="write_pval")
 def write_pval(pval,filename):
     text_file = open(filename, "w")
@@ -413,6 +432,20 @@ def add_loading_image():
 def remove_loading_image():
 	if(os.path.isfile("/code/clustering/static/loading_1.gif")):
 		os.unlink("/code/clustering/static/loading_1.gif")
+
+
+@shared_task(name="add_loading_image_2")
+def add_loading_image_2(session_id):
+	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
+	if(os.path.isfile("/code/clustering/static/loading.gif")):
+		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+	else:
+		print("loading image not found")
+
+@shared_task(name="remove_loading_image_2")
+def remove_loading_image_2(session_id):
+	if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
+		os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
 
 ##################################################################
 ################## used for metadata display #####################
