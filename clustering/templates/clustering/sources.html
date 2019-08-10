@@ -295,33 +295,31 @@ border:1px solid black;
 	<div style="padding:40px;margin:40px;border:1px solid #ccc;min-width:1400px">
 
         <h3> Sources </h3>
-	The two built-in expression datasets are from the following sources:<br>
-	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse2603">Breast Cancer</a><br>
-	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE30219">Lung Cancer</a><br><br>
-	The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/">NDEx Bio</a> webserver and contain datasets from the following sources: <a href="http://www.hprd.org/">Human Protein Reference Database</a> (<a href="http://www.ndexbio.org/#/network/1093e665-86da-11e7-a10d-0ac135e8bacf">link to source</a>), <a href="http://cicblade.dep.usal.es:8080/APID/init.action">Agile Protein Interactions Database</a> (<a href="http://www.ndexbio.org/#/network/9c38ce6e-c564-11e8-aaa6-0ac135e8bacf">link to source</a>), <a href="https://string-db.org/">STRING</a> database (<a href="http://www.ndexbio.org/#/network/275bd84e-3d18-11e8-a935-0ac135e8bacf">link to source</a>), and from <a href="https://thebiogrid.org/">BioGrid</a> (<a href="http://www.ndexbio.org/#/network/becec556-86d4-11e7-a10d-0ac135e8bacf">link to source</a>).<br><br>
-        Most of the code for this website is written in <a href="https://www.python.org/"><b>Python</b></a>.<br>
-	As a server framework, <a href="https://www.djangoproject.com/"><b>Django</b></a> Version 2.1.3 is used.<br>
-	The queuing system <a href="http://www.celeryproject.org/">Celery</a> is used, based on a <a href="https://www.rabbitmq.com/">RabbitMQ</a> server for request processing.<br>
-	For the frontend, additional <a href="https://www.javascript.com"><b>JavaScript</b></a> and <a href="https://jquery.com/">JQuery</a> code is used.<br>
-	For the PPI network display, the javascript library <a href="http://sigmajs.org/">Sigma.js</a> is used.<br>
-	The javascript library <a href="https://datatables.net/">DataTables</a> is used to improve table display.<br><br>
+	The two built-in expression datasets are from the following sources:
+	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse2603" target="_blank">Breast Cancer</a><br>
+	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE30219" target="_blank">Lung Cancer</a><br><br>
+	The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/" target="_blank">NDEx Bio</a> webserver and contain datasets from the following sources: <a href="http://www.hprd.org/" target="_blank">Human Protein Reference Database</a> (<a href="http://www.ndexbio.org/#/network/1093e665-86da-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>), <a href="http://cicblade.dep.usal.es:8080/APID/init.action" target="_blank">Agile Protein Interactions Database</a> (<a href="http://www.ndexbio.org/#/network/9c38ce6e-c564-11e8-aaa6-0ac135e8bacf" target="_blank">link to source</a>), <a href="https://string-db.org/" target="_blank">STRING</a> database (<a href="http://www.ndexbio.org/#/network/275bd84e-3d18-11e8-a935-0ac135e8bacf" target="_blank">link to source</a>), and from <a href="https://thebiogrid.org/" target="_blank">BioGrid</a> (<a href="http://www.ndexbio.org/#/network/becec556-86d4-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>).<br><br>
+        Most of the code for this website is written in <a href="https://www.python.org/" target="_blank"><b>Python</b></a>.<br>
+	As a server framework, <a href="https://www.djangoproject.com/" target="_blank"><b>Django</b></a> Version 2.1.3 is used.<br>
+	The queuing system <a href="http://www.celeryproject.org/" target="_blank">Celery</a> is used, based on a <a href="https://www.rabbitmq.com/" target="_blank">RabbitMQ</a> server for request processing.<br>
+	For the frontend, additional <a href="https://www.javascript.com" target="_blank"><b>JavaScript</b></a> and <a href="https://jquery.com/" target="_blank">JQuery</a> code is used.<br>
+	For the PPI network display, the javascript library <a href="http://sigmajs.org/" target="_blank">Sigma.js</a> is used.<br>
+	The javascript library <a href="https://datatables.net/" target="_blank">DataTables</a> is used to improve table display.<br><br>
 	The server uses the following python libraries:<br>
-	<a href="https://github.com/tjwalch/django-livereload-server">django-livereload-server</a><br>
-	<a href="https://matplotlib.org/">Matplotlib</a> for plots,<br>
-	<a href="https://plot.ly/">Plotly</a> for plots,<br>
-	<a href="https://www.numpy.org/">Numpy</a>,<br>
-	<a href="https://www.scipy.org/">Scipy</a>,<br>
-	<a href="https://bokeh.pydata.org/en/latest/">Bokeh</a> for graph preprocessing,<br>
-	<a href="https://networkx.github.io/">NetworkX</a> for graph processing,<br> 
-	<a href="https://seaborn.pydata.org/">Seaborn</a> for the heatmap,<br>
-	<a href="https://pypi.org/project/pybiomart/">PyBiomart</a> for gene name conversions,<br>
-	<a href="https://pypi.org/project/ndex2/">NDEx 2</a> for PPI data import,<br>
-	<a href="https://pandas.pydata.org/">Pandas</a> for internal data processing,<br>
-	<a href="https://pypi.org/project/gseapy/">GSEApy</a> is used for gene set enrichment analyses,<br>
-	<a href="https://scikit-learn.org/stable/">Scikit / sklearn</a> for clustering,<br>
-	<a href="https://lifelines.readthedocs.io/en/latest/lifelines.statistics.html">Lifelines</a> for survival analysis<br>
-	For enrichment analyses, the datasets (that are built-in in gseapy) from the following sources are used: <a href="https://www.genome.jp/kegg/">KEGG</a>, <a href="http://geneontology.org/">GO (Gene Ontology)</a>: Biological Process and Molecular Function, and <a href="https://reactome.org/">Reactome</a> Pathway Database.<br><br>
- 
+	<a href="https://github.com/tjwalch/django-livereload-server" target="_blank">django-livereload-server</a><br>
+	<a href="https://matplotlib.org/" target="_blank">Matplotlib</a> for plots,<br>
+	<a href="https://plot.ly/" target="_blank">Plotly</a> for plots,<br>
+	<a href="https://www.numpy.org/" target="_blank">Numpy</a>,<br>
+	<a href="https://www.scipy.org/" target="_blank">Scipy</a>,<br>
+	<a href="https://networkx.github.io/" target="_blank">NetworkX</a> for graph processing,<br> 
+	<a href="https://seaborn.pydata.org/" target="_blank">Seaborn</a> for the heatmap,<br>
+	<a href="https://pypi.org/project/pybiomart/" target="_blank">PyBiomart</a> for gene name conversions,<br>
+	<a href="https://pypi.org/project/ndex2/" target="_blank">NDEx 2</a> for PPI data import,<br>
+	<a href="https://pandas.pydata.org/" target="_blank">Pandas</a> for internal data processing,<br>
+	<a href="https://pypi.org/project/gseapy/" target="_blank">GSEApy</a> is used for gene set enrichment analyses,<br>
+	<a href="https://scikit-learn.org/stable/" target="_blank">Scikit / sklearn</a> for clustering,<br>
+	<a href="https://lifelines.readthedocs.io/en/latest/lifelines.statistics.html" target="_blank">Lifelines</a> for survival analysis<br>
+	For enrichment analyses, the datasets (that are built-in in gseapy) from the following sources are used: <a href="https://www.genome.jp/kegg/" target="_blank">KEGG</a>, <a href="http://geneontology.org/" target="_blank">GO (Gene Ontology)</a>: Biological Process and Molecular Function, and <a href="https://reactome.org/" target="_blank">Reactome</a> Pathway Database.<br><br>
     </div>
 </div> 
   

@@ -146,13 +146,20 @@ How a request runs on the server:
 
 If you submit a request, several steps are executed (on the clust_app container) in views.py. 
 For the loading page, the gif with loading symbol is copied to its place so that it is visible in the page. The current status of the run is written and read from a log file.
-Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. There are lines of code in this script that, when uncommented, automatically select the two biggest clusters if more than two clinical patient groups exist in the expression file. Automatically, a column containing information on pre-defined clinical clusters is recognized and assigned a standard title ("disease_type"). Patient identifiers are taken from the first column, and gene IDs from the first row.
+Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. It is checked whether a column in the expression data defines two clinical clusters; if this is the case, these clusters are later displayed in the heatmap. Automatically, a column containing information on pre-defined clinical clusters is recognized and assigned a standard title ("disease_type"). Patient identifiers are taken from the first column, and gene IDs from the first row.
 Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10. These tasks are executed via Celery, and their results are written on the shared volume (under /code). In algo_output_task, the algorithm itself is run. A preprocessing script (aco_preprocessing_strings) in weighted_aco_lib.py is run, the script also automatically recognizes whether the expression data are log2-values (if they contain negative values) and ant runs are executed via the ants() method in weighted_aco_lib.py. The output data (clusters of patients and genes) are taken as an input in script_output_task and there are processed to output format (json and png). They are stored by the methods run in the celery container in a directory on the shared volume and copied by views.py, which is run on the django container, to the local static files directory.
 If a logged-in user wants to display old results, there is a list of stored result files (by date). The filename of the expression file is generated based on the current date when saving, and is written as the value of a dropdown option in the input form when selecting. 
 
-The version of the page with separate pages for input and results redirects the user to the result page after running the analysis. A parameter in the cache is set to "done" so that if the user hits reload or runs an enrichment analysis, he stays on the result page. The user can go back to the input page by clicking "start new analysis". If the user presses this button, an form is submitted with an input parameter "new analysis", and in the method in views.py, the "done" parameter is set to false and the user is redirected to the input page.
+The version of the page with separate pages for input and results ("on_two_pages.html") redirects the user to the result page after running the analysis. A parameter in the cache is set to "done" so that if the user hits reload or runs an enrichment analysis, he stays on the result page. The user can go back to the input page by clicking "start new analysis". If the user presses this button, an form is submitted with an input parameter "new analysis", and in the method in views.py, the "done" parameter is set to false and the user is redirected to the input page.
 
 
+#####################################
+How sessions work:
+#####################################
+
+For user managment, Session IDs (stored in the cache) are used. When a user first accesses the page, he is assigned a new session ID and that ID is stored in the cache. All files that are used for progress display and all files with results contain the session ID in their path (e.g. progress_[SESSION_ID].png).
+When a constructor method is called, the session ID is read from the cache and included in the file paths. The template contains links to all files as variables.
+Updates to these files are detected automatically by the livereload application and reflected to the user.
 
 #####################################
 How the cache works:
@@ -173,6 +180,12 @@ Which methods do what:
 #####################################
 
 In views.py, methods are defined that run code after the user accesses a web page.
+
+There are three different constructors that render a web page for the clustering application with slightly different functionality:
+
+- clustering_6_new: A static version of the webpage that does not use session IDs and with input and results on the same page.
+- clustering_6_part_1 (accessible under "http://0.0.0.0:8000/clustering/on_two_pages.html": A version of the page with different pages for input and result display. Redirects automatically to the result page after completion of the algorithm. Uses Session IDs (stored in the cache) for user management.
+- clustering_6_4 (accessible under ("http://0.0.0.0:8000/clustering/on_one_page.html"): Version of the page with input and results on the same page. Uses Session IDs (in the cache) for user management.
 
 #####################################
 #### 4. Troubleshooting: ############

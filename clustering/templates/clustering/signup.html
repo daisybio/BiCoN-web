@@ -61,22 +61,34 @@ td, th {
                 </a>
             </div>
             <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="navbar">
+ <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li class="active">
                         <a href="#">Home</a>
                     </li>
-                    <li>
-                        <a href="clustering_6.html">Analysis</a>
+                     <li>
+                        <a href="infopage.html">How to</a>
                     </li>
-                   	<li>
-                        <a>Username</a>
+		    <li>
+			<a href="sources.html">Sources</a>
+		    </li>
+                    <li>
+                        <a>Logged in?</a>
 			{% if user.is_authenticated %}
     			User: {{ user.get_username }}
+			<form action="logout.html" method="post" enctype="multipart/form-data">
+              	  	{% csrf_token %}
+                	<input type="submit" value="Logout"/>
+			</form>
    			{% else %}
 			<a href="login.html">Login</a>
    			{% endif %} 
                     </li>
+			{% if user.is_authenticated %}
+			<li>
+			<a href="delete_user.html">Delete user account</a>
+		    </li>
+			{% endif %}
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

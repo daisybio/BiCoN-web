@@ -410,10 +410,6 @@ border:1px solid black;
                      <li>
                         <a href="infopage.html">How to</a>
                     </li>
-
-		    <li>
-			<a href="sources.html">Sources</a>
-		    </li>
 			<li>
                         <a href="#">Analysis</a>
                     </li>
@@ -528,7 +524,6 @@ border:1px solid black;
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% endif %} 
-	<br><br><br><br>
 </div>
 </article>
             
@@ -552,7 +547,6 @@ border:1px solid black;
             </article>
         </div>
 <!--- this </div> was new --->
-
 
        {% load staticfiles %}
 <!--- tab for survival plot --->
@@ -582,14 +576,12 @@ The log-rank test gives a p-value of: {{pval}}
 <div class="tabcontent" id="patient_metadata">
             <article class="col-md-12 article-intro">
                 <h1>Patient Data</h1>
-{% if not ret_metadata1 %}
-{%else%}
 		<h3>
                     <a href="#">Metadata of patients</a>
                 </h3>
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients in Cluster 1 has a lung metastasis).</p>
             
-
+{{ret_metadata}}
 <table style="max-width:1200px;">
 <tr>
 <!--- iterate over tables of metadata and display as table--->
@@ -611,8 +603,7 @@ The log-rank test gives a p-value of: {{pval}}
   <th>{{value}}</th>
 {% endfor %}
 </tr> 
-</table>   
-{%endif%}    
+</table>       
 </article> 
         </div>
 <!--- tab for convergence plot --->
@@ -633,7 +624,7 @@ The log-rank test gives a p-value of: {{pval}}
             
         </div>
 <!--- this </div> was new --->
-<!---</div>--->
+</div>
 <!--- tab for enrichment --->
 	{% if enrichment_open %}
 	<div class="row" id="kegg_enrichment">
@@ -814,12 +805,11 @@ The log-rank test gives a p-value of: {{pval}}
 </table></p>
   </div>
 
-</article>
-<!--- this </div> was new ---> 
-</div>
+</article> 
 </div><!--- tab content ---><!--- end kegg enrichment -->
-<div id="div_for_new_analysis"  >
-<br><br>
+<!---</div>----> <!--- this <! was new --->
+</div><!--- results --->
+
 <form action="polls/clustering_6_part_1.html" name="myForm2" method="post" enctype="multipart/form-data"> {% csrf_token %}
 <input type="hidden" id="newAnalysis" name="newAnalysis" value="newAnalysis">                
 <!---<a name="Content"></a><button type="button" style="display:inline;" onclick="location.href='polls/clustering_6_part_1.html';" id="start_new_analysis_button"><br><b>Start a new analysis</b><br><br></button>--->
@@ -827,12 +817,6 @@ The log-rank test gives a p-value of: {{pval}}
 <!---<button type="submit" style="display:inline;" onclick="location.href='polls/clustering_6_part_1.html';" id="start_new_analysis_button"><br><b>Start a new analysis</b><br><br></button>-->
 <!---<input type="submit" value="Start a new Analysis" />-->
 </form>  
-</div>
-</div>
-
-
-
-</div><!--- results --->
         </div><!--- overall wrapper div--->
         <!-- /.row -->
 
@@ -1038,7 +1022,7 @@ s.refresh();
 			</div>
         </div>
         
-        <div class="small-print" style="clear:both">
+        <div class="small-print">
         	<div class="container">
         		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
         		<p>Copyright &copy; Example.com 2015 </p>

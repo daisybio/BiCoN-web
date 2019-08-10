@@ -400,10 +400,11 @@ border:1px solid black;
                      <li>
                         <a href="infopage.html">How to</a>
                     </li>
-			<li>
-                        <a href="#">Analysis</a>
-                    </li>
-                    <li>
+
+		    <li>
+			<a href="sources.html">Sources</a>
+		    </li>
+			 <li>
                         <a>Logged in?</a>
 			{% if user.is_authenticated %}
     			User: {{ user.get_username }}
@@ -775,11 +776,17 @@ $('#selectall').trigger('change');
 <!--- div for showing algorithm progress --->
 <div class="tab5" style="width:50%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
 <!--- gif with symbol for "page loading" --->
-<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">
+<!---<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">--->
+<img src={% static loading_gif_1 %} width="100" height="100" alt="">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
 <!--- output text from the console and convergence plot--->
+<!---<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
+</object>---->
 <object width="500" height="75" type="text/plain" data="{% static output_console_file %}" border="0" ><br><br>
-</object><br><br><img src={% static progress_file %} width="400" height="400">
+</object><br><br>
+
+<!---<img src={% static 'progress.png' %} width="400" height="400">--->
+<img src={% static progress_file %} width="400" height="400">
 	
 </div>
 </div><!--- progress tab --->
