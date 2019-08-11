@@ -297,7 +297,7 @@ def clustering_6_new(request):
 			if('myfile' in request.FILES):
 				exprstr = request.FILES['myfile'].read().decode('utf-8')
 				result10 = preprocess_file_2.delay(exprstr)
-				(exprstr,nbr_col) = result10.get()
+				(exprstr,nbr_groups) = result10.get()
 			# read predefined expression file and clinical data
 			elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 				cancer_type = request.POST.get("cancer_type")
@@ -311,7 +311,7 @@ def clustering_6_new(request):
 					fh4.flush()
 					fh4.close()
 					survival_col_name = "disease free survival in months:ch1"
-					nbr_col = 2
+					nbr_groups = 2
 				else:
 					fh1 = open("clustering/data/breast_cancer_expr.csv")
 					exprstr = fh1.read()
@@ -321,7 +321,7 @@ def clustering_6_new(request):
 					fh4.flush()
 					fh4.close()
 					survival_col_name = "mfs (yr):ch1"
-					nbr_col = 2
+					nbr_groups = 2
 			# read PPI file
 			if('protfile' in request.FILES):
 				ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -367,7 +367,7 @@ def clustering_6_new(request):
 				gene_set_size = 2000
 				# run algorithm and read results
 			try:
-				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_col)
+				result1 = algo_output_task_2.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,gene_set_size,nbr_groups)
 				(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()
 				# make plots and process results	
 				result2 = script_output_task_9.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf)
@@ -722,7 +722,7 @@ def clustering_6_4_part_2(request):
 			if request.user.is_authenticated:
 				username = str(request.user)
 				list_of_files = GraphForm.list_user_data_2(username)	
-				list_of_files_2 = GraphForm.list_user_data(username)              				
+				list_of_files_2 = GraphForm.list_user_data(username)   
 			return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true"})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
@@ -760,11 +760,11 @@ def clustering_6_4_part_2(request):
 				else:
 					session_id = session_id_from_cache
 				
-				## assign standard result size
-				#if(request.POST['L_g_min'] == ""):
-				#	lgmin = 10
-				#if(request.POST['L_g_max'] == ""):
-				#	lgmax = 20
+				# assign standard result size
+				if(request.POST['L_g_min'] == ""):
+					lgmin = 10
+				if(request.POST['L_g_max'] == ""):
+					lgmax = 20
 				clinicalstr = ""
 				clinicaldf = ""
 				# configure loading page
@@ -781,7 +781,7 @@ def clustering_6_4_part_2(request):
 				if('myfile' in request.FILES):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
 					result10 = preprocess_file_2.delay(exprstr)
-					(exprstr,nbr_col) = result10.get()
+					(exprstr,nbr_groups) = result10.get()
 					#result10 = preprocess_file.delay(exprstr)
 					#exprstr = result10.get()
 				# read predefined expression file and clinical data
@@ -797,7 +797,7 @@ def clustering_6_4_part_2(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "disease free survival in months:ch1"
-						nbr_col = 2
+						nbr_groups = 2
 					else:
 						fh1 = open("clustering/data/breast_cancer_expr.csv")
 						exprstr = fh1.read()
@@ -807,7 +807,7 @@ def clustering_6_4_part_2(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "mfs (yr):ch1"
-						nbr_col = 2
+						nbr_groups = 2
 				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -853,7 +853,7 @@ def clustering_6_4_part_2(request):
 					gene_set_size = 2000
 				# run algorithm and read results
 				try:
-					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_groups)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 					# make plots and process results	
 					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
@@ -885,7 +885,8 @@ def clustering_6_4_part_2(request):
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
 						#if(os.path.isfile(path_metadata + "_2")):
 						#	copyfile((path_metadata+ "_2"),("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt_2"))
-						copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
+						if(has_survival_plot == "true"):
+							copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
 						copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist.txt"))
 						copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist_1.txt"))
 						copyfile(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist_2.txt"))
@@ -950,11 +951,8 @@ def clustering_6_4_part_2(request):
 				cache.set('analysis_running','analysis_running')
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"
-				output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
-				progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
-				loading_gif_1 = "loading_1_" + session_id + ".gif"		
 				#return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
-				return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1},status=301)
+				return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val,'has_survival_plot':has_survival_plot},status=301)
 	elif('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			# configure loading page
@@ -1006,11 +1004,11 @@ def clustering_6_4_part_2(request):
 				make_empty_figure_2.delay(session_id)
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
-				## assign standard result size
-				#if(request.POST['L_g_min'] == ""):
-				#	lgmin = 10
-				#if(request.POST['L_g_max'] == ""):
-				#	lgmax = 20
+				# assign standard result size
+				if(request.POST['L_g_min'] == ""):
+					lgmin = 10
+				if(request.POST['L_g_max'] == ""):
+					lgmax = 20
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
 				# check if clinical data exist				
@@ -1018,9 +1016,11 @@ def clustering_6_4_part_2(request):
 					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
+				result10 = preprocess_file_2.delay(exprstr)
+				(exprstr_2,nbr_groups) = result10.get()
 				# run algorithm
 				try:
-					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_groups)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
@@ -1072,10 +1072,7 @@ def clustering_6_4_part_2(request):
 				cache.set("has_survival_plot",has_survival_plot)
 				remove_loading_image.delay()	
 				remove_loading_image_2.delay(session_id)	
-				output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
-				progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
-				loading_gif_1 = "loading_1_" + session_id + ".gif"
-				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
+				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot})
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"
@@ -1362,8 +1359,11 @@ def clustering_6_4(request):
 			if request.user.is_authenticated:
 				username = str(request.user)
 				list_of_files = GraphForm.list_user_data_2(username)	
-				list_of_files_2 = GraphForm.list_user_data(username)              				
-			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true"})
+				list_of_files_2 = GraphForm.list_user_data(username)         
+			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
+			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
+			loading_gif_1 = "loading_1_" + session_id + ".gif"					           									     	
+			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true",'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
 		# check if input files exist
@@ -1386,18 +1386,18 @@ def clustering_6_4(request):
 			analysis_running = cache.get('analysis_running', 'none')
 			if (analysis_running == 'none'):
 				cache.set('analysis_running','analysis_running')
-			#if ('L_g_min' in request.POST and 'L_g_max' in request.POST):
-			#	if(request.POST['L_g_min'] != "" and request.POST['L_g_max'] != ""):
-			#		lgmin = int(request.POST['L_g_min'])
-			#		lgmax = int(request.POST['L_g_max'])
-			#	else:
-			#		lgmin = 10
-			#		lgmax = 20
-			#else:
-			#	lgmin = 10
-			#	lgmax = 20
-			#if(1 == 1):
-			if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+			if ('L_g_min' in request.POST and 'L_g_max' in request.POST):
+				if(request.POST['L_g_min'] != "" and request.POST['L_g_max'] != ""):
+					lgmin = int(request.POST['L_g_min'])
+					lgmax = int(request.POST['L_g_max'])
+				else:
+					lgmin = 10
+					lgmax = 20
+			else:
+				lgmin = 10
+				lgmax = 20
+			#if('L_g_min' in request.POST and 'L_g_max' in request.POST):
+			if(1 == 1):
 				#if(save_data in ["save_data"]):
 				#	if request.user.is_authenticated:
 				#		print("saving data is true")
@@ -1429,7 +1429,7 @@ def clustering_6_4(request):
 				if('myfile' in request.FILES):
 					exprstr = request.FILES['myfile'].read().decode('utf-8')
 					result10 = preprocess_file_2.delay(exprstr)
-					(exprstr,nbr_col) = result10.get()
+					(exprstr,nbr_groups) = result10.get()
 				# read predefined expression file and clinical data
 				elif('predef_file' in request.POST and 'cancer_type' in request.POST):
 					cancer_type = request.POST.get("cancer_type")
@@ -1443,7 +1443,7 @@ def clustering_6_4(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "disease free survival in months:ch1"
-						nbr_col = 2
+						nbr_groups = 2
 					else:
 						fh1 = open("clustering/data/breast_cancer_expr.csv")
 						exprstr = fh1.read()
@@ -1453,7 +1453,7 @@ def clustering_6_4(request):
 						fh4.flush()
 						fh4.close()
 						survival_col_name = "mfs (yr):ch1"
-						nbr_col = 2
+						nbr_groups = 2
 				# read PPI file
 				if('protfile' in request.FILES):
 					ppistr = request.FILES['protfile'].read().decode('utf-8')
@@ -1498,7 +1498,7 @@ def clustering_6_4(request):
 					gene_set_size = 2000
 				# run algorithm and read results
 				try:
-					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_col)
+					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_groups)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 					# make plots and process results	
 					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
@@ -1532,7 +1532,8 @@ def clustering_6_4(request):
 						copyfile(("/code/clustering/static/" + path_heatmap),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
-						copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
+						if(has_survival_plot == "true"):
+							copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
 						if(os.path.isfile("/code/clustering/static/userfiles/genelist_" + session_id + ".txt")):
 							copyfile(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist.txt"))
 							copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("user_uploaded_files/"+ username + "/" + curr_time + "_genelist_1.txt"))
@@ -1639,6 +1640,10 @@ def clustering_6_4(request):
 				make_empty_figure_2.delay(session_id)
 				lgmin = int(request.POST['L_g_min'])
 				lgmax = int(request.POST['L_g_max'])	
+				if(request.POST['L_g_min'] == ""):
+					lgmin = 10
+				if(request.POST['L_g_max'] == ""):
+					lgmax = 20
 				## assign standard result size
 				if(gene_set_size == "" or not str(gene_set_size).isdigit()):
 					gene_set_size = 2000
@@ -1648,8 +1653,10 @@ def clustering_6_4(request):
 					survival_col_name = ""
 					clinicalstr = "empty"
 					ret_metadata = ""
+				result10 = preprocess_file_2.delay(exprstr)
+				(exprstr_2,nbr_groups) = result10.get()
 				try:
-					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,5)
+					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_groups)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
 					# check if clinical data exist				
 					result2 = script_output_task_10.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
@@ -1833,8 +1840,11 @@ def clustering_6_4(request):
 				cache.set("enrichment_dict_3",enrichment_dict_3)
 				cache.set("enrichment_dict_4",enrichment_dict_4)
 				cache.set("enrichment_dict_5",enrichment_dict_5)
+			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
+			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
+			loading_gif_1 = "loading_1_" + session_id + ".gif"					           									     	
 			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path_heatmap,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
-'json_path':(json_path + "?foo=bar"),'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
+'json_path':(json_path + "?foo=bar"),'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
 		if('enr' not in request.POST):
 			mutable = request.POST._mutable
 			request.POST._mutable = True
@@ -1861,7 +1871,10 @@ def clustering_6_4(request):
 			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"	
-		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot})
+		output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
+		progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
+		loading_gif_1 = "loading_1_" + session_id + ".gif"					           									     	
+		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
 	else:		
 		analysis_running = cache.get('analysis_running', 'none')
 		print("analysis running: " + str(analysis_running))

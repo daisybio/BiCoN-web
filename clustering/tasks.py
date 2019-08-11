@@ -1917,6 +1917,8 @@ def check_input_files(ppistr,exprstr):
 	errstr = ""
 	ppi_stringio = StringIO(ppistr)
 	ppidf = pd.read_csv(ppi_stringio,sep='\t')
+	expr_stringio = StringIO(exprstr)
+	exprdf = pd.read_csv(expr_stringio,sep='\t')
 	#print(ppidf)
 	#print(ppidf.iloc[0,:])
 	# check if PPI file has at least 2 columns
@@ -1935,6 +1937,10 @@ def check_input_files(ppistr,exprstr):
 				contains_numbers = "true"
 	if(contains_numbers == "false"):
 		errstr = errstr + "\n" + "Input file must contain lines with Entrez IDs of interaction partners.\n"
+	for column_name, column in exprdf.iterrows():
+		coluniq = column.unique().tolist()
+		if("-" in coluniq):
+			errstr = "Expression data contain special characters.\n"
 	return(errstr)
 				
 @shared_task(name="convert_gene_list")
