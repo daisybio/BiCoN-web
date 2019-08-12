@@ -674,6 +674,7 @@ def clustering_6_4_part_2(request):
 			path_genelist = filename1.split("_json.json")[0] + "_genelist.txt"
 			path_genelist_1 = filename1.split("_json.json")[0] + "_genelist_1.txt"
 			path_genelist_2 = filename1.split("_json.json")[0] + "_genelist_2.txt"
+			path_ntw_2 = filename1.split("_json.json")[0] + "_ntw.png"
 			# get locations to copy old result files to
 			session_id = ""
 			session_id_from_cache = cache.get("session_id","none")
@@ -693,6 +694,8 @@ def clustering_6_4_part_2(request):
 			copyfile(path_genelist,("clustering/static/userfiles/genelist_" + session_id + ".txt"))
 			copyfile(path_genelist_1,("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 			copyfile(path_genelist_2,("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
+			if(os.path.isfile(path_ntw_2)):
+				copyfile(path_ntw_2,("clustering/static/userfiles/ntw_" + session_id + ".txt"))
 			output_plot_path_2 = ""
 			ret_metadata_1 = ""
 			ret_metadata_2 = ""
@@ -719,11 +722,12 @@ def clustering_6_4_part_2(request):
 			# list old files
 			list_of_files = ""
 			list_of_files_2 = ""
+			network_path = "userfiles/ntw_" + session_id + ".png"					           									     	
 			if request.user.is_authenticated:
 				username = str(request.user)
 				list_of_files = GraphForm.list_user_data_2(username)	
 				list_of_files_2 = GraphForm.list_user_data(username)   
-			return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true"})
+			return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true",'network_path':network_path})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
 		# check if input files exist
@@ -882,6 +886,7 @@ def clustering_6_4_part_2(request):
 						# save output data
 						copyfile(("/code/clustering/static/" + path_heatmap),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
+						copyfile(("/code/clustering/static/userfiles/ntw_" + session_id + ".png"),("user_uploaded_files/"+ username + "/" + curr_time + "_ntw.png"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
 						#if(os.path.isfile(path_metadata + "_2")):
 						#	copyfile((path_metadata+ "_2"),("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt_2"))
@@ -939,6 +944,7 @@ def clustering_6_4_part_2(request):
 				copyfile(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 				copyfile(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
 				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
+				network_file = "userfiles/ntw_" + session_id + ".gif"
 				# save session ID and metadata in cache
 				cache.set('session_id', session_id)	
 				cache.set('ret_metadata1', ret_metadata1)	
@@ -952,7 +958,7 @@ def clustering_6_4_part_2(request):
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"
 				#return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
-				return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val,'has_survival_plot':has_survival_plot},status=301)
+				return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val,'has_survival_plot':has_survival_plot,'network_file':network_file},status=301)
 	elif('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			# configure loading page
@@ -1070,9 +1076,10 @@ def clustering_6_4_part_2(request):
 				cache.set('p_val', p_val)
 				cache.set('done',"done")
 				cache.set("has_survival_plot",has_survival_plot)
+				network_file = "userfiles/ntw_" + session_id + ".gif"
 				remove_loading_image.delay()	
 				remove_loading_image_2.delay(session_id)	
-				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot})
+				return render(request, 'clustering/clustering_6_part_3.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot,'network_file':network_file})
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"
@@ -1316,6 +1323,7 @@ def clustering_6_4(request):
 			path_genelist = filename1.split("_json.json")[0] + "_genelist.txt"
 			path_genelist_1 = filename1.split("_json.json")[0] + "_genelist_1.txt"
 			path_genelist_2 = filename1.split("_json.json")[0] + "_genelist_2.txt"
+			path_ntw_2 = filename1.split("_json.json")[0] + "_ntw.png"
 			# get locations to copy old result files to
 			session_id = request.session._get_or_create_session_key() 
 			json_path = "userfiles/ppi_" + session_id + ".json"
@@ -1325,6 +1333,8 @@ def clustering_6_4(request):
 			# copy files to static directory
 			copyfile(path_json,("clustering/static/" + json_path))	
 			copyfile(path_heatmap,("clustering/static/" + path_heatmap_2))
+			if(os.path.isfile(path_ntw_2)):
+				copyfile(path_ntw_2,("clustering/static/userfiles/ntw_" + session_id + ".txt"))
 			copyfile(path_genelist,("clustering/static/userfiles/genelist_" + session_id + ".txt"))
 			copyfile(path_genelist_1,("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
 			copyfile(path_genelist_2,("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
@@ -1362,8 +1372,9 @@ def clustering_6_4(request):
 				list_of_files_2 = GraphForm.list_user_data(username)         
 			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
-			loading_gif_1 = "loading_1_" + session_id + ".gif"					           									     	
-			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true",'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
+			loading_gif_1 = "loading_1_" + session_id + ".gif"
+			network_path = "userfiles/ntw_" + session_id + ".png"					           									     	
+			return render(request, 'clustering/clustering_6_part_4.html', {'form':"",'images':"",'plot_div':"",'script':"",'path_heatmap':path_heatmap_2,'output_plot_path':output_plot_path_2,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':"true",'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_path':network_path})
 	
 	elif(('myfile' in request.FILES or 'predef_file' in request.POST) and ('protfile' in request.FILES or ('parse_ndex_file' in request.POST and 'ndex_name_2' in request.POST))):
 		# check if input files exist
@@ -1531,6 +1542,7 @@ def clustering_6_4(request):
 						# save output data
 						copyfile(("/code/clustering/static/" + path_heatmap),("user_uploaded_files/"+ username + "/" + curr_time + "_heatmap.png"))	
 						copyfile(("/code/clustering/static/" + json_path),("user_uploaded_files/"+ username + "/" + curr_time + "_json.json"))	
+						copyfile(("/code/clustering/static/userfiles/ntw_" + session_id + ".png"),("user_uploaded_files/"+ username + "/" + curr_time + "_ntw.png"))	
 						copyfile( path_metadata,("user_uploaded_files/"+ username + "/" + curr_time + "metadata.txt"))
 						if(has_survival_plot == "true"):
 							copyfile(("/code/clustering/static/" + output_plot_path),("user_uploaded_files/"+ username + "/" + curr_time + "plotly.html"))
@@ -1591,9 +1603,10 @@ def clustering_6_4(request):
 				output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 				progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
 				loading_gif_1 = "loading_1_" + session_id + ".gif"
+				network_file = "userfiles/ntw_" + session_id + ".gif"
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"		
-				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
+				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_file':network_file})
 	if('redo_analysis' in request.POST and request.user.is_authenticated):
 		if(request.POST['redo_analysis']):
 			# configure loading page
@@ -1712,7 +1725,8 @@ def clustering_6_4(request):
 				output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 				progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
 				loading_gif_1 = "loading_1_" + session_id + ".gif"
-				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})	
+				network_file = "userfiles/ntw_" + session_id + ".gif"
+				return render(request, 'clustering/clustering_6_part_4.html', {'path_heatmap':path_heatmap,'output_plot_path':output_plot_path,'json_path':json_path, 'list_of_files':list_of_files,'ret_dat':"",'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_file':network_file})	
 	elif('enrichment_type' in request.POST):
 		enr_type = request.POST.get("enrichment_type")
 		group_for_enr = "both"	
@@ -1925,6 +1939,7 @@ def clustering_6_4(request):
 			# take result files from storage
 			path_heatmap = "userfiles/heatmap_" + session_id_from_cache + ".png"
 			json_path = "userfiles/ppi_" + session_id_from_cache + ".json"
+			network_path = "userfiles/ntw_" + session_id_from_cache + ".png"
 			output_plot_path = "userfiles/output_plotly_" + session_id_from_cache + ".html"
 			# take metadata from cache
 			ret_metadata1 = cache.get('ret_metadata1',"")
@@ -1955,8 +1970,9 @@ def clustering_6_4(request):
 			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
 			loading_gif_1 = "loading_1_" + session_id + ".gif"
-			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1})
+			return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_path':network_path})
 		cache.clear()
+		#network_path = "userfiles/ntw_" + session_id + ".png"
 		cache.set('session_id',session_id)
 		cache.set('analysis_running', analysis_running)
 		output_console_file = "userfiles/output_console_" + session_id + ".txt"

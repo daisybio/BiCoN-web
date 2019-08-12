@@ -190,7 +190,9 @@ tr:nth-child(even) {
 }
 .row{
 min-width:1200px;}
-
+body {
+  color: black;
+}
 </style>
 </head>
 
@@ -294,17 +296,19 @@ border:1px solid black;
         </div>
 	<div style="padding:40px;margin:40px;border:1px solid #ccc;min-width:1400px">
 
-        <h3> Sources </h3>
-	The two built-in expression datasets are from the following sources:
+        <h3> Datasets </h3>
+	The two built-in expression datasets are from the following sources:<br>
 	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse2603" target="_blank">Breast Cancer</a><br>
 	<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE30219" target="_blank">Lung Cancer</a><br><br>
-	The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/" target="_blank">NDEx Bio</a> webserver and contain datasets from the following sources: <a href="http://www.hprd.org/" target="_blank">Human Protein Reference Database</a> (<a href="http://www.ndexbio.org/#/network/1093e665-86da-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>), <a href="http://cicblade.dep.usal.es:8080/APID/init.action" target="_blank">Agile Protein Interactions Database</a> (<a href="http://www.ndexbio.org/#/network/9c38ce6e-c564-11e8-aaa6-0ac135e8bacf" target="_blank">link to source</a>), <a href="https://string-db.org/" target="_blank">STRING</a> database (<a href="http://www.ndexbio.org/#/network/275bd84e-3d18-11e8-a935-0ac135e8bacf" target="_blank">link to source</a>), and from <a href="https://thebiogrid.org/" target="_blank">BioGrid</a> (<a href="http://www.ndexbio.org/#/network/becec556-86d4-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>).<br><br>
+	The built-in PPI data are loaded from the <a href="http://www.ndexbio.org/" target="_blank">NDEx Bio</a> webserver and contain datasets from the following sources: <br><a href="http://www.hprd.org/" target="_blank">Human Protein Reference Database</a> (<a href="http://www.ndexbio.org/#/network/1093e665-86da-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>),<br> <a href="http://cicblade.dep.usal.es:8080/APID/init.action" target="_blank">Agile Protein Interactions Database</a> (<a href="http://www.ndexbio.org/#/network/9c38ce6e-c564-11e8-aaa6-0ac135e8bacf" target="_blank">link to source</a>),<br> <a href="https://string-db.org/" target="_blank">STRING</a> database (<a href="http://www.ndexbio.org/#/network/275bd84e-3d18-11e8-a935-0ac135e8bacf" target="_blank">link to source</a>), <br>and from <a href="https://thebiogrid.org/" target="_blank">BioGrid</a> (<a href="http://www.ndexbio.org/#/network/becec556-86d4-11e7-a10d-0ac135e8bacf" target="_blank">link to source</a>).<br><br>
+	<br><br><h3>Code</h3>
         Most of the code for this website is written in <a href="https://www.python.org/" target="_blank"><b>Python</b></a>.<br>
 	As a server framework, <a href="https://www.djangoproject.com/" target="_blank"><b>Django</b></a> Version 2.1.3 is used.<br>
 	The queuing system <a href="http://www.celeryproject.org/" target="_blank">Celery</a> is used, based on a <a href="https://www.rabbitmq.com/" target="_blank">RabbitMQ</a> server for request processing.<br>
 	For the frontend, additional <a href="https://www.javascript.com" target="_blank"><b>JavaScript</b></a> and <a href="https://jquery.com/" target="_blank">JQuery</a> code is used.<br>
 	For the PPI network display, the javascript library <a href="http://sigmajs.org/" target="_blank">Sigma.js</a> is used.<br>
 	The javascript library <a href="https://datatables.net/" target="_blank">DataTables</a> is used to improve table display.<br><br>
+	<br><br><h3>External libraries</h3>
 	The server uses the following python libraries:<br>
 	<a href="https://github.com/tjwalch/django-livereload-server" target="_blank">django-livereload-server</a><br>
 	<a href="https://matplotlib.org/" target="_blank">Matplotlib</a> for plots,<br>
@@ -352,8 +356,6 @@ border:1px solid black;
         
         <div class="small-print">
         	<div class="container">
-        		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
-        		<p>Copyright &copy; Example.com 2015 </p>
         	</div>
         </div>
 	</footer>
@@ -374,4 +376,5 @@ border:1px solid black;
 </body>
 
 </html>
+
 

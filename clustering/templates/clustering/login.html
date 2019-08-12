@@ -112,21 +112,20 @@ tr:nth-child(even) {
         <!-- Heading -->
         <div class="row">
             <div class="col-lg-12">
-                <h1 class="page-header">Login
+                <h1 class="page-header">Log in here
                 </h1>
-                <p>Log in here:</p>
             </div>
         </div>
 	<div style="padding:40px;margin:40px;border:1px solid #ccc">
 	{{text}} <br>
-        <h1>Enter password and username:</h1>
+        <h2>Enter password and username:<br><br><br></h2>
         <form action="#" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-	Username:
+	<b>Username:</b>
 	<input class="input" type="text" name="username">
-	Password:
+	&nbsp;&nbsp;&nbsp;&nbsp;<b>Password:</b>
     	<input class="input" type="text" name="password">
-                <input type="submit" value="Login"/>
+        &nbsp;&nbsp;<input type="submit" value="Login"/>
 	
 </div>
 
@@ -142,8 +141,6 @@ tr:nth-child(even) {
         
         <div class="small-print">
         	<div class="container">
-        		<p><a href="#">Terms &amp; Conditions</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a></p>
-        		<p>Copyright &copy; Example.com 2015 </p>
         	</div>
         </div>
 	</footer>
