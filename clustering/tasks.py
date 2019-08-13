@@ -445,6 +445,8 @@ def add_loading_image_2(session_id):
 def remove_loading_image_2(session_id):
 	if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
 		os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
+	if(os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
+		os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
 
 ##################################################################
 ################## used for metadata display #####################
@@ -742,18 +744,28 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 						print("expression data are logarithmized")
 						log2_2 = False	
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
-	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
-		text_file.write("Your files are being processed...")
-	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
-		text_file.write("Your files are being processed...")
+	if(session_id == "none"):
+		with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+			text_file.write("Your files are being processed...")
+		with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+			text_file.write("Your files are being processed...")
+	else:
+		with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+			text_file.write("Your files are being processed...")
+		with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+			text_file.write("Your files are being processed...")
 	#B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
 	if(clusters_param == 2):
 		B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	else:
 		B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
 	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
-	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
-		text_file.write("Starting model run...")	
+	if(session_id == "none"):
+		with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+			text_file.write("Starting model run...")	
+	else:
+		with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+			text_file.write("Starting model run...")	
 	print("How many genes you want per cluster (minimum):")
 	#L_g_min = int(input())
 	print("How many genes you want per cluster (maximum):")
@@ -787,6 +799,10 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
+	#if(session_id == "none"):
+	#	solution,t_best,sc,conv=  lib.ants(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
+	#else:
+	# session id is "none" if it is not given
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
 	print("######################################################################")
@@ -925,13 +941,21 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
 		col_colors = species.map(lut)
 		#print(col_colors)
-	plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
+	if(session_id == "none"):
+		plt.savefig("/code/clustering/static/userfiles/ntw.png")
+		plt.savefig("/code/clustering/static/ntw.png")
+	else:
+		plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
 	#plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	plt.xlabel("iterations")
 	plt.ylabel("score per subnetwork")
-	plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
+	if(session_id == "none"):
+		plt.savefig("/code/clustering/static/userfiles/conv.png")
+		plt.savefig("/code/clustering/static/conv.png")
+	else:
+		plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
 	#plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
 
@@ -1347,8 +1371,8 @@ def script_output_task_9(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,ge
 	return(plot_div,ret_metadata,p_val)
 
 ### Processing of algorithm output with using session ID
-@shared_task(name="script_output_task_10")
-def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
+@shared_task(name="script_output_task")
+def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1_ret,jac_2_ret,survival_col,clinicaldf,session_id):
 	# define colors depending on z-score differences of genes in graph
 	def color_for_graph(v):
 		cmap_custom = {-4:'rgb(255, 0, 0)',-3:'rgb(255, 153, 51)',-2:'rgb(255, 204, 0)',-1:'rgb(255, 255, 0)',0:'rgb(204, 255, 51)',1:'rgb(153, 255, 51)',2:'rgb(102, 255, 51)',3:'rgb(51, 204, 51)'}
@@ -1398,8 +1422,11 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	jsn33 = jsn2.replace('links','edges')
 	jsn44 = jsn33.replace('Label','label')
 	jsn55 = jsn44.replace('bels','bel')
-	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','') 
-	json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
+	jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},','')
+	if(session_id == "none"):
+		json_path = "/code/clustering/static/userfiles/ppi.json"
+	else:
+		json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
 	with open(json_path, "w") as text_file:
 		text_file.write(jsn3)		
 	colordict={0:'#BB0000',1:'#0000BB'}
@@ -1415,15 +1442,24 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
-	path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
+	if(session_id == "none"):
+		path_heatmap = "/code/clustering/static/userfiles/heatmap.png"
+	else:
+		path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
 	plt.savefig(path_heatmap)
 	plt.clf()
 	# Array PatientData is for storing survival information
 	patientData = {}
 	# write lists of genes in files, needed for enrichment analysis
-	path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
-	path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
-	path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
+	if(session_id == "none"):
+		path_genelist = "/code/clustering/static/userfiles/genelist.txt"
+		path_genelist_1 = "/code/clustering/static/userfiles/genelist_1.txt"
+		path_genelist_2 = "/code/clustering/static/userfiles/genelist_2.txt"
+	else:
+
+		path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
+		path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
+		path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
 	with open(path_genelist,"w") as text_file_4:
 		for i in G_list:
 			text_file_4.write(str(i) + "\n")
@@ -1438,7 +1474,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 			if(i not in genes1):
 				text_file_6.write(str(i) + "\n")
 	text_file_6.close()
-	path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
+	if(session_id == "none"):
+		path_metadata = "/code/clustering/static/userfiles/metadata.txt"
+	else:
+		path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 	# if no metadata given, write an empty metadata file
 	p_val = ""
 	if(clinicalstr == "empty"):
@@ -1448,7 +1487,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+		if(session_id == "none"):
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+		else:
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
 			text_file_2.write("")
 		output_plot_path = "empty"
@@ -1472,7 +1514,7 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		clinicaldf.replace(['NTL'],['NA'], inplace=True)
 		clinicaldf.replace(['na'],['NA'], inplace=True)
 		clinicaldf_col_names = list(clinicaldf.columns)
-		patientids_metadata = clinicaldf.iloc[:,0].values.tolist()
+		patientids_metadata = [str(i) for i in clinicaldf.iloc[:,0].values.tolist()]
 		# get patient ids either from first column or from index, add one empty element at the beginning of the column names
 		if("Unnamed" in "\t".join(list(clinicaldf.columns))):
 			clinicaldf_col_names_temp = ['empty']
@@ -1739,7 +1781,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		title='percentage of patients'))
 		fig = dict(data=surv_data_for_graph,layout=layout)		
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
-		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+		if(session_id == "none"):
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+		else:
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open(output_plot_path, "w") as text_file_2:
@@ -1759,7 +1804,10 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		text_file_3.close()	
 		plot_div = ""	
 		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
-		output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+		if(session_id == "none"):
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+		else:
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		with open(output_plot_path, "w") as text_file_2:
 			text_file_2.write("")
 		output_plot_path = "empty"
@@ -1772,10 +1820,12 @@ def script_output_task_10(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,g
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
 		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
-	with open("/code/clustering/static/output_console.txt", "w") as text_file:
-		text_file.write("Done!")
-	with open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w") as text_file:
-		text_file.write("Done!")
+	if(session_id == "none"):
+		with open("/code/clustering/static/output_console.txt", "w") as text_file:
+			text_file.write("Done!")
+	else:
+		with open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w") as text_file:
+			text_file.write("Done!")
 	return(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val)
 
 

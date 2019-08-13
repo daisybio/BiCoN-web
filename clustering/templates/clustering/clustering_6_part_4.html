@@ -783,11 +783,11 @@ $('#selectall').trigger('change');
 </div><!--- wrapper div 3 -->
 
 <!--- div for showing algorithm progress --->
-<div class="tab5" style="width:50%; height:650px;float:left;display:inline;right:400px" id="progress_tab">
+<div class="tab5" style="width:40%; height:650px;float:left;display:inline;right:400px" id="progress_tab">
 <!--- gif with symbol for "page loading" --->
 <!---<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">--->
-<img src={% static loading_gif_1 %} width="100" height="100" alt="">
-<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
+<img src={% static loading_gif_1 %} width="100" height="100" alt=""><br>
+<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;">
 <!--- output text from the console and convergence plot--->
 <!---<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
 </object>---->
@@ -826,14 +826,14 @@ if (document.getElementById('display_old_results').checked){
     // check if inputted number is between 0 and 1000
     if (input >= 0 && input <= 1000) {
     } else { 
-    alert("Input for minimal number of genes must be between 0 and 1000");
-    return false;
+    alert("No number of genes selected. Analysis will automatically use cluster size between 10 and 20.");
+    return true;
     }
   var input2=parseFloat($('#L_g_max').val(), 2000);
     if (input2 >= 0 && input2 <= 1000) {
     } else { 
-    alert("Input for maximal number of genes must be between 0 and 1000");
-    return false;
+    alert("No number of genes selected. Analysis will automatically use cluster size between 10 and 20.");
+    return true;
     }
 }
 </script>

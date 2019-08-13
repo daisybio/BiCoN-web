@@ -158,7 +158,7 @@ How sessions work:
 #####################################
 
 For user managment, Session IDs (stored in the cache) are used. When a user first accesses the page, he is assigned a new session ID and that ID is stored in the cache. All files that are used for progress display and all files with results contain the session ID in their path (e.g. progress_[SESSION_ID].png).
-When a constructor method is called, the session ID is read from the cache and included in the file paths. The template contains links to all files as variables.
+When a constructor method is called, the session ID is read from the cache and included in the file paths. It is passed to the methods that write these files; if no session IDs are used, the parameter for session ID is set to "none" which is recognized by these methods. The rendered template contains links to all files as variables.
 Updates to these files are detected automatically by the livereload application and reflected to the user.
 
 #####################################

@@ -89,149 +89,136 @@ def hi(A_j,n,m):
 
 
 def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
-    #fig = plt.figure(figsize=(10,8))
-    #fig.suptitle('Your request is being processed...', fontsize=14, fontweight='bold')
-    #plt.savefig("/home/quirin/testproject/polls/static/progress.png")
-    #plt.close(fig)
-    ge = GE.values
-    H =H.astype(np.short)
-    N = neigborhood(H,n,th)
-    patients = np.arange(n,n+m)  
-    
-    cost = H/10
-    cost = np.max(cost)-cost
-    scores = []
-    avs = []
-    count_big = 0
-    max_total_score = 0
-    max_round_score = -100
-    av_score = 0
-    st = time.time()
-    t0 = np.ones((n+m,n+m))*5
-    t0 = t0.astype(np.short)
-    probs= prob_upd(H,t0,a,b,n,th,N)
-    end = time.time()
-    flag = False
-    score_change = []
-    print ("Running time statistics:")
-    print ("###############################################################")
-    print("the joint graph has "+ str(n+m) + " nodes")
-    print("probability update takes "+str(round(end-st,3)))
-    W = 0
-    while np.abs(max_round_score-av_score)>eps and count_big<times and (W<m/3):
-        av_score = 0
-        W = 0
-        max_round_score = 0
-        scores_per_round = []
-
-        for i in range(K):
-            #for each ant
-            st = time.time()
-            tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,i,cost_limit,L_g_min,L_g_max,G,ge,print_runs)
-            end = time.time()
-            W = W+wars
-            if count_big ==0 and i ==0:
-                print("one ant run takes "+str(round(end-st,3)))
-            scores_per_round.append(tot_score)
-            av_score = av_score + tot_score
-            if tot_score > max_round_score:
-                max_round_score = tot_score
-                solution = (gene_groups,patients_groups)
-                full_scores = new_scores
-                solution_big = (no_int,patients_groups)
-            if count_big ==0 and i ==K-1:
-                gs = 1.5*max_round_score
-
-                t_max = (1/evaporation)*gs
-                t_min = 0
-   
-                t0 = np.ones((n+m,n+m))*t_max
-        #after all ants have finished:
-        scores.append(scores_per_round)
-        
-        #saving rhe best overall solution
-        if max_round_score>max_total_score:
-            max_total_score = max_round_score
-            best_solution = solution
-            max_full_scores = full_scores 
-            solution_big_best = solution_big
-        score_change.append(round(max_round_score,3))
-        print("Iteration # "+ str(count_big+1))
-        print("best round score: " + str(round(max_round_score,3)))
-        print("average score: " + str(round(av_score/K,3)))
-        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
-        	#print("foobar")
-        	text_file.write("Iteration # "+ str(count_big+1))
-        	text_file.close()
-
-        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
-        	#print("foobar")
-        	text_file.write("Iteration # "+ str(count_big+1))
-        	text_file.close()
-        av_score = av_score/K
-        avs.append(round(av_score,2))
-        #print(scores)
-        print(avs)
-        #pher. and prob. updates
-        t = pher_upd(t0,t_min,evaporation,max_full_scores,solution_big_best,flag)
-        t0 = np.copy(t)
-        
-        probs= prob_upd(H,t,a,b,n,th,N)
-        
-        #visualization options:
-        
-        if show_pher:
-            fig = plt.figure(figsize=(18,12))
-            ax = fig.add_subplot(111)
-            t_max = np.max(t)   
-            cax = ax.matshow(t, interpolation='nearest',cmap=plt.cm.RdPu,vmin = t_min,vmax = t_max)
-            plt.colorbar(cax)
-            plt.title("Pheramones")
-            plt.show(block=False)
-            plt.close(fig)
-
-        count_big = count_big +1
-        if show_nets:
-            features(solution, GE,G)    
-        if show_plot:
-            fig = plt.figure(figsize=(10,8))
-            plt.boxplot(np.asarray(scores).T,manage_xticks = True, patch_artist=True)
-            if opt!=None:
-                plt.axhline(y=opt,label = "optimal solution score", c = "r")
-            #plt.ylim((0,1))
-            #plt.legend()
-            #this was not commented before #plt.show(block=False)
-            plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
-            plt.savefig("/code/clustering/static/progress.png")
-            plt.close(fig)
-        if len(set(score_change[:3])) ==1 and len(score_change)>3:
-            flag = True
-    if save != None:
-        fig = plt.figure(figsize=(10,8))
-        plt.boxplot(np.asarray(scores).T,manage_xticks = True)
-        if opt!=None:
-            plt.axhline(y=opt,label = "optimal solution score", c = "r")
-        #plt.legend()
-        plt.savefig(save+".png")
-        plt.close(fig)
-        
-    #after the solutution is found we make sure to cluster patients the last time with that exact solution:
-    data_new = ge[solution[0][0]+solution[0][1],:]
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
-    labels = kmeans.labels_
-    patients_groups =[]
-    for clust in range(clusters):
-        wh = np.where(labels == clust)[0]
-        group_p = [patients[i] for i in wh]
-        patients_groups.append(group_p)
-    if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
-        patients_groups = patients_groups[::-1]
-    best_solution = [best_solution[0],patients_groups]
-    
-    print("best total score: "+str(max_total_score))
-    #print_clusters(GE,best_solution)
-    #features(best_solution, GE,G)
-    return(best_solution,t,max_total_score,np.asarray(scores).T)
+	ge = GE.values
+	H =H.astype(np.short)
+	N = neigborhood(H,n,th)
+	patients = np.arange(n,n+m)  
+	cost = H/10
+	cost = np.max(cost)-cost
+	scores = []
+	avs = []
+	count_big = 0
+	max_total_score = 0
+	max_round_score = -100
+	av_score = 0
+	st = time.time()
+	t0 = np.ones((n+m,n+m))*5
+	t0 = t0.astype(np.short)
+	probs= prob_upd(H,t0,a,b,n,th,N)
+	end = time.time()
+	flag = False
+	score_change = []
+	print ("Running time statistics:")
+	print ("###############################################################")
+	print("the joint graph has "+ str(n+m) + " nodes")
+	print("probability update takes "+str(round(end-st,3)))
+	W = 0
+	while np.abs(max_round_score-av_score)>eps and count_big<times and (W<m/3):
+		av_score = 0
+		W = 0
+		max_round_score = 0
+		scores_per_round = []
+		for i in range(K):
+			#for each ant
+			st = time.time()
+			tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,i,cost_limit,L_g_min,L_g_max,G,ge,print_runs)
+			end = time.time()
+			W = W+wars
+			if count_big ==0 and i ==0:
+				print("one ant run takes "+str(round(end-st,3)))
+			scores_per_round.append(tot_score)
+			av_score = av_score + tot_score
+			if tot_score > max_round_score:
+				max_round_score = tot_score
+				solution = (gene_groups,patients_groups)
+				full_scores = new_scores
+				solution_big = (no_int,patients_groups)
+			if count_big ==0 and i ==K-1:
+				gs = 1.5*max_round_score
+				t_max = (1/evaporation)*gs
+				t_min = 0
+				t0 = np.ones((n+m,n+m))*t_max
+		#after all ants have finished:
+		scores.append(scores_per_round)
+		#saving rhe best overall solution
+		if max_round_score>max_total_score:
+			max_total_score = max_round_score
+			best_solution = solution
+			max_full_scores = full_scores 
+			solution_big_best = solution_big
+		score_change.append(round(max_round_score,3))
+		print("Iteration # "+ str(count_big+1))
+		print("best round score: " + str(round(max_round_score,3)))
+		print("average score: " + str(round(av_score/K,3)))
+		if(session_id == "none"):
+			with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+				#print("foobar")
+				text_file.write("Iteration # "+ str(count_big+1))
+				text_file.close()
+		else:
+			with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+				#print("foobar")
+				text_file.write("Iteration # "+ str(count_big+1))
+				text_file.close()
+		av_score = av_score/K
+		avs.append(round(av_score,2))
+		#print(scores)
+		print(avs)
+		#pher. and prob. updates
+		t = pher_upd(t0,t_min,evaporation,max_full_scores,solution_big_best,flag)
+		t0 = np.copy(t)
+		probs= prob_upd(H,t,a,b,n,th,N)	
+		#visualization options:
+		
+		if show_pher:
+			fig = plt.figure(figsize=(18,12))
+			ax = fig.add_subplot(111)
+			t_max = np.max(t)   
+			cax = ax.matshow(t, interpolation='nearest',cmap=plt.cm.RdPu,vmin = t_min,vmax = t_max)
+			plt.colorbar(cax)
+			plt.title("Pheramones")
+			plt.show(block=False)
+			plt.close(fig)
+		count_big = count_big +1
+		if show_nets:
+			features(solution, GE,G)    
+		if show_plot:
+			fig = plt.figure(figsize=(10,8))
+			plt.boxplot(np.asarray(scores).T,manage_xticks = True, patch_artist=True)
+			if opt!=None:
+				plt.axhline(y=opt,label = "optimal solution score", c = "r")
+			if(session_id == "none"):
+				plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+				plt.close(fig)
+			else:
+				plt.savefig("/code/clustering/static/progress.png")
+				plt.close(fig)
+		if len(set(score_change[:3])) ==1 and len(score_change)>3:
+			flag = True
+	if save != None:
+		fig = plt.figure(figsize=(10,8))
+		plt.boxplot(np.asarray(scores).T,manage_xticks = True)
+	if opt!=None:
+		plt.axhline(y=opt,label = "optimal solution score", c = "r")
+		#plt.legend()
+		plt.savefig(save+".png")
+		plt.close(fig)
+	#after the solutution is found we make sure to cluster patients the last time with that exact solution:
+	data_new = ge[solution[0][0]+solution[0][1],:]
+	kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
+	labels = kmeans.labels_
+	patients_groups =[]
+	for clust in range(clusters):
+		wh = np.where(labels == clust)[0]
+		group_p = [patients[i] for i in wh]
+		patients_groups.append(group_p)
+		if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
+			patients_groups = patients_groups[::-1]
+	best_solution = [best_solution[0],patients_groups]
+	print("best total score: "+str(max_total_score))
+	#print_clusters(GE,best_solution)
+	#features(best_solution, GE,G)
+	return(best_solution,t,max_total_score,np.asarray(scores).T)
 
 def ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
     #fig = plt.figure(figsize=(10,8))
