@@ -198,11 +198,11 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
 	if save != None:
 		fig = plt.figure(figsize=(10,8))
 		plt.boxplot(np.asarray(scores).T,manage_xticks = True)
-	if opt!=None:
-		plt.axhline(y=opt,label = "optimal solution score", c = "r")
-		#plt.legend()
-		plt.savefig(save+".png")
-		plt.close(fig)
+		if opt!=None:
+			plt.axhline(y=opt,label = "optimal solution score", c = "r")
+			#plt.legend()
+			plt.savefig(save+".png")
+			plt.close(fig)
 	#after the solutution is found we make sure to cluster patients the last time with that exact solution:
 	data_new = ge[solution[0][0]+solution[0][1],:]
 	kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
@@ -212,8 +212,8 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
 		wh = np.where(labels == clust)[0]
 		group_p = [patients[i] for i in wh]
 		patients_groups.append(group_p)
-		if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
-			patients_groups = patients_groups[::-1]
+	if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
+		patients_groups = patients_groups[::-1]
 	best_solution = [best_solution[0],patients_groups]
 	print("best total score: "+str(max_total_score))
 	#print_clusters(GE,best_solution)

@@ -786,7 +786,7 @@ $('#selectall').trigger('change');
 <div class="tab5" style="width:40%; height:650px;float:left;display:inline;right:400px" id="progress_tab">
 <!--- gif with symbol for "page loading" --->
 <!---<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">--->
-<img src={% static loading_gif_1 %} width="100" height="100" alt=""><br>
+<img src={% static loading_gif_1 %} width="100" height="100" alt="" id="loading_gif"><br>
 <div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;">
 <!--- output text from the console and convergence plot--->
 <!---<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
@@ -794,7 +794,7 @@ $('#selectall').trigger('change');
 <object width="500" height="75" type="text/plain" data="{% static output_console_file %}" border="0" >
 </object><br><br>
 <!---<img src={% static 'progress.png' %} width="400" height="400">--->
-<img src={% static progress_file %} width="400" height="400">
+<img src={% static progress_file %} width="400" height="400" id="progress_image">
 	
 </div>
 </div><!--- progress tab --->
@@ -889,15 +889,34 @@ for (i = 0; i < coll.length; i++) {
         <!-- Feature Row -->
 
 <script>
-// optional function to hide the input form when algorithm is running
 //$.get("home/quirin/testproject/polls/static/loading_1.gif")
-$.get("/static/loading_1.gif")
+var loading_gif_file = "{{loading_gif_1}}"
+//var interval = setInterval(function() {
+$.get(loading_gif_file)
     .done(function() { 
-	//$('#input_data_div').hide();
+	//$('#loading_gif').show();
+	//$('#loading_gif').hide();
         // Do something now you know the image exists.
 
     }).fail(function() { 
-	//$('#progress_tab').hide();
+	//$('#loading_gif').hide();
+        // Image doesn't exist - do something else.
+
+    })
+//},2000);
+</script>
+
+<script>
+// optional function to hide the input form when algorithm is running
+//$.get("home/quirin/testproject/polls/static/loading_1.gif")
+var progress_image = "{{progress_file}}"
+$.get(progress_image)
+    .done(function() { 
+	$('#progress_image').show();
+        // Do something now you know the image exists.
+
+    }).fail(function() { 
+	//$('#progress_image').hide();
         // Image doesn't exist - do something else.
 
     })
