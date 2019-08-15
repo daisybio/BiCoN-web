@@ -25,7 +25,7 @@ import shutil
 import clustering
 from clustering.models import Upload,UploadForm,GraphForm
 from django.contrib.auth import authenticate, login, logout
-from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,import_ndex,read_enrichment,read_ndex_file_4,run_kegg_enrichment,run_go_enrichment,run_reac_enrichment,read_enrichment_2,convert_gene_list,check_input_files,script_output_task,preprocess_file,write_pval,list_metadata_from_file,preprocess_clinical_file,preprocess_ppi_file,preprocess_file_2,make_empty_figure_2,empty_log_file_2,add_loading_image_2,remove_loading_image_2,run_enrichment
+from clustering.tasks import make_empty_figure,algo_output_task,empty_log_file,add_loading_image,remove_loading_image,import_ndex,read_enrichment,read_ndex_file_4,read_enrichment_2,convert_gene_list,check_input_files,script_output_task,preprocess_file,write_pval,list_metadata_from_file,preprocess_clinical_file,preprocess_ppi_file,preprocess_file_2,make_empty_figure_2,empty_log_file_2,add_loading_image_2,remove_loading_image_2,run_enrichment
 from django.core.cache import cache
 import os.path
 from django.core.mail import send_mail
@@ -519,9 +519,9 @@ def clustering_6_new(request):
 		if not(os.path.isfile("genelist.txt") and os.path.isfile("genelist_1.txt") and os.path.isfile("genelist_2.txt")):
 				return render(request,'clustering/clustering_6.html',{'errstr':""})
 		if(enr_type == "kegg_enrichment"):
-			result1 = run_kegg_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_kegg")
-			result2 = run_kegg_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_kegg")
-			result3 = run_kegg_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_kegg")
+			result1 = run_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_kegg",['KEGG_2016','KEGG_2013'])
+			result2 = run_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_kegg",['KEGG_2016','KEGG_2013'])
+			result3 = run_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_kegg",['KEGG_2016','KEGG_2013'])
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
@@ -535,9 +535,9 @@ def clustering_6_new(request):
 			enrichment_dict_3 = result6.get()
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_enrichment"):	
-			result1 = run_go_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_go")
-			result2 = run_go_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_go")
-			result3 = run_go_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_go")
+			result1 = run_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result2 = run_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result3 = run_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
@@ -552,9 +552,9 @@ def clustering_6_new(request):
 			enrichment_dict_3 = result6.get()	
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_molecular"):
-			result1 = run_go_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_go")
-			result2 = run_go_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_go")
-			result3 = run_go_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_go")
+			result1 = run_enrichment.delay("genelist.txt",pval_enr,"/code/clustering/data/test/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result2 = run_enrichment.delay("genelist_1.txt",pval_enr,"/code/clustering/data/test2/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result3 = run_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test3/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
@@ -569,7 +569,7 @@ def clustering_6_new(request):
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "reactome_enrichment"):
 			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
-			result2 = run_reac_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test2/enrichr_reactome")
+			result2 = run_enrichment.delay("genelist_2.txt",pval_enr,"/code/clustering/data/test2/enrichr_reactome",['Reactome_2013','Reactome_2016'])
 			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
 			#enr_results = result1.get()
 			enr_results_2 = result2.get()
@@ -955,6 +955,7 @@ def clustering_6_4_part_2(request):
 				# set "done" parameter
 				cache.set('done',"done")
 				cache.set('analysis_running','analysis_running')
+				cache.set('has_survival_plot',has_survival_plot)
 				if(clinicalstr == "empty"):
 					output_plot_path = "empty"
 				#return render(request, 'clustering/clustering_6_part_3.html', {'form':"",'images':"",'plot_div':"",'script':"",'plot2':"",'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path, 'list_of_files':list_of_files,'ret_dat':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'list_of_files_2':list_of_files_2,'pval':p_val})
@@ -1109,9 +1110,9 @@ def clustering_6_4_part_2(request):
 		# one if loop for each enrichment type due to complicated naming of result files
 		if(enr_type == "kegg_enrichment"):
 			# run enrichment and write to directories
-			result1 = run_kegg_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"clustering/data/test/enrichr_kegg")
-			result2 = run_kegg_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"clustering/data/test2/enrichr_kegg")
-			result3 = run_kegg_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"clustering/data/test3/enrichr_kegg")
+			result1 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"clustering/data/test/enrichr_kegg",['KEGG_2016','KEGG_2013'])
+			result2 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"clustering/data/test2/enrichr_kegg",['KEGG_2016','KEGG_2013'])
+			result3 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"clustering/data/test3/enrichr_kegg",['KEGG_2016','KEGG_2013'])
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
@@ -1126,9 +1127,9 @@ def clustering_6_4_part_2(request):
 			enrichment_dict_3 = result6.get()
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_enrichment"):	
-			result1 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"clustering/data/test/enrichr_go")
-			result2 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"clustering/data/test2/enrichr_go")
-			result3 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"clustering/data/test3/enrichr_go")
+			result1 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"clustering/data/test/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result2 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"clustering/data/test2/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result3 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"clustering/data/test3/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 			#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
@@ -1143,9 +1144,9 @@ def clustering_6_4_part_2(request):
 			enrichment_dict_3 = result6.get()	
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "go_molecular"):
-			result1 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"/code/clustering/data/test/enrichr_go")
-			result2 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"/code/clustering/data/test2/enrichr_go")
-			result3 = run_go_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"/code/clustering/data/test3/enrichr_go")
+			result1 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_" + session_id + ".txt",pval_enr,"/code/clustering/data/test/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result2 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt",pval_enr,"/code/clustering/data/test2/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+			result3 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"/code/clustering/data/test3/enrichr_go",['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 			enr_results = result1.get()
 			enr_results_2 = result2.get()
 			enr_results_3 = result3.get()
@@ -1160,7 +1161,7 @@ def clustering_6_4_part_2(request):
 			(enrichment_dict_4,enrichment_dict_5) = result7.get()
 		elif(enr_type == "reactome_enrichment"):
 			#result1 = run_reac_enrichment.delay("genelist_1.txt",pval_enr,"polls/data/test/enrichr_reactome")
-			result2 = run_reac_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"/code/clustering/data/test2/enrichr_reactome")
+			result2 = run_enrichment.delay("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt",pval_enr,"/code/clustering/data/test2/enrichr_reactome",['Reactome_2013','Reactome_2016'])
 			#result3 = run_reac_enrichment.delay("genelist.txt",pval_enr,"polls/data/test3/enrichr_reactome")
 			#enr_results = result1.get()
 			enr_results_2 = result2.get()
@@ -1198,6 +1199,11 @@ def clustering_6_4_part_2(request):
 		done_from_cache = cache.get("done","")
 		analysis_running = cache.get('analysis_running', 'none')
 		session_id_from_cache = cache.get('session_id', 'has_expired')
+		surv_from_cache = cache.get('has_survival_plot', 'none')
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
+		elif(surv_from_cache == "true"):
+			has_survival_plot = "true"
 		# if no analysis is running, remove loading image and text. this is to make sure after an incomplete analysis no "leftover" text with the status of last run is displayed
 		if (analysis_running == 'none'):
 			print("analysis not running")
@@ -1248,7 +1254,7 @@ def clustering_6_4_part_2(request):
 				json_path = "userfiles/ppi_" + session_id + ".json"
 				path_metadata = "userfiles/metadata_" + session_id + ".txt"
 				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
-				return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true"})		
+				return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':has_survival_plot})		
 		# this redirects the user to the result page if the done parameter is true (e.g. reloading page after an analysis)
 		if(done_from_cache=="done"):
 			#print("clustering 6 part 3")
@@ -1263,7 +1269,7 @@ def clustering_6_4_part_2(request):
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			path_metadata = "userfiles/metadata_" + session_id + ".txt"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
-			return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true"},status=301)				
+			return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':has_survival_plot},status=301)				
 			#return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict})				
 		if(session_id_from_cache == 'has_expired'):
 			session_id = request.session._get_or_create_session_key()
@@ -2075,9 +2081,9 @@ def clustering_6_part_3_2(request):
 			#kegg_output_dir = kegg_dir + "/KEGG_2013.test_name.enrichr.reports.txt"
 			#print(genelist)
 			if(enr_type == "kegg_enrichment"):
-				result1 = run_kegg_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_kegg/" + session_id))
-				result2 = run_kegg_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_kegg/" + session_id))
-				result3 = run_kegg_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_kegg/" + session_id))
+				result1 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_kegg/" + session_id),['KEGG_2016','KEGG_2013'])
+				result2 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_kegg/" + session_id),['KEGG_2016','KEGG_2013'])
+				result3 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_kegg/" + session_id),['KEGG_2016','KEGG_2013'])
 				enr_results = result1.get()
 				enr_results_2 = result2.get()
 				enr_results_3 = result3.get()
@@ -2094,9 +2100,9 @@ def clustering_6_part_3_2(request):
 				# results "only in group 1/2"
 				(enrichment_dict_4,enrichment_dict_5) = result7.get()
 			elif(enr_type == "go_enrichment"):	
-				result1 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id))
-				result2 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_go/" + session_id))
-				result3 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_go/" + session_id))
+				result1 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+				result2 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+				result3 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 				#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
 				enr_results = result1.get()
 				enr_results_2 = result2.get()
@@ -2111,9 +2117,9 @@ def clustering_6_part_3_2(request):
 				enrichment_dict_3 = result6.get()	
 				(enrichment_dict_4,enrichment_dict_5) = result7.get()
 			elif(enr_type == "go_molecular"):
-				result1 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id))
-				result2 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_go/" + session_id))
-				result3 = run_go_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_go/" + session_id))
+				result1 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+				result2 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
+				result3 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 				enr_results = result1.get()
 				enr_results_2 = result2.get()
 				enr_results_3 = result3.get()
@@ -2127,9 +2133,9 @@ def clustering_6_part_3_2(request):
 				enrichment_dict_3 = result6.get()
 				(enrichment_dict_4,enrichment_dict_5) = result7.get()
 			elif(enr_type == "reactome_enrichment"):
-				result1 = run_reac_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_reactome/" + session_id))
-				result2 = run_reac_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_reactome/" + session_id))
-				result3 = run_reac_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_reactome/" + session_id))
+				result1 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_reactome/" + session_id),['Reactome_2013','Reactome_2016'])
+				result2 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_reactome/" + session_id),['Reactome_2013','Reactome_2016'])
+				result3 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_reactome/" + session_id),['Reactome_2013','Reactome_2016'])
 				enr_results = result1.get()
 				enr_results_2 = result2.get()
 				enr_results_3 = result3.get()
@@ -2211,7 +2217,12 @@ def clustering_6_part_3_2(request):
 				enrichment_dict_3 = cache.get('enrichment_dict_3',"")
 				enrichment_dict_4 = cache.get('enrichment_dict_4',"")
 				enrichment_dict_5 = cache.get('enrichment_dict_5',"")
+			surv_from_cache = cache.get('has_survival_plot','none')
 			cache.clear()	
+			if(surv_from_cache == "false"):
+				has_survival_plot = "false"
+			elif(surv_from_cache == "true"):
+				has_survival_plot = "true"
 			cache.set('session_id', session_id_from_cache)	
 			cache.set('ret_metadata1', ret_metadata1)	
 			cache.set('ret_metadata2', ret_metadata2)	
@@ -2226,12 +2237,18 @@ def clustering_6_part_3_2(request):
 		json_path = "ppi_" + session_id + ".json"
 		path_metadata = "metadata_" + session_id + ".txt"
 		output_plot_path = "output_plotly_" + session_id + ".html"
+		surv_from_cache = cache.get('has_survival_plot','none')
 		cache.clear()
 		cache.set('analysis_running', analysis_running)
 		network_path = "none"
+		print("survival from cache" + str(surv_from_cache))
+		if(surv_from_cache == "false"):
+			has_survival_plot = "false"
+		elif(surv_from_cache == "true"):
+			has_survival_plot = "true"
 		if(os.path.isfile("/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".txt")):
 			network_path = "/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".txt"
-		return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true",'network_path':network_path})
+		return render(request,'clustering/clustering_6_part_3.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true",'network_path':network_path,'has_survival_plot':has_survival_plot})
 
 
 

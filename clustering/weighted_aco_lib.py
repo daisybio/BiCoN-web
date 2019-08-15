@@ -1,4 +1,5 @@
-from multiprocessing import Pool
+import multiprocessing
+from multiprocessing import set_start_method, Process, Queue
 import time
 import pandas as pd
 import numpy as np

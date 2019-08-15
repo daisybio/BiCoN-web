@@ -1229,61 +1229,6 @@ def run_enrichment(path,pval_enr,out_dir,terms):
                 )
 	return(enr.results)
 
-@shared_task(name="run_kegg_enrichment")
-def run_kegg_enrichment(path,pval_enr,out_dir):
-	fh1 = open(path)
-	gene_list = []
-	lines = fh1.readlines()
-	# read gene list line for line from file
-	for line in lines:
-		line.replace("\\n","")
-		gene_list.append(line)
-	print("running enrichment analysis")
-	enr = gp.enrichr(gene_list=gene_list,
-                 description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
-                 gene_sets=['KEGG_2016','KEGG_2013'],
-                 outdir=out_dir,
-                 cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
-                )
-	return(enr.results)
-
-@shared_task(name="run_go_enrichment")
-def run_go_enrichment(path,pval_enr,out_dir):
-	fh1 = open(path)
-	gene_list = []
-	lines = fh1.readlines()
-	#lines = lines[1:]
-	# read gene list from file line for line
-	for line in lines:
-		line.replace("\\n","")
-		gene_list.append(line)
-	print("running enrichment analysis")
-	enr = gp.enrichr(gene_list=gene_list,
-                 description='test_name',
-                 gene_sets=['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'],
-                 outdir=out_dir,
-                 cutoff=float(pval_enr)
-                )
-	return(enr.results)
-
-
-@shared_task(name="run_reac_enrichment")
-def run_reac_enrichment(path,pval_enr,out_dir):
-	fh1 = open(path)
-	gene_list = []
-	lines = fh1.readlines()
-	for line in lines:
-		line.replace("\\n","")
-		gene_list.append(line)
-	enr = gp.enrichr(gene_list=gene_list,
-                 description='test_name',
-                 gene_sets=['Reactome_2013','Reactome_2016'],
-                 outdir=out_dir,
-                 cutoff=float(pval_enr)
-                )
-	return(enr.results)
 
 
 # read terms in given cluster
