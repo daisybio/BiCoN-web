@@ -156,8 +156,8 @@ def errorpage(request):
 #########################################################################
 
 
-
-def clustering_6_new(request):
+#def clustering_6_new(request):
+def clustering_no_sessions(request):
 	ret_metadata1 = {}
 	ret_metadata2 = {}
 	ret_metadata3 = {}
@@ -609,7 +609,8 @@ def clustering_6_new(request):
 #### version of the page with separate input form and result display ####
 #########################################################################
 
-def clustering_6_4_part_2(request):
+#def clustering_6_4_part_2(request):
+def clustering_step_1(request):
 	# check if user has clicked 'return' button on result page, then request.POST['newAnalysis'] is "true"
 	if('newAnalysis' in request.POST):
 		print(request.POST.get("newAnalysis"))
@@ -1200,6 +1201,7 @@ def clustering_6_4_part_2(request):
 		analysis_running = cache.get('analysis_running', 'none')
 		session_id_from_cache = cache.get('session_id', 'has_expired')
 		surv_from_cache = cache.get('has_survival_plot', 'none')
+		has_survival_plot = "false"
 		if(surv_from_cache == "false"):
 			has_survival_plot = "false"
 		elif(surv_from_cache == "true"):
@@ -1288,7 +1290,7 @@ def clustering_6_4_part_2(request):
 #########################################################################
 
 
-def clustering_6_4(request):
+def clustering(request):
 	# the parameter analysis_running is true when an analysis has been run while the current cache exists. If it is false and an empty request is submitted (which is when an user first accesses the
 	# page), and for some reason the output-console file for the progress page is filled with text, it gets emptied and the loading-gif removed.
 	analysis_running = cache.get('analysis_running', 'none')
@@ -2005,19 +2007,6 @@ def clustering_6_4(request):
 		return render(request,'clustering/clustering_6_part_4.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':"",'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_path':network_path})
 
 
-def clustering_6_part_2_2(request):
-		#print("badfbasdbasdbasdb")
-		#return HttpResponseRedirect('polls/clustering_6_part_3.html')
-		#print(exprstr_par)
-		print(request.session['ppistr'])
-		if('done' in request.session):
-			print(request.session['done'])
-		#if(request.session.get('done') == "True"):
-		#	print("done")
-		return HttpResponseRedirect('clustering/clustering_6_part_3.html')
-		#return render(request,'polls/clustering_6_part_3.html')
-		#return(clustering_6_part_3_2(request))
-
 
 
 
@@ -2039,7 +2028,8 @@ def errorpage(request):
 
 
 # method for generating the result page belonging to clustering_6_part_4_2
-def clustering_6_part_3_2(request):
+#def clustering_6_part_3_2(request):
+def clustering_step_2(request):
 	#if('session_id' in request.POST):
 	#	print(request.POST['session_id'])
 	#print("basdbasdbasdbasdbs")

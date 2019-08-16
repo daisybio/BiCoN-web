@@ -3,17 +3,27 @@
 ### this file contains methods for all computationally intensive tasks needed for algorithm runs:
 ### - algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
 ###			arrays etc with the algorithm results.
-### - script_output_task_9 - this is needed for processing the outputs of algo_output_task to formats used
+### - script_output_task - this is needed for processing the outputs of algo_output_task to formats used
 ###  			for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to 
-###			files and outputs links to those files (and an array with metadata).
-### - script_output_task_10 - the same as script_output_task_9 but with using the session-id for each user.
+###			files and outputs links to those files (and an array with metadata). it takes a parameter
+###			"session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
+###			this parameter can be set to "none" if you do not want to use sessions. then it uses
+###			static paths (e.g. "ppi.json") instead.
 ### - import_ndex - this tasks imports PPI files from NDEx based on the UUID and parses them to the correct
 ###			input format for the algorithm tasks.
 ### - check_input_files - this task checks given expression and PPI files if they contain data and returns an error
 ###			string if they do not.
-### - preprocess_file - this task preprocesses an input file and when uncommenting some lines, it chooses the 2 most
-###			frequent clinical clusters when there are more than 2 clusters in a file.
-### - list_metadata_4 - reads metadata from a file and returns 3 arrays.
+### - preprocess_file - this task preprocesses an input expression data file and tries to find a column with
+###			pre-defined clusters. if found, it is renamed to "disease_type".
+### - preprocess_file_2 - the same as preprecess_file, but it returns a number of pre-defined clusters additionally.
+### - preprocess_ppi_file - preprocesses the PPI file. it finds every row that contains two tab-separated integers (protein IDs)
+###			and appends them to the output file.
+### - preprocess_clinical_file - converts clinical file to TSV format.
+### - list_metadata_from_file - reads metadata from a file and returns 3 arrays with variable names and their frequency
+###			in cluster 1 and 2.
+### - run_enrichment - runs an enrichment analysis usen given terms on a list of genes.
+### - read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
+### - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
 
 
 import string
@@ -117,7 +127,7 @@ def create_random_user_accounts(total):
 #### Olga's methods ####################################
 ########################################################
 
-
+# make an empty progress file (with static path)
 @shared_task(name="make_empty_figure")
 def make_empty_figure():
 	fig = plt.figure(figsize=(10,8))
@@ -125,6 +135,16 @@ def make_empty_figure():
 	#plt.savefig("/code/clustering/static/userfiles/progress.png")
 	plt.close(fig)
 
+
+# make an empty progress file and include session ID in the path
+@shared_task(name="make_empty_figure_2")
+def make_empty_figure_2(session_id):
+	fig = plt.figure(figsize=(10,8))
+	plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+	#plt.savefig("/code/clustering/static/userfiles/progress.png")
+	plt.close(fig)
+
+# empty the log file (static path)
 @shared_task(name="empty_log_file")
 def empty_log_file():
 	text_file = open("/code/clustering/static/output_console.txt", "w")
@@ -135,14 +155,7 @@ def empty_log_file():
     		text_file.write("")
     		text_file.close()
 
-
-@shared_task(name="make_empty_figure_2")
-def make_empty_figure_2(session_id):
-	fig = plt.figure(figsize=(10,8))
-	plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
-	#plt.savefig("/code/clustering/static/userfiles/progress.png")
-	plt.close(fig)
-
+# empty the log file (session ID in path)
 @shared_task(name="empty_log_file_2")
 def empty_log_file_2(session_id):
 	text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
@@ -153,17 +166,13 @@ def empty_log_file_2(session_id):
     		text_file.write("")
     		text_file.close()
 
-
+# write the p value to a file
 @shared_task(name="write_pval")
 def write_pval(pval,filename):
     text_file = open(filename, "w")
     text_file.write("The log-rank test gives a p-value of: " + str(pval))
     text_file.close()
 
-
-#######################################################################
-#### Olgas code again #################################################
-#######################################################################
 
 
 ########################################################
@@ -174,7 +183,7 @@ def write_pval(pval,filename):
 #### the *actual* algorithm ############################
 ########################################################
 
-
+# preprocess file with metadata
 @shared_task(name="preprocess_clinical_file")
 def preprocess_clinical_file(clinical_str):
 	if(len(clinical_str.split("\n")[0].split("\t")) > 2):
@@ -188,6 +197,7 @@ def preprocess_clinical_file(clinical_str):
 			clinical_str = clinical_str.replace(",","\t")
 	return clinical_str
 
+# preprocess PPI file
 @shared_task(name="preprocess_ppi_file")
 def preprocess_ppi_file(ppistr):
 	ppistr_split = ppistr.split("\n")
@@ -214,10 +224,7 @@ def preprocess_ppi_file(ppistr):
 			if(len(line.split("\t")) > 2):
 				line_length = len(line.split("\t"))
 				line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
-			#print(line.split("\t")[0])
-			#print(str(line.split("\t")[1]) + "end")
-			#print(str(line.split("\t")[0]).isdigit())
-			#print(str(line.split("\t")[1]).strip().replace("\n","").isdigit())
+			# check if line contains two integers with protein IDs
 			if(str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n","")).isdigit()):				
 				ppistr_split_new.append(line)
 				#print(line)
@@ -351,12 +358,12 @@ def preprocess_file_2(expr_str):
 					if(len(column.unique()) > 2 and done1 == "false"):
 						expr_str_split_2 = []
 						expr_str_split_2.append(expr_str_split[0])
-						type1 = column.value_counts().index.tolist()[0]	
-						type2 = column.value_counts().index.tolist()[1]
+						#type1 = column.value_counts().index.tolist()[0]	
+						#type2 = column.value_counts().index.tolist()[1]
 						#print(len(list(column)))
 						for i in range(0,len(list(column))-1):
-							if(list(column)[i] == type1 or list(column)[i] == type2):
-								expr_str_split_2.append(expr_str_split[i+1])
+							#if(list(column)[i] == type1 or list(column)[i] == type2):
+							expr_str_split_2.append(expr_str_split[i+1])
 						expr_str = "\n".join(expr_str_split_2)
 						done1 = "true"			
 		return(expr_str,nbr_col)
@@ -402,12 +409,12 @@ def preprocess_file_2(expr_str):
 						if(len(column.unique()) > 2 and done1 == "false"):
 							expr_str_split_2 = []
 							expr_str_split_2.append(expr_str_split[0])
-							type1 = column.value_counts().index.tolist()[0]	
-							type2 = column.value_counts().index.tolist()[1]
+							#type1 = column.value_counts().index.tolist()[0]	
+							#type2 = column.value_counts().index.tolist()[1]
 							#print(len(list(column)))
 							for i in range(0,len(list(column))-1):
-								if(list(column)[i] == type1 or list(column)[i] == type2):
-									expr_str_split_2.append(expr_str_split[i+1])
+								#if(list(column)[i] == type1 or list(column)[i] == type2):
+								expr_str_split_2.append(expr_str_split[i+1])
 							expr_str = "\n".join(expr_str_split_2)
 							done1 = "true"
 			########################
@@ -453,7 +460,7 @@ def remove_loading_image_2(session_id):
 ##################################################################
 
 
-
+# read metadata from file and return array with data
 @shared_task(name="list_metadata_from_file")
 def list_metadata_from_file(path):
 	# used for reading metadata
@@ -1208,7 +1215,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 
 
 ## enrichment stuff ##
-
+# run enrichment analysis
 @shared_task(name="run_enrichment")
 def run_enrichment(path,pval_enr,out_dir,terms):
 	fh1 = open(path)

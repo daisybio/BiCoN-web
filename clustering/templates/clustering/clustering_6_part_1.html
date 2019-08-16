@@ -398,7 +398,7 @@ border:1px solid black;
                         <a href="#">Home</a>
                     </li>
                      <li>
-                        <a href="infopage.html">How to</a>
+                        <a href="infopage.html">Guide</a>
                     </li>
 
 		    <li>
@@ -431,8 +431,8 @@ border:1px solid black;
     </nav>
 
 	<div class="jumbotron feature">
-		<div class="container">
-			<h1> Quirin's Master Thesis Test Page</h1>
+		<div class="container" style="display:inline-block;margin-left:17%">
+		<img src={% static 'logo.svg'%} % alt="" width="300" height="300" style="float:left;" ><div style="position: relative;"><h1 style="font-size:72px;"> <br>BiGAnts</h1></div>
 			<p>Vizualise Gene Expression and PPI data. </p>
 		</div>
 	</div>
@@ -457,7 +457,7 @@ border:1px solid black;
 	<div id="wrapper_div_4" style="float:left; display: inline-block;">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;display:inline;height:420px;width=50%;" id="input_data_div">
         <h1>Run Algorithm:</h1>
-	<a href="infopage.html"  target="_blank" style="font-size:25px">How to</a><br><br>
+	<a href="infopage.html"  target="_blank" style="font-size:25px">Guide</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 
@@ -777,7 +777,7 @@ $('#selectall').trigger('change');
 <div class="tab5" style="width:50%; height:600px;float:left;display:inline;right:400px" id="progress_tab">
 <!--- gif with symbol for "page loading" --->
 <!---<img src={% static 'loading_1.gif' %} width="100" height="100" alt="">--->
-<img src={% static loading_gif_1 %} width="100" height="100" alt="">
+<img src={% static loading_gif_1 %} width="100" height="100" alt="" onerror="this.style.display='none'">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left">
 <!--- output text from the console and convergence plot--->
 <!---<object width="500" height="75" type="text/plain" data="{% static 'output_console.txt' %}" border="0" ><br><br>
@@ -786,7 +786,7 @@ $('#selectall').trigger('change');
 </object><br><br>
 
 <!---<img src={% static 'progress.png' %} width="400" height="400">--->
-<img src={% static progress_file %} width="400" height="400">
+<img src={% static progress_file %} width="400" height="400" onerror="this.style.display='none'">
 	
 </div>
 </div><!--- progress tab --->

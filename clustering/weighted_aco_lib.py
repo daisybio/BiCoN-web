@@ -189,10 +189,10 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
 			if opt!=None:
 				plt.axhline(y=opt,label = "optimal solution score", c = "r")
 			if(session_id == "none"):
-				plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+				plt.savefig("/code/clustering/static/progress.png")
 				plt.close(fig)
 			else:
-				plt.savefig("/code/clustering/static/progress.png")
+				plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
 				plt.close(fig)
 		if len(set(score_change[:3])) ==1 and len(score_change)>3:
 			flag = True

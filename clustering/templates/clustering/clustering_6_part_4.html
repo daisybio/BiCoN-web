@@ -408,7 +408,7 @@ border:1px solid black;
                         <a href="#">Home</a>
                     </li>
                      <li>
-                        <a href="infopage.html">How to</a>
+                        <a href="infopage.html">Guide</a>
                     </li>
 		    <li>
 			<a href="sources.html">Sources</a>
@@ -461,12 +461,12 @@ border:1px solid black;
         </div>    
 	<!--- wrapper divs are used for a stable display of the page layout when resizing browser window --->
 	<div id="wrapper_div_2" style="float:left;min-width:1200px"> <!--- overall wrapper div -->
-	<div id="input_div_2" style="float:left; display:inline-block;max-height:650px;overflow-y:hidden;"> <!--- wrapper input div --->
+	<div id="input_div_2" style="float:left; display:inline-block;max-height:700px;min-height:700px;overflow-y:hidden;"> <!--- wrapper input div --->
 	<div id="wrapper_div_3" style="float:left; display: inline-block;">
 	<div id="wrapper_div_4" style="float:left; display: inline-block;">
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;display:inline;height:420px;width=50%;" id="input_data_div">
         <h1>Run Algorithm:</h1>
-	<a href="infopage.html"  target="_blank" style="font-size:25px">How to</a><br><br>
+	<a href="infopage.html"  target="_blank" style="font-size:25px">Guide</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 
@@ -748,6 +748,7 @@ $('#collapsible').change(function () {
     if ($(this).prop('checked')) {
     $('#params').css('height','450px');
     $('#input_data_div').css('height','600px');
+    //$('#wrapper_div').css('height','600px');
     } else {
     $('#params').css('height','300px');
     $('#input_data_div').css('height','420px');
