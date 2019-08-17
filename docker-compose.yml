@@ -25,6 +25,7 @@ services:
     volumes:
       - .:/code
     environment:
+      - NBR_PROCESSES=${nbr_processes:-4}
       - SECRET_KEY=${secret_key}
       - DJANGO_ALLOWED_HOSTS=${allowed_hosts:-['*']}
       - CELERY_URL=${cel_url}

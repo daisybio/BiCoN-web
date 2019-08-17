@@ -109,15 +109,14 @@ import ndex2
 
 #from polls.script3 import algo_output_ownfile_2
 
-@shared_task
-def create_random_user_accounts(total):
-    for i in range(total):
-        username = 'user_{}'.format(get_random_string(10, string.ascii_letters))
-        email = '{}@example.com'.format(username)
-        password = get_random_string(50)
-        User.objects.create_user(username=username, email=email, password=password)
-    return '{} random users created with success!'.format(total)
-
+#@shared_task
+#def create_random_user_accounts(total):
+#    for i in range(total):
+ #       username = 'user_{}'.format(get_random_string(10, string.ascii_letters))
+  #      email = '{}@example.com'.format(username)
+   #     password = get_random_string(50)
+    #    User.objects.create_user(username=username, email=email, password=password)
+    #return '{} random users created with success!'.format(total)
 #@shared_task(name="run_analysis")
 #def run_analysis(s,L_g_min,L_g_max,fh,prot_fh,nbr_iter,nbr_ants,evap):
 #	return(algo_output_ownfile_2(s,L_g_min,L_g_max,fh,prot_fh,nbr_iter,nbr_ants,evap))
@@ -127,51 +126,42 @@ def create_random_user_accounts(total):
 #### Olga's methods ####################################
 ########################################################
 
-# make an empty progress file (with static path)
-@shared_task(name="make_empty_figure")
-def make_empty_figure():
-	fig = plt.figure(figsize=(10,8))
-	plt.savefig("/code/clustering/static/progress.png")
-	#plt.savefig("/code/clustering/static/userfiles/progress.png")
-	plt.close(fig)
+
 
 
 # make an empty progress file and include session ID in the path
-@shared_task(name="make_empty_figure_2")
-def make_empty_figure_2(session_id):
+@shared_task(name="make_empty_figure")
+def make_empty_figure(session_id):
 	fig = plt.figure(figsize=(10,8))
-	plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
-	#plt.savefig("/code/clustering/static/userfiles/progress.png")
-	plt.close(fig)
-
-# empty the log file (static path)
-@shared_task(name="empty_log_file")
-def empty_log_file():
-	text_file = open("/code/clustering/static/output_console.txt", "w")
-	text_file.write("")
-	text_file.close()
-	if(os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
-    		text_file = open("/code/clustering/static/output_console.txt", "w")
-    		text_file.write("")
-    		text_file.close()
+	if(session_id == "none"):
+		plt.savefig("/code/clustering/static/progress.png")
+		#plt.savefig("/code/clustering/static/userfiles/progress.png")
+		plt.close(fig)
+	else:
+		plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+		#plt.savefig("/code/clustering/static/userfiles/progress.png")
+		plt.close(fig)
 
 # empty the log file (session ID in path)
-@shared_task(name="empty_log_file_2")
-def empty_log_file_2(session_id):
-	text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
-	text_file.write("")
-	text_file.close()
-	if(os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
-    		text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
-    		text_file.write("")
-    		text_file.close()
+@shared_task(name="empty_log_file")
+def empty_log_file(session_id):
+	if(session_id == "none"):
+		text_file = open("/code/clustering/static/output_console.txt", "w")
+		text_file.write("")
+		text_file.close()
+		if(os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
+	    		text_file = open("/code/clustering/static/output_console.txt", "w")
+	    		text_file.write("")
+	    		text_file.close()
+	else:
+		text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
+		text_file.write("")
+		text_file.close()
+		if(os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
+    			text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
+    			text_file.write("")
+    			text_file.close()
 
-# write the p value to a file
-@shared_task(name="write_pval")
-def write_pval(pval,filename):
-    text_file = open(filename, "w")
-    text_file.write("The log-rank test gives a p-value of: " + str(pval))
-    text_file.close()
 
 
 
@@ -427,33 +417,28 @@ def preprocess_file_2(expr_str):
 
 
 @shared_task(name="add_loading_image")
-def add_loading_image():
-	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
-	if(os.path.isfile("/code/clustering/static/loading.gif")):
-		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
+def add_loading_image(session_id):
+	if(session_id == "none"):
+		if(os.path.isfile("/code/clustering/static/loading.gif")):
+			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
+		else:
+			print("loading image not found")
 	else:
-		print("loading image not found")
+		if(os.path.isfile("/code/clustering/static/loading.gif")):
+			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+		else:
+			print("loading image not found")
 
 @shared_task(name="remove_loading_image")
-def remove_loading_image():
-	if(os.path.isfile("/code/clustering/static/loading_1.gif")):
-		os.unlink("/code/clustering/static/loading_1.gif")
-
-
-@shared_task(name="add_loading_image_2")
-def add_loading_image_2(session_id):
-	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
-	if(os.path.isfile("/code/clustering/static/loading.gif")):
-		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+def remove_loading_image(session_id):
+	if(session_id == "none"):
+		if(os.path.isfile("/code/clustering/static/loading_1.gif")):
+			os.unlink("/code/clustering/static/loading_1.gif")
 	else:
-		print("loading image not found")
-
-@shared_task(name="remove_loading_image_2")
-def remove_loading_image_2(session_id):
-	if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
-		os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
-	if(os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
-		os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
+		if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
+			os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
+		if(os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
+			os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
 
 ##################################################################
 ################## used for metadata display #####################
@@ -1547,12 +1532,6 @@ def import_ndex(name):
 	return(ret)
 
 
-@shared_task(name="show_old_data")
-def show_old_data(path_json,path_heatmap):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	copyfile(path_heatmap,"/code/clustering/static/test.png")
-	copyfile(path_json,"/code/clustering/static/test15.json")
 	
 
 

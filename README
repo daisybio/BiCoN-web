@@ -35,7 +35,7 @@ in the same terminal.
 
 This gets the server running. You can then access the website by typing:
 
-http://0.0.0.0:8000/clustering/clustering_6_4.html
+http://0.0.0.0:8000/clustering/clustering.html
 
 And substitute 0.0.0.0:8000 by the address and port number that is printed out by the application as above.
 
@@ -120,7 +120,7 @@ What is where (in the code):
 
 Templates (HTML pages visible to the user) are connected in a file at "clustering/urls.py" with a function that processes the request for each template. If you want to change the link for one of the pages, add a line below "urlpatterns" in this form:
 url(r'new_address.html', views.your_view),
-with your_view as the name of the method in "clustering/views.py" that is used to process a request submitted via "new_address.html" (e.g. the method for clustering_6_part_4.html is called clustering_6_4).
+with your_view as the name of the method in "clustering/views.py" that is used to process a request submitted via "new_address.html" (e.g. the method for clustering.html is called clustering).
 
 Files with results are stored in a static directory for which the location is defined in "clust_app/clust_app/settings.py". This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. In some cases, files are copied from the shared volume to the container running the Django server. 
 
@@ -183,9 +183,9 @@ In views.py, methods are defined that run code after the user accesses a web pag
 
 There are three different constructors that render a web page for the clustering application with slightly different functionality:
 
-- clustering_6_new: A static version of the webpage that does not use session IDs and with input and results on the same page.
-- clustering_6_part_1 (accessible under "http://0.0.0.0:8000/clustering/on_two_pages.html": A version of the page with different pages for input and result display. Redirects automatically to the result page after completion of the algorithm. Uses Session IDs (stored in the cache) for user management.
-- clustering_6_4 (accessible under ("http://0.0.0.0:8000/clustering/on_one_page.html"): Version of the page with input and results on the same page. Uses Session IDs (in the cache) for user management.
+- clustering_no_sessions: A static version of the webpage that does not use session IDs and with input and results on the same page.
+- clustering_step_1 (accessible under "http://0.0.0.0:8000/clustering/on_two_pages.html": A version of the page with different pages for input and result display. Redirects automatically to the result page after completion of the algorithm. Uses Session IDs (stored in the cache) for user management.
+- clustering (accessible under ("http://0.0.0.0:8000/clustering/on_one_page.html"): Version of the page with input and results on the same page. Uses Session IDs (in the cache) for user management.
 
 #####################################
 #### 4. Troubleshooting: ############
