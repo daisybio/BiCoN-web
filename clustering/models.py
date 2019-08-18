@@ -59,23 +59,23 @@ import matplotlib.patches as mpatches
 
 from django.forms import ModelForm
 
-class Upload(models.Model):
-        pic = models.FileField(upload_to="images/")
-        upload_date=models.DateTimeField(auto_now_add =True)
+#class Upload(models.Model):
+#        pic = models.FileField(upload_to="images/")
+#        upload_date=models.DateTimeField(auto_now_add =True)
 
 # FileUpload form class.
-class UploadForm(ModelForm):
-        class Meta:
-                model = Upload
-                fields = ('pic',)
+#class UploadForm(ModelForm):
+#        class Meta:
+#                model = Upload
+#                fields = ('pic',)
 
 class GraphForm(models.Model):
-	def makehref(term):
-		ret = term + ""
-		ret = "<a href=\"https://www.ncbi.nlm.nih.gov/gene/?term="+ret+"\">"+ret+"</a>"
-		return(ret)
-	def is_logged_in(username,password):
-		return(1)
+	#def makehref(term):
+	#	ret = term + ""
+	#	ret = "<a href=\"https://www.ncbi.nlm.nih.gov/gene/?term="+ret+"\">"+ret+"</a>"
+	#	return(ret)
+	#def is_logged_in(username,password):
+	#	return(1)
 	
 	def save_user_data(fn,prot_fn,username):
 		user_dir = "user_uploaded_files/" + username

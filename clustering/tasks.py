@@ -922,96 +922,56 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-			if "NA" in coluniq:
-				# check if column entries are binary - length is 3 if na is there
-				if(len(coluniq) == 3):
-					patients_temp_0 = []
-					patients_temp_1 = []
-					# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
-					column = column.replace('Good Prognosis','1')
-					column = column.replace('Bad Prognosis','0')
-					column = column.replace('yes','1')
-					column = column.replace('no','0')
-					column = column.replace('P','1') 
-					column = column.replace('N','0')
-					column = column.replace('0A','NA')
-					column = column.replace('relapse (event=1; no event=0): 0','0')
-					column = column.replace('relapse (event=1; no event=0): 1','0')
-					column = column.replace('relapse (event=1; no event=0): na','NA')
-					column = column.replace('status: ALIVE','1')
-					column = column.replace('status: DEAD','0')
-					column = column.replace('status: NTL','NA')
-					column = column.replace('ALIVE','1')
-					column = column.replace('DEAD','0')
-					column = column.replace('NTL','NA')
-					coluniq2 = column.unique()
-					coluniq3 = [str(w) for w in coluniq2]
-					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
-					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						col_as_list = [str(i) for i in column]
-						for i in range(0,len(col_as_list)-1):
-							if(col_as_list[i] == '0'):
-								patients_temp_0.append(patientids_metadata[i])
-							elif(col_as_list[i] == '1'):
-								patients_temp_1.append(patientids_metadata[i])
-						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)	
-						# add column name to parameter names									
-						param_names.append(column_name)
-						param_cols.append(ctr)
-						all_patients = patients_temp_0 + patients_temp_1
-						current_patients_group_1 = []
-						current_patients_group_2 = []
-						for i in range(0,len(all_patients)-1):
-							if(all_patients[i] in group1_ids):
-								current_patients_group_1.append(all_patients[i])
-							elif(all_patients[i] in group2_ids):	
-								current_patients_group_2.append(all_patients[i])
-						group1_has.append(current_patients_group_1)				
-						group2_has.append(current_patients_group_2)
-			else:
-				if(len(coluniq) == 2):
-					column = column.replace('Good Prognosis','1')
-					column = column.replace('Bad Prognosis','0')
-					column = column.replace('yes','1')
-					column = column.replace('no','0')
-					column = column.replace('P','1') 
-					column = column.replace('N','0')
-					column = column.replace('0A','NA')
-					column = column.replace('relapse (event=1; no event=0): 0','0')
-					column = column.replace('relapse (event=1; no event=0): 1','0')
-					column = column.replace('relapse (event=1; no event=0): na','NA')
-					column = column.replace('status: ALIVE','1')
-					column = column.replace('status: DEAD','0')
-					column = column.replace('status: NTL','NA')
-					column = column.replace('ALIVE','1')
-					column = column.replace('DEAD','0')
-					column = column.replace('NTL','NA')
-					coluniq2 = column.unique()
-					coluniq3 = [str(w) for w in coluniq2]
-					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						col_as_list = [str(i) for i in column]
-						# check for which patients current metadata variable is 0 or 1
-						for i in range(0,len(col_as_list)-1):
-							if(col_as_list[i] == '0'):
-								patients_temp_0.append(patientids_metadata[i])
-							elif(col_as_list[i] == '1'):
-								patients_temp_1.append(patientids_metadata[i])
-						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)										
-						param_names.append(column_name)
-						param_cols.append(ctr)
-						all_patients = patients_temp_0 + patients_temp_1
-						current_patients_group_1 = []
-						current_patients_group_2 = []
-						# check for which patients metadata variable is available and write in the array
-						for i in range(0,len(all_patients)-1):
-							if(all_patients[i] in group1_ids):
-								current_patients_group_1.append(all_patients[i])
-							elif(all_patients[i] in group2_ids):	
-								current_patients_group_2.append(all_patients[i])
-						group1_has.append(current_patients_group_1)				
-						group2_has.append(current_patients_group_2)
+			if(len(coluniq) == 2 or len(coluniq) == 3):
+				patients_temp_0 = []
+				patients_temp_1 = []
+				# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
+				column = column.replace('Good Prognosis','1')
+				column = column.replace('Bad Prognosis','0')
+				column = column.replace('yes','1')
+				column = column.replace('no','0')
+				column = column.replace('P','1') 
+				column = column.replace('N','0')
+				column = column.replace('0A','NA')
+				column = column.replace('relapse (event=1; no event=0): 0','0')
+				column = column.replace('relapse (event=1; no event=0): 1','0')
+				column = column.replace('relapse (event=1; no event=0): na','NA')
+				column = column.replace('status: ALIVE','1')
+				column = column.replace('status: DEAD','0')
+				column = column.replace('status: NTL','NA')
+				column = column.replace('ALIVE','1')
+				column = column.replace('DEAD','0')
+				column = column.replace('NTL','NA')
+				coluniq2 = column.unique()
+				coluniq3 = [str(w) for w in coluniq2]
+				# check if sorted column now contains only 0,1 and NA
+				if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
+					# get column values as array
+					col_as_list = [str(i) for i in column]
+					# append values to patient list
+					for i in range(0,len(col_as_list)-1):
+						if(col_as_list[i] == '0'):
+							patients_temp_0.append(patientids_metadata[i])
+						elif(col_as_list[i] == '1'):
+							patients_temp_1.append(patientids_metadata[i])
+					# append patient list for metadata variable to overall patient list
+					patients_0.append(patients_temp_0)
+					patients_1.append(patients_temp_1)	
+					# add column name to parameter names									
+					param_names.append(column_name)
+					param_cols.append(ctr)
+					all_patients = patients_temp_0 + patients_temp_1
+					current_patients_group_1 = []
+					current_patients_group_2 = []
+					# check which patients in both clusters are represented in current column
+					for i in range(0,len(all_patients)-1):
+						if(all_patients[i] in group1_ids):
+							current_patients_group_1.append(all_patients[i])
+						elif(all_patients[i] in group2_ids):	
+							current_patients_group_2.append(all_patients[i])
+					# append to array that lists the available patients for all variables
+					group1_has.append(current_patients_group_1)				
+					group2_has.append(current_patients_group_2)		
 			ctr = ctr + 1
 		jaccards_1 = []
 		jaccards_2 = []
