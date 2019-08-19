@@ -32,28 +32,14 @@ from multiprocessing import Pool
 import time
 import pandas as pd
 import numpy as np
-#import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.algorithms import bipartite
-#import scipy.sparse as sparse
-#from scipy.sparse import csr_matrix
-#from scipy.misc import logsumexp
-#from IPython.display import Audio, display
-#from sklearn.cluster.bicluster import SpectralCoclustering
-#from collections import Counter
-#import collections
-#from sklearn import preprocessing
 flatten = lambda l: [item for sublist in l for item in sublist]
-#from scipy import stats
-#import scipy.spatial.distance as ssd
-#from scipy.cluster import hierarchy
 import seaborn as sns; sns.set(color_codes=True)
 #from multiprocessing import Pool
 from numpy import linalg as LA
-#from sklearn.cluster import KMeans
 #from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-#import polls.weighted_aco_lib as lib
 import clustering.weighted_aco_lib as lib
 from shutil import copyfile
 import plotly
@@ -61,7 +47,6 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 import plotly.io as pio
 import plotly.offline
-#from .models import Choice, Question
 from datetime import datetime
 from networkx.readwrite import json_graph
 import json
@@ -72,106 +57,57 @@ from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
 import os
 from celery import shared_task
-#import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from lifelines.statistics import logrank_test
 import math
-
 import gseapy as gp
-
 import seaborn as sns
 import pandas as pd
 from numpy import array
-
 import matplotlib.patches as mpatches
-
-
 import networkx as nx
-#from bokeh.io import show, output_notebook, output_file, save
-##from bokeh.plotting import figure
-##from bokeh.models import Circle, HoverTool, TapTool, BoxSelectTool
-##from bokeh.models.graphs import from_networkx
-##from bokeh.transform import linear_cmap
-##from bokeh.models import ColumnDataSource, LabelSet
-##from bokeh.models.graphs import NodesAndLinkedEdges, EdgesAndLinkedNodes
-#from biomart import BiomartServer
-##from bokeh.embed import components
-#from bokeh.palettes import Spectral4
-##from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
-
 from pybiomart import Dataset
-
 from ndex2.nice_cx_network import NiceCXNetwork
 import ndex2.client as nc
 import ndex2
-#from PyEntrezId import Conversion
-
-#from polls.script3 import algo_output_ownfile_2
-
-@shared_task
-def create_random_user_accounts(total):
-    for i in range(total):
-        username = 'user_{}'.format(get_random_string(10, string.ascii_letters))
-        email = '{}@example.com'.format(username)
-        password = get_random_string(50)
-        User.objects.create_user(username=username, email=email, password=password)
-    return '{} random users created with success!'.format(total)
-
-#@shared_task(name="run_analysis")
-#def run_analysis(s,L_g_min,L_g_max,fh,prot_fh,nbr_iter,nbr_ants,evap):
-#	return(algo_output_ownfile_2(s,L_g_min,L_g_max,fh,prot_fh,nbr_iter,nbr_ants,evap))
 
 
-########################################################
-#### Olga's methods ####################################
-########################################################
-
-# make an empty progress file (with static path)
-@shared_task(name="make_empty_figure")
-def make_empty_figure():
-	fig = plt.figure(figsize=(10,8))
-	plt.savefig("/code/clustering/static/progress.png")
-	#plt.savefig("/code/clustering/static/userfiles/progress.png")
-	plt.close(fig)
 
 
 # make an empty progress file and include session ID in the path
-@shared_task(name="make_empty_figure_2")
-def make_empty_figure_2(session_id):
+@shared_task(name="make_empty_figure")
+def make_empty_figure(session_id):
 	fig = plt.figure(figsize=(10,8))
-	plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
-	#plt.savefig("/code/clustering/static/userfiles/progress.png")
-	plt.close(fig)
-
-# empty the log file (static path)
-@shared_task(name="empty_log_file")
-def empty_log_file():
-	text_file = open("/code/clustering/static/output_console.txt", "w")
-	text_file.write("")
-	text_file.close()
-	if(os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
-    		text_file = open("/code/clustering/static/output_console.txt", "w")
-    		text_file.write("")
-    		text_file.close()
+	if(session_id == "none"):
+		plt.savefig("/code/clustering/static/progress.png")
+		#plt.savefig("/code/clustering/static/userfiles/progress.png")
+		plt.close(fig)
+	else:
+		plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+		#plt.savefig("/code/clustering/static/userfiles/progress.png")
+		plt.close(fig)
 
 # empty the log file (session ID in path)
-@shared_task(name="empty_log_file_2")
-def empty_log_file_2(session_id):
-	text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
-	text_file.write("")
-	text_file.close()
-	if(os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
-    		text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
-    		text_file.write("")
-    		text_file.close()
+@shared_task(name="empty_log_file")
+def empty_log_file(session_id):
+	if(session_id == "none"):
+		text_file = open("/code/clustering/static/output_console.txt", "w")
+		text_file.write("")
+		text_file.close()
+		if(os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
+	    		text_file = open("/code/clustering/static/output_console.txt", "w")
+	    		text_file.write("")
+	    		text_file.close()
+	else:
+		text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
+		text_file.write("")
+		text_file.close()
+		if(os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
+    			text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
+    			text_file.write("")
+    			text_file.close()
 
-# write the p value to a file
-@shared_task(name="write_pval")
-def write_pval(pval,filename):
-    text_file = open(filename, "w")
-    text_file.write("The log-rank test gives a p-value of: " + str(pval))
-    text_file.close()
 
 
 
@@ -187,9 +123,6 @@ def write_pval(pval,filename):
 @shared_task(name="preprocess_clinical_file")
 def preprocess_clinical_file(clinical_str):
 	if(len(clinical_str.split("\n")[0].split("\t")) > 2):
-		#print(expr_str.split("\n")[0])	+
-		#clinical_stringio = StringIO(clinical_str)	
-		#clinicaldf = pd.read_csv(clinical_stringio,sep='\t')
 		return(clinical_str)
 	elif("," in clinical_str):
 		# replace comma by tab if file is CSV and not TSV
@@ -219,7 +152,6 @@ def preprocess_ppi_file(ppistr):
 		del ppistr_split[0]
 	# take only the right two columns
 	for line in ppistr_split:
-		#print(line)
 		if(len(line.split("\t")) > 1):
 			if(len(line.split("\t")) > 2):
 				line_length = len(line.split("\t"))
@@ -227,15 +159,7 @@ def preprocess_ppi_file(ppistr):
 			# check if line contains two integers with protein IDs
 			if(str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n","")).isdigit()):				
 				ppistr_split_new.append(line)
-				#print(line)
-				#print((ppistr_split_new[0]))
 	ppistr = "\n".join(ppistr_split_new)		
-	#for line in ppistr_split:
-	#	if(len(line.split("\t")) > 2):
-	#		line_length = len(line.split("\t"))
-	#		line = "\t".join([line.split("\t")[line_length-2],line.split("\t")[line_length-1]])
-	#	ppistr_split_new.append(line)
-	#return("\n".join(ppistr_split_new))
 	return(ppistr)
 
 
@@ -251,17 +175,13 @@ def preprocess_file(expr_str):
 				expr_str = expr_str.replace("subtype","disease_type")
 		# remove name of first column (left upper corner)
 		expr_str_first_colname = expr_str_split[0].split("\t")[0]
-		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-		#print(expr_str_first_colname)
-		#print(expr_str.split("\n")[0])
+		expr_str = expr_str.replace(expr_str_first_colname,"",1)
 		expr_stringio = StringIO(expr_str)	
 		exprdf = pd.read_csv(expr_stringio,sep='\t')
-		#return(expr_str)
 		# check for column with two unique entries (pre-defined clusters)
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 				if(len(column.unique()) == 2):
-					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
 	elif("," in expr_str):
 		# replace comma by tab if file is CSV and not TSV
@@ -272,11 +192,8 @@ def preprocess_file(expr_str):
 				if("subtype" in expr_str):
 					expr_str = expr_str.replace("subtype","disease_type")
 			expr_str_first_colname = expr_str_split[0].split(",")[0]
-			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-			#print(expr_str_first_colname)
-			#print(expr_str.split("\n")[0])	
+			expr_str = expr_str.replace(expr_str_first_colname,"",1)
 			expr_str = expr_str.replace(",","\t")
-			#print(expr_str.split("\n")[0])
 			expr_str_split = expr_str.split("\n")
 			# remove entries after given length if expression data file is too big
 			if(len(expr_str_split) > 300):
@@ -290,7 +207,6 @@ def preprocess_file(expr_str):
 			for column_name, column in exprdf.transpose().iterrows():
 				if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 					if(len(column.unique()) == 2):
-						#print(column_name)
 						expr_str = expr_str.replace(column_name,"disease_type")	
 			#### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
 			done1 = "false"
@@ -300,13 +216,11 @@ def preprocess_file(expr_str):
 						nbr_col = len(column.unique())
 						expr_str = expr_str.replace(column_name,"disease_type")	
 						expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
-						#print(list(column))
 						if(len(column.unique()) > 2 and done1 == "false"):
 							expr_str_split_2 = []
 							expr_str_split_2.append(expr_str_split[0])
 							type1 = column.value_counts().index.tolist()[0]	
 							type2 = column.value_counts().index.tolist()[1]
-							#print(len(list(column)))
 							for i in range(0,len(list(column))-1):
 								if(list(column)[i] == type1 or list(column)[i] == type2):
 									expr_str_split_2.append(expr_str_split[i+1])
@@ -316,7 +230,6 @@ def preprocess_file(expr_str):
 
 			expr_stringio = StringIO(expr_str)
 			exprdf = pd.read_csv(expr_stringio,sep='\t')
-			#return(expr_str,nbr_col)
 			return(expr_str)
 
 # the same as preprocess_file, but returns number of pre-defined clusters	
@@ -332,18 +245,14 @@ def preprocess_file_2(expr_str):
 				expr_str = expr_str.replace("subtype","disease_type")
 		# remove name of first column (left upper corner)
 		expr_str_first_colname = expr_str_split[0].split("\t")[0]
-		expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-		#print(expr_str_first_colname)
-		#print(expr_str.split("\n")[0])
+		expr_str = expr_str.replace(expr_str_first_colname,"",1)
 		expr_stringio = StringIO(expr_str)	
 		exprdf = pd.read_csv(expr_stringio,sep='\t')
-		#return(expr_str)
 		done1 = "false"
 		# check for column with two unique entries (pre-defined clusters)
 		for column_name, column in exprdf.transpose().iterrows():
 			if((not column_name.isdigit()) and (not (column_name == "disease_type"))):
 				if(len(column.unique()) == 2):
-					#print(column_name)
 					expr_str = expr_str.replace(column_name,"disease_type")	
 					nbr_col = 2
 					done1 = "true"
@@ -354,15 +263,10 @@ def preprocess_file_2(expr_str):
 					nbr_col = len(column.unique())
 					expr_str = expr_str.replace(column_name,"disease_type")	
 					expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
-					#print(list(column))
 					if(len(column.unique()) > 2 and done1 == "false"):
 						expr_str_split_2 = []
 						expr_str_split_2.append(expr_str_split[0])
-						#type1 = column.value_counts().index.tolist()[0]	
-						#type2 = column.value_counts().index.tolist()[1]
-						#print(len(list(column)))
 						for i in range(0,len(list(column))-1):
-							#if(list(column)[i] == type1 or list(column)[i] == type2):
 							expr_str_split_2.append(expr_str_split[i+1])
 						expr_str = "\n".join(expr_str_split_2)
 						done1 = "true"			
@@ -377,10 +281,7 @@ def preprocess_file_2(expr_str):
 					expr_str = expr_str.replace("subtype","disease_type")
 			expr_str_first_colname = expr_str_split[0].split(",")[0]
 			expr_str = expr_str.replace(expr_str_first_colname,"",1)	
-			#print(expr_str_first_colname)
-			#print(expr_str.split("\n")[0])	
 			expr_str = expr_str.replace(",","\t")
-			#print(expr_str.split("\n")[0])
 			expr_str_split = expr_str.split("\n")
 			# remove entries after given length if expression data file is too big
 			if(len(expr_str_split) > 300):
@@ -405,13 +306,9 @@ def preprocess_file_2(expr_str):
 						nbr_col = len(column.unique())
 						expr_str = expr_str.replace(column_name,"disease_type")	
 						expr_str_split[0] = expr_str_split[0].replace(column_name,"disease_type")
-						#print(list(column))
 						if(len(column.unique()) > 2 and done1 == "false"):
 							expr_str_split_2 = []
 							expr_str_split_2.append(expr_str_split[0])
-							#type1 = column.value_counts().index.tolist()[0]	
-							#type2 = column.value_counts().index.tolist()[1]
-							#print(len(list(column)))
 							for i in range(0,len(list(column))-1):
 								#if(list(column)[i] == type1 or list(column)[i] == type2):
 								expr_str_split_2.append(expr_str_split[i+1])
@@ -427,33 +324,28 @@ def preprocess_file_2(expr_str):
 
 
 @shared_task(name="add_loading_image")
-def add_loading_image():
-	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
-	if(os.path.isfile("/code/clustering/static/loading.gif")):
-		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
+def add_loading_image(session_id):
+	if(session_id == "none"):
+		if(os.path.isfile("/code/clustering/static/loading.gif")):
+			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1.gif")
+		else:
+			print("loading image not found")
 	else:
-		print("loading image not found")
+		if(os.path.isfile("/code/clustering/static/loading.gif")):
+			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+		else:
+			print("loading image not found")
 
 @shared_task(name="remove_loading_image")
-def remove_loading_image():
-	if(os.path.isfile("/code/clustering/static/loading_1.gif")):
-		os.unlink("/code/clustering/static/loading_1.gif")
-
-
-@shared_task(name="add_loading_image_2")
-def add_loading_image_2(session_id):
-	#copyfile("/code/polls/static/loading.gif","/code/polls/static/loading_1.gif")
-	if(os.path.isfile("/code/clustering/static/loading.gif")):
-		copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+def remove_loading_image(session_id):
+	if(session_id == "none"):
+		if(os.path.isfile("/code/clustering/static/loading_1.gif")):
+			os.unlink("/code/clustering/static/loading_1.gif")
 	else:
-		print("loading image not found")
-
-@shared_task(name="remove_loading_image_2")
-def remove_loading_image_2(session_id):
-	if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
-		os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
-	if(os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
-		os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
+		if(os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
+			os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
+		if(os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
+			os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
 
 ##################################################################
 ################## used for metadata display #####################
@@ -466,11 +358,9 @@ def list_metadata_from_file(path):
 	# used for reading metadata
 	fh1 = open(path)
 	lines = fh1.read()
-	#emptydict = {}
 	if(lines == "NA"):
 		return({},{},{})
 	# remove html from metadata file and replace table elements by tab
-	#emptydict = {}
 	# if no data in file, remove empty dictionaries
 	if(len(lines.split('\n')) < 3):
 		return({},{},{})
@@ -505,9 +395,7 @@ def list_metadata_from_file(path):
 ## method for more than 2 pre-defined clusters, uses session IDs
 @shared_task(name="algo_output_task")
 def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,size,clusters_param):
-	#col = "cancer_type"
 	col = "disease_type"
-	#size = 2000
 	log2 = True
 	expr_stringio = StringIO(expr_str)
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
@@ -518,9 +406,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	else:
 		print("expression data not logarithmized")
 		log2_2 = True
-	#print(exprdf.iloc[:,[2]])
-	#print(list(exprdf.iloc[:,0]))
-	#for i in range(1,len(exprdf.columns)-1):
 	### this checks whether the expression data contain negative numbers
 	for i in range(2,4):
 		if(log2_2 and i>len(exprdf.columns)):
@@ -531,7 +416,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 					if(exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-","",1).replace(".","",1).isdigit()):
 						print("expression data are logarithmized")
 						log2_2 = False	
-	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	if(session_id == "none"):
 		with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
 			text_file.write("Your files are being processed...")
@@ -547,7 +431,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2,group1_ids,group2_ids = lib.aco_preprocessing_strings(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = int(size), sample= None)
 	else:
 		B,G,H,n,m,GE,A_g,labels_B,rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,log2 = log2_2, gene_list = None, size = size, sample= None)
-	#with open(("/code/clustering/static/output_console_" + session_id + ".txt"), "w") as text_file:
 	if(session_id == "none"):
 		with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
 			text_file.write("Starting model run...")	
@@ -587,9 +470,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
 		text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
-	#if(session_id == "none"):
-	#	solution,t_best,sc,conv=  lib.ants(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
-	#else:
 	# session id is "none" if it is not given
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
@@ -610,12 +490,8 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 			values = [val2,val1]
 	# mapping to gene names (for now with API)
 	mg = mygene.MyGeneInfo()
-	#print("solution[0]")
-	#print(solution[0])
-	#print(solution[1])
 	new_genes = solution[0][0]+solution[0][1]
 	new_genes_entrez = [labels_B[x] for x in new_genes]
-	#print(new_genes_entrez)
 	out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
 	mapping =dict()
 	for line in out:
@@ -626,7 +502,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	new_genes2 = [mapping[key] for key in mapping if key in solution[0][1] ]    
 	
 	genes1,genes2 = solution[0]
-	#print(str(len(genes1) + len(genes2)))
 	patients1, patients2 = solution[1]
 	patients1_ids = []
 	patients2_ids = []
@@ -658,9 +533,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	ret2 = means1 + means2
 	ret3 = new_genes1 + new_genes2
 	adjlist = []
-	#for line99 in nx.generate_edgelist(G_small,data=False):	
-	#	lineSplit = line99.split()
-	#	adjlist.append([lineSplit[0],lineSplit[1]])
 	for line in nx.generate_edgelist(G_small,data=False):	
 		lineSplit = line.split()
 		adjlist.append([lineSplit[0],lineSplit[1]])
@@ -682,15 +554,10 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	grouping_p = []
 	grouping_g = []
 	p_num = list(GE.columns)
-	#print("list of columns")
-	#print(p_num)
 	GE_small = GE.T[genes1+genes2]
 	GE_small. rename(columns=mapping, inplace=True)
 	GE_small = GE_small.T
 	g_num = list(GE_small.index)
-	#print("list ge small index")
-	#print(len(list(GE_small.index)))
-	#print(len(list(GE.columns)))
 	if(clusters_param == 2):
 		for g in g_num:
 		    if g in new_genes1 :
@@ -706,8 +573,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		        grouping_p.append(values[1])
 		grouping_p = pd.DataFrame(grouping_p,index = p_num)
 		grouping_g = pd.DataFrame(grouping_g,index = g_num)
-		#print(grouping_p)
-		#print(grouping_g)	
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
 		col_colors = species.map(lut)
@@ -728,13 +593,11 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		species = grouping_g[grouping_g[0]!=3][0]
 		lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
 		col_colors = species.map(lut)
-		#print(col_colors)
 	if(session_id == "none"):
 		plt.savefig("/code/clustering/static/userfiles/ntw.png")
 		plt.savefig("/code/clustering/static/ntw.png")
 	else:
 		plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
-	#plt.savefig("/code/clustering/static/ntw_" + session_id + ".png")
 	plt.clf()
 	plt.boxplot(conv/2,vert=True,patch_artist=True)   # vertical box alignment  # will be used to label x-ticks
 	plt.xlabel("iterations")
@@ -744,7 +607,6 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 		plt.savefig("/code/clustering/static/conv.png")
 	else:
 		plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
-	#plt.savefig("/code/clustering/static/conv_" + session_id + ".png")
 	return(GE_small.T,row_colors,col_colors,G_small, ret2, ret3, adjlist,new_genes1,patients1_ids,patients2_ids,jac_1_ret,jac_2_ret)
 
 
@@ -937,96 +799,94 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 					elem = "NA"
 				elif(elem == float('nan')):
 					elem = "NA"
-			if "NA" in coluniq:
-				# check if column entries are binary - length is 3 if na is there
-				if(len(coluniq) == 3):
+			if(len(coluniq) == 2 or len(coluniq) == 3):
+				patients_temp_0 = []
+				patients_temp_1 = []
+				# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
+				column = column.replace('Good Prognosis','1')
+				column = column.replace('Bad Prognosis','0')
+				column = column.replace('yes','1')
+				column = column.replace('no','0')
+				column = column.replace('P','1') 
+				column = column.replace('N','0')
+				column = column.replace('0A','NA')
+				column = column.replace('relapse (event=1; no event=0): 0','0')
+				column = column.replace('relapse (event=1; no event=0): 1','0')
+				column = column.replace('relapse (event=1; no event=0): na','NA')
+				column = column.replace('status: ALIVE','1')
+				column = column.replace('status: DEAD','0')
+				column = column.replace('status: NTL','NA')
+				column = column.replace('ALIVE','1')
+				column = column.replace('DEAD','0')
+				column = column.replace('NTL','NA')
+				if("gender" in column_name):
+					column = column.replace('M','1')
+					column = column.replace('F','0')
+					column_name = "Gender: Male"
+				coluniq2 = column.unique()
+				coluniq3 = [str(w) for w in coluniq2]
+				# check if sorted column now contains only 0,1 and NA
+				if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
+					# get column values as array
+					col_as_list = [str(i) for i in column]
+					# append values to patient list
+					for i in range(0,len(col_as_list)-1):
+						if(col_as_list[i] == '0'):
+							patients_temp_0.append(patientids_metadata[i])
+						elif(col_as_list[i] == '1'):
+							patients_temp_1.append(patientids_metadata[i])
+					# append patient list for metadata variable to overall patient list
+					patients_0.append(patients_temp_0)
+					patients_1.append(patients_temp_1)	
+					# add column name to parameter names									
+					param_names.append(column_name)
+					param_cols.append(ctr)
+					all_patients = patients_temp_0 + patients_temp_1
+					current_patients_group_1 = []
+					current_patients_group_2 = []
+					# check which patients in both clusters are represented in current column
+					for i in range(0,len(all_patients)-1):
+						if(all_patients[i] in group1_ids):
+							current_patients_group_1.append(all_patients[i])
+						elif(all_patients[i] in group2_ids):	
+							current_patients_group_2.append(all_patients[i])
+					# append to array that lists the available patients for all variables
+					group1_has.append(current_patients_group_1)				
+					group2_has.append(current_patients_group_2)	
+				elif(":" in coluniq[0]):
 					patients_temp_0 = []
 					patients_temp_1 = []
-					# replace simple binary entries like good and bad prognosis by standard 0 and 1 for calculation
-					column = column.replace('Good Prognosis','1')
-					column = column.replace('Bad Prognosis','0')
-					column = column.replace('yes','1')
-					column = column.replace('no','0')
-					column = column.replace('P','1') 
-					column = column.replace('N','0')
-					column = column.replace('0A','NA')
-					column = column.replace('relapse (event=1; no event=0): 0','0')
-					column = column.replace('relapse (event=1; no event=0): 1','0')
-					column = column.replace('relapse (event=1; no event=0): na','NA')
-					column = column.replace('status: ALIVE','1')
-					column = column.replace('status: DEAD','0')
-					column = column.replace('status: NTL','NA')
-					column = column.replace('ALIVE','1')
-					column = column.replace('DEAD','0')
-					column = column.replace('NTL','NA')
-					coluniq2 = column.unique()
-					coluniq3 = [str(w) for w in coluniq2]
-					# check if columns are only 0 and 1 now (to avoid non-binary columns with only 2 different entries)
-					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						col_as_list = [str(i) for i in column]
+					coluniq_split = []
+					for elem in coluniq:
+						if(":" in elem):
+							coluniq_split.append(elem.split(":")[1].replace(" ",""))
+					if(sorted(coluniq_split) == ['0','1','NA'] or sorted(coluniq_split) == ['0','1']):
+						col_as_list_tmp = [str(i) for i in column]
+						col_as_list = [i.split(":")[1].replace(" ","") for i in col_as_list_tmp]
+						# append values to patient list
 						for i in range(0,len(col_as_list)-1):
 							if(col_as_list[i] == '0'):
 								patients_temp_0.append(patientids_metadata[i])
 							elif(col_as_list[i] == '1'):
 								patients_temp_1.append(patientids_metadata[i])
+						# append patient list for metadata variable to overall patient list
 						patients_0.append(patients_temp_0)
 						patients_1.append(patients_temp_1)	
 						# add column name to parameter names									
-						param_names.append(column_name)
+						param_names.append(coluniq[0].split(":")[0])
 						param_cols.append(ctr)
 						all_patients = patients_temp_0 + patients_temp_1
 						current_patients_group_1 = []
 						current_patients_group_2 = []
+						# check which patients in both clusters are represented in current column
 						for i in range(0,len(all_patients)-1):
 							if(all_patients[i] in group1_ids):
 								current_patients_group_1.append(all_patients[i])
 							elif(all_patients[i] in group2_ids):	
 								current_patients_group_2.append(all_patients[i])
+						# append to array that lists the available patients for all variables
 						group1_has.append(current_patients_group_1)				
-						group2_has.append(current_patients_group_2)
-			else:
-				if(len(coluniq) == 2):
-					column = column.replace('Good Prognosis','1')
-					column = column.replace('Bad Prognosis','0')
-					column = column.replace('yes','1')
-					column = column.replace('no','0')
-					column = column.replace('P','1') 
-					column = column.replace('N','0')
-					column = column.replace('0A','NA')
-					column = column.replace('relapse (event=1; no event=0): 0','0')
-					column = column.replace('relapse (event=1; no event=0): 1','0')
-					column = column.replace('relapse (event=1; no event=0): na','NA')
-					column = column.replace('status: ALIVE','1')
-					column = column.replace('status: DEAD','0')
-					column = column.replace('status: NTL','NA')
-					column = column.replace('ALIVE','1')
-					column = column.replace('DEAD','0')
-					column = column.replace('NTL','NA')
-					coluniq2 = column.unique()
-					coluniq3 = [str(w) for w in coluniq2]
-					if(sorted(coluniq3) == ['0','1','NA'] or sorted(coluniq3) == ['0','1']):
-						col_as_list = [str(i) for i in column]
-						# check for which patients current metadata variable is 0 or 1
-						for i in range(0,len(col_as_list)-1):
-							if(col_as_list[i] == '0'):
-								patients_temp_0.append(patientids_metadata[i])
-							elif(col_as_list[i] == '1'):
-								patients_temp_1.append(patientids_metadata[i])
-						patients_0.append(patients_temp_0)
-						patients_1.append(patients_temp_1)										
-						param_names.append(column_name)
-						param_cols.append(ctr)
-						all_patients = patients_temp_0 + patients_temp_1
-						current_patients_group_1 = []
-						current_patients_group_2 = []
-						# check for which patients metadata variable is available and write in the array
-						for i in range(0,len(all_patients)-1):
-							if(all_patients[i] in group1_ids):
-								current_patients_group_1.append(all_patients[i])
-							elif(all_patients[i] in group2_ids):	
-								current_patients_group_2.append(all_patients[i])
-						group1_has.append(current_patients_group_1)				
-						group2_has.append(current_patients_group_2)
+						group2_has.append(current_patients_group_2)	
 			ctr = ctr + 1
 		jaccards_1 = []
 		jaccards_2 = []
@@ -1170,7 +1030,6 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		else:
 			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
-		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
 			with open(output_plot_path, "w") as text_file_2:
 				text_file_2.write("")
@@ -1188,7 +1047,6 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 		text_file_3.write("NA")
 		text_file_3.close()	
 		plot_div = ""	
-		#output_plot_path = "/code/clustering/static/output_plotly_" + session_id + ".html"
 		if(session_id == "none"):
 			output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
 		else:
@@ -1204,7 +1062,6 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 		ret_metadata.append(ret_metadata_1)
 		ret_metadata.append(ret_metadata_2)
 		ret_metadata.append(ret_metadata_3)
-		#plotly.offline.plot(fig,auto_open=False, image_filename="tempimage.png", image='png')
 	if(session_id == "none"):
 		with open("/code/clustering/static/output_console.txt", "w") as text_file:
 			text_file.write("Done!")
@@ -1228,8 +1085,6 @@ def run_enrichment(path,pval_enr,out_dir,terms):
 	print("running enrichment analysis")
 	enr = gp.enrichr(gene_list=gene_list,
                  description='test_name',
-                 # gene_sets='KEGG_2016',
-                 # or gene_sets='KEGG_2016,KEGG_2013',
                  gene_sets=terms,
                  outdir=out_dir,
                  cutoff=float(pval_enr) # test dataset, use lower value of range(0,1)
@@ -1250,7 +1105,6 @@ def read_enrichment(path,pval_enr):
 		if(ctr > 0):	
 			# check p-value
 			if(float(lineSplit[3]) < float(pval_enr)):
-				#ret_dict.append(tmp)
 				# append genes, enrichment term, p-value etc to list
 				for i in range(0,5):
 					tmp[i] = lineSplit[i]
@@ -1318,15 +1172,12 @@ def check_input_files(ppistr,exprstr):
 	ppidf = pd.read_csv(ppi_stringio,sep='\t')
 	expr_stringio = StringIO(exprstr)
 	exprdf = pd.read_csv(expr_stringio,sep='\t')
-	#print(ppidf)
-	#print(ppidf.iloc[0,:])
 	# check if PPI file has at least 2 columns
 	if(len(ppidf.columns) < 2):
 		errstr = errstr + "Input file must contain two columns with interaction partners.\n"
 		#errstr = errstr + "\n \n To avoid this error, go to <a href=\"infopage.html\">the infopage</a> and make sure that your input data has the specified format."
 		return(errstr)
 	contains_numbers = "false"
-	#for i in range(len(ppidf.index)):
 	# check if PPI file contains lines with two protein IDs
 	for i in range(len(ppidf.index)):
 		if(contains_numbers == "false"):
@@ -1362,7 +1213,6 @@ def convert_gene_list(adjlist,filename):
 			gene_nbr_2_2 = conv.loc[gene_nbr_2,'NCBI gene ID'].values[0]
 			# write genes into tab separated string
 			retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
-	#return(retstr)
 	with open(filename, "w") as text_file:
 		text_file.write(retstr)
 
@@ -1542,17 +1392,10 @@ def import_ndex(name):
 			curr_edge_str = str(node_dict[source]) + "\t" + str(node_dict[target]) + "\n"
 			edgelist.append([node_dict[source],node_dict[target]])
 			ret = ret + curr_edge_str
-	#print(node_dict)
 	# return tab separated string
 	return(ret)
 
 
-@shared_task(name="show_old_data")
-def show_old_data(path_json,path_heatmap):
-	#G = nx.Graph()
-	#G_2 = nx.Graph()
-	copyfile(path_heatmap,"/code/clustering/static/test.png")
-	copyfile(path_json,"/code/clustering/static/test15.json")
 	
 
 

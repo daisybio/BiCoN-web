@@ -35,7 +35,7 @@ in the same terminal.
 
 This gets the server running. You can then access the website by typing:
 
-http://0.0.0.0:8000/clustering/clustering_6_4.html
+http://0.0.0.0:8000/clustering/clustering.html
 
 And substitute 0.0.0.0:8000 by the address and port number that is printed out by the application as above.
 
@@ -120,7 +120,7 @@ What is where (in the code):
 
 Templates (HTML pages visible to the user) are connected in a file at "clustering/urls.py" with a function that processes the request for each template. If you want to change the link for one of the pages, add a line below "urlpatterns" in this form:
 url(r'new_address.html', views.your_view),
-with your_view as the name of the method in "clustering/views.py" that is used to process a request submitted via "new_address.html" (e.g. the method for clustering_6_part_4.html is called clustering_6_4).
+with your_view as the name of the method in "clustering/views.py" that is used to process a request submitted via "new_address.html" (e.g. the method for clustering.html is called clustering).
 
 Files with results are stored in a static directory for which the location is defined in "clust_app/clust_app/settings.py". This static directory is located in a shared volume (path is "/code") that is accessible for all containers (celery, livereload, django, rabbitmq). This is important because the celery container manipulates data that must be visible to the django container. In some cases, files are copied from the shared volume to the container running the Django server. 
 
@@ -147,7 +147,7 @@ How a request runs on the server:
 If you submit a request, several steps are executed (on the clust_app container) in views.py. 
 For the loading page, the gif with loading symbol is copied to its place so that it is visible in the page. The current status of the run is written and read from a log file.
 Data are preprocessed by preprocess_file in tasks.py so that CSV files are converted to TSV. It is checked whether a column in the expression data defines two clinical clusters; if this is the case, these clusters are later displayed in the heatmap. Automatically, a column containing information on pre-defined clinical clusters is recognized and assigned a standard title ("disease_type"). Patient identifiers are taken from the first column, and gene IDs from the first row.
-Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task_10. These tasks are executed via Celery, and their results are written on the shared volume (under /code). In algo_output_task, the algorithm itself is run. A preprocessing script (aco_preprocessing_strings) in weighted_aco_lib.py is run, the script also automatically recognizes whether the expression data are log2-values (if they contain negative values) and ant runs are executed via the ants() method in weighted_aco_lib.py. The output data (clusters of patients and genes) are taken as an input in script_output_task and there are processed to output format (json and png). They are stored by the methods run in the celery container in a directory on the shared volume and copied by views.py, which is run on the django container, to the local static files directory.
+Two scripts are used to run the algorithm for the data in tasks.py: algo_output_task and script_output_task. These tasks are executed via Celery, and their results are written on the shared volume (under /code). In algo_output_task, the algorithm itself is run. A preprocessing script (aco_preprocessing_strings) in weighted_aco_lib.py is run, the script also automatically recognizes whether the expression data are log2-values (if they contain negative values) and ant runs are executed via the ants() method in weighted_aco_lib.py. The output data (clusters of patients and genes) are taken as an input in script_output_task and there are processed to output format (json and png). They are stored by the methods run in the celery container in a directory on the shared volume and copied by views.py, which is run on the django container, to the local static files directory.
 If a logged-in user wants to display old results, there is a list of stored result files (by date). The filename of the expression file is generated based on the current date when saving, and is written as the value of a dropdown option in the input form when selecting. 
 
 The version of the page with separate pages for input and results ("on_two_pages.html") redirects the user to the result page after running the analysis. A parameter in the cache is set to "done" so that if the user hits reload or runs an enrichment analysis, he stays on the result page. The user can go back to the input page by clicking "start new analysis". If the user presses this button, an form is submitted with an input parameter "new analysis", and in the method in views.py, the "done" parameter is set to false and the user is redirected to the input page.
@@ -183,9 +183,9 @@ In views.py, methods are defined that run code after the user accesses a web pag
 
 There are three different constructors that render a web page for the clustering application with slightly different functionality:
 
-- clustering_6_new: A static version of the webpage that does not use session IDs and with input and results on the same page.
-- clustering_6_part_1 (accessible under "http://0.0.0.0:8000/clustering/on_two_pages.html": A version of the page with different pages for input and result display. Redirects automatically to the result page after completion of the algorithm. Uses Session IDs (stored in the cache) for user management.
-- clustering_6_4 (accessible under ("http://0.0.0.0:8000/clustering/on_one_page.html"): Version of the page with input and results on the same page. Uses Session IDs (in the cache) for user management.
+- clustering_no_sessions: A static version of the webpage that does not use session IDs and with input and results on the same page.
+- clustering_step_1 (accessible under "http://0.0.0.0:8000/clustering/on_two_pages.html": A version of the page with different pages for input and result display. Redirects automatically to the result page after completion of the algorithm. Uses Session IDs (stored in the cache) for user management.
+- clustering (accessible under ("http://0.0.0.0:8000/clustering/on_one_page.html"): Version of the page with input and results on the same page. Uses Session IDs (in the cache) for user management.
 
 #####################################
 #### 4. Troubleshooting: ############

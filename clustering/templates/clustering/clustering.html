@@ -1278,11 +1278,19 @@ function fixStepIndicator(n) {
 </script>
 
 <!--- display the files for downloading --->
-{% if user.is_authenticated %}
+{% if network_path == "none" %}
+{% if json_path == "" %}
+{% else %}
      <br><br><b>
 	Download the network 
-     <a href={% static network_path %} download> as png </a> or
      <a href={% static json_path %} download> as json file </a>
+	</b>
+   {% endif %}
+{% else %}
+{% if json_path == "" %}
+     <br><br><b>
+	Download the network 
+     <a href={% static network_path %} download> as png </a>
 	</b>
    {% else %}
 	<b>
@@ -1291,6 +1299,7 @@ function fixStepIndicator(n) {
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% endif %}
+{% endif %}
 <br><br><br> 
 </div>
 </article>
@@ -1305,7 +1314,7 @@ function fixStepIndicator(n) {
        {% load staticfiles %}
 
 	
-        <img src={% static path_heatmap %}><h3>
+        <img src={% static path_heatmap %} onerror="this.style.display='none'"><h3>
                     <a href="#">Heatmap</a>
                 </h3>
                 <p>The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.</p>
@@ -1387,7 +1396,7 @@ The log-rank test gives a p-value of: {{pval}}
                 </h3>
 		
        {% load staticfiles %}
-		        <img src={% static 'conv.png' %} width ="500" height ="500">
+		        <img src={% static conv_file %} width ="500" height ="500" onerror="this.style.display='none'" >
 
                 <p>Convergence behaviour of the algorithm.</p>
             </article>
