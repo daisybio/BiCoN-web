@@ -765,6 +765,7 @@ def clustering_step_1(request):
 				# start session for storing result data			
 				session_id = ""
 				session_id_from_cache = cache.get("session_id","none")
+				print("session id from cache:" + str(session_id_from_cache))
 				if(session_id_from_cache == "none" or session_id_from_cache == ""):
 					# start session for storing result data			
 					session_id = request.session._get_or_create_session_key()
@@ -1173,6 +1174,9 @@ def clustering_step_1(request):
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 			conv_file = "userfiles/conv_" + session_id + ".png"
+			ret_metadata1 = cache.get('ret_metadata1','none')
+			ret_metadata2 = cache.get('ret_metadata2','none')
+			ret_metadata3 = cache.get('ret_metadata3','none')
 			if('ppi_path' in request.POST and 'heatmap_path' in request.POST and 'plot_path' in request.POST):
 				print(request.POST.get('ppi_path'))
 				path_heatmap = request.POST.get('heatmap_path')
@@ -1214,6 +1218,14 @@ def clustering_step_1(request):
 			if(session_id_from_cache != 'has_expired'):
 				cache.set('session_id',session_id_from_cache)
 			cache.set('done',done_from_cache)
+			if not(session_id == ""):
+				if(os.path.isfile("/code/clustering/static/userfiles/metadata_" + session_id + ".txt")):
+					metd = list_metadata_from_file.apply_async(args=["/code/clustering/static/userfiles/metadata_" + session_id + ".txt"],countdown=0)
+					(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 
+					metadata_dict = [ret_metadata1,ret_metadata2,ret_metadata3]
+			cache.set('ret_metadata1', ret_metadata1)	
+			cache.set('ret_metadata2', ret_metadata2)	
+			cache.set('ret_metadata3', ret_metadata3)
 		# get session ID and user files if user is logged in
 		else:
 			username = str(request.user)
@@ -1232,7 +1244,10 @@ def clustering_step_1(request):
 			cache.set('analysis_running',analysis_running)
 			cache.set('session_id',session_id)
 			cache.set('done',done_from_cache)
-			print(ret_metadata1) 
+			cache.set('ret_metadata1', ret_metadata1)	
+			cache.set('ret_metadata2', ret_metadata2)	
+			cache.set('ret_metadata3', ret_metadata3)
+			#print(ret_metadata1) 
 		if('done' in request.session):
 			if(request.session['done'] == "true"): 
 				session_id = request.session._get_or_create_session_key()
@@ -1244,8 +1259,8 @@ def clustering_step_1(request):
 				return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':has_survival_plot,'conv_file':conv_file})		
 		# this redirects the user to the result page if the done parameter is true (e.g. reloading page after an analysis)
 		if(done_from_cache=="done"):
-			session_id_from_cache = cache.get("session_id","none")
-			if(session_id_from_cache == "none"):
+			session_id_from_cache = cache.get("session_id",'has expired')
+			if(session_id_from_cache == 'has expired'):
 				session_id = request.session._get_or_create_session_key()
 			else:
 				session_id = session_id_from_cache
@@ -1259,9 +1274,11 @@ def clustering_step_1(request):
 			session_id = request.session._get_or_create_session_key()
 		else:
 			session_id = session_id_from_cache
+		cache.set('session_id',session_id)
 		output_console_file = "userfiles/output_console_" + session_id + ".txt"
 		progress_file = "userfiles/progress_" + session_id + ".png"
 		loading_gif_1 = "loading_1_" + session_id + ".gif"
+		print("session id: " + str(session_id))
 		return render(request,'clustering/clustering_step_1.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true",'progress_file':progress_file,'output_console_file':output_console_file,'loading_gif_1':loading_gif_1})
 
 
@@ -1904,7 +1921,6 @@ def clustering(request):
 				os.unlink("/code/clustering/static/progress_" + session_id + ".png")
 			remove_loading_image.delay("none")		
 			remove_loading_image.delay(session_id)
-			#print("removed loading image")
 			with open("/code/clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
@@ -1916,7 +1932,6 @@ def clustering(request):
 			username = str(request.user)
 			list_of_files = GraphForm.list_user_data_2(username)
 			list_of_files_2 = GraphForm.list_user_data(username)
-			#cache.clear()
 		ret_metadata1 = ""
 		ret_metadata2 = ""
 		ret_metadata3 = ""
@@ -2047,7 +2062,6 @@ def clustering_step_2(request):
 				result1 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 				result2 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test2/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
 				result3 = run_enrichment.delay(("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"),pval_enr,("/code/clustering/data/test3/enrichr_go/" + session_id),['GO_Biological_Process_2018','GO_Cellular_Component_2018','GO_Molecular_Function_2018'])
-				#result1 = run_go_enrichment.delay("genelist.txt",pval_enr)
 				enr_results = result1.get()
 				enr_results_2 = result2.get()
 				enr_results_3 = result3.get()
@@ -2094,6 +2108,7 @@ def clustering_step_2(request):
 			path_heatmap = "heatmap_" + session_id + ".png"
 			json_path = "ppi_" + session_id + ".json"
 			path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
+			conv_file = "userfiles/conv_" + session_id + ".png"
 			if(os.path.isfile(path_metadata)):
 				metd = list_metadata_from_file.apply_async(args=[path_metadata],countdown=0)
 				(ret_metadata1,ret_metadata2,ret_metadata3) = metd.get() 			
@@ -2107,7 +2122,7 @@ def clustering_step_2(request):
 				cache.set("enrichment_dict_4",enrichment_dict_4)
 				cache.set("enrichment_dict_5",enrichment_dict_5)
 			return render(request,'polls/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':("userfiles/"+path_heatmap),'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
-'json_path':("userfiles/"+json_path + "?foo=bar"),'output_plot_path':("userfiles/"+output_plot_path),'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':"true"})
+'json_path':("userfiles/"+json_path + "?foo=bar"),'output_plot_path':("userfiles/"+output_plot_path),'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':"true",'conv_file':conv_file})
 		except:
 			return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
 		return render(request,'polls/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'has_survival_plot':"true"})
@@ -2125,7 +2140,6 @@ def clustering_step_2(request):
 				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
-			#cache.set('analysis_running','analysis_running')
 		ret_metadata = ""
 		# check if session already exists for current user (e.g. when user has hit the reload button)
 		session_id_from_cache = cache.get('session_id', 'has_expired')
@@ -2170,9 +2184,10 @@ def clustering_step_2(request):
 			cache.set('ret_metadata3', ret_metadata3)	
 			cache.set('p_val', p_val)	
 			network_path = "none"
+			conv_file = "userfiles/conv_" + session_id + ".png"
 			if(os.path.isfile("/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".png")):
 				network_path = "/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".png"
-			return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':"true",'network_path':network_path})
+			return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':"true",'network_path':network_path,'conv_file':conv_file})
 		session_id = request.session._get_or_create_session_key()
 		path99 = "heatmap_" + session_id + ".png"
 		json_path = "ppi_" + session_id + ".json"
@@ -2181,6 +2196,7 @@ def clustering_step_2(request):
 		surv_from_cache = cache.get('has_survival_plot','none')
 		cache.clear()
 		cache.set('analysis_running', analysis_running)
+		conv_file = "userfiles/conv_" + session_id + ".png"
 		network_path = "none"
 		print("survival from cache" + str(surv_from_cache))
 		if(surv_from_cache == "false"):
@@ -2189,7 +2205,7 @@ def clustering_step_2(request):
 			has_survival_plot = "true"
 		if(os.path.isfile("/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".png")):
 			network_path = "/code/clustering/static/userfiles/ntw_" + session_id_from_cache + ".png"
-		return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true",'network_path':network_path,'has_survival_plot':has_survival_plot})
+		return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path99,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':"true",'network_path':network_path,'has_survival_plot':has_survival_plot,'conv_file':conv_file})
 
 
 

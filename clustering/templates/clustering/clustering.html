@@ -1279,23 +1279,18 @@ function fixStepIndicator(n) {
 
 <!--- display the files for downloading --->
 {% if network_path == "none" %}
-{% if user.is_authenticated %}
+{% if json_path == "" %}
+{% else %}
      <br><br><b>
-	Download the network 
-     <a href={% static json_path %} download> as json file </a>
-	</b>
-   {% else %}
-	<b>
 	Download the network 
      <a href={% static json_path %} download> as json file </a>
 	</b>
    {% endif %}
 {% else %}
-{% if user.is_authenticated %}
+{% if json_path == "" %}
      <br><br><b>
 	Download the network 
-     <a href={% static network_path %} download> as png </a> or
-     <a href={% static json_path %} download> as json file </a>
+     <a href={% static network_path %} download> as png </a>
 	</b>
    {% else %}
 	<b>
