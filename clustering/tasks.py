@@ -332,7 +332,7 @@ def add_loading_image(session_id):
 			print("loading image not found")
 	else:
 		if(os.path.isfile("/code/clustering/static/loading.gif")):
-			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/loading_1_" + session_id + ".gif")
+			copyfile("/code/clustering/static/loading.gif","/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
 		else:
 			print("loading image not found")
 
@@ -465,10 +465,13 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
 	#bigger th - less genes are considered (can lead to empty paths if th is too high)
 	# will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-	with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:	
-		text_file.write("Progress of the algorithm is shown below...")
-	with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
-		text_file.write("Progress of the algorithm is shown below...")
+
+	if(session_id == "none"):
+		with open(("/code/clustering/static/output_console.txt"), "w") as text_file:	
+			text_file.write("Progress of the algorithm is shown below...")
+	else:
+		with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:	
+			text_file.write("Progress of the algorithm is shown below...")
 	start = time.time()
 	# session id is "none" if it is not given
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
@@ -685,7 +688,6 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1)	
 		else:
 			g = sns.clustermap(T, figsize=(13, 13),col_colors=col_colors1,row_colors=row_colors1)	
-	
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
@@ -991,9 +993,11 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 		survival_perc_1 = {0:1}
 		survival_perc_2 = {0:1}
 		# calculate data for kaplan meyer plot
+		# check for every number of years between 1 and 10, how many patients are alive
 		for i in range(1,10):	
 			tmp1 = 1.0
-			tmp2 = 1.0
+			tmp2 = 1.0	
+			# iterate over list with survival times
 			for k in survival_1:
 				if(float(k) < float(i)):
 					tmp1 = tmp1 - (1.0/len(survival_1))
@@ -1002,6 +1006,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 					tmp2 = tmp2 - (1.0/len(survival_2))
 			survival_perc_1.update({i:tmp1})
 			survival_perc_2.update({i:tmp2})
+		# write kaplan meyer plots
 		trace1 = go.Scatter(
 		x=list(survival_perc_1.keys()),
 		y=list(survival_perc_1.values()),
@@ -1027,7 +1032,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 		fig = dict(data=surv_data_for_graph,layout=layout)		
 		plot_div=plotly.offline.plot(fig, auto_open=False,output_type='div')
 		if(session_id == "none"):
-			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+			output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
 		else:
 			output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
 		if(survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
