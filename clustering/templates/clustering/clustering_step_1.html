@@ -455,13 +455,14 @@ border:1px solid black;
 	<div id="input_div_2" style="float:left; display:inline-block;"> <!--- wrapper input div --->
 	<div id="wrapper_div_3" style="float:left; display: inline-block;">
 	<div id="wrapper_div_4" style="float:left; display: inline-block;">
+	
 	<div style="padding:40px;margin:40px;border:1px solid #ccc" style="float:left;display:inline;height:420px;width=50%;" id="input_data_div">
         <h1>Run Algorithm:</h1>
 	<a href="infopage.html"  target="_blank" style="font-size:25px">Guide</a><br><br>
 		<form action="#" name="myForm" method="post" enctype="multipart/form-data" onsubmit="return checkInp()">
                 {% csrf_token %}
 
-	<!--- buttons for the start page --->
+	<!--- tab with buttons for the start page --->
 	<div class="tab4" style="width:200px; height:300px" id="start_new_analysis">
 	<!--- this button opens the standard, 5-step input form--->
 	<button type="button" onclick="showTab2(1)" id="start_new_analysis_button" style="height:100px;width:180px; "><h3>Start new analysis</h3></button>
@@ -471,6 +472,7 @@ border:1px solid black;
 	<button type="button" onclick="showOldAnalysisTab()" id="show_old_analysis_button" style="height:100px;width:180px;"><h3>Show old results</h3></button>
 	{% endif %}
 	</div>
+
 	<!--- tab for selecting old data to display --->
 	<div class="tab6" style="width:500px; height:300px; display:none" id="display_old_data">
 	<label for="display_old_results"><input type="checkbox" name="display_old_results" value="display_old_results" id="display_old_results">Display old results</label>
@@ -482,70 +484,60 @@ border:1px solid black;
        	</select><br>	
 	</div>
 	<!--- start of multi-step input form --->
+
 	<!--- upload expression data (step 1) --->
 	<div class="tab4" style="width:500px; height:300px" id="expr_upload">
-	<b>Upload expression data:    </b><br>
+		<b>Upload expression data:    </b><br>
 
-	<input class="input" id="myfile_input" type="file" name="myfile" style="float:left">
-	{% if user.is_authenticated %}
-    	<label for="save_data"><input type="checkbox" name="save_data" value="save_data" id="save_data">  Save data</label>	
-   	{% endif %}
-	<br><br>
+		<input class="input" id="myfile_input" type="file" name="myfile" style="float:left">
+		{% if user.is_authenticated %}
+	    	<label for="save_data"><input type="checkbox" name="save_data" value="save_data" id="save_data">  Save data</label>	
+	   	{% endif %}
+		<br><br>
 
-	<label for="predef_box"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
-	<select name="cancer_type" id="predef_input" size="1">	
-	        <option value="1">Lung Cancer</option>
-	        <option value="2">Breast Cancer</option>
-       	</select><br><br>
-	{% if user.is_authenticated %}
-	<label for="redo_box"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
-	<select name="input_own_file_redo" size="1"style="width:500px">	
-		{% for filename2 in list_of_files_2 %}
-	        <option value="{{filename2.f2}}">File(s) from: {{filename2.f1}}</option>
-		{% endfor %}
-       	</select>
-	<br><br>
-	{% endif %}	
+		<label for="predef_box"><input type="checkbox" name="predef_file" value="predef_file" id="predef_box">   Or use predefined input files:</label><br>
+		<select name="cancer_type" id="predef_input" size="1">	
+			<option value="1">Lung Cancer</option>
+			<option value="2">Breast Cancer</option>
+	       	</select><br><br>
+		{% if user.is_authenticated %}
+		<label for="redo_box"><input type="checkbox" name="redo_analysis" value="redo_analysis" id="redo_box">    Or use own uploaded files</label><br>
+		<select name="input_own_file_redo" size="1"style="width:500px">	
+			{% for filename2 in list_of_files_2 %}
+			<option value="{{filename2.f2}}">File(s) from: {{filename2.f1}}</option>
+			{% endfor %}
+	       	</select>
+		<br><br>
+		{% endif %}	
 	</div>
+
 	<!--- upload PPI data (step 2) --->
 	<div class="tab4" style="width:500px; height:300px" id="ppi_upload">
-	<b>Upload file with PPI:</b><br>
-	<input class="input" id="protfile_input" type="file" name="protfile"   style="float: left;"> 
-	<!--- ndex import (collapsible)--->
-	 <div class="wrap-collabsible" style="width:200px; display:inline;" id="ndex_div">
-	  <input id="collapsible_2" class="toggle" type="checkbox" style="display:none">
-	  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
-	  <div class="collapsible-content">
-	    <div class="content-inner">
-	<!--- invisible checkbox that is checked when collapsible is open, and unchecked if closed (used to pass parameter to view) ---> 
-	<label for="parse_ndex_file"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
-
-	<br><br><select name="ndex_name_2" id="ndex_name_2" size="1">	
-	        <option value="1" selected="selected">APID</option>
-	        <option value="2">STRING</option>
-	        <option value="3">BioGrid</option>
-	        <option value="4">HPRD (Human Protein Reference Database)</option>
-		<option value="5">Ulitsky</option>
-       		<option value="6">I2D</option>
-      	 	<option value="7">BioGrid (C.Elegans)</option>
-      	 	<option value="8">BioGrid (A.Thal.)</option>
-      	 	<option value="9">BioGrid (Mus Mus.)</option>
-      	 	<option value="10">BioGrid (D Mel.)</option>
-      	 	<option value="11">BioGrid (E. Coli)</option>
-      	 	<option value="12">BioGrid (Sacch. C.)</option>
-      	 	<option value="13">BioGrid (Dan.R.)</option>
-       	</select><br><br>
-<span class="message_1"  style="display:block;">Human interactome extracted from <a href="http://apid.dep.usal.es">APID</a>, only human proteins, no inter-species interactions.</span>
-       	<span class="message_2" style="display:none;">PPI from <a href="https://string-db.org/">String Database</a>. This network contains high confidence human protein links. All interactions with Score lower than 0.7 were filtered out.</span>
-       	<span class="message_3" style="display:none;">PPI from <a href="https://thebiogrid.org/">BIOGRID</a></span>
-	<span class="message_4" style="display:none;">This network belongs to an NDEx Network Set associated with the 2018 Huang and Carlin et al. Cell Systems paper.</span>
-	<span class="message_5" style="display:none;">PPI network from Ulitsky et al. 2008</span>
-	<span class="message_6" style="display:none;">PPI from the <a href="http://ophid.utoronto.ca/ophidv2.204/">I2D</a> project.</span>
-	
-</div>
-  </div>
-</div> <!--- end ndex_div -->
-</div> <!--- end PPI upload -->
+		<b>Upload file with PPI:</b><br>
+		<input class="input" id="protfile_input" type="file" name="protfile"   style="float: left;"> 
+		<!--- ndex import (collapsible)--->
+		 <div class="wrap-collabsible" style="width:200px; display:inline;" id="ndex_div">
+		  <input id="collapsible_2" class="toggle" type="checkbox" style="display:none">
+		  <label for="collapsible_2" class="lbl-toggle">OR Import Ndex:</label>
+		  <div class="collapsible-content">
+		    <div class="content-inner">
+		<!--- invisible checkbox that is checked when collapsible is open, and unchecked if closed (used to pass parameter to view) ---> 
+		<label for="parse_ndex_file"><input type="checkbox" name="parse_ndex_file" value="parse_ndex_file" id="parse_ndex_file" style="display:none;">Parse Ndex file:</label>
+		<!--- selection of NDEx file --->
+		<br><br><select name="ndex_name_2" id="ndex_name_2" size="1">	
+			<option value="1" selected="selected">APID</option>
+			<option value="2">STRING</option>
+			<option value="3">BioGrid</option>
+			<option value="4">HPRD (Human Protein Reference Database)</option>
+	       	</select><br><br>
+		<span class="message_1"  style="display:block;">Human interactome extracted from <a href="http://apid.dep.usal.es">APID</a>, only human proteins, no inter-species interactions.</span>
+	       	<span class="message_2" style="display:none;">PPI from <a href="https://string-db.org/">String Database</a>. This network contains high confidence human protein links. All interactions with Score lower than 0.7 were filtered out.</span>
+	       	<span class="message_3" style="display:none;">PPI from <a href="https://thebiogrid.org/">BIOGRID</a></span>
+		<span class="message_4" style="display:none;">This network belongs to an NDEx Network Set associated with the 2018 Huang and Carlin et al. Cell Systems paper.</span>	
+		</div>
+		 </div>
+		</div> <!--- end ndex_div -->
+	</div> <!--- end PPI upload -->
 <!--- js code for PPI data upload --->
 <script>
  // Check hidden parse-ndex-file box if the "parse ndex file" collapsible is opened (then the parse-ndex-file parameter will be true in form data)
@@ -627,14 +619,6 @@ $(document).ready(function() {
             $('.message_4').show();
         } else {
             $('.message_4').hide();
-        }if ( selectedValue == '5' ) {
-            $('.message_5').show();
-        } else {
-            $('.message_5').hide();
-        }if ( selectedValue == '6' ) {
-            $('.message_6').show();
-        } else {
-            $('.message_6').hide();
         }
 
     });
@@ -644,91 +628,92 @@ $(document).ready(function() {
 
 
 
+
 	<!--- upload metadata (step 3) --->
 	<div class="tab4" style="width:500px; height:300px" id="metad_upload">
-	<b>This step is optional.</b><br> If you do not want to upload metadata, you can
-    	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
-	<label for="analyze_metadata"><input type="checkbox" name="analyze_metadata" value="analyze_metadata" id="analyze_metadata">Analyze Patient Metadata</label>
-	<br>
-	<b>Upload file with Patient Data:</b> <br>
-	<input class="input" type="file" name="patientdata"><br> <b>Name of "survival" column:</b> <input class="input" type="text" name="survival_col"><br>
+		<b>This step is optional.</b><br> If you do not want to upload metadata, you can
+	    	<button type="button" id="nextBtn3" onclick="nextPrev(1)">Go to the next step</button>
+		<label for="analyze_metadata"><input type="checkbox" name="analyze_metadata" value="analyze_metadata" id="analyze_metadata">Analyze Patient Metadata</label>
+		<br>
+		<b>Upload file with Patient Data:</b> <br>
+		<input class="input" type="file" name="patientdata"><br> <b>Name of "survival" column:</b> <input class="input" type="text" name="survival_col"><br>
 	</div>
 
 	<!--- algorithm parameters (step 4) --->
 	<div class="tab4" style="width:500px; height:300px" id="params">
 
-	<h3>Algorithm Parameters</h3>
-	<p><b>Enter minimum and maximum number of genes per cluster and run the algorithm:</b></p>
-       Minimal:
-	<input class="input" type="text" name="L_g_min" id="L_g_min">
-	Maximal:
-    	<input class="input" type="text" name="L_g_max" id="L_g_max">
-	<br>
-	Maximum number of iterations:
-	<select name="nbr_iter" size="1">	
-	        <option value="2">2</option>
-	        <option value="5">5</option>
-	        <option value="10">10</option>
-	        <option value="20">20</option>
-	        <option value="45">45</option>
-       	</select>
-	<!--- collapsible for advanced parameter input --->
-	 <div class="wrap-collabsible">
-  <input id="collapsible" class="toggle" type="checkbox" style="display:none">
-  <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
-  <div class="collapsible-content">
-    <div class="content-inner">
-      <p>
-	Gene set size:
-	<input class="input" type="text" name="gene_set_size" id="gene_set_size">
-	<br>
-       Number of ants:
-	<select name="nbr_ants" size="1">	
-	        <option value="10">10</option>
-	        <option value="20">20</option>
-	        <option value="30" selected="selected">30</option>
-	        <option value="40">40</option>
-	        <option value="50">50</option>
-       	</select>  
-	Evaporation rate:
-	<select name="evap" size="1">	
-	        <option value="0.1">0.1</option>
-	        <option value="0.25">0.25</option>
-	        <option value="0.5" selected="selected">0.5</option>
-	        <option value="0.6">0.6</option>
-	        <option value="0.7">0.7</option>
-       	</select><br>
-Pheromone significance:
-	<select name="pher" size="1">	
-	        <option value="0.5">0.5</option>
-	        <option value="0.75">0.75</option>
-	        <option value="1" selected="selected">1</option>
-	        <option value="1.5">1.5</option>
-	        <option value="2">2</option>
-       	</select>
-HI significance:
-	<select name="hisig" size="1">	
-	        <option value="0.5">0.5</option>
-	        <option value="0.75">0.75</option>
-	        <option value="1" selected="selected">1</option>
-	        <option value="1.5">1.5</option>
-	        <option value="2">2</option>
-       	</select><br>
-Stop criteria: score_max - score_av <
-	<select name="stopcr" size="1">	
-	        <option value="0.005">0.005</option>
-	        <option value="0.01">0.01</option>
-	        <option value="0.02" selected="selected">0.02</option>
-	        <option value="0.03">0.03</option>
-	        <option value="0.05">0.05</option>
-       	</select>
-	
-	</p>
-    </div>
-  </div>
+		<h3>Algorithm Parameters</h3>
+		<p><b>Enter minimum and maximum number of genes per cluster and run the algorithm:</b></p>
+	       Minimal:
+		<input class="input" type="text" name="L_g_min" id="L_g_min">
+		Maximal:
+	    	<input class="input" type="text" name="L_g_max" id="L_g_max">
+		<br>
+		Maximum number of iterations:
+		<select name="nbr_iter" size="1">	
+			<option value="2">2</option>
+			<option value="5">5</option>
+			<option value="10">10</option>
+			<option value="20">20</option>
+			<option value="45">45</option>
+	       	</select>
+		<!--- collapsible for advanced parameter input --->
+		 <div class="wrap-collabsible">
+		  <input id="collapsible" class="toggle" type="checkbox" style="display:none">
+		  <label for="collapsible" class="lbl-toggle">Advanced parameters</label>
+		  <div class="collapsible-content">
+		    <div class="content-inner">
+		      <p>
+			Gene set size:
+			<input class="input" type="text" name="gene_set_size" id="gene_set_size">
+			<br>
+		       Number of ants:
+			<select name="nbr_ants" size="1">	
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="30" selected="selected">30</option>
+				<option value="40">40</option>
+				<option value="50">50</option>
+		       	</select>  
+			Evaporation rate:
+			<select name="evap" size="1">	
+				<option value="0.1">0.1</option>
+				<option value="0.25">0.25</option>
+				<option value="0.5" selected="selected">0.5</option>
+				<option value="0.6">0.6</option>
+				<option value="0.7">0.7</option>
+		       	</select><br>
+		Pheromone significance:
+			<select name="pher" size="1">	
+				<option value="0.5">0.5</option>
+				<option value="0.75">0.75</option>
+				<option value="1" selected="selected">1</option>
+				<option value="1.5">1.5</option>
+				<option value="2">2</option>
+		       	</select>
+		HI significance:
+			<select name="hisig" size="1">	
+				<option value="0.5">0.5</option>
+				<option value="0.75">0.75</option>
+				<option value="1" selected="selected">1</option>
+				<option value="1.5">1.5</option>
+				<option value="2">2</option>
+		       	</select><br>
+		Stop criteria: score_max - score_av <
+			<select name="stopcr" size="1">	
+				<option value="0.005">0.005</option>
+				<option value="0.01">0.01</option>
+				<option value="0.02" selected="selected">0.02</option>
+				<option value="0.03">0.03</option>
+				<option value="0.05">0.05</option>
+		       	</select>
+			
+			</p>
+		    </div>
+		  </div>
 
-</div> <!--- end wrap-collapsible -->
-	        <input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
+		</div> <!--- end wrap-collapsible -->
+				<input type="submit" value="Submit" onclick="hideAll()" onclick="showProgressTab(0)"/>
 
 	</div> <!-- end params -->
 <!--- end of multi-stetp input form --->
@@ -883,6 +868,8 @@ function showTab(n) {
   } else {
     document.getElementById("prevBtn").style.display = "inline";
   }
+
+
   // last tab has no next button
   if (n == (x.length - 1)) {
     document.getElementById("nextBtn").style.display = "none";
@@ -892,32 +879,39 @@ function showTab(n) {
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
   }
+
+
   // no next and submit button on page 0 (where the user can choose between starting a new run or showing old results)
- if (n == 0) {
+  if (n == 0) {
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
   }
-if (n == 1) {
+  if (n == 1) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
   }
+
+
   // ... and run a function that displays the correct step indicator:
   fixStepIndicator(n)
-if (n == 5) {
+
+
+  if (n == 5) {
     document.getElementById("prevBtn").style.display = "none";
-   document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
- } else {
+  } else {
   }
-if (n == 0) {
+  
+  if (n == 0) {
   }
-// hide the display-old-data tab if the user has selected "run new analysis"
-var y = document.getElementsByClassName("tab6");
-for (i = 0; i < y.length; i++) {
-  y[i].style.display = "none";
+  // hide the display-old-data tab if the user has selected "run new analysis"
+  var y = document.getElementsByClassName("tab6");
+  for (i = 0; i < y.length; i++) {
+    y[i].style.display = "none";
   }
-}
+  }
 
 function showTab2(n) {
   // This function will display the specified tab of the form ...
@@ -929,6 +923,7 @@ function showTab2(n) {
   } else {
     document.getElementById("prevBtn").style.display = "inline";
   }
+
   if (n == (x.length - 1)) {
 
     document.getElementById("nextBtn").style.display = "none";
@@ -939,26 +934,31 @@ function showTab2(n) {
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
   }
-if (n == 1) {
+
+  if (n == 1) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
     document.getElementsByClassName("step")[0].className += " finish";
   }
- if (n == 0) {
+
+  if (n == 0) {
     document.getElementById("nextBtn").style.display = "none";
   }
+
+
   // ... and run a function that displays the correct step indicator:
   fixStepIndicator(n)
+
+
   for (i = 0; i < x.length; i++) {
     x[i].style.display = "none";
   }
   x[n].style.display = "block";
 
   currentTab = n;
-if (n == 5) {
- } else {
-
-  }
+  //if (n == 5) {
+  //} else {
+  //  }
 // hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
@@ -972,11 +972,13 @@ function showTab3(n) {
   // show the overview tab if you click previous on the first input step
   var x = document.getElementsByClassName("tab4");
   // ... and fix the Previous/Next buttons:
+
   if (n == 0) {
     document.getElementById("prevBtn").style.display = "none";
   } else {
     document.getElementById("prevBtn").style.display = "inline";
   }
+
   if (n == (x.length - 1)) {
     //document.getElementById("nextBtn").innerHTML = "Submit";
     document.getElementById("nextBtn").style.display = "none";
@@ -987,41 +989,47 @@ function showTab3(n) {
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
   }
-if (n == 1) {
+
+  if (n == 1) {
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "none";
   }
- if (n == 0) {
+  if (n == 0) {
     document.getElementById("nextBtn").style.display = "none";
   }
+
+
   // ... and run a function that displays the correct step indicator:
   fixStepIndicator(n)
+
+
   for (i = 0; i < x.length; i++) {
     x[i].style.display = "none";
   }
   x[n].style.display = "block";
 
-    document.getElementById("prevBtn2").style.display = "none";
+  document.getElementById("prevBtn2").style.display = "none";
 
   currentTab = n;
-if (n == 5) {
- } else {
 
-  }
+//if (n == 5) {
+// } else {
+ // }
+
 // hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
 for (i = 0; i < y.length; i++) {
   y[i].style.display = "none";
   }
 
-  var i, x = document.getElementsByClassName("step");
+var i, x = document.getElementsByClassName("step");
   for (i = 0; i < x.length; i++) {
 
     x[i].style.display = "inline-block";
   }
+
   //... and adds the "active" class to the current step:
   var j,y = document.getElementsByClassName("step2");
-
   y[0].style.display = "none";
 }
 
@@ -1037,13 +1045,14 @@ function showOldAnalysisTab() {
 
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("prevBtn2").style.display = "inline";
- for (i = 0; i < x.length; i++) {
+  for (i = 0; i < x.length; i++) {
     x[i].style.display = "none";
   }
   var y = document.getElementsByClassName("tab6");
-for (i = 0; i < y.length; i++) {
-  y[i].style.display = "block";
+  for (i = 0; i < y.length; i++) {
+    y[i].style.display = "block";
   }
+
 oldAnalysisStepIndicator()
 
 }
@@ -1112,51 +1121,54 @@ function nextPrev(n) {
   x[currentTab].style.display = "none";
   // Increase or decrease the current tab by 1:
   currentTab = currentTab + n;
+
   // if you have reached the end of the form... :
   if (currentTab >= x.length) {
     return false;
   }
+
   //hide the first step (where you select run new analysis or show old results)
   var j,y = document.getElementsByClassName("step2");
   y[0].style.display = "none";
+
 // remove the "start a new analysis" button when clicking next on step 1
 if(currentTab==1){
-if(n==1){
-    document.getElementsByClassName("step")[0].className += " finish";
-    document.getElementById('start_new_analysis_wrapper').display = "none";
+	if(n==1){
+	    document.getElementsByClassName("step")[0].className += " finish";
+	    document.getElementById('start_new_analysis_wrapper').display = "none";
+	}
 }
-}
+
 // if you are on the expression file input tab, check if the user has uploaded something or selected a predefined file
 if (currentTab == 2) {
-if (n == 1) {
-if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false ) && (document.getElementById('redo_box').checked === false )){
-   // give warning if user has not uploaded anything
-    alert("Please input file with expression data");
-  // and stay on the same tab instead of going to the next
-  currentTab = currentTab -1;
-  //showTab(currentTab);
-}
-}
+	if (n == 1) {
+		if(document.getElementById('myfile_input').value=='' && (document.getElementById('predef_box').checked === false ) && (document.getElementById('redo_box').checked === false )){
+		   // give warning if user has not uploaded anything
+		   alert("Please input file with expression data");
+		   // and stay on the same tab instead of going to the next
+		   currentTab = currentTab -1;
+		   //showTab(currentTab);
+		}
+	}
 }
 
+// if you are on the ppi input tab, check if user has selected a pre-defined file, uses own old files or uploaded something
 if (currentTab == 3) {
-if (n == 1) {
-// no protein file needed if user has selected own old data
-if(document.getElementById('protfile_input').value=='' && (document.getElementById('parse_ndex_file').checked === false) && (document.getElementById('redo_box').checked === false)){
-
-    alert("Please input file with PPI data");
-
-  currentTab = currentTab -1;
-
+	if (n == 1) {
+	// no protein file needed if user has selected own old data
+		if(document.getElementById('protfile_input').value=='' && (document.getElementById('parse_ndex_file').checked === false) && (document.getElementById('redo_box').checked === false)){
+		    alert("Please input file with PPI data");
+		    currentTab = currentTab -1;
+		}
+	}
 }
-}
-}
+
 // if you click the "next" button, set the label style for the previous step to "done"
 if(n==1){
     document.getElementsByClassName("step")[currentTab-1].className += " finish";
 }
 
-  // Otherwise, display the correct tab:
+  //display the correct tab:
   showTab(currentTab);
 }
 
