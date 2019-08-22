@@ -974,11 +974,9 @@ function showTab3(n) {
   }
 
   if (n == (x.length - 1)) {
-    //document.getElementById("nextBtn").innerHTML = "Submit";
     document.getElementById("nextBtn").style.display = "none";
     document.getElementById("submitBtn").style.display = "inline";
   } else {
-    //document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("nextBtn").style.display = "inline";
     document.getElementById("nextBtn").innerHTML = "Next";
     document.getElementById("submitBtn").style.display = "none";
@@ -1006,9 +1004,6 @@ function showTab3(n) {
 
   currentTab = n;
 
-//if (n == 5) {
-// } else {
- // }
 
 // hide the display-old-data tab if the user has selected "run new analysis"
 var y = document.getElementsByClassName("tab6");
@@ -1100,8 +1095,6 @@ function hideAll() {
   // show no previous/next buttons, and hide the start-new analysis button
     document.getElementById("prevBtn").style.display = "none";
     document.getElementById("showtabs").style.display = "none";
-	//document.getElementById("start_new_analysis").style = "width:0px";
-	//document.getElementById("start_new_analysis_wrapper").style = "width:0px";
    document.getElementById("nextBtn").style.display = "none";
  for (i = 0; i < x.length; i++) {
     x[i].style.display = "none";
@@ -1141,7 +1134,6 @@ if (currentTab == 2) {
 		   alert("Please input file with expression data");
 		   // and stay on the same tab instead of going to the next
 		   currentTab = currentTab -1;
-		   //showTab(currentTab);
 		}
 	}
 }
@@ -1257,14 +1249,20 @@ function fixStepIndicator(n) {
                 <h1>Heatmap</h1>
        {% load staticfiles %}
 
-	
-        <img src={% static path_heatmap %} onerror="this.style.display='none'"><h3>
+	<div id="heatmap_inner_div">
+        <img src={% static path_heatmap %} onerror="this.style.display='none'" id="heatmap_image"><h3>
                     <a href="#">Heatmap</a>
                 </h3>
                 <p>The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.</p>
+	</div>
 		
 <br><br>
 
+<script>
+$("#heatmap_image").error(function () { 
+    $('heatmap_inner_div').hide(); 
+});
+</script>
             </article>
         </div>
 
@@ -1364,10 +1362,13 @@ function fixStepIndicator(n) {
 	{% else %}
 	<div class="tabcontent" id="kegg_enrichment">
 	{% endif %}
+
             <article class="col-md-12 article-intro">
                 <h1>Enrichment</h1>
 		<h3>
                 </h3>
+	{% if json_path == "" %}
+	{%else %}
                 <p></p><br>
 		Run an Enrichment for the genes used in the analysis. Select for which terms you want to run the enrichment and display the results for genes either in both clusters, in cluster 1 or in cluster 2.<br><br>
 	<!--- form for enrichment analysis --->
@@ -1545,6 +1546,7 @@ function fixStepIndicator(n) {
 
 	</table></p>
 	 </div>
+	{% endif %}
 	</article> 
 <!--- end of enrichment results --->
 </div><!--- tab content ---><!--- end kegg enrichment -->

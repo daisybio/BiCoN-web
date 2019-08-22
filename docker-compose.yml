@@ -48,6 +48,7 @@ services:
   celery:
     environment: 
         #- DJANGO_ALLOWED_HOSTS=['0.0.0.0','172.18.0.6']
+        - NBR_PROCESSES=${nbr_processes:-4}
         - SECRET_KEY=${secret_key}
         - C_FORCE_ROOT=true
         - CELERY_URL=${cel_url}

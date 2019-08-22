@@ -81,11 +81,9 @@ def make_empty_figure(session_id):
 	fig = plt.figure(figsize=(10,8))
 	if(session_id == "none"):
 		plt.savefig("/code/clustering/static/progress.png")
-		#plt.savefig("/code/clustering/static/userfiles/progress.png")
 		plt.close(fig)
 	else:
 		plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
-		#plt.savefig("/code/clustering/static/userfiles/progress.png")
 		plt.close(fig)
 
 # empty the log file (session ID in path)
@@ -113,10 +111,9 @@ def empty_log_file(session_id):
 
 ########################################################
 #### writing and processing metadata, loading 
-#### images etc...  some of these methods are obsolete
-#### and will be removed soon ##########################
-#### you can just scroll down a bit, there will be 
-#### the *actual* algorithm ############################
+#### images etc...   ###################################
+#### the *actual* algorithm will be further
+#### down the page       ###############################
 ########################################################
 
 # preprocess file with metadata
@@ -387,6 +384,7 @@ def list_metadata_from_file(path):
 	return(dict0,dict1,dict2)
 
 
+
 ##################################################################################################
 ######### running the algorithm - part 1 #########################################################
 ##################################################################################################
@@ -453,13 +451,10 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	evaporation  = float(evap)
 	a = float(pher_sig) #pheramone significance
 	times =int(nbr_iter) #max amount of iterations
-	#times =45 #max amount of iterations
 	# =============================================================================
 	# #NETWORK SIZE PARAMETERS:
 	# =============================================================================
 	cost_limit = 20 # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
-	#L_g_min = 10 # minimum # of genes per group
-	#L_g_max = 20 # minimum # of genes per group
 	
 	th = 1# the coefficient to define the search radipus which is supposed to be bigger than 
 	#mean(heruistic_information[patient]+th*std(heruistic_information[patient])
@@ -476,6 +471,8 @@ def algo_output_task(s,L_g_min,L_g_max,expr_str,ppi_str,nbr_iter,nbr_ants,evap,e
 	# session id is "none" if it is not given
 	solution,t_best,sc,conv= lib.ants_new(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = False,show_plot = True, print_runs = False, save 	= None, show_nets = False)
 	end = time.time()
+	n_proc = os.getenv("NBR_PROCESSES",'4')
+	lib.ants_manager(a,b,n,m,H,GE,G,2,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,n_proc, opt = None,pts = False,show_pher = True,show_plot = True, save = None, show_nets = False)
 	print("######################################################################")
 	print("RESULTS ANALYSIS")
 	print("total time " + str(round((end - start)/60,2))+ " minutes")
@@ -691,6 +688,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 	ax = g.ax_heatmap
 	ax.set_xlabel("Genes")
 	ax.set_ylabel("Patients")
+	# do not include session ID in path if no session ID was given
 	if(session_id == "none"):
 		path_heatmap = "/code/clustering/static/userfiles/heatmap.png"
 	else:
@@ -774,7 +772,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 		param_names = []
 		param_values = []
 		param_cols = []
-	#if not(clinicalstr == "empty" or set(patientids_metadata).isdisjoint(group1_ids)):
+	#if clinical data were uploaded, more than 1 patient exists and patient IDs from metadata and expression data overlap
 	if not(clinicalstr == "empty" or ((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(group1_ids)):
 		patients_0 = []
 		patients_1 = []
@@ -1047,6 +1045,7 @@ def script_output_task(T,row_colors1,col_colors1,G2,means,genes_all,adjlist,gene
 				text_file_2.write(errstr)
 			output_plot_path = "empty"
 	else:
+		# return empty arrays for metadata / empty file for survival plot  if no metadata were found
 		ret_metadata = []
 		text_file_3 = open(path_metadata, "w")
 		text_file_3.write("NA")

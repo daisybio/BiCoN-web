@@ -88,6 +88,20 @@ def hi(A_j,n,m):
                     H[node2,node1] = H[node1,node2]
     return(H*10)
 
+### used for testing
+
+#def ants_manager(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,n_proc, opt = None,pts = False,show_pher = True,show_plot = True, save = None, show_nets = True):
+#checks which implementation should be used sequential or parallel
+def ants_manager(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,n_proc, opt = None,pts = False,show_pher = True,show_plot = True, save = None, show_nets = False):
+	#if n_proc == 1:
+	#    #return(ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt,pts,show_pher,show_plot, save,show_nets))
+	if (n_proc>1) and (n_proc <= multiprocessing.cpu_count()):
+		print("cpu count " + str(multiprocessing.cpu_count()))
+        #return(ants_par(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,n_proc, opt,pts,show_pher,show_plot, save, show_nets))
+	else:
+		raise Exception('n_proc should not exceed {0}. The value of x was: {1}'.format(multiprocessing.cpu_count(), n_proc))
+
+
 
 def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
 	ge = GE.values

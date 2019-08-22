@@ -2,7 +2,6 @@ from django.shortcuts import render
 from io import StringIO
 from django.http import HttpResponse
 from django.template import loader
-##from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import check_password
@@ -11,13 +10,9 @@ from django.urls import reverse
 from django.views import generic
 from django.core.cache import cache
 from datetime import datetime
-#from .models import Choice, Question
-#from sklearn.ensemble import RandomForestClassifier
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response,render
 from django.template import RequestContext
-##from django.http import HttpResponseRedirect
-##from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from shutil import copyfile
 import shutil
@@ -31,23 +26,8 @@ import os.path
 from django.core.mail import send_mail
 
 ### *ACTUAL* imports (that have dependencies other than django and my own stuff) ####
-##import networkx as nx
-#from biomart import BiomartServer
-#from bokeh.palettes import Spectral4
-##from pybiomart import Dataset
-##import seaborn as sns
 import pandas as pd
-##from numpy import array
-##import matplotlib.patches as mpatches
-##import numpy as np
 import matplotlib.pyplot as plt
-##import mpld3
-##from plotly.offline import plot_mpl
-##import plotly
-##import plotly.plotly as py
-##import plotly.graph_objs as go
-##import plotly.io as pio
-##import plotly.offline
 
 
 def logout_2(request):
@@ -1223,7 +1203,7 @@ def clustering_step_1(request):
 				text_file.write("")
 			with open("clustering/static/output_console.txt", "w") as text_file:
 				text_file.write("")
-		
+		# set session ID (always), read metadata (if loading page new because user has hit reload)
 		if not (request.user.is_authenticated):
 			cache.clear()
 			cache.set('analysis_running',analysis_running)
@@ -1260,16 +1240,16 @@ def clustering_step_1(request):
 			cache.set('ret_metadata2', ret_metadata2)	
 			cache.set('ret_metadata3', ret_metadata3)
 			#print(ret_metadata1) 
-		if('done' in request.session):
-			if(request.session['done'] == "true"): 
-				session_id = request.session._get_or_create_session_key()
-				path_heatmap = "userfiles/heatmap_" + session_id + ".png"
-				json_path = "userfiles/ppi_" + session_id + ".json"
-				path_metadata = "userfiles/metadata_" + session_id + ".txt"
-				output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
-				conv_file = "userfiles/conv_" + session_id + ".png"
-				return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':has_survival_plot,'conv_file':conv_file})		
-		# this redirects the user to the result page if the done parameter is true (e.g. reloading page after an analysis)
+			#if('done' in request.session):
+			#	if(request.session['done'] == "true"): 
+			#		session_id = request.session._get_or_create_session_key()
+			#		path_heatmap = "userfiles/heatmap_" + session_id + ".png"
+			#		json_path = "userfiles/ppi_" + session_id + ".json"
+			#		path_metadata = "userfiles/metadata_" + session_id + ".txt"
+			#		output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
+			#		conv_file = "userfiles/conv_" + session_id + ".png"
+			#		return render(request,'clustering/clustering_step_2.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'has_survival_plot':has_survival_plot,'conv_file':conv_file})		
+			# this redirects the user to the result page if the done parameter is true (e.g. reloading page after an analysis)
 		if(done_from_cache=="done"):
 			session_id_from_cache = cache.get("session_id",'has expired')
 			if(session_id_from_cache == 'has expired'):
@@ -1353,18 +1333,18 @@ def clustering(request):
 			path_metadata_2 = "userfiles/metadata_" + session_id + ".txt"
 			path_plotly_2 = "userfiles/output_plotly_" + session_id + ".html"
 			# copy files to static directory
-			copyfile(path_json,("clustering/static/" + json_path))	
-			copyfile(path_heatmap,("clustering/static/" + path_heatmap_2))
+			copyfile(path_json,("/code/clustering/static/" + json_path))	
+			copyfile(path_heatmap,("/code/clustering/static/" + path_heatmap_2))
 			if(os.path.isfile(path_ntw_2)):
-				copyfile(path_ntw_2,("clustering/static/userfiles/ntw_" + session_id + ".png"))
-			copyfile(path_genelist,("clustering/static/userfiles/genelist_" + session_id + ".txt"))
-			copyfile(path_genelist_1,("clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
-			copyfile(path_genelist_2,("clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
+				copyfile(path_ntw_2,("/code/clustering/static/userfiles/ntw_" + session_id + ".png"))
+			copyfile(path_genelist,("/code/clustering/static/userfiles/genelist_" + session_id + ".txt"))
+			copyfile(path_genelist_1,("/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"))
+			copyfile(path_genelist_2,("/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"))
 			output_plot_path_2 = ""
 			has_survival_plot = "false"
 			# check if plotly file exists and copy
 			if(os.path.isfile(path_plotly)):
-				copyfile(path_plotly,("clustering/static/" + path_plotly_2))
+				copyfile(path_plotly,("/code/clustering/static/" + path_plotly_2))
 				output_plot_path_2 = path_plotly_2
 				has_survival_plot = "true"
 			ret_metadata_1 = ""
@@ -1534,10 +1514,12 @@ def clustering(request):
 				has_survival_plot = "false"
 			else:
 				cache.set("has_survival_plot","true")
+			# set paths for result files
 			output_plot_path = "userfiles/output_plotly_" + session_id + ".html"
 			json_path = "userfiles/ppi_" + session_id + ".json"
 			path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
 			path_heatmap = "userfiles/heatmap_" + session_id + ".png"
+			# save uploaded files if specified
 			if(save_data in ["save_data"]):
 				if request.user.is_authenticated:
 					username = str(request.user)
@@ -1574,10 +1556,8 @@ def clustering(request):
 				cache.set("enrichment_dict_3","")
 				cache.set("enrichment_dict_4","")
 				cache.set("enrichment_dict_5","")
-			# paths for showing results
 			# write list of genes to downloadable file
 			convert_gene_list.delay(adjlist,"/code/clustering/static/userfiles/genelist_temp.txt")
-			# save uploaded files if specified
 			# render list of previously uploaded files if user is logged in (needed if user submits another request)
 			if request.user.is_authenticated:
 				username = str(request.user)
@@ -1680,19 +1660,22 @@ def clustering(request):
 					ret_metadata = ""
 				result10 = preprocess_file_2.delay(exprstr)
 				(exprstr_2,nbr_groups) = result10.get()
+				# check if clinical data exist				
 				try:
+					# run algorithm
 					result1 = algo_output_task.delay(1,lgmin,lgmax,exprstr,ppistr,nbr_iter,nbr_ants,evap,epsilon,hi_sig,pher_sig,session_id,gene_set_size,nbr_groups)
 					(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,jac_1,jac_2) =result1.get()			
-					# check if clinical data exist				
+					# make plots and process results	
 					result2 = script_output_task.delay(T,row_colors,col_colors,G2,means,genes_all,adjlist,genes1,group1_ids,group2_ids,clinicalstr,jac_1,jac_2,survival_col_name,clinicaldf,session_id)
 					(ret_metadata,path_heatmap,path_metadata,output_plot_path,json_path,p_val) = result2.get()
 				except:
 					return render(request,'clustering/errorpage.html',{'errors':"An error occurred during the algorithm run.",'hide_standard_message':"true"})
 
-				
+				# get metadata
 				ret_metadata1 = ret_metadata[0]
 				ret_metadata2 = ret_metadata[1]
 				ret_metadata3 = ret_metadata[2]
+				# set enrichment
 				enrichment_dict = cache.get('enrichment_dict',"")
 				if not(enrichment_dict == ""):
 					cache.set("enrichment_dict","")
@@ -1870,7 +1853,8 @@ def clustering(request):
 				cache.set("enrichment_dict_5",enrichment_dict_5)
 			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
-			loading_gif_1 = "userfiles/loading_1_" + session_id + ".gif"					           									    				network_path = "userfiles/ntw_" + session_id_from_cache + ".png"
+			loading_gif_1 = "userfiles/loading_1_" + session_id + ".gif"
+			network_path = "userfiles/ntw_" + session_id_from_cache + ".png"
 			return render(request,'clustering/clustering.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'path_heatmap':path_heatmap,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,
 'json_path':(json_path + "?foo=bar"),'output_plot_path':output_plot_path,'network_path':network_path,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'enrichment_open':"true",'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'conv_file':conv_file})
 		except:
@@ -1970,7 +1954,7 @@ def clustering(request):
 				network_path = "userfiles/ntw_" + session_id_from_cache + ".png"
 			else:
 				network_path = "none"
-				has_survival_plot = "false"
+				#has_survival_plot = "false"
 			output_plot_path = "userfiles/output_plotly_" + session_id_from_cache + ".html"	
 			conv_file = "userfiles/conv_" + session_id + ".png"
 			# take metadata from cache
@@ -1990,9 +1974,10 @@ def clustering(request):
 				enrichment_dict_4 = cache.get('enrichment_dict_4',"")
 				enrichment_dict_5 = cache.get('enrichment_dict_5',"")
 			cache.clear()	
-			if(surv_from_cache == "false"):
-				has_survival_plot = "false"
-				cache.set("has_survival_plot","false")
+			#if(surv_from_cache == "false"):
+			#	has_survival_plot = "false"
+			#	cache.set("has_survival_plot","false")
+			# set cache variables after clearing cache
 			cache.set('session_id', session_id_from_cache)	
 			cache.set('ret_metadata1', ret_metadata1)	
 			cache.set('ret_metadata2', ret_metadata2)	
@@ -2000,14 +1985,23 @@ def clustering(request):
 			cache.set('p_val', p_val)	
 			cache.set('analysis_running', analysis_running)
 			cache.set('has_survival_plot', has_survival_plot)
+			surv_from_cache = cache.get('has_survival_plot','none')
+			print("survival from cache" + str(surv_from_cache))
+			if(surv_from_cache == "true"):
+				print("survival from cache is true")
 			output_console_file = "userfiles/output_console_" + session_id_from_cache + ".txt"
 			progress_file = "userfiles/progress_" + session_id_from_cache + ".png"
 			loading_gif_1 = "userfiles/loading_1_" + session_id + ".gif"
 			return render(request,'clustering/clustering.html',{'list_of_files':list_of_files,'list_of_files_2':list_of_files_2,'ret_metadata':ret_metadata,'path_heatmap':path_heatmap,'json_path':json_path,'output_plot_path':output_plot_path,'ret_metadata1':ret_metadata1,'ret_metadata2':ret_metadata2,'ret_metadata3':ret_metadata3,'metadata_dict':metadata_dict,'enrichment_dict':enrichment_dict,'enrichment_dict_2':enrichment_dict_2,'enrichment_dict_3':enrichment_dict_3,'enrichment_dict_4':enrichment_dict_4,'enrichment_dict_5':enrichment_dict_5,'p_val':p_val,'has_survival_plot':has_survival_plot,'output_console_file':output_console_file,'progress_file':progress_file,'loading_gif_1':loading_gif_1,'network_path':network_path,'conv_file':conv_file})
 		cache.clear()
+		# set cache variables after clearing cache
 		cache.set('session_id',session_id)
 		cache.set('analysis_running', analysis_running)
 		cache.set('has_survival_plot', has_survival_plot)
+		surv_from_cache = cache.get('has_survival_plot','none')
+		print("survival from cache" + str(surv_from_cache))
+		if(surv_from_cache == "true"):
+			print("survival from cache is true")
 		conv_file = "userfiles/conv_" + session_id + ".png"
 		output_console_file = "userfiles/output_console_" + session_id + ".txt"
 		progress_file = "userfiles/progress_" + session_id + ".png"
