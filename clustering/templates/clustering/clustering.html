@@ -1632,9 +1632,9 @@ function openTab2(evt, tabName) {
     window.dispatchEvent(new Event('resize'));
     var element1 = document.getElementById("graph-container");
     if(element1.style.height == "600px"){
-    element1.style.height = "599px";}
+   	 element1.style.height = "599px";}
     else{
-    element1.style.height = "600px";}
+   	 element1.style.height = "600px";}
     // refresh sigma.js (needed to display graph after it has been hidden)
     var s = sigma.instances()[0];
     s.refresh();

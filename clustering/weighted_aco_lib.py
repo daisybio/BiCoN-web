@@ -1,5 +1,8 @@
-import multiprocessing
-from multiprocessing import set_start_method, Process, Queue
+#import multiprocessing
+#from multiprocessing import set_start_method, Process, Queue
+import billiard as multiprocessing
+from billiard import set_start_method,Process,Queue
+#from multiprocessing import set_start_method, Queue
 import time
 import pandas as pd
 import numpy as np
@@ -19,7 +22,7 @@ from scipy import stats
 import scipy.spatial.distance as ssd
 from scipy.cluster import hierarchy
 import seaborn as sns; sns.set(color_codes=True)
-from multiprocessing import Pool
+#from multiprocessing import Pool
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor    
@@ -93,15 +96,51 @@ def hi(A_j,n,m):
 #def ants_manager(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,n_proc, opt = None,pts = False,show_pher = True,show_plot = True, save = None, show_nets = True):
 #checks which implementation should be used sequential or parallel
 def ants_manager(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,n_proc, opt = None,pts = False,show_pher = True,show_plot = True, save = None, show_nets = False):
-	#if n_proc == 1:
-	#    #return(ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt,pts,show_pher,show_plot, save,show_nets))
-	if (n_proc>1) and (n_proc <= multiprocessing.cpu_count()):
+	if (int(n_proc) == 1):
+		return(ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt,pts,show_pher,show_plot, save,show_nets))
+	if (int(n_proc)>1) and (int(n_proc) <= multiprocessing.cpu_count()):
 		print("cpu count " + str(multiprocessing.cpu_count()))
-        #return(ants_par(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,n_proc, opt,pts,show_pher,show_plot, save, show_nets))
+		return(ants_paral_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,n_proc, opt,pts,show_pher,show_plot, save, show_nets))
 	else:
 		raise Exception('n_proc should not exceed {0}. The value of x was: {1}'.format(multiprocessing.cpu_count(), n_proc))
 
 
+def ant_job_paral_OLD(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,ants_per_batch,pr,ss,result):
+    max_round_score = -100
+    W = 0
+    av_score = 0
+    for i in range(ants_per_batch):
+        seed = ss[i]
+        tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,seed)
+        W = W+wars
+        av_score = av_score+ tot_score
+        if tot_score > max_round_score:
+            max_round_score = tot_score
+            solution = (gene_groups,patients_groups)
+            solution_big = (no_int,patients_groups)
+            new_scores_best = new_scores
+            s1 = new_scores_best[0][0]*new_scores_best[0][1]
+            s2 = new_scores_best[1][0]*new_scores_best[1][1]
+    result.put([(s1,s2),solution,solution_big, av_score/ants_per_batch])
+
+
+def ant_job_paral(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,ants_per_batch,pr,ss):
+    max_round_score = -100
+    W = 0
+    av_score = 0
+    for i in range(ants_per_batch):
+        seed = ss[i]
+        tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,seed)
+        W = W+wars
+        av_score = av_score+ tot_score
+        if tot_score > max_round_score:
+            max_round_score = tot_score
+            solution = (gene_groups,patients_groups)
+            solution_big = (no_int,patients_groups)
+            new_scores_best = new_scores
+            s1 = new_scores_best[0][0]*new_scores_best[0][1]
+            s2 = new_scores_best[1][0]*new_scores_best[1][1]
+    return([(s1,s2),solution,solution_big, av_score/ants_per_batch])
 
 def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
 	ge = GE.values
@@ -128,6 +167,15 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
 	print("the joint graph has "+ str(n+m) + " nodes")
 	print("probability update takes "+str(round(end-st,3)))
 	W = 0
+	#jobs = []
+	#result = Queue()
+	#ants_per_batch = 5
+	#pr = 1
+	#ss = np.random.choice(np.arange(pr*ants_per_batch,pr*ants_per_batch+ants_per_batch),ants_per_batch,replace = False)
+	#p = Process(target = ant_job_paral, args = (GE,N,H,th,2,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,5,1,ss,))
+	#p = Process(target = ant_job_paral, args = (GE,N,H,th,2,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,5,1,ss,result,))
+	#jobs.append(p)
+	#p.start()
 	while np.abs(max_round_score-av_score)>eps and count_big<times and (W<m/3):
 		av_score = 0
 		W = 0
@@ -234,6 +282,205 @@ def ants_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max
 	#print_clusters(GE,best_solution)
 	#features(best_solution, GE,G)
 	return(best_solution,t,max_total_score,np.asarray(scores).T)
+
+
+
+def ants_paral_new(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,session_id,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
+	ge = GE.values
+	H =H.astype(np.short)
+	N = neigborhood(H,n,th)
+	patients = np.arange(n,n+m)  
+	cost = H/10
+	cost = np.max(cost)-cost
+	scores = []
+	avs = []
+	count_big = 0
+	max_total_score = 0
+	max_round_score = -100
+	av_score = 0
+	st = time.time()
+	t0 = np.ones((n+m,n+m))*5
+	t0 = t0.astype(np.short)
+	probs= prob_upd(H,t0,a,b,n,th,N)
+	end = time.time()
+	flag = False
+	score_change = []
+	print ("Running time statistics:")
+	print ("###############################################################")
+	print("the joint graph has "+ str(n+m) + " nodes")
+	print("probability update takes "+str(round(end-st,3)))
+	W = 0
+	jobs = []
+	result = Queue()
+	ants_per_batch = 5
+	pr = 1
+	ss = np.random.choice(np.arange(pr*ants_per_batch,pr*ants_per_batch+ants_per_batch),ants_per_batch,replace = False)
+	p = Process(target = ant_job_paral, args = (GE,N,H,th,2,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,5,1,ss,))
+	#p = Process(target = ant_job_paral, args = (GE,N,H,th,2,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,5,1,ss,result,))
+	jobs.append(p)
+	p.start()
+	while np.abs(max_round_score-av_score)>eps and count_big<times and (W<m/3):
+		av_score = 0
+		W = 0
+		max_round_score = 0
+		scores_per_round = []
+		for i in range(K):
+			#for each ant
+			st = time.time()
+			tot_score,gene_groups,patients_groups,new_scores,wars,no_int = ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,i,cost_limit,L_g_min,L_g_max,G,ge,print_runs)
+			end = time.time()
+			W = W+wars
+			if count_big ==0 and i ==0:
+				print("one ant run takes "+str(round(end-st,3)))
+			scores_per_round.append(tot_score)
+			av_score = av_score + tot_score
+			if tot_score > max_round_score:
+				max_round_score = tot_score
+				solution = (gene_groups,patients_groups)
+				full_scores = new_scores
+				solution_big = (no_int,patients_groups)
+			if count_big ==0 and i ==K-1:
+				gs = 1.5*max_round_score
+				t_max = (1/evaporation)*gs
+				t_min = 0
+				t0 = np.ones((n+m,n+m))*t_max
+		#after all ants have finished:
+		scores.append(scores_per_round)
+		#saving rhe best overall solution
+		if max_round_score>max_total_score:
+			max_total_score = max_round_score
+			best_solution = solution
+			max_full_scores = full_scores 
+			solution_big_best = solution_big
+		score_change.append(round(max_round_score,3))
+		print("Iteration # "+ str(count_big+1))
+		print("best round score: " + str(round(max_round_score,3)))
+		print("average score: " + str(round(av_score/K,3)))
+		if(session_id == "none"):
+			with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+				#print("foobar")
+				text_file.write("Iteration # "+ str(count_big+1))
+				text_file.close()
+		else:
+			with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+				#print("foobar")
+				text_file.write("Iteration # "+ str(count_big+1))
+				text_file.close()
+		av_score = av_score/K
+		avs.append(round(av_score,2))
+		#print(scores)
+		print(avs)
+		#pher. and prob. updates
+		t = pher_upd(t0,t_min,evaporation,max_full_scores,solution_big_best,flag)
+		t0 = np.copy(t)
+		probs= prob_upd(H,t,a,b,n,th,N)	
+		#visualization options:
+		
+		if show_pher:
+			fig = plt.figure(figsize=(18,12))
+			ax = fig.add_subplot(111)
+			t_max = np.max(t)   
+			cax = ax.matshow(t, interpolation='nearest',cmap=plt.cm.RdPu,vmin = t_min,vmax = t_max)
+			plt.colorbar(cax)
+			plt.title("Pheramones")
+			plt.show(block=False)
+			plt.close(fig)
+		count_big = count_big +1
+		if show_nets:
+			features(solution, GE,G)    
+		if show_plot:
+			fig = plt.figure(figsize=(10,8))
+			plt.boxplot(np.asarray(scores).T,manage_xticks = True, patch_artist=True)
+			if opt!=None:
+				plt.axhline(y=opt,label = "optimal solution score", c = "r")
+			if(session_id == "none"):
+				plt.savefig("/code/clustering/static/progress.png")
+				plt.close(fig)
+			else:
+				plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+				plt.close(fig)
+		if len(set(score_change[:3])) ==1 and len(score_change)>3:
+			flag = True
+	if save != None:
+		fig = plt.figure(figsize=(10,8))
+		plt.boxplot(np.asarray(scores).T,manage_xticks = True)
+		if opt!=None:
+			plt.axhline(y=opt,label = "optimal solution score", c = "r")
+			#plt.legend()
+			plt.savefig(save+".png")
+			plt.close(fig)
+	#after the solutution is found we make sure to cluster patients the last time with that exact solution:
+	data_new = ge[solution[0][0]+solution[0][1],:]
+	kmeans = KMeans(n_clusters=2, random_state=0).fit(data_new.T)
+	labels = kmeans.labels_
+	patients_groups =[]
+	for clust in range(clusters):
+		wh = np.where(labels == clust)[0]
+		group_p = [patients[i] for i in wh]
+		patients_groups.append(group_p)
+	if np.mean(ge[best_solution[0][0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[best_solution[0][1],:][:,(np.asarray(patients_groups[0])-n)]):
+		patients_groups = patients_groups[::-1]
+	best_solution = [best_solution[0],patients_groups]
+	print("best total score: "+str(max_total_score))
+	#print_clusters(GE,best_solution)
+	#features(best_solution, GE,G)
+	return(best_solution,t,max_total_score,np.asarray(scores).T)
+
+
+
+def ant_job(GE,N,H,th,clusters,probs,a,b,cost,m,n,patients,count_big,cost_limit,L_g_min,L_g_max,G,ge,seed = None):
+
+    paths = []
+    wars = 0
+    #set an ant on every patient
+    for w in range(m):
+        #print(w)
+        k = cost_limit
+        start = patients[w]
+        Nn = N[w] #neigbohood
+        P_small = probs[w]
+        path = walk(start,Nn,P_small,cost,k,n)
+        paths.append(path)
+#    print("Random walks: {0}\n".format(end-st))
+    data_new = ge[list(set(flatten(paths))),:]
+    kmeans = KMeans(n_clusters=2).fit(data_new.T)
+    labels = kmeans.labels_
+#    print("Patients clustering: {0}\n".format(end-st))
+
+    gene_groups_set =[]
+    patients_groups =[]
+    for clust in range(clusters):
+        wh = np.where(labels == clust)[0]
+        group_g = [paths[i] for i in wh]
+        group_g = flatten(group_g)
+        gene_groups_set.append(set(group_g))
+        #save only most common genes for a group
+        group_p = [patients[i] for i in wh]
+        patients_groups.append(group_p)
+        
+    #delete intersecting genes between groups
+    
+    I = set.intersection(*gene_groups_set)
+    no_int =[list(gene_groups_set[i].difference(I)) for i in range(clusters)]
+    gene_groups = no_int
+#    print("Genes clustering: {0}\n".format(end-st))
+
+    # make sure that gene clusters correspond to patients clusters:
+    if np.mean(ge[gene_groups[0],:][:,(np.asarray(patients_groups[0])-n)])<np.mean(ge[gene_groups[1],:][:,(np.asarray(patients_groups[0])-n)]):
+        patients_groups = patients_groups[::-1]
+#    print("Switch: {0}\n".format(end-st))
+
+
+    gene_groups,sizes= clean_net(gene_groups,patients_groups, clusters,L_g_min,G,GE)
+#    print("Clean net: {0}\n".format(end-st))
+
+    new_scores = score(G,patients_groups,gene_groups,n,m,ge,sizes,L_g_min,L_g_max)
+#    print("Score: {0}\n".format(end-st))
+
+    
+    tot_score = new_scores[0][0]*new_scores[0][1]+new_scores[1][0]*new_scores[1][1]   
+    return(tot_score,gene_groups,patients_groups,new_scores,wars,no_int)
+
 
 def ants(a,b,n,m,H,GE,G,clusters,cost_limit,K,evaporation,th,L_g_min,L_g_max,eps,times,opt= None,pts = False,show_pher = True,show_plot = True, print_runs = True, save = None, show_nets = True):
     #fig = plt.figure(figsize=(10,8))
