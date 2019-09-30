@@ -1,5 +1,3 @@
- 
-
 # BiGAnts Web - ToDo
 
 ## Code cleanup
@@ -15,6 +13,15 @@
   Home(views.infopage), Analysis(views.clustering), Sources(views.sources), Sign up
 
 + [ ] Check redirects (?) `^clustering_6_part_1/$`
+
+Restructure Project + make runnable without docker
+
++ [ ] Move static files outside
++ [ ] Move generated files outside
++ [ ] Detach the volume `./code` , change to different directory (add Volume)
++ [ ] Run in Docker (DB, RabbitMQ)
++ [ ] Run without Docker (web service and celary)
++ [ ] Debug Mode (when run seperate Dockerfile) and supply different environment variables?
 
 ## Bug Fixes
 

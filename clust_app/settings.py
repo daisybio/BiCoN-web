@@ -14,26 +14,19 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#BASE_DIR = os.path.dirname(__file__)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = os.getenv("SECRET_KEY",'9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6') 
-SECRET_KEY = os.getenv("SECRET_KEY") 
-#SECRET_KEY = '9z5(_w$5&=_)eve^u(--xcg%ge3dxi38m^d$yqol5#*atybvt6'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 # allowed host must list every adress that is used for accessing the web server in the browser. In the docker container, it runs (for example) on 172.18.0.6:8000; when run outside a docker container, you can access the website on localhost:8000.
-#ALLOWED_HOSTS = ['0.0.0.0','172.18.0.6','localhost']
-#ALLOWED_HOSTS = ['*']
-
 # get list of allowed hosts from environment variable
-#ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", ['*'])
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS") 
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS")
 
 # Application definition
 
@@ -60,13 +53,9 @@ MIDDLEWARE = [
     'livereload.middleware.LiveReloadScript',
 ]
 
-#ROOT_URLCONF = 'testproject.urls'
 ROOT_URLCONF = 'clust_app.urls'
 # celery configuration. this line tells celery where it can access rabbitMQ.
-#CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_BROKER_URL = os.getenv("CELERY_URL") 
-#CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
-#CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = os.getenv("CELERY_URL")
 # the serializer is used for passing results from celery to python functions. pickle is the only serializer that is suitable for all different data formats.
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
@@ -97,42 +86,22 @@ TEMPLATES = [
     },
 ]
 # tells the server where to find the HTML pages to display for the user.
-#TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'polls/templates')]
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'clustering/templates')]
 
-#WSGI_APPLICATION = 'testproject.wsgi.application'
 WSGI_APPLICATION = 'clust_app.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#    }
-#}
-# here the database is referenced
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'database.sqlite3'),
-#        'USER': '',
-#        'PASSWORD': '',
-#        'HOST': '',
-#        'PORT': '',
-#    }
-#}
-
 DATABASES = {  
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST':  'db',
+        # 'HOST':  'db',
+        'HOST':  'localhost',
         'PORT': '5432',
     },
 }
@@ -174,15 +143,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 # tells the server where to look for static files. Static files are all non-html files used for display on the web pages, such as heatmaps or loading gifs.
-#STATIC_URL = '/static/'
 STATIC_URL = '/code/clustering/static/'
-#STATIC_URL = '/'
-#STATIC_ROOT = os.path.join(BASE_DIR, '../code/polls/static')
-#STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'clustering/static')
 # staticfile_dirs tells Django where to take additional static files from. It is possible to add further directories with static files there.
 # In this case here, the shared volume is referenced where celery, livereload and django have access.
 STATICFILES_DIRS = ['/code/clustering/static/']
-#STATIC_ROOT = os.path.join(BASE_DIR, 'polls/static')
-#STATICFILES_DIRS = ['/code/polls/static/']
 

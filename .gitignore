@@ -107,6 +107,7 @@ venv.bak/
 .idea/
 
 # BiGAnts-web specific files (ToDo remove, legacy)
+./clustering/static/userfiles
 ./test_scripts_3/APID.cx
 ./test_scripts_3/biogrid_sce.cx
 ./polls/data/lung_cancer_expr_raw.csv
