@@ -19,7 +19,6 @@ LOGIN_URL = 'core_login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'core_login'
 
-
 # ##### DATABASE CONFIGURATION ############################
 DATABASES = {
     'default': {

@@ -1,6 +1,7 @@
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+
 class GenerateRandomUserForm(forms.Form):
     total = forms.IntegerField(
         validators=[
@@ -8,13 +9,16 @@ class GenerateRandomUserForm(forms.Form):
             MaxValueValidator(500)
         ]
     )
+
+
 class DocumentForm(forms.Form):
-	docfile = forms.FileField(
-	  label='Select a file',
-	  help_text='max. 42 megabytes'
-	)
-	class Meta:
-		app_label = 'Document'
+    docfile = forms.FileField(
+        label='Select a file',
+        help_text='max. 42 megabytes'
+    )
+
+    class Meta:
+        app_label = 'Document'
 
 
 class UploadFileForm(forms.Form):
@@ -25,6 +29,7 @@ class UploadFileForm(forms.Form):
 class ContactForm1(forms.Form):
     subject = forms.CharField(max_length=100)
     sender = forms.EmailField()
+
 
 class ContactForm2(forms.Form):
     message = forms.CharField(widget=forms.Textarea)
