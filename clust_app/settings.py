@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'livereload',
     'django.contrib.staticfiles',
     'clustering.apps.PollsConfig',
-    #'polls.apps.PollsConfig',
+    # 'polls.apps.PollsConfig',
 ]
 
 MIDDLEWARE = [
@@ -60,14 +60,14 @@ CELERY_BROKER_URL = os.getenv("CELERY_URL")
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
-CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
+CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 CACHES = {
-   'default': {
-      'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-      'LOCATION': 'my_cache_table',
-      'TIMEOUT': 10000,
-   }
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+        'TIMEOUT': 10000,
+    }
 }
 
 TEMPLATES = [
@@ -90,18 +90,17 @@ TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'clustering/templates')]
 
 WSGI_APPLICATION = 'clust_app.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {  
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         # 'HOST':  'db',
-        'HOST':  'localhost',
+        'HOST': 'localhost',
         'PORT': '5432',
     },
 }
@@ -124,7 +123,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -138,7 +136,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
@@ -148,4 +145,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'clustering/static')
 # staticfile_dirs tells Django where to take additional static files from. It is possible to add further directories with static files there.
 # In this case here, the shared volume is referenced where celery, livereload and django have access.
 STATICFILES_DIRS = ['/code/clustering/static/']
-
