@@ -1,0 +1,221 @@
+html
+{ }
+
+*
+{ margin: 0;
+  padding: 0;}
+
+body
+{ font-family: "trebuchet ms", arial, sans-serif;
+  font-size: .84em;
+  color: #222;
+  line-height: 1.4em;
+  background: #F1F1F1;
+  width: 900px;
+  margin: 10px auto 0px auto;}
+  
+h1, h2, h3, h4, h5, h6 
+{ color: #FFA509;
+  letter-spacing: 0em;
+  padding: 0 0 5px 0;}
+
+h1, h2, h3
+{ font: normal 170% 'lucida sans', arial;
+  margin: 0 0 15px 0;
+  padding: 0 0 5px 0;
+  color: #000;}
+
+h2
+{ font-size: 130%;
+  padding: 9px 0 5px 0;
+  color: #555;}
+
+h3
+{ font-size: 140%;
+  padding: 5px 0 0 0;}
+
+h4, h6
+{ color: #009FBC;
+  padding: 0 0 5px 0;
+  font: normal 110% arial;
+  text-transform: uppercase;}
+
+h5, h6
+{ color: #888;
+  font: normal 95% arial;
+  letter-spacing: normal;
+  padding: 0 0 15px 0;}
+
+a, a:hover
+{ outline: none;
+  text-decoration: none;
+  border-bottom: 1px dashed #000;
+  color: #000;}
+
+p
+{ line-height: 1.5em;
+  padding-bottom: 17px;}
+
+blockquote
+{ margin: 20px 0; 
+  padding: 10px 20px 0 20px;
+  border: 1px solid #E5E5DB;
+  background: #FFF;}
+
+ul
+{ margin: 2px 0 12px 0;}
+
+ul li
+{ list-style-type: none;
+  background: url(bullet.png) no-repeat;
+  margin: 0 0 0 0; 
+  padding: 0 0 4px 25px;
+  line-height: 1.5em;}
+
+ol
+{ margin: 8px 0 22px 0;}
+
+ol li
+{ margin: 0 0 11px 20px;}
+
+.left
+{ float: left;
+  width: auto;
+  margin-right: 10px;}
+
+.right
+{ float: right; 
+  width: auto;
+  margin-left: 10px;}
+
+.center
+{ display: block;
+  text-align: center;
+  margin: 20px auto;}
+
+#basic-accordian
+{ padding: 0px;
+  background: #FFF;}
+
+.accordion_headings
+{ padding: 10px 25px 10px 25px;
+  background: #E1E1E1;
+  color: #111;
+  border-top: 1px solid #FFF;
+  border-bottom: 1px solid #CCC;
+  cursor: pointer;
+  font-size: 120%;
+  position: relative;
+  z-index: 20;}
+
+.accordion_headings:hover
+{ background: #E1E1E1;
+  color: #FF0971;}
+
+.accordion_child
+{ padding: 25px;
+  background: #FFF;}
+
+.header_highlight
+{ background: #E1E1E1;
+  color: #FF0971;}
+
+#logo
+{ width: 100%;
+  height: 78px;
+  background: transparent;
+  color: #444;
+  position: relative;
+  z-index: 10;
+  padding-top: 15px;}
+
+#logo h1
+{ font: normal 600% 'century gothic', arial;
+  padding: 0 0 0 20px;
+  margin: 0;
+  color: #CCC;}
+
+#footer p
+{ letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 20px;
+  color: #444;
+  font-size: 90%;}
+
+#footer a, #footer a:hover
+{ color: #76786A;
+  text-decoration: none;
+  border: 0;}
+
+.search
+{ color: #5D5D5D; 
+  border: 1px solid #BBB; 
+  width: 134px; 
+  padding: 4px; 
+  font: 100% arial, sans-serif;}
+
+.form_settings
+{ margin: 15px 0 0 0;}
+
+.form_settings p
+{ padding: 0 0 4px 0;}
+
+.form_settings span
+{ float: left; 
+  width: 200px; 
+  text-align: left;}
+  
+.form_settings input, .form_settings textarea
+{ padding: 5px; 
+  width: 299px; 
+  font: 100% arial; 
+  border: 1px solid #E5E5DB; 
+  background: #FFF; 
+  color: #47433F;}
+  
+.form_settings .submit
+{ font: 100% arial; 
+  border: 0; 
+  width: 99px; 
+  margin: 0 0 0 212px; 
+  height: 33px;
+  padding: 2px 0 3px 0;
+  cursor: pointer; 
+  background: #EEE; 
+  color: #111;}
+
+.form_settings textarea, .form_settings select
+{ font: 100% arial; 
+  width: 299px;}
+
+.form_settings select
+{ width: 310px;}
+
+.form_settings .checkbox
+{ margin: 4px 0; 
+  padding: 0; 
+  width: 14px;
+  border: 0;
+  background: none;}
+
+.separator
+{ width: 100%;
+  height: 0;
+  border-top: 1px solid #D9D5CF;
+  border-bottom: 1px solid #FFF;
+  margin: 0 0 20px 0;}
+  
+table
+{ margin: 10px 0 30px 0;}
+
+table tr th, table tr td
+{ background: #EFEFEF;
+  color: #111;
+  padding: 7px 4px;
+  text-align: left;}
+  
+table tr td
+{ background: #F8F8F8;
+  color: #47433F;
+  border-top: 1px solid #FFF;}

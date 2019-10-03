@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags <meta http-equiv="refresh" content="3" > -->
+
+    <title>BiGAnts</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+
+       {% load staticfiles %}
+
+
+<script src="{% static 'src/sigma.core.js' %}"></script>
+<script src="{% static 'src/conrad.js' %}"></script>
+<script src="{% static 'src/utils/sigma.utils.js' %}"></script>
+<script src="{% static 'src/utils/sigma.polyfills.js' %}"></script>
+<script src="{% static 'src/sigma.settings.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.dispatcher.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.configurable.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.graph.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.camera.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.quad.js' %}"></script>
+<script src="{% static 'src/classes/sigma.classes.edgequad.js' %}"></script>
+<script src="{% static 'src/captors/sigma.captors.mouse.js' %}"></script>
+<script src="{% static 'src/captors/sigma.captors.touch.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.canvas.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.webgl.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.svg.js' %}"></script>
+<script src="{% static 'src/renderers/sigma.renderers.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.nodes.fast.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.fast.js' %}"></script>
+<script src="{% static 'src/renderers/webgl/sigma.webgl.edges.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.labels.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.hovers.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.curve.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edges.curvedArrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.def.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.curve.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.arrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.edgehovers.curvedArrow.js' %}"></script>
+<script src="{% static 'src/renderers/canvas/sigma.canvas.extremities.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.utils.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.nodes.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.edges.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.edges.curve.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.labels.def.js' %}"></script>
+<script src="{% static 'src/renderers/svg/sigma.svg.hovers.def.js' %}"></script>
+<script src="{% static 'src/middlewares/sigma.middlewares.rescale.js' %}"></script>
+<script src="{% static 'src/middlewares/sigma.middlewares.copy.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.animation.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.bindEvents.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.bindDOMEvents.js' %}"></script>
+<script src="{% static 'src/misc/sigma.misc.drawHovers.js' %}"></script>
+<script src="{% static 'shape-library.js' %}"></script>
+<script src="{% static 'sigma.renderers.customShapes.js' %}"></script>
+<!-- END SIGMA IMPORTS -->
+<script src="{% static 'plugins/sigma.parsers.json/sigma.parsers.json.js' %}"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'bootstrap.min.css'%}" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="{% static 'custom.css'%}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<style>.wrap-collabsible {
+  margin-bottom: 1.2rem 0;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: block;
+
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  text-align: center;
+
+  padding: 1rem;
+
+  color: #000000;
+  background: #FFFFFF;
+
+  cursor: pointer;
+
+  border-radius: 7px;
+  transition: all 0.25s ease-out;
+}
+
+.lbl-toggle:hover {
+  color: #000000;
+}
+
+.lbl-toggle::before {
+  content: ' ';
+  display: inline-block;
+
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid currentColor;
+  vertical-align: middle;
+  margin-right: .7rem;
+  transform: translateY(-2px);
+
+  transition: transform .2s ease-out;
+}
+
+.toggle:checked + .lbl-toggle::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: 350px;
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.collapsible-content .content-inner {
+  /*background: rgba(250, 224, 66, .2);*/
+  background: rgba(255, 255, 255, .2);
+  border-bottom: 1px solid rgba(255, 255, 255, .2);
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  padding: .5rem 1rem;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+.collapsible {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+.active, .collapsible:hover {
+  background-color: #ccc;
+}
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+.row{
+min-width:1200px;}
+
+body {
+  color: black;
+}
+
+</style>
+</head>
+
+<body>
+<div id="container">
+  <style>
+    #graph-container {
+	width: 1000px;
+    height: 600px;
+    margin: auto;
+border:1px solid black;
+      top: 100;
+      bottom: 100;
+      left: 100;
+      right: 100;
+      position:
+    }
+    #sigma-container {
+	width: 700px;
+      height: 400px;
+    margin: auto;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      position: absolute;
+    }
+  </style>
+		
+</div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                	BiGAnts
+                </a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#">Home</a>
+                    </li>
+                     <li>
+                        <a href="clustering.html">Analysis</a>
+                    </li>
+		    <li>
+			<a href="sources.html">Sources</a>
+		    </li>
+                    <li>
+                        <a>Logged in?</a>
+			{% if user.is_authenticated %}
+    			User: {{ user.get_username }}
+			<form action="logout.html" method="post" enctype="multipart/form-data">
+              	  	{% csrf_token %}
+                	<input type="submit" value="Logout"/>
+			</form>
+   			{% else %}
+			<a href="login.html">Login</a>
+   			{% endif %} 
+                    </li><li>
+			<a href="signup.html">Sign up</a>
+		    </li>
+			{% if user.is_authenticated %}
+			<li>
+			<a href="delete_user.html">Delete user account</a>
+		    </li>
+			{% endif %}
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+	<div class="jumbotron feature">
+		<div class="container" style="display:inline-block;margin-left:17%">
+		<img src={% static 'logo.svg'%} % alt="" width="300" height="300" style="float:left;" ><div style="position: relative;"><h1 style="font-size:72px;"> <br>BiGAnts</h1></div>
+			<p>Vizualise Gene Expression and PPI data. </p>
+		</div>
+	</div>
+
+    <!-- Content -->
+    <div class="container">
+<a name="Content"></a>
+        <!-- Heading -->
+        <div class="row">
+            <!---<div class="col-lg-14">--->
+                <h1 class="page-header">How to run the algorithm:
+                    <small>Detailed description</small>
+                </h1>
+                
+            <!---</div>--->
+        </div>
+	<div style="padding:40px;margin:40px;border:1px solid #ccc;min-width:1400px">
+        With the <a href="clustering.html target="_blank">BiGAnts </a> web application, you can run a bi-clustering algorithm to calculate a clustering of patients and genes and vizualise interactions between the genes, as well as (optionally) analyze clinical variables of patients and run gene set enrichment analyses.<br> Start a new analysis by clicking the button that says "Start new Analysis". You can then upload your data stepwise through the input form.<br>
+Input consists either of pre-defined datasets (expression data from Lung or Breast Cancer patients, as well as pre-compiled PPI networks) or your own uploaded datasets. Registered users can also store their own uploaded data and results by clicking "save data" on the first tab of the input form and re-use them. Your uploaded data must contain one file with expression data and one with PPI data. Optionally, you can upload a file with clinical data to analyze clinical variables for the resulting patient clusters.<br>
+<h3><b>Data input</b></h3>
+ <br><br> <b>The expression data must be in TSV or CSV format with the first column consisting of patient identifiers of any kind, and generally have the following format:</b><br><br><img src={% static 'small_expr_data.png' %}><br><br>
+The first row must contain NCBI gene IDs of genes in the data. One column, labeled as 'cancer type' in the example above, can contain information about the disease subtype, which separates patients into pre-defined groups. It will be recognized automatically. If this column assigns two clusters to patients, the data from this column can be vizualised in the heatmap to display the overlap between predefined clusters and the clusters calculated by the application.<br>
+Each row consists of gene expression values of the list of genes for a specific patient. The expression values must be written as numbers with a point as decimal separator (and not comma), e.g. 1.0000. They can, but do not have to be, logarithmized (which will be automatically recognized by the application).
+<br> You can use pre-defined expression data instead of uploading data, by checking the box that says "use pre-defined files" and selecting one of the datasets in the dropdown menu.<br><br>
+<b>The PPI data must be in CSV or TSV format have the following format:</b><br><br><img src={% static 'small_prot_data.png' %}><br><br>Where each row consists of two NCBI gene IDs of the interacting genes.
+Instead of uploading a file, can use a pre-defined dataset by clicking on the label that says "import NDEx" and selecting a dataset.<br><br>
+Optionally, you can upload a file consisting of clinical data for the patients (check the box that says 'analyze metadata'). In this case, you can specify a column in your file indicating the survival time for patients, which can be used to display the differences in survival time between both calculated patient clusters. For this, type the exact name of the column in the field that is labeled "Name of "survival" column", without quotation marks. <br><br>
+<b>The clinical patient metadata should have a format similar to this:</b> <br><br><img src={% static 'metadata_small.png' %}><br><br>
+Where the first column indicates the patient ID and each row consists of clinical data for a patient. Only binary variables (e.g. survival - yes or no) where information is available for at least 80% of patients will be analyzed in the application.
+<br><br><br><b><p style="font-size:16px">Algorithm parameters</p></b><br>In the last step of the upload form, you must specify the minimum and maximum number of genes you want per cluster. Also, you can choose how many iterations the algorithm should perform at most; for the settings used in the example runs, the algorithm usually converged between run 25 and 45.<br>
+If you wish to set more parameters, you can select the target gene set size, number of ants, evaporation rate, pheromone significance, HI significance and the stop criteria.<br>
+While the algorithm is running, a figure will be shown displaying the algorithm's progress (convergence behaviour). If the algorithm run has finished, you will see a message that says "Done" next to the input form. Then you can see your results in the lower part of the page.
+<br><br><br><b><p style="font-size:16px">How to re-use data</p></b><br> If you are logged in as a user, you can display old results again by clicking the button that says "Show old results" on the home page. If you want to re-run an analysis with previously uploaded data, click "Start new analysis" and select "Use own data" on the first tab of the input form and choose a file based on the date of upload. The corresponding PPI data will be used automatically and you can skip the steps for PPI file upload and for patient data analysis. If your previously uploaded data have included metadata, they will be included automatically in the new analysis.
+
+<br><br><br><h3><b>Results</b></h3><br>After running the analysis, the results are visualized at the bottom part of the page. You can click thorugh the grey tab links for viewing all results.<br> The results consist of the following parts:<br><br><p style="font-size:16px"><b>Heatmap</b></p><br>
+<img src={% static 'heatmap_example.png' %}><br>
+The heatmap displays patient and gene clusters and gene expression levels. If your expression data included information on patient clusters, a colored bar next to the 'patients' axis indicates to which pre-defined cluster a patient belongs. By default, the algorithm only includes pre-defined clusters if there are two clusters of patients in the data (e.g. two cancer subtypes).<br><br>
+<b><p style="font-size:16px">PPI Graph</p></b><br>
+<img src={% static 'ppi_graph_example.png' %}><br>
+In the PPI graph, you can see all interactions between genes in the result clusters. The node for each gene is colorized according to the z-score difference between both calculated patient clusters. Node forms correspond to the cluster of a gene. The PPI graph can be downloaded as an image or as a .json file by clicking the links below the graph.<br><br>
+<b><p style="font-size:16px">Clinical data </p></b><br>
+If you have uploaded clinical data, you will be shown a table that lists the overlap between clinical categories and patient clusters calculated by the algorithm, for example which fraction of patients in each cluster has had a relapse.<br>
+<img src={% static 'metadata_result_small.png' %}>
+<br><br><b><p style="font-size:16px">Survival analysis</p></b><br>
+If you have included survival time in your data, you can see a graph (Kaplan-Meyer plot) where the different survival times for both clusters are seen. The lines in the graph indicate the fraction of patients alive at each point of time, with one line for each cluster of patients.<br><br>
+<b><p style="font-size:16px">Algorithm Convergence</p></b><br>
+Additionally, you will see the convergence behaviour of the algorithm for your run.<br><br>
+<br><b><p style="font-size:16px">Enrichment Analysis</p></b><br>After running the analysis for calculation of patient and gene clusters, you can run a gene set enrichment analysis on the calculated gene clusters to show biological terms associated to the genes. For this, select the tab "Enrichment" at the results overview, select the type of terms you want to analyze (e.g. KEGG terms) and a p-value cutoff. After running the enrichment, you will see the results below, grouped in several tabs: The first tab, "Both Groups" shows results for genes in any cluster; "Group 1" and "Group 2" show associated terms for genes that are in cluster 1 or 2, and "Only in Group 1 / Only in Group 2" shows the terms associated to genes that only occur in cluster 1 and not in cluster 2, or the other way around. You can sort the results by p-value or number of associated genes. 
+
+<br><br><br><h3><b>User accounts</b></h3><br>If you want to create an user account, go to the <a href="signup.html target="_blank">page for signing up</a>. Enter your name, E-mail address and set username and password. Your account will be created and after <a href="login.html target="_blank">logging in here</a>, you will be able to save and reproduce your analyses.
+<br><br><b><p style="font-size:16px"> How to delete your user account</p></b><br>To delete your user account, go to <a href="delete_user.html target="_blank">this page</a>, enter password and username and submit.
+  
+    </div>
+</div> 
+  
+</div>
+       {% load staticfiles %}
+<div class="row" ">
+           
+           
+            
+        </div>
+
+<div class="row" style=>
+            
+           
+            <article class="col-md-12 article-intro">
+
+            </article>
+        </div>
+
+	<footer>
+		<div class="footer-blurb">
+			<div class="container">
+				<div class="row">
+					
+
+				</div>
+				<!-- /.row -->	
+			</div>
+        </div>
+        
+        <div class="small-print">
+        	<div class="container">
+        	</div>
+        </div>
+	</footer>
+
+	
+    <!-- jQuery -->
+    <script src="{% static 'jquery-1.11.3.min.js'%}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{%static 'bootstrap.min.js'%}"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="{%static 'ie10-viewport-bug-workaround.js'%}"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="{%static 'holder.min.js'%}"></script>
+	
+</body>
+
+</html>
+

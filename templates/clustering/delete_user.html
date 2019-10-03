@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>BiGAnts</title>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
+
+       {% load staticfiles %}
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'bootstrap.min.css'%}" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="{% static 'custom.css'%}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<style>
+table {
+    font-family: arial, sans-serif;
+    border: "0";
+    width: 100%;
+    border: none;
+}
+
+td, th {
+    border: 0px;
+    text-align: left;
+    padding: 8px;
+}
+
+</style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                	BiGAnts
+                </a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#">Home</a>
+                    </li>
+                     <li>
+                        <a href="infopage.html">How to</a>
+                    </li>
+			<li>
+                        <a href="clustering.html">Analysis</a>
+                    </li>
+                    <li>
+                        <a>Logged in?</a>
+			{% if user.is_authenticated %}
+    			User: {{ user.get_username }}
+			<form action="logout.html" method="post" enctype="multipart/form-data">
+              	  	{% csrf_token %}
+                	<input type="submit" value="Logout"/>
+			</form>
+   			{% else %}
+			<a href="login.html">Login</a>
+   			{% endif %} 
+                    </li><li>
+			<a href="signup.html">Sign up</a>
+		    </li>
+			{% if user.is_authenticated %}
+			<li>
+			<a href="#">Delete user account</a>
+		    </li>
+			{% endif %}
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+	<div class="jumbotron feature">
+		<div class="container" style="display:inline-block;margin-left:17%">
+		<img src={% static 'logo.svg'%} % alt="" width="300" height="300" style="float:left;" ><div style="position: relative;"><h1 style="font-size:72px;"> <br>BiGAnts</h1></div>
+			<p>Vizualise Gene Expression and PPI data. </p>
+		</div>
+	</div>
+
+    <!-- Content -->
+    <div class="container">
+<a name="Content"></a>
+        <!-- Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Delete account
+                </h1>
+            </div>
+        </div>
+	<div style="padding:40px;margin:40px;border:1px solid #ccc">
+        <h3>Enter your username and password here:</h3><br>
+        <form action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+	
+{% if deleted %}
+<br> {{text}}
+{% else %}
+	
+	<br>
+	<br>
+	   <table>
+   <tr><th width="150px">
+	Username:</th><th>
+	<input class="input" type="text" name="username"><br></th></tr>
+   <tr><th width="150px">
+	Password:</th><th>
+    	<input class="input" type="text" name="password"><br></th></tr>
+   </table>
+                <input type="submit" value="Delete account"/>
+
+{% endif %}
+</div>
+
+    </div>
+    <!-- /.container -->
+	
+	<footer>
+		<div class="footer-blurb">
+			<div class="container">
+				<div class="row">
+				</div>
+				<!-- /.row -->	
+			</div>
+        </div>
+        
+        <div class="small-print">
+        	<div class="container">
+        	</div>
+        </div>
+	</footer>
+
+	
+    <!-- jQuery -->
+    <script src="{% static 'jquery-1.11.3.min.js'%}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{%static 'bootstrap.min.js'%}"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="{%static 'ie10-viewport-bug-workaround.js'%}"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="{%static 'holder.min.js'%}"></script>
+	
+</body>
+
+</html>
+

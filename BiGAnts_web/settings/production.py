@@ -1,6 +1,9 @@
 # for now fetch the development settings only
 from .development import *
 
+# uncomment the following line to include i18n
+# from .i18n import *
+
 # turn off all debugging
 DEBUG = False
 
