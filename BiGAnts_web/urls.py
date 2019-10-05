@@ -21,6 +21,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('clustering/', include('clustering.urls')),
+    path('new/', include('apps.clustering.urls')),
     path('admin/', admin.site.urls),
 ]
 
