@@ -17,8 +17,8 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 
 #### own imports
-from clustering.models import GraphForm
-from clustering.tasks import make_empty_figure, algo_output_task, empty_log_file, add_loading_image, \
+from .models import GraphForm
+from .tasks import make_empty_figure, algo_output_task, empty_log_file, add_loading_image, \
     remove_loading_image, import_ndex, read_enrichment, read_enrichment_2, convert_gene_list, \
     check_input_files, script_output_task, list_metadata_from_file, preprocess_ppi_file, preprocess_file_2, \
     run_enrichment
@@ -673,7 +673,6 @@ def clustering_no_sessions(request):
 #### version of the page with separate input form and result display ####
 #########################################################################
 
-# def clustering_6_4_part_2(request):
 def clustering_step_1(request):
     # check if user has clicked 'return' button on result page, then request.POST['newAnalysis'] is "true"
     if ('newAnalysis' in request.POST):
@@ -1381,10 +1380,10 @@ def clustering_step_1(request):
             if (os.path.isfile("/code/clustering/static/userfiles/progress_" + session_id + ".png")):
                 os.unlink("/code/clustering/static/userfiles/progress_" + session_id + ".png")
             remove_loading_image.delay("none")
-            with open("/code/clustering/static/output_console.txt", "w") as text_file:
-                text_file.write("")
-            with open("clustering/static/output_console.txt", "w") as text_file:
-                text_file.write("")
+            # with open("/code/clustering/static/output_console.txt", "w") as text_file:
+            #     text_file.write("")
+            # with open("clustering/static/output_console.txt", "w") as text_file:
+            #     text_file.write("")
         # set session ID (always), read metadata (if loading page new because user has hit reload)
         if not (request.user.is_authenticated):
             cache.clear()

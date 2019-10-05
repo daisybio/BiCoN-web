@@ -55,7 +55,7 @@ DEFAULT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'clustering.apps.PollsConfig',  # TODO Change app path
+    'apps.clustering.apps.Clustering',
 ]
 
 # Middlewares

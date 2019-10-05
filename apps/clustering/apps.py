@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class Clustering(AppConfig):
-    name = 'clustering'
+    name = 'apps.clustering'
+    verbose_name = 'BiGAnts gene expression Bi-Clustering tool.'

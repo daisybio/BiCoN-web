@@ -27,6 +27,13 @@ DATABASES = {
     }
 }
 
+# ##### CELARY CONFIGURATION ############################
+CELERY_BROKER_URL = 'amqp://admin:mypass@localhost:5672'
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = "amqp"
+CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
+
 # ##### APPLICATION CONFIGURATION #########################
 
 INSTALLED_APPS = DEFAULT_APPS
