@@ -1,9 +1,14 @@
+import os
 import pandas as pd
 
-from django.views.generic import TemplateView
-from django.http import HttpResponse, HttpResponseNotFound
+from os import path
 
-from .tasks import algo_output_task, script_output_task, preprocess_file_2
+from django.shortcuts import render
+from django.views.generic import TemplateView
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+
+from .tasks import algo_output_task, script_output_task, preprocess_file_2, import_ndex, preprocess_ppi_file, \
+    check_input_files
 
 
 class IndexView(TemplateView):
@@ -20,16 +25,93 @@ def submit_analysis(request):
     and start analysis task with Celery
     """
 
-    print(request.POST)
-    print(request.FILES)
+    print(f'===== POST REQUEST: {request.POST}')
+    print(f'===== REQUEST FILES: {request.FILES}')
 
     # ========== Test if all the parameters are set correctly ==========
+    # EMPTY, needs to be done
 
     # ========== Parse algorithm parameters from post request ==========
+
+    session_id = 'ASDFASDFASDFASDFASDF'
+
+    # --- Step 1: Expression Data
+    # Get selected option
+    option = request.POST['expression-data']
+    dataset_path = 'apps/clustering/datasets'
+
+    # Parse predefined data
+    if option == 'lung-cancer':
+        with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
+            expr_str = expr_file.read()
+
+        # This is for METADATA, recheck at it later
+        clinical_df = pd.read_csv(path.join(dataset_path, 'lung_cancer_clinical.csv'))
+        with open(path.join(dataset_path, 'lung_cancer_clinical.csv')) as clinical_file:
+            clinical_str = clinical_file.read()
+
+        survival_col_name = "disease free survival in months:ch1"
+        nbr_groups = 2
+
+    # Parse predefined data
+    elif option == 'brest-cancer':
+        with open(path.join(dataset_path, 'breast_cancer_expr.csv')) as expr_file:
+            expr_str = expr_file.read()
+
+        # This is for METADATA look at it later
+        clinical_df = pd.read_csv(path.join(dataset_path, 'breast_cancer_clinical.csv'))
+        with open(path.join(dataset_path, 'breast_cancer_clinical.csv')) as clinical_file:
+            clinical_str = clinical_file.read()
+
+        survival_col_name = "mfs (yr):ch1"
+        nbr_groups = 2
+
+    # Parse expression network from uploaded file
+    elif option == 'custom':  # TODO refractor?!
+        expr_data_str = request.FILES['expression-data'].read().decode('utf-8')
+        (expr_str, nbr_groups) = preprocess_file_2.delay(expr_data_str).get()
+
+    # If no option could be parsed, stop!
+    else:
+        return HttpResponse(f"No option found. Provided expression data option was '{option}'")
+
+    # --- Step 2: PPI Network
+    ppi_network_selection = request.POST['ppi-network']
+
+    raise KeyError
+    if ppi_network_selection == "apid":
+        ppi_str = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf").get()
+    elif ppi_network_selection == "string":
+        ppi_str = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf").get()
+    elif ppi_network_selection == "biogrid":
+        ppi_str = import_ndex.delay("becec556-86d4-11e7-a10d-0ac135e8bacf").get()
+    elif ppi_network_selection == "hprd":
+        ppi_str = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf").get()
+    elif ppi_network_selection == 'custom':
+        ppi_str = request.FILES['ppi-network'].read().decode('utf-8')
+        ppi_str = preprocess_ppi_file.delay(ppi_str).get()
+        err_str = check_input_files.delay(ppi_str, expr_str).get()
+        if err_str:
+            request.session['errors'] = err_str
+            # Todo change error page to redirect to analysis? or results?
+            # return render(request, 'clustering/errorpage.html', {'errors': err_str})
+            return HttpResponseBadRequest(err_str)
+    else:
+        return HttpResponseBadRequest(f"No option found. Provided ppi network option was '{option}'")
+
+    # --- Step 3: Meta data
+    if 'analyse-metadata' in request.POST:  # Set parameter for metadata analysis if desired
+        if 'survival-col' in request.POST and 'survival-metadata' in request.FILES:
+            survival_col_name = request.POST['survival_col']
+            clinical_df = pd.read_csv(request.FILES['survival-metadata'])
+
+    else:  # Set the variables to empy, default checkbox for example data
+        pass
+
     # --- Step 4 (Required)
     nbr_iter = request.POST.get("nbr_iter")  # Todo check with Olga if defaults should be set (45?)
-    lgmin = int(request.POST['L_g_min'])
-    lgmax = int(request.POST['L_g_max'])
+    lg_min = int(request.POST['L_g_min'])
+    lg_max = int(request.POST['L_g_max'])
 
     # --- Step 4 (Optional)
     save_data = request.POST.get("save_data", None)
@@ -40,44 +122,16 @@ def submit_analysis(request):
     hi_sig = request.POST.get("hisig", 1)
     epsilon = request.POST.get("stopcr", 0.02)
 
-    # --- Step 1: Expression Data
-    # Get selected option
-    option = request.POST['expression-data']
+    # ========== Run the clustering algorithm ==========
 
-    if option == 'lung-cancer':
-        fh1 = open("clustering/data/lung_cancer_expr.csv")
-        exprstr = fh1.read()
-        clinicaldf = pd.read_csv("clustering/data/lung_cancer_clinical.csv")
-        # fh4 is for METADATA look at it later
-        fh4 = open("clustering/data/lung_cancer_clinical.csv")
-        clinicalstr = fh4.read()
-        fh4.flush()
-        fh4.close()
-        survival_col_name = "disease free survival in months:ch1"
-        nbr_groups = 2
-
-    elif option == 'brest-cancer':
-        pass
-
-    elif option == 'custom':    # TODO refractor?!
-        exprstr = request.FILES['expression-data'].read().decode('utf-8')
-        result10 = preprocess_file_2.delay(exprstr)
-        (exprstr, nbr_groups) = result10.get()
-
-    # If no option could be parsed, stop!
-    else:
-        return HttpResponseNotFound(f"No option found. Provided option was '{option}'")
-
-        # ========== Run the clustering algorithm ==========
-
-    result1 = algo_output_task.delay(1, lgmin, lgmax, exprstr, ppistr, nbr_iter, nbr_ants, evap,
+    result1 = algo_output_task.delay(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
                                      epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
-    (T, row_colors, col_colors, G2, means, genes_all, adjlist, genes1, group1_ids, group2_ids, jac_1,
+    (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
      jac_2) = result1.get()
     # make plots and process results
-    result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adjlist, genes1,
-                                       group1_ids, group2_ids, clinicalstr, jac_1, jac_2,
-                                       survival_col_name, clinicaldf, session_id)
+    result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
+                                       group1_ids, group2_ids, clinical_str, jac_1, jac_2,
+                                       survival_col_name, clinical_df, session_id)
     (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = result2.get()
 
 

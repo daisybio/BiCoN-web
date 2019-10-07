@@ -81,7 +81,7 @@
                     </div>
                     <div class="custom-control custom-radio">
                         <input type="radio" id="ppi-network_2" name="ppi-network" class="custom-control-input"
-                               value="stringr" onclick="hideElement('upload-ppi-network');">
+                               value="string" onclick="hideElement('upload-ppi-network');">
                         <label class="custom-control-label" for="ppi-network_2">STRING</label>
                     </div>
                     <div class="custom-control custom-radio">
@@ -102,7 +102,7 @@
                             dataset</label>
                     </div>
                     <div id="upload-ppi-network" class="custom-file" style="display: none">
-                        <input type="file" class="custom-file-input">
+                        <input type="file" class="custom-file-input" name="ppi-network">
                         <label class="custom-file-label" for="customFile">Choose expression file</label>
                     </div>
                 </div>
@@ -112,18 +112,18 @@
                     <p class="card-text"><b>This step is optional.</b>
                         <br> If you do not want to upload metadata, you can go to the next step <br/></p>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="use" id="use-metadata"
+                        <input class="form-check-input" type="checkbox" name="analyse-metadata" value="analyse-metadata" id="use-metadata"
                                onclick="toggleAllElements(['upload-metadata', 'column-metadata'])">
                         <label class="form-check-label" for="use-metadata">Use additional Metadata</label>
                     </div>
                     <div id="upload-metadata" class="custom-file" style="display: none">
-                        <input type="file" class="custom-file-input">
+                        <input type="file" class="custom-file-input" name="survival-metadata">
                         <label class="custom-file-label" for="upload-metadata">Choose expression file</label>
                     </div>
                     <div id="column-metadata" class="form-group" style="display: none">
                         <div class="form-group">
                             <label for="exampleFormControlTextarea1">Metadata column</label>
-                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
+                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" name="survival-col"></textarea>
                         </div>
                     </div>
                 </div>

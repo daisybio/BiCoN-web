@@ -1,28 +1,29 @@
-### this file contains methods for all computationally intensive tasks needed for algorithm runs:
-### - algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
-###			arrays etc with the algorithm results.
-### - script_output_task - this is needed for processing the outputs of algo_output_task to formats used
-###  			for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to 
-###			files and outputs links to those files (and an array with metadata). it takes a parameter
-###			"session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
-###			this parameter can be set to "none" if you do not want to use sessions. then it uses
-###			static paths (e.g. "ppi.json") instead.
-### - import_ndex - this tasks imports PPI files from NDEx based on the UUID and parses them to the correct
-###			input format for the algorithm tasks.
-### - check_input_files - this task checks given expression and PPI files if they contain data and returns an error
-###			string if they do not.
-### - preprocess_file - this task preprocesses an input expression data file and tries to find a column with
-###			pre-defined clusters. if found, it is renamed to "disease_type".
-### - preprocess_file_2 - the same as preprecess_file, but it returns a number of pre-defined clusters additionally.
-### - preprocess_ppi_file - preprocesses the PPI file. it finds every row that contains two tab-separated integers (protein IDs)
-###			and appends them to the output file.
-### - preprocess_clinical_file - converts clinical file to TSV format.
-### - list_metadata_from_file - reads metadata from a file and returns 3 arrays with variable names and their frequency
-###			in cluster 1 and 2.
-### - run_enrichment - runs an enrichment analysis usen given terms on a list of genes.
-### - read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
-### - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
-
+"""
+this file contains methods for all computationally intensive tasks needed for algorithm runs:
+- algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
+        arrays etc with the algorithm results.
+- script_output_task - this is needed for processing the outputs of algo_output_task to formats used
+            for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to
+        files and outputs links to those files (and an array with metadata). it takes a parameter
+        "session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
+        this parameter can be set to "none" if you do not want to use sessions. then it uses
+        static paths (e.g. "ppi.json") instead.
+- import_ndex - this tasks imports PPI files from NDEx based on the UUID and parses them to the correct
+        input format for the algorithm tasks.
+- check_input_files - this task checks given expression and PPI files if they contain data and returns an error
+        string if they do not.
+- preprocess_file - this task preprocesses an input expression data file and tries to find a column with
+        pre-defined clusters. if found, it is renamed to "disease_type".
+- preprocess_file_2 - the same as preprecess_file, but it returns a number of pre-defined clusters additionally.
+- preprocess_ppi_file - preprocesses the PPI file. it finds every row that contains two tab-separated integers (protein IDs)
+        and appends them to the output file.
+- preprocess_clinical_file - converts clinical file to TSV format.
+- list_metadata_from_file - reads metadata from a file and returns 3 arrays with variable names and their frequency
+        in cluster 1 and 2.
+- run_enrichment - runs an enrichment analysis usen given terms on a list of genes.
+- read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
+- read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
+"""
 
 import string
 from io import StringIO
@@ -417,7 +418,7 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
                     # make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
                     if (exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-", "",
                                                                                                                1).replace(
-                            ".", "", 1).isdigit()):
+                        ".", "", 1).isdigit()):
                         print("expression data are logarithmized")
                         log2_2 = False
     if (session_id == "none"):
@@ -1265,8 +1266,9 @@ def read_ndex_file_4(fn):
             if ("nodeAttributes" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[
                 1] and "UniprotName" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1]):
                 lines6_temp = \
-                lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split("{\"nodeAttributes\":[")[
-                    1]
+                    lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split(
+                        "{\"nodeAttributes\":[")[
+                        1]
                 lines6 = lines6_temp.split("{\"edgeAttributes\":[")[0]
         else:
             lines4 = lines5[1].split("{\"edges\":[")[1]
