@@ -33,7 +33,7 @@
                 praesentium animi perspiciatis molestias iure, ducimus!</p>
 
             <!-- Multi part analysis setup form -->
-            <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post">
+            <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <!-- One "tab" for each step in the form: -->
                 <!-- Tab: Expression Data -->
@@ -47,7 +47,6 @@
                     <div class="custom-control custom-radio">
                         <input type="radio" id="expression-data_1" name="expression-data" class="custom-control-input"
                                value="lung-cancer" onclick="hideElement('upload-expression-data');">
-
                         <label class="custom-control-label" for="expression-data_1">Lung cancer dataset
                             (predefined)</label>
                     </div>
@@ -64,7 +63,7 @@
                             dataset</label>
                     </div>
                     <div id="upload-expression-data" class="custom-file" style="display: none">
-                        <input type="file" class="custom-file-input">
+                        <input type="file" class="custom-file-input" name="expression-data">
                         <label class="custom-file-label" for="customFile">Choose expression file</label>
                     </div>
                 </div>
@@ -115,7 +114,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" value="use" id="use-metadata"
                                onclick="toggleAllElements(['upload-metadata', 'column-metadata'])">
-                        <label class="form-check-label" for="use-metadata">Default checkbox</label>
+                        <label class="form-check-label" for="use-metadata">Use additional Metadata</label>
                     </div>
                     <div id="upload-metadata" class="custom-file" style="display: none">
                         <input type="file" class="custom-file-input">
@@ -134,9 +133,9 @@
                     <p class="card-text">Enter minimum and maximum number of genes per cluster and run the
                         algorithm:</p>
                     Minimal:
-                    <input class="input" type="text" name="L_g_min" id="L_g_min">
+                    <input class="input" type="text" name="L_g_min" id="L_g_min" value="10">
                     Maximal:
-                    <input class="input" type="text" name="L_g_max" id="L_g_max">
+                    <input class="input" type="text" name="L_g_max" id="L_g_max" value="20">
                     <br>
                     Maximum number of iterations:
                     <select name="nbr_iter" size="1">

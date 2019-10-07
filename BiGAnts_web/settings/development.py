@@ -27,6 +27,14 @@ DATABASES = {
     }
 }
 
+# ##### CACHE CONFIGURATION ############################
+# Dummy cache = disable chache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+   }
+}
+
 # ##### CELARY CONFIGURATION ############################
 CELERY_BROKER_URL = 'amqp://admin:mypass@localhost:5672'
 CELERY_TASK_SERIALIZER = 'pickle'

@@ -417,7 +417,7 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
                     # make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
                     if (exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-", "",
                                                                                                                1).replace(
-                            ".", "", 1).isdigit()):
+                        ".", "", 1).isdigit()):
                         print("expression data are logarithmized")
                         log2_2 = False
     if (session_id == "none"):
@@ -1265,8 +1265,9 @@ def read_ndex_file_4(fn):
             if ("nodeAttributes" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[
                 1] and "UniprotName" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1]):
                 lines6_temp = \
-                lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split("{\"nodeAttributes\":[")[
-                    1]
+                    lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split(
+                        "{\"nodeAttributes\":[")[
+                        1]
                 lines6 = lines6_temp.split("{\"edgeAttributes\":[")[0]
         else:
             lines4 = lines5[1].split("{\"edges\":[")[1]
