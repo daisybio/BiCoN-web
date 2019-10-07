@@ -114,4 +114,5 @@ venv.bak/
 ./polls/data/APID_OLD.cx
 ./polls/data/breast_cancer_expr_raw.csv
 ./.pybiomart.sqlite
+.pybiomart.sqlite
 ./database.sqlite3
