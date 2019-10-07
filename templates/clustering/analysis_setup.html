@@ -1,73 +1,244 @@
-{% extends "clustering/base.html" %}
+{% extends "clustering/base_analysis.html" %}
+
 {% block title %}BiGAnts-Web analysis setup{% endblock %}
 
-{% block content_two_third %}
-    <h1 class="w3-text-teal">Analysis - Gene Expression & PPI</h1>
-    <!-- Some information about this page-->
-    <fieldset>
-        <h3 class="w3-text-teal">Information</h3>
-        <p>
-            Network-constrained biclustering of patients and omics data using BiGAnts [1]<br/>
-            <br/>
-            Select the correct parameters for you run and click submit. To get more information about an already
-            submitted
-            job please go to running analysis status or go to old results to view finished jobs
-            <br/>
-            <br/>
-            For more information regarding the setup and parameters please refer to the documentation.
-            <br/>
-            <br/>
-            <font color="#a9a9a9">
-                [1] https://www.some.reference.to.paper.pdf <br/>
-            </font>
-        </p>
-    </fieldset>
-    <br/>
+{% block custom_css %}
+    {% load static %}
+    <link href="{% static 'clustering/css/forms.css' %}" rel="stylesheet">
+{% endblock %}
 
 
-    <!-- The Setup Analysis form -->
-    <fieldset>
-        <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post">
-            {% csrf_token %}
-            <h3 class="w3-text-teal">Setup Analysis</h3>
+{% block content %}
+    <!-- Analysis info card -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Analysis overview</h1>
+            <p class="card-text"> To start a new analysis fill out the form below. If you are unsure about some of the
+                options, you can look them up in the documentations<br/>
+                If you want to know the status of you recently submittet and running analysis click on "submitted
+                analysis" <br/>
+                If you want to see results of previous run and finished analysis, click on "all results"
+            </p>
+        </div>
+    </div>
+    <!-- /.card -->
 
-            <!-- One "tab" for each step in the form: -->
-            <div class="tab">Expression Data:
-                <p><input placeholder="First name..." oninput="this.className = ''"></p>
-                <p><input placeholder="Last name..." oninput="this.className = ''"></p>
-            </div>
+    <!-- Analysis submit card -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Setup new analysis</h1>
+            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente dicta
+                fugit
+                fugiat hic aliquam itaque facere, soluta. Totam id dolores, sint aperiam sequi pariatur
+                praesentium animi perspiciatis molestias iure, ducimus!</p>
 
-            <div class="tab">PPI:
-                <p><input placeholder="E-mail..." oninput="this.className = ''"></p>
-                <p><input placeholder="Phone..." oninput="this.className = ''"></p>
-            </div>
+            <!-- Multi part analysis setup form -->
+            <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post">
+                {% csrf_token %}
+                <!-- One "tab" for each step in the form: -->
+                <!-- Tab: Expression Data -->
 
-            <div class="tab">Metadata:
-                <p><input placeholder="dd" oninput="this.className = ''"></p>
-                <p><input placeholder="mm" oninput="this.className = ''"></p>
-                <p><input placeholder="yyyy" oninput="this.className = ''"></p>
-            </div>
+                <div class="tab"><h3> Expression Data </h3>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente dicta
+                        fugit
+                        fugiat hic aliquam itaque facere, soluta. Totam id dolores, sint aperiam sequi pariatur
+                        praesentium animi perspiciatis molestias iure, ducimus!</p>
 
-            <div class="tab">Parameters:
-                <p><input placeholder="Username..." oninput="this.className = ''"></p>
-                <p><input placeholder="Password..." oninput="this.className = ''"></p>
-            </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="expression-data_1" name="expression-data" class="custom-control-input"
+                               value="lung-cancer" onclick="hideElement('upload-expression-data');">
 
-            <div style="overflow:auto;">
-                <div style="float:right;">
-                    <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
-                    <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+                        <label class="custom-control-label" for="expression-data_1">Lung cancer dataset
+                            (predefined)</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="expression-data_2" name="expression-data" class="custom-control-input"
+                               value="brest-cancer" onclick="hideElement('upload-expression-data');">
+                        <label class="custom-control-label" for="expression-data_2">Brest cancer dataset
+                            (predefined)</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="expression-data_3" name="expression-data" class="custom-control-input"
+                               value="custom" onclick="showElement('upload-expression-data');">
+                        <label class="custom-control-label" for="expression-data_3">Upload own expression
+                            dataset</label>
+                    </div>
+                    <div id="upload-expression-data" class="custom-file" style="display: none">
+                        <input type="file" class="custom-file-input">
+                        <label class="custom-file-label" for="customFile">Choose expression file</label>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Circles which indicates the steps of the form: -->
-            <div style="text-align:center;margin-top:40px;">
-                <span class="step"></span>
-                <span class="step"></span>
-                <span class="step"></span>
-                <span class="step"></span>
-            </div>
+                <!-- Tab: PPI -->
+                <div class="tab"><h3>PPI</h3>
+                    <p class="card-text">Parse Ndex file: <br/>
+                        Human interactome extracted from APID, only human proteins, no inter-species interactions. </p>
 
-        </form>
-    </fieldset>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="ppi-network_1" name="ppi-network" class="custom-control-input"
+                               value="apid" onclick="hideElement('upload-ppi-network');">
+
+                        <label class="custom-control-label" for="ppi-network_1">APID</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="ppi-network_2" name="ppi-network" class="custom-control-input"
+                               value="stringr" onclick="hideElement('upload-ppi-network');">
+                        <label class="custom-control-label" for="ppi-network_2">STRING</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="ppi-network_3" name="ppi-network" class="custom-control-input"
+                               value="biogrid" onclick="hideElement('upload-ppi-network');">
+                        <label class="custom-control-label" for="ppi-network_3">BioGrid</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="ppi-network_4" name="ppi-network" class="custom-control-input"
+                               value="hprd" onclick="hideElement('upload-ppi-network');">
+                        <label class="custom-control-label" for="ppi-network_4">HPRD (Human Protein Reference
+                            Database)</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="ppi-network_5" name="ppi-network" class="custom-control-input"
+                               value="custom" onclick="showElement('upload-ppi-network');">
+                        <label class="custom-control-label" for="ppi-network_5">Upload own expression
+                            dataset</label>
+                    </div>
+                    <div id="upload-ppi-network" class="custom-file" style="display: none">
+                        <input type="file" class="custom-file-input">
+                        <label class="custom-file-label" for="customFile">Choose expression file</label>
+                    </div>
+                </div>
+
+                <!-- Tab: Metadata -->
+                <div class="tab"><h3>Metadata (optional)</h3>
+                    <p class="card-text"><b>This step is optional.</b>
+                        <br> If you do not want to upload metadata, you can go to the next step <br/></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="use" id="use-metadata"
+                               onclick="toggleAllElements(['upload-metadata', 'column-metadata'])">
+                        <label class="form-check-label" for="use-metadata">Default checkbox</label>
+                    </div>
+                    <div id="upload-metadata" class="custom-file" style="display: none">
+                        <input type="file" class="custom-file-input">
+                        <label class="custom-file-label" for="upload-metadata">Choose expression file</label>
+                    </div>
+                    <div id="column-metadata" class="form-group" style="display: none">
+                        <div class="form-group">
+                            <label for="exampleFormControlTextarea1">Metadata column</label>
+                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Algorithm parameters -->
+                <div class="tab"><h3>Algorithm parameters</h3>
+                    <p class="card-text">Enter minimum and maximum number of genes per cluster and run the
+                        algorithm:</p>
+                    Minimal:
+                    <input class="input" type="text" name="L_g_min" id="L_g_min">
+                    Maximal:
+                    <input class="input" type="text" name="L_g_max" id="L_g_max">
+                    <br>
+                    Maximum number of iterations:
+                    <select name="nbr_iter" size="1">
+                        <option value="2">2</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="45">45</option>
+                    </select>
+
+                    Advanced
+                    Gene set size:
+                    <input class="input" type="text" name="gene_set_size"
+                           id="gene_set_size">
+                    <br>
+                    Number of ants:
+                    <select name="nbr_ants" size="1">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30" selected="selected">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                    </select>
+                    Evaporation rate:
+                    <select name="evap" size="1">
+                        <option value="0.1">0.1</option>
+                        <option value="0.25">0.25</option>
+                        <option value="0.5" selected="selected">0.5</option>
+                        <option value="0.6">0.6</option>
+                        <option value="0.7">0.7</option>
+                    </select><br>
+                    Pheromone significance:
+                    <select name="pher" size="1">
+                        <option value="0.5">0.5</option>
+                        <option value="0.75">0.75</option>
+                        <option value="1" selected="selected">1</option>
+                        <option value="1.5">1.5</option>
+                        <option value="2">2</option>
+                    </select>
+                    HI significance:
+                    <select name="hisig" size="1">
+                        <option value="0.5">0.5</option>
+                        <option value="0.75">0.75</option>
+                        <option value="1" selected="selected">1</option>
+                        <option value="1.5">1.5</option>
+                        <option value="2">2</option>
+                    </select><br>
+                    Stop criteria: score_max - score_av <
+                    <select name="stopcr" size="1">
+                        <option value="0.005">0.005</option>
+                        <option value="0.01">0.01</option>
+                        <option value="0.02" selected="selected">0.02</option>
+                        <option value="0.03">0.03</option>
+                        <option value="0.05">0.05</option>
+                    </select>
+                </div>
+
+                <div style="overflow:auto;">
+                    <div class="btn-group btn-primary" style="float:right;">
+                        <button type="button" id="prevBtn" class="btn-primary" onclick="nextPrev(-1)">Previous
+                        </button>
+                        <button type="button" id="nextBtn" class="btn-primary" onclick="nextPrev(1)">Next</button>
+                    </div>
+                </div>
+
+                <!-- Circles which indicates the steps of the form: -->
+                <div style="text-align:center;margin-top:40px;">
+                    <span class="step"></span>
+                    <span class="step"></span>
+                    <span class="step"></span>
+                    <span class="step"></span>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- /.card -->
+
+    <!-- Import javacript files -->
+    {% load static %}
+    <script src="{% static 'clustering/js/forms.js' %}"></script>
+    <script>
+        function showElement(elementID) {
+            document.getElementById(elementID).style.display = 'block';
+        }
+
+        function hideElement(elementID) {
+            document.getElementById(elementID).style.display = 'none';
+        }
+
+        function toggleElement(elementID) {
+            let style = document.getElementById(elementID).style.display;
+            if (style === 'block') {
+                document.getElementById(elementID).style.display = 'none'
+            } else {
+                document.getElementById(elementID).style.display = 'block'
+            }
+        }
+
+        function toggleAllElements(elementList) {
+            elementList.forEach(toggleElement);
+        }
+    </script>
+
 {% endblock %}
