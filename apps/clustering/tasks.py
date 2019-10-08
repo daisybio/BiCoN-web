@@ -1,9 +1,39 @@
+import os
+import time
+import math
+import json
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly
+import plotly.graph_objs as go
+import networkx as nx
+import ndex2
+import mygene
+import imp
+import gseapy as gp
+
+import apps.clustering.weighted_aco_lib as lib
+
+from os import path
+from io import StringIO
+from shutil import copyfile
+from celery import shared_task
+from networkx.readwrite import json_graph
+from pybiomart import Dataset
+from lifelines.statistics import logrank_test
+from django.conf import settings
+
+flatten = lambda l: [item for sublist in l for item in sublist]
+sns.set(color_codes=True)
+
 """
 this file contains methods for all computationally intensive tasks needed for algorithm runs:
 - algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
         arrays etc with the algorithm results.
 - script_output_task - this is needed for processing the outputs of algo_output_task to formats used
-            for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to
+        for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to
         files and outputs links to those files (and an array with metadata). it takes a parameter
         "session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
         this parameter can be set to "none" if you do not want to use sessions. then it uses
@@ -25,87 +55,48 @@ this file contains methods for all computationally intensive tasks needed for al
 - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
 """
 
-import string
-from io import StringIO
-from multiprocessing import Pool
-import time
-import pandas as pd
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.algorithms import bipartite
-
-flatten = lambda l: [item for sublist in l for item in sublist]
-import seaborn as sns;
-
-sns.set(color_codes=True)
-# from multiprocessing import Pool
-from numpy import linalg as LA
-# from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-import clustering.weighted_aco_lib as lib
-from shutil import copyfile
-import plotly
-import plotly.plotly as py
-import plotly.graph_objs as go
-import plotly.io as pio
-import plotly.offline
-from datetime import datetime
-from networkx.readwrite import json_graph
-import json
-import imp
-import seaborn as sns;
-
-sns.set(color_codes=True)
-import mygene
-from django.contrib.auth.models import User
-from django.utils.crypto import get_random_string
-import os
-from celery import shared_task
-import numpy as np
-import matplotlib.pyplot as plt
-from lifelines.statistics import logrank_test
-import math
-import gseapy as gp
-import seaborn as sns
-import pandas as pd
-from numpy import array
-import matplotlib.patches as mpatches
-import networkx as nx
-from pybiomart import Dataset
-from ndex2.nice_cx_network import NiceCXNetwork
-import ndex2.client as nc
-import ndex2
 
 
-# make an empty progress file and include session ID in the path
 @shared_task(name="make_empty_figure")
 def make_empty_figure(session_id):
+    """
+    Create static picutures of the progress?!
+    TODO Remove? Use bootstrap and js
+    :param session_id:
+    :return:
+    """
     fig = plt.figure(figsize=(10, 8))
     if (session_id == "none"):
-        plt.savefig("/code/clustering/static/progress.png")
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/progress.png'))
         plt.close(fig)
     else:
-        plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/progress_" + session_id + ".png'))
         plt.close(fig)
 
 
 # empty the log file (session ID in path)
 @shared_task(name="empty_log_file")
 def empty_log_file(session_id):
+    """
+    Some logfiles, presumably just to check the status, not detailed logs?!
+    TODO: Remove and use celary to give status?
+    :param session_id:
+    :return:
+    """
     if (session_id == "none"):
-        text_file = open("/code/clustering/static/output_console.txt", "w")
+        text_file = open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt", "w'))
         text_file.write("")
         text_file.close()
-        if (os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
-            text_file = open("/code/clustering/static/output_console.txt", "w")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console.txt'))):
+            text_file = open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt", "w'))
             text_file.write("")
             text_file.close()
     else:
-        text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
+        text_file = open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console_" + session_id + ".txt", "w'))
         text_file.write("")
         text_file.close()
-        if (os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
-            text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt'))):
+            text_file = open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt", "w'))
             text_file.write("")
             text_file.close()
 
@@ -117,9 +108,14 @@ def empty_log_file(session_id):
 #### down the page       ###############################
 ########################################################
 
-# preprocess file with metadata
 @shared_task(name="preprocess_clinical_file")
 def preprocess_clinical_file(clinical_str):
+    """
+    Create TSV from CSV (or do nothing)
+    TODO: MAKE EFFICIENT; REMOVE?!
+    :param clinical_str:
+    :return:
+    """
     if (len(clinical_str.split("\n")[0].split("\t")) > 2):
         return (clinical_str)
     elif ("," in clinical_str):
@@ -131,12 +127,21 @@ def preprocess_clinical_file(clinical_str):
 
 # preprocess PPI file
 @shared_task(name="preprocess_ppi_file")
-def preprocess_ppi_file(ppistr):
-    ppistr_split = ppistr.split("\n")
+def preprocess_ppi_file(ppi_str):
+    """
+    Converts csv into tsv (see above, can be made more efficient)
+    Removes first row if it contains title columns ?!
+    Take only the right two columns
+    Misc??
+    TODO Refractor with pandas
+    :param ppi_str:
+    :return:
+    """
+    ppistr_split = ppi_str.split("\n")
     # check if file is csv or tsv and convert it to tsv format
     if ("\t" not in ppistr_split[2]):
-        ppistr = ppistr.replace(",", "\t")
-        ppistr_split = ppistr.split("\n")
+        ppi_str = ppi_str.replace(",", "\t")
+        ppistr_split = ppi_str.split("\n")
     ppistr_split_new = []
     len_first_line = 0
     len_second_line = 0
@@ -158,8 +163,8 @@ def preprocess_ppi_file(ppistr):
             # check if line contains two integers with protein IDs
             if (str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n", "")).isdigit()):
                 ppistr_split_new.append(line)
-    ppistr = "\n".join(ppistr_split_new)
-    return (ppistr)
+    ppi_str = "\n".join(ppistr_split_new)
+    return (ppi_str)
 
 
 # Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information	
@@ -325,14 +330,14 @@ def preprocess_file_2(expr_str):
 @shared_task(name="add_loading_image")
 def add_loading_image(session_id):
     if (session_id == "none"):
-        if (os.path.isfile("/code/clustering/static/loading.gif")):
-            copyfile("/code/clustering/static/loading.gif", "/code/clustering/static/loading_1.gif")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading.gif'))):
+            copyfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading.gif", "/code/clustering/static/loading_1.gif'))
         else:
             print("loading image not found")
     else:
-        if (os.path.isfile("/code/clustering/static/loading.gif")):
-            copyfile("/code/clustering/static/loading.gif",
-                     "/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading.gif'))):
+            copyfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading.gif'),
+                     path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/loading_1_" + session_id + ".gif'))
         else:
             print("loading image not found")
 
@@ -340,13 +345,13 @@ def add_loading_image(session_id):
 @shared_task(name="remove_loading_image")
 def remove_loading_image(session_id):
     if (session_id == "none"):
-        if (os.path.isfile("/code/clustering/static/loading_1.gif")):
-            os.unlink("/code/clustering/static/loading_1.gif")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading_1.gif'))):
+            os.unlink(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading_1.gif'))
     else:
-        if (os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
-            os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
-        if (os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
-            os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading_1_" + session_id + ".gif'))):
+            os.unlink(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/loading_1_" + session_id + ".gif'))
+        if (os.path.isfile(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/loading_1_" + session_id + ".gif'))):
+            os.unlink(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/loading_1_" + session_id + ".gif'))
 
 
 ##################################################################
@@ -394,57 +399,89 @@ def list_metadata_from_file(path):
 ##################################################################################################
 
 
-## method for more than 2 pre-defined clusters, uses session IDs
-@shared_task(name="algo_output_task")
+# @shared_task(name="algo_output_task")
 def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap, epsilon, hi_sig, pher_sig,
                      session_id, size, clusters_param):
+    """
+    method for more than 2 pre-defined clusters, uses session IDs
+    :param s:
+    :param L_g_min:
+    :param L_g_max:
+    :param expr_str:
+    :param ppi_str:
+    :param nbr_iter:
+    :param nbr_ants:
+    :param evap:
+    :param epsilon:
+    :param hi_sig:
+    :param pher_sig:
+    :param session_id:
+    :param size:
+    :param clusters_param:
+    :return:
+    """
+
     col = "disease_type"
-    log2 = True
+    not_log = True
     expr_stringio = StringIO(expr_str)
-    exprdf = pd.read_csv(expr_stringio, sep='\t')
+    expr_df = pd.read_csv(expr_stringio, sep='\t')
+
     # check if string contains negative numbers.
+    # USED FOR: setting not_log (contains negative numbers => numbers are logarithmic
     if ("-" in expr_str.split("\n")[2]):
         print("expression data are logarithmized")
-        log2_2 = False
+        not_log = False
     else:
         print("expression data not logarithmized")
-        log2_2 = True
-    ### this checks whether the expression data contain negative numbers
+
+    # this checks whether the expression data contain negative numbers
+    # USED FOR: setting not_log (contains negative numbers => numbers are logarithmic
     for i in range(2, 4):
-        if (log2_2 and i > len(exprdf.columns)):
+        if (not_log and i > len(expr_df.columns)):
             # check only first 1000 lines of column 2 and 3
-            for j in range(1, min(len(exprdf.index) - 1, 1000)):
-                if (log2_2 and str(exprdf.columns[i]) != "disease_type"):
+            for j in range(1, min(len(expr_df.index) - 1, 1000)):
+                if (not_log and str(expr_df.columns[i]) != "disease_type"):
                     # make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
-                    if (exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-", "",
-                                                                                                               1).replace(
+                    if (expr_df.iloc[[j], [i]].to_string().__contains__('-') and str(expr_df.iloc[j][i]).replace("-",
+                                                                                                                 "",
+                                                                                                                 1).replace(
                         ".", "", 1).isdigit()):
                         print("expression data are logarithmized")
-                        log2_2 = False
+                        not_log = False
+
+    # USED FOR: don't know, remove?
+    """
     if (session_id == "none"):
-        with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console.txt"), "w')) as text_file:
             text_file.write("Your files are being processed...")
-        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt"), "w')) as text_file:
             text_file.write("Your files are being processed...")
     else:
-        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
             text_file.write("Your files are being processed...")
-        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt"), "w')) as text_file:
             text_file.write("Your files are being processed...")
-    # B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
+    """
+
+    # Preprocess everything?
+    # RUN THE ACTUAL TASK
     if (clusters_param == 2):
         B, G, H, n, m, GE, A_g, group1, group2, labels_B, rev_labels_B, val1, val2, group1_ids, group2_ids = lib.aco_preprocessing_strings(
-            expr_str, ppi_str, col, log2=log2_2, gene_list=None, size=int(size), sample=None)
+            expr_str, ppi_str, col, log2=not_log, gene_list=None, size=int(size), sample=None)
     else:
         B, G, H, n, m, GE, A_g, labels_B, rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,
-                                                                                         log2=log2_2, gene_list=None,
+                                                                                         log2=not_log, gene_list=None,
                                                                                          size=size, sample=None)
+
+    # USED FOR: don't know? remove?
+    """
     if (session_id == "none"):
-        with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console.txt"), "w')) as text_file:
             text_file.write("Starting model run...")
     else:
-        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
             text_file.write("Starting model run...")
+    """
     print("How many genes you want per cluster (minimum):")
     # L_g_min = int(input())
     print("How many genes you want per cluster (maximum):")
@@ -452,7 +489,7 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
     imp.reload(lib)
 
     # =============================================================================
-    # #GENERAL PARAMETERS:
+    # GENERAL PARAMETERS:
     # =============================================================================
     clusters = clusters_param  # other options are currently unavailable
     K = int(nbr_ants)  # number of ants
@@ -462,7 +499,7 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
     a = float(pher_sig)  # pheramone significance
     times = int(nbr_iter)  # max amount of iterations
     # =============================================================================
-    # #NETWORK SIZE PARAMETERS:
+    # NETWORK SIZE PARAMETERS:
     # =============================================================================
     cost_limit = 20  # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
 
@@ -471,13 +508,19 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
     # bigger th - less genes are considered (can lead to empty paths if th is too high)
     # will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
 
+
+    # USED FOR: don't know? remove?
+    """
     if (session_id == "none"):
-        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt"), "w')) as text_file:
             text_file.write("Progress of the algorithm is shown below...")
     else:
-        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+        with open((path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
             text_file.write("Progress of the algorithm is shown below...")
+    """
+
     start = time.time()
+
     # session id is "none" if it is not given
     solution, t_best, sc, conv = lib.ants_new(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max,
                                               eps, times, session_id, opt=None, pts=False, show_pher=False,
@@ -486,6 +529,7 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
     n_proc = os.getenv("NBR_PROCESSES", '4')
     lib.ants_manager(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max, eps, times, session_id,
                      n_proc, opt=None, pts=False, show_pher=True, show_plot=True, save=None, show_nets=False)
+
     print("######################################################################")
     print("RESULTS ANALYSIS")
     print("total time " + str(round((end - start) / 60, 2)) + " minutes")
@@ -610,20 +654,21 @@ def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants,
         species = grouping_g[grouping_g[0] != 3][0]
         lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
         col_colors = species.map(lut)
+
     if (session_id == "none"):
-        plt.savefig("/code/clustering/static/userfiles/ntw.png")
-        plt.savefig("/code/clustering/static/ntw.png")
+        plt.savefig(os.path.join('/clustering/userfiles/ntw.png'))
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/ntw.png'))
     else:
-        plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/ntw_" + session_id + ".png'))
     plt.clf()
     plt.boxplot(conv / 2, vert=True, patch_artist=True)  # vertical box alignment  # will be used to label x-ticks
     plt.xlabel("iterations")
     plt.ylabel("score per subnetwork")
     if (session_id == "none"):
-        plt.savefig("/code/clustering/static/userfiles/conv.png")
-        plt.savefig("/code/clustering/static/conv.png")
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/conv.png'))
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/conv.png'))
     else:
-        plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
+        plt.savefig(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/conv_" + session_id + ".png'))
     return (GE_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids, patients2_ids,
             jac_1_ret, jac_2_ret)
 
@@ -690,9 +735,9 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     jsn55 = jsn44.replace('bels', 'bel')
     jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},', '')
     if (session_id == "none"):
-        json_path = "/code/clustering/static/userfiles/ppi.json"
+        json_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/ppi.json')
     else:
-        json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
+        json_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/ppi_" + session_id + ".json')
     with open(json_path, "w") as text_file:
         text_file.write(jsn3)
     colordict = {0: '#BB0000', 1: '#0000BB'}
@@ -709,23 +754,23 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     ax.set_ylabel("Patients")
     # do not include session ID in path if no session ID was given
     if (session_id == "none"):
-        path_heatmap = "/code/clustering/static/userfiles/heatmap.png"
+        path_heatmap = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/heatmap.png')
     else:
-        path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
+        path_heatmap = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/heatmap_" + session_id + ".png')
     plt.savefig(path_heatmap)
     plt.clf()
     # Array PatientData is for storing survival information
     patientData = {}
     # write lists of genes in files, needed for enrichment analysis
     if (session_id == "none"):
-        path_genelist = "/code/clustering/static/userfiles/genelist.txt"
-        path_genelist_1 = "/code/clustering/static/userfiles/genelist_1.txt"
-        path_genelist_2 = "/code/clustering/static/userfiles/genelist_2.txt"
+        path_genelist = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist.txt')
+        path_genelist_1 = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist_1.txt')
+        path_genelist_2 = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist_2.txt')
     else:
 
-        path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
-        path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
-        path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
+        path_genelist = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist_" + session_id + ".txt')
+        path_genelist_1 = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist_1_" + session_id + ".txt')
+        path_genelist_2 = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/genelist_2_" + session_id + ".txt')
     with open(path_genelist, "w") as text_file_4:
         for i in G_list:
             text_file_4.write(str(i) + "\n")
@@ -741,9 +786,9 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                 text_file_6.write(str(i) + "\n")
     text_file_6.close()
     if (session_id == "none"):
-        path_metadata = "/code/clustering/static/userfiles/metadata.txt"
+        path_metadata = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/metadata.txt')
     else:
-        path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
+        path_metadata = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/metadata_" + session_id + ".txt')
     # if no metadata given, write an empty metadata file
     p_val = ""
     if (clinicalstr == "empty"):
@@ -754,9 +799,9 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         text_file_3.close()
         plot_div = ""
         if (session_id == "none"):
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly.html')
         else:
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly_" + session_id + ".html')
         with open(output_plot_path, "w") as text_file_2:
             text_file_2.write("")
         output_plot_path = "empty"
@@ -1051,9 +1096,9 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         fig = dict(data=surv_data_for_graph, layout=layout)
         plot_div = plotly.offline.plot(fig, auto_open=False, output_type='div')
         if (session_id == "none"):
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly.html')
         else:
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly_" + session_id + ".html')
         if (survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
             with open(output_plot_path, "w") as text_file_2:
                 text_file_2.write("")
@@ -1073,9 +1118,9 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         text_file_3.close()
         plot_div = ""
         if (session_id == "none"):
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly.html')
         else:
-            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+            output_plot_path = path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_plotly_" + session_id + ".html')
         with open(output_plot_path, "w") as text_file_2:
             text_file_2.write("")
         output_plot_path = "empty"
@@ -1088,10 +1133,10 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         ret_metadata.append(ret_metadata_2)
         ret_metadata.append(ret_metadata_3)
     if (session_id == "none"):
-        with open("/code/clustering/static/output_console.txt", "w") as text_file:
+        with open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/output_console.txt", "w')) as text_file:
             text_file.write("Done!")
     else:
-        with open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w") as text_file:
+        with open(path.join(settings.MEDIA_ROOT, '/clustering/userfiles/userfiles/output_console_" + session_id + ".txt", "w')) as text_file:
             text_file.write("Done!")
     return (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val)
 
@@ -1423,4 +1468,4 @@ def import_ndex(name):
             edgelist.append([node_dict[source], node_dict[target]])
             ret = ret + curr_edge_str
     # return tab separated string
-    return (ret)
+    return ret
