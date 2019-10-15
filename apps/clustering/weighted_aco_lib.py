@@ -30,7 +30,8 @@ from numpy import linalg as LA
 from sklearn.cluster import KMeans
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from io import StringIO
-
+from os import path
+from django.conf import settings
 
 def jac(x, y):
     if len(x) > 0 and len(y) > 0:
@@ -237,12 +238,12 @@ def ants_new(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, th, L_g
         print("best round score: " + str(round(max_round_score, 3)))
         print("average score: " + str(round(av_score / K, 3)))
         if (session_id == "none"):
-            with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+            with open((path.join(settings.MEDIA_ROOT, 'clustering/userfilest')), "w") as text_file:
                 # print("foobar")
                 text_file.write("Iteration # " + str(count_big + 1))
                 text_file.close()
         else:
-            with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+            with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles_') + session_id + ".txt"), "w") as text_file:
                 # print("foobar")
                 text_file.write("Iteration # " + str(count_big + 1))
                 text_file.close()
@@ -274,10 +275,11 @@ def ants_new(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, th, L_g
             if opt != None:
                 plt.axhline(y=opt, label="optimal solution score", c="r")
             if (session_id == "none"):
-                plt.savefig("/code/clustering/static/progress.png")
+                plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfilesg'))
                 plt.close(fig)
             else:
-                plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+                print(settings.MEDIA_ROOT)
+                plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/', 'userfiles_' + session_id + ".png"))
                 plt.close(fig)
         if len(set(score_change[:3])) == 1 and len(score_change) > 3:
             flag = True
@@ -388,12 +390,12 @@ def ants_paral_new(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, t
         print("best round score: " + str(round(max_round_score, 3)))
         print("average score: " + str(round(av_score / K, 3)))
         if (session_id == "none"):
-            with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+            with open((path.join(settings.MEDIA_ROOT, 'clustering/userfilest')), "w") as text_file:
                 # print("foobar")
                 text_file.write("Iteration # " + str(count_big + 1))
                 text_file.close()
         else:
-            with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+            with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles_') + session_id + ".txt"), "w") as text_file:
                 # print("foobar")
                 text_file.write("Iteration # " + str(count_big + 1))
                 text_file.close()
@@ -425,10 +427,10 @@ def ants_paral_new(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, t
             if opt != None:
                 plt.axhline(y=opt, label="optimal solution score", c="r")
             if (session_id == "none"):
-                plt.savefig("/code/clustering/static/progress.png")
+                plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfilesg'))
                 plt.close(fig)
             else:
-                plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
+                plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles_') + session_id + ".png")
                 plt.close(fig)
         if len(set(score_change[:3])) == 1 and len(score_change) > 3:
             flag = True
@@ -589,7 +591,7 @@ def ants(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, th, L_g_min
         print("best round score: " + str(round(max_round_score, 3)))
         print("average score: " + str(round(av_score / K, 3)))
         # with open("/code/polls/static/output_console.txt", "w") as text_file:
-        with open("/code/clustering/static/output_console.txt", "w") as text_file:
+        with open(path.join(settings.MEDIA_ROOT, 'clustering/userfilest'), "w") as text_file:
             # print("foobar")
             text_file.write("Iteration # " + str(count_big + 1))
             text_file.close()
@@ -627,7 +629,7 @@ def ants(a, b, n, m, H, GE, G, clusters, cost_limit, K, evaporation, th, L_g_min
             # plt.legend()
             # this was not commented before #plt.show(block=False)
             # plt.savefig("/code/polls/static/progress.png")
-            plt.savefig("/code/clustering/static/progress.png")
+            plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfilesg'))
             plt.close(fig)
         if len(set(score_change[:3])) == 1 and len(score_change) > 3:
             flag = True

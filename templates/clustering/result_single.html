@@ -1,0 +1,175 @@
+{% extends "clustering/base_analysis.html" %}
+
+{% block title %}BiGAnts-Web analysis results{% endblock %}
+
+
+{% block content %}
+    {% load static %}
+    <!-- Analysis PPI Graph -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">PPI Graph</h1>
+            <p class="card-text"> Visualize Protein-Protein Interactions</p>
+
+            <div id="ppi-graph-container" style="max-width: available; height: 400px; margin: auto"></div>
+
+            <p>In the above graph, interactions between analysed genes are shown. The color corresponds to
+                the mean difference in expression level between both groups.</p>
+
+            <br><br><b>
+            Download the network
+            <a href={% static network_path %} download> as png </a> or
+            <a href={% static ppi_json %} download> as json file </a>
+        </b>
+        </div>
+    </div>
+
+
+    <!-- Heatmap -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Heatmap</h1>
+            <p> The heatmap shows a clustering of the analysed genes. The colored bar next to the heatmap shows to which
+                group the patient belongs. The colored bar above the heatmap shows to which group the gene belongs.
+            </p>
+            <img src="{% get_media_prefix %}{{ heatmap_png }}" class="img-fluid">
+        </div>
+
+    </div>
+
+    <!-- Survial Data -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Survival Information</h1>
+            <p>Survival of patients: <br>
+                Survival time for patients of both groups is shown (Fractions of patients in the respective group that
+                are alive at time X).</p>
+            <object type="text/html" data="{% get_media_prefix %}{{ survival_plotly }}"
+                    style="width: 600px; height: 400px"
+            "></object>
+
+        </div>
+    </div>
+
+    <!-- Patient Data -->
+    {% if patient_metadata_head %}
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h1>Patient Data</h1>
+                <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the
+                    algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients
+                    in Cluster 1 has a lung metastasis).</p>
+
+                <table class="table table-striped table-hover table-responsive">
+                    <thead>
+                    <tr>
+                        <!--- iterate over tables of metadata and display as table--->
+                        <th scope="col">Group</th>
+                        {% for key,value in patient_metadata_head.items %}
+                            <th scope="col"> {{ value }} </th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr>
+                        <th>Group 1</th>
+                        {% for key,value in patient_metadata_group_1.items %}
+                            <th> {{ value }}</th>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        <th>Group 2</th>
+                        {% for key,value in patient_metadata_group_2.items %}
+                            <th>{{ value }}</th>
+                        {% endfor %}
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Convergence Behaviour -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Convergence Behaviour</h1>
+            <p>Algorithm Convergence:<br>
+                Convergence behaviour of the algorithm.
+            </p>
+            <img src="{% get_media_prefix %}{{ convergence_png }}" class="img-fluid">
+
+        </div>
+    </div>
+
+    <!-- Convergence Behaviour -->
+
+
+    <!-- Import javacript files -->
+    <!--- sigma.js imports needed for PPI graph -->
+    <script src="{% static 'clustering/js/sigma.js/src/sigma.core.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/conrad.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/utils/sigma.utils.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/utils/sigma.polyfills.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/sigma.settings.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.dispatcher.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.configurable.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.graph.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.camera.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.quad.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/classes/sigma.classes.edgequad.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/captors/sigma.captors.mouse.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/captors/sigma.captors.touch.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/sigma.renderers.canvas.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/sigma.renderers.webgl.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/sigma.renderers.svg.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/sigma.renderers.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/webgl/sigma.webgl.nodes.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/webgl/sigma.webgl.nodes.fast.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/webgl/sigma.webgl.edges.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/webgl/sigma.webgl.edges.fast.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/webgl/sigma.webgl.edges.arrow.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.labels.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.hovers.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.nodes.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edges.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edges.curve.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edges.arrow.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edges.curvedArrow.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edgehovers.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edgehovers.curve.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edgehovers.arrow.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.edgehovers.curvedArrow.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/canvas/sigma.canvas.extremities.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.utils.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.nodes.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.edges.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.edges.curve.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.labels.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/renderers/svg/sigma.svg.hovers.def.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/middlewares/sigma.middlewares.rescale.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/middlewares/sigma.middlewares.copy.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/misc/sigma.misc.animation.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/misc/sigma.misc.bindEvents.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/misc/sigma.misc.bindDOMEvents.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/src/misc/sigma.misc.drawHovers.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/plugins/sigma.renderers.customShapes/shape-library.js' %}"></script>
+    <script src="{% static 'clustering/js/sigma.js/plugins/sigma.renderers.customShapes/sigma.renderers.customShapes.js' %}"></script>
+    <!-- END SIGMA IMPORTS -->
+    <script src="{% static 'clustering/js/sigma.js/plugins/sigma.parsers.json/sigma.parsers.json.js' %}"></script>
+
+
+    <!-- script for generation of PPI graph--->
+    <script>
+        sigma.parsers.json('{% get_media_prefix %}{{ppi_json}}', {
+            container: 'ppi-graph-container',
+            settings: {
+                defaultNodeColor: '#ec5148'
+            }
+        });
+    </script>
+
+{% endblock %}

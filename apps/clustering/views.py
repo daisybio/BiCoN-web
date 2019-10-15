@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
+from django.conf import settings
 
 from .tasks import algo_output_task, script_output_task, preprocess_file_2, import_ndex, preprocess_ppi_file, \
     check_input_files
@@ -140,16 +141,52 @@ def submit_analysis(request):
     # make plots and process results
 
     (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
-      jac_2) = algo_output_task(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-                                      epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
+     jac_2) = algo_output_task(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
+                               epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
     print('Making plots task submitted')
-    result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
-                                       group1_ids, group2_ids, clinical_str, jac_1, jac_2,
-                                       survival_col_name, clinical_df, session_id)
-    (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = result2.get()
+    # result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
+    #                                    group1_ids, group2_ids, clinical_str, jac_1, jac_2,
+    #                                    survival_col_name, clinical_df, session_id)
+    # (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = result2.get()
+
+    (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = script_output_task(T,
+                                                                                                         row_colors,
+                                                                                                         col_colors,
+                                                                                                         G2,
+                                                                                                         means,
+                                                                                                         genes_all,
+                                                                                                         adj_list,
+                                                                                                         genes1,
+                                                                                                         group1_ids,
+                                                                                                         group2_ids,
+                                                                                                         clinical_str,
+                                                                                                         jac_1,
+                                                                                                         jac_2,
+                                                                                                         survival_col_name,
+                                                                                                         clinical_df,
+                                                                                                         session_id)
 
     print(f'redicreting to analysis_status')
-    return HttpResponseRedirect(reverse('clustering:analysis_status'))
+    # return HttpResponseRedirect(reverse('clustering:analysis_status'))
+    return HttpResponseRedirect(reverse('clustering:test'))
+
+def test(request):
+    return render(request, 'clustering/result_single.html', context={
+        'ppi_json': 'clustering/userfiles/ppi_ASDFASDFASDFASDFASDF.json',
+        'heatmap_png': 'clustering/userfiles/heatmap_ASDFASDFASDFASDFASDF.png',
+        'survival_plotly': 'clustering/userfiles/output_plotly_ASDFASDFASDFASDFASDF.html',
+        'convergence_png': 'clustering/userfiles/conv_ASDFASDFASDFASDFASDF.png',
+    })
+
+
+def analysis_status(request):
+    pass
+
+def analysis_result(request, analysis_result):
+    pass
+
+def results(request):
+    pass
 
 
 class DocumentationView(TemplateView):
