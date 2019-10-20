@@ -1,17 +1,25 @@
 import os
+import uuid
+
 import pandas as pd
 
 from os import path
 
+from django.core.files.base import ContentFile
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
 from django.conf import settings
+from django.utils import timezone
+
+from celery.result import AsyncResult
 
 from .tasks import algo_output_task, script_output_task, preprocess_file_2, import_ndex, preprocess_ppi_file, \
-    check_input_files
+    check_input_files, run_algorithm
+
+from .models import Job
 
 
 class IndexView(TemplateView):
@@ -20,6 +28,14 @@ class IndexView(TemplateView):
 
 class AnalysisSetupView(TemplateView):
     template_name = "clustering/analysis_setup.html"
+
+    def get_context_data(self, **kwargs):
+        # Create new session if none is found
+        if not self.request.session.session_key:
+            self.request.session.create()
+
+        # Just return the same context data
+        return super().get_context_data(**kwargs)
 
 
 @csrf_exempt  # TODO IMPORTANT REMOVE FOR PRODUCTION!!!!
@@ -37,8 +53,12 @@ def submit_analysis(request):
     # EMPTY, needs to be done
 
     # ========== Parse algorithm parameters from post request ==========
+    session_id = None
 
-    session_id = 'ASDFASDFASDFASDFASDF'
+    if request.user.is_authenticated:
+        pass
+    else:
+        session_id = request.session.session_key
 
     # --- Step 1: Expression Data
     # Get selected option
@@ -128,8 +148,17 @@ def submit_analysis(request):
     epsilon = request.POST.get("stopcr", 0.02)
 
     print('All the given data was parsed: Starting clustering')
+
+    # ========== Save the task into the database (create a job) ==========
+    task_id = uuid.uuid4()
+
+    if session_id:
+        job = Job(job_id=task_id, session_id=session_id, submit_time=timezone.now(), status=Job.SUBMITTED)
+        job.save()
+    else:
+        pass
+
     # ========== Run the clustering algorithm ==========
-    print('Running algorithm started')
     # result1 = algo_output_task.delay(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
     #                                  epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
     # (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
@@ -140,53 +169,61 @@ def submit_analysis(request):
     #  jac_2) = result1.get()
     # make plots and process results
 
-    (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
-     jac_2) = algo_output_task(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-                               epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
-    print('Making plots task submitted')
+    print('Running algorithm started')
+    started_algorithm_id = run_algorithm.delay(lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
+                                               epsilon, hi_sig, pher_sig, str(task_id), gene_set_size, nbr_groups,
+                                               clinical_str, survival_col_name,
+                                               clinical_df, job).id
     # result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
     #                                    group1_ids, group2_ids, clinical_str, jac_1, jac_2,
     #                                    survival_col_name, clinical_df, session_id)
     # (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = result2.get()
 
-    (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = script_output_task(T,
-                                                                                                         row_colors,
-                                                                                                         col_colors,
-                                                                                                         G2,
-                                                                                                         means,
-                                                                                                         genes_all,
-                                                                                                         adj_list,
-                                                                                                         genes1,
-                                                                                                         group1_ids,
-                                                                                                         group2_ids,
-                                                                                                         clinical_str,
-                                                                                                         jac_1,
-                                                                                                         jac_2,
-                                                                                                         survival_col_name,
-                                                                                                         clinical_df,
-                                                                                                         session_id)
+    # ToDo create task with given ID
+    started_algorithm_id = str(task_id)
 
     print(f'redicreting to analysis_status')
-    # return HttpResponseRedirect(reverse('clustering:analysis_status'))
-    return HttpResponseRedirect(reverse('clustering:test'))
+    return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': started_algorithm_id}))
+
 
 def test(request):
+    job = Job.objects.get(job_id='bfc6f95f-6ac1-4cf1-b032-ad3db0715ddf')
+    job.ppi_png.save('TESTNAME', ContentFile('A string with the file content'))
+    return HttpResponse(request.session.session_key)
+
+
+def test_result(request):
+    # return render(request, 'clustering/result_single.html', context={
+    #     'ppi_json': 'clustering/test/ppi.json',
+    #     'heatmap_png': 'clustering/test/heatmap.png',
+    #     'survival_plotly': 'clustering/test/output_plotly.html',
+    #     'convergence_png': 'clustering/test/conv.png',
+    # })
+    pass
+
+
+def analysis_status(request, analysis_id):
+    analysis_task = AsyncResult(str(analysis_id))
+    print(analysis_task.status)
+    return HttpResponse(analysis_task.status)
+
+
+def analysis_result(request, analysis_id):
+    job = Job.objects.get(job_id=analysis_id)
     return render(request, 'clustering/result_single.html', context={
-        'ppi_json': 'clustering/userfiles/ppi_ASDFASDFASDFASDFASDF.json',
-        'heatmap_png': 'clustering/userfiles/heatmap_ASDFASDFASDFASDFASDF.png',
-        'survival_plotly': 'clustering/userfiles/output_plotly_ASDFASDFASDFASDFASDF.html',
-        'convergence_png': 'clustering/userfiles/conv_ASDFASDFASDFASDFASDF.png',
+        'ppi_png' : job.ppi_png.name,
+        'ppi_json': job.ppi_json.name,
+        'heatmap_png': job.heatmap_png.name,
+        'survival_plotly': job.survival_plotly.name,
+        'convergence_png': job.convergence_png.name,
     })
 
 
-def analysis_status(request):
-    pass
-
-def analysis_result(request, analysis_result):
-    pass
-
 def results(request):
-    pass
+    session_id = request.session.session_key
+
+    previous_jobs = Job.objects.filter(session_id__exact=session_id)
+    return HttpResponse(previous_jobs)
 
 
 class DocumentationView(TemplateView):

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, analysis_result, results,\
-    DocumentationView, SourceView, test
+    DocumentationView, SourceView, test, test_result
 
 app_name = 'clustering'
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
     path('analysis/results', results, name='analysis_results'),
 
     # TEST PAGE
+    path('analysis/test_result', test_result, name='test_result'),
     path('analysis/test', test, name='test'),
 
     # Page for documentation and source

@@ -17,7 +17,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 
 #### own imports
-from .models import GraphForm
+from .models_old import GraphForm
 from .tasks import make_empty_figure, algo_output_task, empty_log_file, add_loading_image, \
     remove_loading_image, import_ndex, read_enrichment, read_enrichment_2, convert_gene_list, \
     check_input_files, script_output_task, list_metadata_from_file, preprocess_ppi_file, preprocess_file_2, \

@@ -18,7 +18,7 @@
 
             <br><br><b>
             Download the network
-            <a href={% static network_path %} download> as png </a> or
+            <a href={% static ppi_png %} download> as png </a> or
             <a href={% static ppi_json %} download> as json file </a>
         </b>
         </div>
@@ -45,8 +45,8 @@
                 Survival time for patients of both groups is shown (Fractions of patients in the respective group that
                 are alive at time X).</p>
             <object type="text/html" data="{% get_media_prefix %}{{ survival_plotly }}"
-                    style="width: 600px; height: 400px"
-            "></object>
+                    style="width: 600px; height: 400px">
+            </object>
 
         </div>
     </div>
