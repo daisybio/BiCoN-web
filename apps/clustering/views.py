@@ -222,8 +222,10 @@ def analysis_result(request, analysis_id):
 def results(request):
     session_id = request.session.session_key
 
-    previous_jobs = Job.objects.filter(session_id__exact=session_id)
-    return HttpResponse(previous_jobs)
+    previous_jobs = Job.objects.filter(session_id__exact=session_id).order_by('-submit_time')
+    return render(request, 'clustering/results.html', context={
+        'previous_jobs' : previous_jobs
+    })
 
 
 class DocumentationView(TemplateView):

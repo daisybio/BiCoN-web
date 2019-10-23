@@ -18,8 +18,8 @@
 
             <br><br><b>
             Download the network
-            <a href={% static ppi_png %} download> as png </a> or
-            <a href={% static ppi_json %} download> as json file </a>
+            <a href="{% get_media_prefix %}{{ ppi_png }}" download> as png </a> or
+            <a href="{% get_media_prefix %}{{ ppi_json }}" download> as json file </a>
         </b>
         </div>
     </div>
@@ -60,35 +60,35 @@
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the
                     algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients
                     in Cluster 1 has a lung metastasis).</p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <!--- iterate over tables of metadata and display as table--->
+                            <th scope="col">Group</th>
+                            {% for key,value in patient_metadata_head.items %}
+                                <th scope="col"> {{ value }} </th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
 
-                <table class="table table-striped table-hover table-responsive">
-                    <thead>
-                    <tr>
-                        <!--- iterate over tables of metadata and display as table--->
-                        <th scope="col">Group</th>
-                        {% for key,value in patient_metadata_head.items %}
-                            <th scope="col"> {{ value }} </th>
-                        {% endfor %}
-                    </tr>
-                    </thead>
+                        <tbody>
+                        <tr>
+                            <th>Group 1</th>
+                            {% for key,value in patient_metadata_group_1.items %}
+                                <th> {{ value }}</th>
+                            {% endfor %}
+                        </tr>
 
-                    <tbody>
-                    <tr>
-                        <th>Group 1</th>
-                        {% for key,value in patient_metadata_group_1.items %}
-                            <th> {{ value }}</th>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <th>Group 2</th>
-                        {% for key,value in patient_metadata_group_2.items %}
-                            <th>{{ value }}</th>
-                        {% endfor %}
-                    </tr>
-                    </tbody>
-                </table>
-
+                        <tr>
+                            <th>Group 2</th>
+                            {% for key,value in patient_metadata_group_2.items %}
+                                <th>{{ value }}</th>
+                            {% endfor %}
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     {% endif %}
