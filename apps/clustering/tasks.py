@@ -1,34 +1,32 @@
+import imp
+import json
+import math
 import os
 import time
-import math
-import json
+from io import StringIO, BytesIO
+from os import path
+from shutil import copyfile
+
+import celery.states
+import gseapy as gp
+import matplotlib.pyplot as plt
+import mygene
+import ndex2
+import networkx as nx
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly
 import plotly.graph_objs as go
-import networkx as nx
-import ndex2
-import mygene
-import imp
-import gseapy as gp
-import celery.states
-
-import apps.clustering.weighted_aco_lib as lib
-
-from os import path
-from io import StringIO, BytesIO
-from shutil import copyfile
+import seaborn as sns
 from celery import shared_task
-from networkx.readwrite import json_graph
-from pybiomart import Dataset
-from lifelines.statistics import logrank_test
 from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
+from lifelines.statistics import logrank_test
+from networkx.readwrite import json_graph
+from pybiomart import Dataset
 
-from apps.clustering.models import Job
+import apps.clustering.weighted_aco_lib as lib
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 sns.set(color_codes=True)

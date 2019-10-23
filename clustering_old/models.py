@@ -1,18 +1,7 @@
 import datetime
-from django.db import models
-from django.utils import timezone
 # Create your models here.
-import os, sys
-from django.shortcuts import render
-
+import os
 # Create your views here.
-from django.http import HttpResponse
-from django.template import loader
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from django.views import generic
 ##from scipy.stats.stats import pearsonr
 ##import plotly
 ##import plotly.plotly as py
@@ -21,13 +10,14 @@ from django.views import generic
 ##import plotly.offline
 # from .models import Choice, Question
 from datetime import datetime
+
+from django.db import models
+
+
 ##from networkx.readwrite import json_graph
 ##import json
-from django.shortcuts import render_to_response, render
-from django.template import RequestContext
 ##from django.http import HttpResponseRedirect
 ##from django.urls import reverse
-import clustering
 # from polls.models import Document
 ##from clustering.forms import DocumentForm
 # from polls.models import Upload,UploadForm
@@ -38,8 +28,6 @@ import clustering
 ##import seaborn as sns
 ##import pandas as pd
 ##from numpy import array
-
-import matplotlib.patches as mpatches
 
 # import networkx as nx
 # from bokeh.io import show, output_notebook, output_file, save
@@ -55,8 +43,6 @@ import matplotlib.patches as mpatches
 # from bokeh.models import Plot, Range1d, MultiLine, Circle, HoverTool, TapTool, BoxSelectTool
 
 ##from pybiomart import Dataset
-
-from django.forms import ModelForm
 
 
 # class Upload(models.Model):

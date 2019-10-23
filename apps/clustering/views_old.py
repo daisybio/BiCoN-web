@@ -1,13 +1,13 @@
 import os.path
 import shutil
-from shutil import copyfile
 from datetime import datetime
 from io import StringIO
-from django.conf import settings
 from os import path
+from shutil import copyfile
 
 ### *ACTUAL* imports (that have dependencies other than django and my own stuff) ####
 import pandas as pd
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User

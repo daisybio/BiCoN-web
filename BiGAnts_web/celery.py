@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 
 # TODO: Add other file? or method to change settings.dev

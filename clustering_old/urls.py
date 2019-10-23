@@ -1,9 +1,8 @@
-from django.urls import path
-
-from django.conf.urls import include, url
-from . import views
+from django.conf.urls import url
 # from . import views_2
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+from . import views
 
 app_name = 'polls'
 urlpatterns = [

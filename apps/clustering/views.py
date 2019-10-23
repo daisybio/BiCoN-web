@@ -1,25 +1,19 @@
-import os
 import uuid
-
-import pandas as pd
-
 from os import path
 
+import pandas as pd
+from celery.result import AsyncResult
 from django.core.files.base import ContentFile
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
-from django.conf import settings
-from django.utils import timezone
-
-from celery.result import AsyncResult
-
-from .tasks import algo_output_task, script_output_task, preprocess_file_2, import_ndex, preprocess_ppi_file, \
-    check_input_files, run_algorithm
 
 from .models import Job
+from .tasks import preprocess_file_2, import_ndex, preprocess_ppi_file, \
+    check_input_files, run_algorithm
 
 
 class IndexView(TemplateView):

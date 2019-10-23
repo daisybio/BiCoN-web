@@ -1,13 +1,19 @@
 import os.path
 import shutil
-from shutil import copyfile
 from datetime import datetime
 from io import StringIO
-from django.conf import settings
 from os import path
+from shutil import copyfile
 
 ### *ACTUAL* imports (that have dependencies other than django and my own stuff) ####
 import pandas as pd
+#### own imports
+from clustering.models import GraphForm
+from clustering.tasks import make_empty_figure, algo_output_task, empty_log_file, add_loading_image, \
+    remove_loading_image, import_ndex, read_enrichment, read_enrichment_2, convert_gene_list, \
+    check_input_files, script_output_task, list_metadata_from_file, preprocess_ppi_file, preprocess_file_2, \
+    run_enrichment
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
@@ -15,13 +21,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import cache
 from django.shortcuts import redirect
 from django.shortcuts import render
-
-#### own imports
-from clustering.models import GraphForm
-from clustering.tasks import make_empty_figure, algo_output_task, empty_log_file, add_loading_image, \
-    remove_loading_image, import_ndex, read_enrichment, read_enrichment_2, convert_gene_list, \
-    check_input_files, script_output_task, list_metadata_from_file, preprocess_ppi_file, preprocess_file_2, \
-    run_enrichment
 
 
 def logout_2(request):

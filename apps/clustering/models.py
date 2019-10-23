@@ -1,9 +1,6 @@
-import uuid
-from os import path
-
-from django.db import models
-from django.contrib.auth.models import User
 from celery.states import FAILURE, IGNORED, PENDING, RECEIVED, RETRY, REVOKED, STARTED, SUCCESS
+from django.contrib.auth.models import User
+from django.db import models
 
 
 class Job(models.Model):

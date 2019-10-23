@@ -1,27 +1,11 @@
-from django.db import models
 # Create your models here.
-import os, sys
-from django.shortcuts import render
-
-# Create your views here.
-from django.http import HttpResponse
-from django.template import loader
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from django.views import generic
-
+import os
 from datetime import datetime
 
-from django.shortcuts import render_to_response, render
-from django.template import RequestContext
+from django.db import models
 
-import clustering_old
 
-import matplotlib.patches as mpatches
-
-from django.forms import ModelForm
+# Create your views here.
 
 
 # class Upload(models.Model):

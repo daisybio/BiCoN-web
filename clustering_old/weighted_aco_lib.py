@@ -1,34 +1,28 @@
 # import multiprocessing
 # from multiprocessing import set_start_method, Process, Queue
-import billiard as multiprocessing
-from billiard import set_start_method, Process, Queue
 # from multiprocessing import set_start_method, Queue
 import time
-import pandas as pd
-import numpy as np
-import itertools
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.algorithms import bipartite
-import scipy.sparse as sparse
-from scipy.sparse import csr_matrix
 # from IPython.display import Audio, display
-from sklearn.cluster.bicluster import SpectralCoclustering
 from collections import Counter
-import collections
+
+import billiard as multiprocessing
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+from billiard import Process, Queue
+from networkx.algorithms import bipartite
+from scipy.sparse import csr_matrix
 from sklearn import preprocessing
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 from scipy import stats
-import scipy.spatial.distance as ssd
-from scipy.cluster import hierarchy
 import seaborn as sns;
 
 sns.set(color_codes=True)
 # from multiprocessing import Pool
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from io import StringIO
 
 

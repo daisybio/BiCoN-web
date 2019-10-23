@@ -1,8 +1,7 @@
-from django.urls import path
-
-from django.conf.urls import include, url
-from . import views_old as views
+from django.conf.urls import url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+from . import views_old as views
 
 urlpatterns = [
     url(r'infopage.html', views.infopage),

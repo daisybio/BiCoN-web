@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, analysis_result, results,\
+from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, analysis_result, results, \
     DocumentationView, SourceView, test, test_result
 
 app_name = 'clustering'

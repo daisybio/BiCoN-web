@@ -24,31 +24,20 @@
 ### - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
 
 
-import string
-from io import StringIO
-from multiprocessing import Pool
 import time
-import pandas as pd
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.algorithms import bipartite
+from io import StringIO
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 import seaborn as sns;
 
 sns.set(color_codes=True)
 # from multiprocessing import Pool
-from numpy import linalg as LA
 # from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import clustering.weighted_aco_lib as lib
 from shutil import copyfile
 import plotly
-import plotly.plotly as py
 import plotly.graph_objs as go
-import plotly.io as pio
 import plotly.offline
-from datetime import datetime
 from networkx.readwrite import json_graph
 import json
 import imp
@@ -56,8 +45,6 @@ import seaborn as sns;
 
 sns.set(color_codes=True)
 import mygene
-from django.contrib.auth.models import User
-from django.utils.crypto import get_random_string
 import os
 from celery import shared_task
 import numpy as np
@@ -67,12 +54,8 @@ import math
 import gseapy as gp
 import seaborn as sns
 import pandas as pd
-from numpy import array
-import matplotlib.patches as mpatches
 import networkx as nx
 from pybiomart import Dataset
-from ndex2.nice_cx_network import NiceCXNetwork
-import ndex2.client as nc
 import ndex2
 
 
