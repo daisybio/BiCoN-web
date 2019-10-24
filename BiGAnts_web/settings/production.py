@@ -3,7 +3,7 @@ from .common import *
 
 # ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
-DEBUG = False
+DEBUG = True
 
 
 # ##### DATABASE CONFIGURATION ############################
