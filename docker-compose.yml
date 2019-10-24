@@ -1,37 +1,86 @@
-version: '3'
+version: '3.2'
 
 services:
   web:
     build:
       context: .
       dockerfile: docker/bigants/Dockerfile
-    command: gunicorn BiGAnts_web/wsgi.py:application --bind 0.0.0.0:8000
+    command: gunicorn BiGAnts_web.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/bigants/web/run/static
       - media_volume:/home/bigants/web/run/media
-    expose:
-      - 8000
-    env_file:
-      - ./.env.prod
+#    networks:
+#      - database_network
+#      - nginx_network
     depends_on:
       - db
+
+  celery:
+    build:
+      context: .
+      dockerfile: docker/bigants/Dockerfile
+    command: celery -A BiGAnts_web worker -l info
+    volumes:
+      - media_volume:/home/bigants/web/run/media
+#    networks:
+#      - database_network
+    depends_on:
+      - db
+      - rabbit
+
   db:
-    image: postgres:12.0-alpine
+    image: postgres:12.0
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+#    networks:
+#      - database_network
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env.prod.db
-  nginx:
-    build: ./nginx
-    volumes:
-      - static_volume:/home/bigants/run/static
-      - media_volume:/home/bigants/run/media
+
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.8
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+#    networks:
+#      - database_network
     ports:
-      - 1337:80
+        - "5672:5672"
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+
+
+  nginx:
+    build: ./docker/nginx
+    volumes:
+      - static_volume:/data/bigants/run/static
+      - media_volume:/data/bigants/run/media
+    # If you want the application to be listening on another port different than port 8000
+    # Change the 'published' port number to the port you desire
+    ports:
+      - target: 80
+        published: 80             # Change this port
+        protocol: tcp
+        mode: host
+
+#    networks:
+#      - nginx_network
     depends_on:
       - web
 
+
+#networks:
+#  nginx_network:
+#    driver: bridge
+#  database_network:
+#    driver: bridge
+
 volumes:
-  postgres_data:
   static_volume:
   media_volume:
+  postgres_data:
+  rabbit_data:

@@ -1,15 +1,43 @@
-# for now fetch the development settings only
+# project imports
+from .common import *
 
-# uncomment the following line to include i18n
-# from .i18n import *
-
+# ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
 DEBUG = False
 
-# You will have to determine, which hostnames should be served by Django
-ALLOWED_HOSTS = []
+
+# ##### DATABASE CONFIGURATION ############################
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',  # <-- IMPORTANT: same name as docker-compose service!
+        'PORT': '5432',
+    }
+}
+
+# ##### CACHE CONFIGURATION ############################
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'my_cache_table',
+#     }
+# }
+
+# ##### CELARY CONFIGURATION ############################
+CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = "amqp"
+CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
+
+# ##### APPLICATION CONFIGURATION #########################
+INSTALLED_APPS = DEFAULT_APPS
 
 # ##### SECURITY CONFIGURATION ############################
+ALLOWED_HOSTS = ['*']
 
 # TODO: Make sure, that sensitive information uses https
 # TODO: Evaluate the following settings, before uncommenting them
