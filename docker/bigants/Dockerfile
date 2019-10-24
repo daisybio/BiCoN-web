@@ -19,9 +19,12 @@ WORKDIR $APP_HOME
 COPY requirements/requirements.txt $APP_HOME/requirements/
 RUN pip install -r requirements/requirements.txt
 
-# TEMPORARILY TODO REMOVE LATER
+# TEMPORARILY START TODO REMOVE LATER
 COPY _dev/BiGAnts-PyPI-package $APP_HOME/_dev/BiGAnts-PyPI-package
-RUN python $APP_HOME/_dev/BiGAnts-PyPI-package/setup.py install
+WORKDIR $APP_HOME/_dev/BiGAnts-PyPI-package
+RUN python setup.py install
+WORKDIR $APP_HOME
+# TEMPORARILY END
 
 # copy project
 COPY . $APP_HOME
