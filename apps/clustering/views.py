@@ -107,7 +107,7 @@ def submit_analysis(request):
         ppi_str = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf").get()
     elif ppi_network_selection == 'custom':
         ppi_str = request.FILES['ppi-network-file'].read().decode('utf-8')
-        ppi_str = preprocess_ppi_file.delay(ppi_str).get()
+        # ppi_str = preprocess_ppi_file.delay(ppi_str).get()
         err_str = check_input_files.delay(ppi_str, expr_str).get()
         if err_str:
             request.session['errors'] = err_str
@@ -128,8 +128,8 @@ def submit_analysis(request):
 
     # --- Step 4 (Required)
     nbr_iter = request.POST.get("nbr_iter")  # Todo check with Olga if defaults should be set (45?)
-    lg_min = int(request.POST['L_g_min'])
-    lg_max = int(request.POST['L_g_max'])
+    L_g_min = int(request.POST['L_g_min'])
+    L_g_max = int(request.POST['L_g_max'])
 
     # --- Step 4 (Optional)
     save_data = request.POST.get("save_data", None)
@@ -153,21 +153,26 @@ def submit_analysis(request):
         pass
 
     # ========== Run the clustering algorithm ==========
-    # result1 = algo_output_task.delay(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
+    # result1 = algo_output_task.delay(1, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
     #                                  epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
     # (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
     #  jac_2) = result1.get()
-    # result1 = algo_output_task.delay(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
+    # result1 = algo_output_task.delay(1, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
     #                                  epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
     # (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
     #  jac_2) = result1.get()
     # make plots and process results
 
     print('Running algorithm started')
-    started_algorithm_id = run_algorithm.delay(lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-                                               epsilon, hi_sig, pher_sig, str(task_id), gene_set_size, nbr_groups,
-                                               clinical_str, survival_col_name,
-                                               clinical_df, job).id
+    # started_algorithm_id = run_algorithm.delay(L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
+    #                                            epsilon, hi_sig, pher_sig, str(task_id), gene_set_size, nbr_groups,
+    #                                            clinical_str, survival_col_name,
+    #                                            clinical_df, job).id
+    # TODO connect survial
+    started_algorithm_id = run_algorithm.delay(job, expr_str, ppi_str, False, gene_set_size, L_g_min, L_g_max,
+                  n_proc=1, a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon, times=6, clusters=2, cost_limit=5,
+                  max_iter=nbr_iter, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False).id
+
     # result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
     #                                    group1_ids, group2_ids, clinical_str, jac_1, jac_2,
     #                                    survival_col_name, clinical_df, session_id)

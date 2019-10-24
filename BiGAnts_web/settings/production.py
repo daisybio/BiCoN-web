@@ -9,13 +9,14 @@ DEBUG = False
 # ##### DATABASE CONFIGURATION ############################
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'db',  # <-- IMPORTANT: same name as docker-compose service!
+        'HOST':  'db',
         'PORT': '5432',
-    }
+    },
 }
 
 # ##### CACHE CONFIGURATION ############################

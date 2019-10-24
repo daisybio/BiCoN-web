@@ -18,13 +18,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
 
 urlpatterns = [
-    # path('clustering/', include('clustering.urls')),
-    path('old/', include('apps.clustering.urls_old')),
-    path('new/', include('apps.clustering.urls')),
+    path('', include('apps.clustering.urls')),
     path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# Serve media files during debugging through the django server aswell
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # TEMPLATE TODO check if can be used
 # urlpatterns = [
