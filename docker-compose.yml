@@ -6,12 +6,15 @@ services:
       context: .
       dockerfile: docker/bigants/Dockerfile
     command: gunicorn BiGAnts_web.wsgi:application --bind 0.0.0.0:8000
+    environment:
+      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
     volumes:
       - static_volume:/home/bigants/web/run/static
       - media_volume:/home/bigants/web/run/media
     networks:
-      - database_network
       - nginx_network
+      - database_network
+      - celery_network
     depends_on:
       - db
 
@@ -20,10 +23,13 @@ services:
       context: .
       dockerfile: docker/bigants/Dockerfile
     command: celery -A BiGAnts_web worker -l info
+    environment:
+      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
     volumes:
       - media_volume:/home/bigants/web/run/media
     networks:
       - database_network
+      - celery_network
     depends_on:
       - db
       - rabbit
@@ -47,7 +53,7 @@ services:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=mypass
     networks:
-      - database_network
+      - celery_network
     ports:
         - "5672:5672"
     volumes:
@@ -77,6 +83,8 @@ networks:
   nginx_network:
     driver: bridge
   database_network:
+    driver: bridge
+  celery_network:
     driver: bridge
 
 volumes:
