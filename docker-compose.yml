@@ -9,9 +9,9 @@ services:
     volumes:
       - static_volume:/home/bigants/web/run/static
       - media_volume:/home/bigants/web/run/media
-#    networks:
-#      - database_network
-#      - nginx_network
+    networks:
+      - database_network
+      - nginx_network
     depends_on:
       - db
 
@@ -22,8 +22,8 @@ services:
     command: celery -A BiGAnts_web worker -l info
     volumes:
       - media_volume:/home/bigants/web/run/media
-#    networks:
-#      - database_network
+    networks:
+      - database_network
     depends_on:
       - db
       - rabbit
@@ -34,8 +34,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
-#    networks:
-#      - database_network
+    networks:
+      - database_network
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
@@ -46,8 +46,8 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=mypass
-#    networks:
-#      - database_network
+    networks:
+      - database_network
     ports:
         - "5672:5672"
     volumes:
@@ -67,17 +67,17 @@ services:
         protocol: tcp
         mode: host
 
-#    networks:
-#      - nginx_network
+    networks:
+      - nginx_network
     depends_on:
       - web
 
 
-#networks:
-#  nginx_network:
-#    driver: bridge
-#  database_network:
-#    driver: bridge
+networks:
+  nginx_network:
+    driver: bridge
+  database_network:
+    driver: bridge
 
 volumes:
   static_volume:
