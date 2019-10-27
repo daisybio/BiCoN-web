@@ -1,190 +1,124 @@
-import imp
-import json
-import math
-import os
+### this file contains methods for all computationally intensive tasks needed for algorithm runs:
+### - algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
+###			arrays etc with the algorithm results.
+### - script_output_task - this is needed for processing the outputs of algo_output_task to formats used
+###  			for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to
+###			files and outputs links to those files (and an array with metadata). it takes a parameter
+###			"session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
+###			this parameter can be set to "none" if you do not want to use sessions. then it uses
+###			static paths (e.g. "ppi.json") instead.
+### - import_ndex - this tasks imports PPI files from NDEx based on the UUID and parses them to the correct
+###			input format for the algorithm tasks.
+### - check_input_files - this task checks given expression and PPI files if they contain data and returns an error
+###			string if they do not.
+### - preprocess_file - this task preprocesses an input expression data file and tries to find a column with
+###			pre-defined clusters. if found, it is renamed to "disease_type".
+### - preprocess_file_2 - the same as preprecess_file, but it returns a number of pre-defined clusters additionally.
+### - preprocess_ppi_file - preprocesses the PPI file. it finds every row that contains two tab-separated integers (protein IDs)
+###			and appends them to the output file.
+### - preprocess_clinical_file - converts clinical file to TSV format.
+### - list_metadata_from_file - reads metadata from a file and returns 3 arrays with variable names and their frequency
+###			in cluster 1 and 2.
+### - run_enrichment - runs an enrichment analysis usen given terms on a list of genes.
+### - read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
+### - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
+
+
+import string
+from io import StringIO
+from multiprocessing import Pool
 import time
-from io import StringIO, BytesIO
-from os import path
-from shutil import copyfile
-
-import celery.states
-import gseapy as gp
-import matplotlib.pyplot as plt
-import mygene
-import ndex2
-import networkx as nx
-import numpy as np
 import pandas as pd
-import plotly
-import plotly.graph_objs as go
-import seaborn as sns
-from celery import shared_task
-from django.conf import settings
-from django.core.files import File
-from django.utils import timezone
-from lifelines.statistics import logrank_test
-from networkx.readwrite import json_graph
-from pybiomart import Dataset
-
-from bigants import data_preprocessing
-from bigants import BiGAnts
-
-import apps.clustering.weighted_aco_lib as lib
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx.algorithms import bipartite
 
 flatten = lambda l: [item for sublist in l for item in sublist]
+import seaborn as sns;
+
 sns.set(color_codes=True)
+# from multiprocessing import Pool
+from numpy import linalg as LA
+# from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+import clustering.weighted_aco_lib as lib
+from shutil import copyfile
+import plotly
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly.io as pio
+import plotly.offline
+from datetime import datetime
+from networkx.readwrite import json_graph
+import json
+import imp
+import seaborn as sns;
 
-"""
-this file contains methods for all computationally intensive tasks needed for algorithm runs:
-- algo_output_task - this is needed for running the algorithm based on PPI and expression data. it outputs
-        arrays etc with the algorithm results.
-- script_output_task - this is needed for processing the outputs of algo_output_task to formats used
-        for data vizualisation. it writes heatmap, ppi graph, survival plot and metadata to
-        files and outputs links to those files (and an array with metadata). it takes a parameter
-        "session_id" that is included in the path to result files (e.g. "ppi_[SESSION_ID].json").
-        this parameter can be set to "none" if you do not want to use sessions. then it uses
-        static paths (e.g. "ppi.json") instead.
-- import_ndex - this tasks imports PPI files from NDEx based on the UUID and parses them to the correct
-        input format for the algorithm tasks.
-- check_input_files - this task checks given expression and PPI files if they contain data and returns an error
-        string if they do not.
-- preprocess_file - this task preprocesses an input expression data file and tries to find a column with
-        pre-defined clusters. if found, it is renamed to "disease_type".
-- preprocess_file_2 - the same as preprecess_file, but it returns a number of pre-defined clusters additionally.
-- preprocess_ppi_file - preprocesses the PPI file. it finds every row that contains two tab-separated integers (protein IDs)
-        and appends them to the output file.
-- preprocess_clinical_file - converts clinical file to TSV format.
-- list_metadata_from_file - reads metadata from a file and returns 3 arrays with variable names and their frequency
-        in cluster 1 and 2.
-- run_enrichment - runs an enrichment analysis usen given terms on a list of genes.
-- read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
-- read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
-"""
-
-
-# def check_input_files():
-#     err_str = check_input_files.delay(ppi_str, expr_str).get()
-#     if err_str:
-#         request.session['errors'] = err_str
-#         # Todo change error page to redirect to analysis? or results?
-#         # return render(request, 'clustering/errorpage.html', {'errors': err_str})
-#         return HttpResponseBadRequest(err_str)
-
-def parse_expression_data(option, expr_raw_str=None):
-    dataset_path = path.join(settings.PROJECT_ROOT, 'apps/clustering/datasets')
-
-    # Parse predefined data
-    if option == 'lung-cancer':
-        with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
-            expr_str = expr_file.read()
-
-        # This is for METADATA, recheck at it later
-        clinical_df = pd.read_csv(path.join(dataset_path, 'lung_cancer_clinical.csv'))
-        with open(path.join(dataset_path, 'lung_cancer_clinical.csv')) as clinical_file:
-            clinical_str = clinical_file.read()
-
-        survival_col_name = "disease free survival in months:ch1"
-        nbr_groups = 2
-
-    # Parse predefined data
-    elif option == 'brest-cancer':
-        with open(path.join(dataset_path, 'breast_cancer_expr.csv')) as expr_file:
-            expr_str = expr_file.read()
-
-        # This is for METADATA look at it later
-        clinical_df = pd.read_csv(path.join(dataset_path, 'breast_cancer_clinical.csv'))
-        with open(path.join(dataset_path, 'breast_cancer_clinical.csv')) as clinical_file:
-            clinical_str = clinical_file.read()
-
-        survival_col_name = "mfs (yr):ch1"
-        nbr_groups = 2
-
-    elif option == 'custom':
-        # expr_str, nbr_groups = preprocess_file_2(expr_raw_str)
-        expr_str = expr_raw_str
-        clinical_df = pd.DataFrame()
-        survival_col_name = None
-
-    return expr_str, clinical_df, survival_col_name
+sns.set(color_codes=True)
+import mygene
+from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
+import os
+from celery import shared_task
+import numpy as np
+import matplotlib.pyplot as plt
+from lifelines.statistics import logrank_test
+import math
+import gseapy as gp
+import seaborn as sns
+import pandas as pd
+from numpy import array
+import matplotlib.patches as mpatches
+import networkx as nx
+from pybiomart import Dataset
+from ndex2.nice_cx_network import NiceCXNetwork
+import ndex2.client as nc
+import ndex2
 
 
-def parse_ppi_data(option, ppi_raw_str=None):
-    if option == "apid":
-        ppi_str = import_ndex("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf")
-    elif option == "string":
-        ppi_str = import_ndex("275bd84e-3d18-11e8-a935-0ac135e8bacf")
-    elif option == "biogrid":
-        ppi_str = import_ndex("becec556-86d4-11e7-a10d-0ac135e8bacf")
-    elif option == "hprd":
-        ppi_str = import_ndex("1093e665-86da-11e7-a10d-0ac135e8bacf")
-    elif option == 'custom':
-        ppi_str = ppi_raw_str
-    return ppi_str
-
-
+# make an empty progress file and include session ID in the path
 @shared_task(name="make_empty_figure")
 def make_empty_figure(session_id):
-    """
-    Create static picutures of the progress?!
-    TODO Remove? Use bootstrap and js
-    :param session_id:
-    :return:
-    """
     fig = plt.figure(figsize=(10, 8))
     if (session_id == "none"):
-        plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress.png'))
+        plt.savefig("/code/clustering/static/progress.png")
         plt.close(fig)
     else:
-        plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress_" + session_id + ".png'))
+        plt.savefig("/code/clustering/static/userfiles/progress_" + session_id + ".png")
         plt.close(fig)
 
 
 # empty the log file (session ID in path)
 @shared_task(name="empty_log_file")
 def empty_log_file(session_id):
-    """
-    Some logfiles, presumably just to check the status, not detailed logs?!
-    TODO: Remove and use celary to give status?
-    :param session_id:
-    :return:
-    """
     if (session_id == "none"):
-        text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
+        text_file = open("/code/clustering/static/output_console.txt", "w")
         text_file.write("")
         text_file.close()
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt'))):
-            text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
+        if (os.path.isfile("/code/clustering/static/userfiles/output_console.txt")):
+            text_file = open("/code/clustering/static/output_console.txt", "w")
             text_file.write("")
             text_file.close()
     else:
-        text_file = open(
-            path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
+        text_file = open("/code/clustering/static/output_console_" + session_id + ".txt", "w")
         text_file.write("")
         text_file.close()
-        if (
-                os.path.isfile(
-                    path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt'))):
-            text_file = open(
-                path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
+        if (os.path.isfile("/code/clustering/static/userfiles/output_console_" + session_id + ".txt")):
+            text_file = open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w")
             text_file.write("")
             text_file.close()
 
 
 ########################################################
-#### writing and processing metadata, loading 
+#### writing and processing metadata, loading
 #### images etc...   ###################################
 #### the *actual* algorithm will be further
 #### down the page       ###############################
 ########################################################
 
+# preprocess file with metadata
 @shared_task(name="preprocess_clinical_file")
 def preprocess_clinical_file(clinical_str):
-    """
-    Create TSV from CSV (or do nothing)
-    TODO: MAKE EFFICIENT; REMOVE?!
-    :param clinical_str:
-    :return:
-    """
     if (len(clinical_str.split("\n")[0].split("\t")) > 2):
         return (clinical_str)
     elif ("," in clinical_str):
@@ -196,21 +130,12 @@ def preprocess_clinical_file(clinical_str):
 
 # preprocess PPI file
 @shared_task(name="preprocess_ppi_file")
-def preprocess_ppi_file(ppi_str):
-    """
-    Converts csv into tsv (see above, can be made more efficient)
-    Removes first row if it contains title columns ?!
-    Take only the right two columns
-    Misc??
-    TODO Refractor with pandas
-    :param ppi_str:
-    :return:
-    """
-    ppistr_split = ppi_str.split("\n")
+def preprocess_ppi_file(ppistr):
+    ppistr_split = ppistr.split("\n")
     # check if file is csv or tsv and convert it to tsv format
     if ("\t" not in ppistr_split[2]):
-        ppi_str = ppi_str.replace(",", "\t")
-        ppistr_split = ppi_str.split("\n")
+        ppistr = ppistr.replace(",", "\t")
+        ppistr_split = ppistr.split("\n")
     ppistr_split_new = []
     len_first_line = 0
     len_second_line = 0
@@ -232,11 +157,11 @@ def preprocess_ppi_file(ppi_str):
             # check if line contains two integers with protein IDs
             if (str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n", "")).isdigit()):
                 ppistr_split_new.append(line)
-    ppi_str = "\n".join(ppistr_split_new)
-    return (ppi_str)
+    ppistr = "\n".join(ppistr_split_new)
+    return (ppistr)
 
 
-# Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information	
+# Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information
 @shared_task(name="preprocess_file")
 def preprocess_file(expr_str):
     expr_str = expr_str.replace("cancer_type", "disease_type")
@@ -390,21 +315,23 @@ def preprocess_file_2(expr_str):
                             done1 = "true"
             ########################
 
-            return expr_str, nbr_col
+            expr_stringio = StringIO(expr_str)
+            exprdf = pd.read_csv(expr_stringio, sep='\t')
+            # return(expr_str,nbr_col)
+            return (expr_str, nbr_col)
 
 
 @shared_task(name="add_loading_image")
 def add_loading_image(session_id):
     if (session_id == "none"):
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
-            copyfile(path.join(settings.MEDIA_ROOT,
-                               'clustering/userfiles/loading.gif", "/code/clustering/static/loading_1.gif'))
+        if (os.path.isfile("/code/clustering/static/loading.gif")):
+            copyfile("/code/clustering/static/loading.gif", "/code/clustering/static/loading_1.gif")
         else:
             print("loading image not found")
     else:
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
-            copyfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'),
-                     path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
+        if (os.path.isfile("/code/clustering/static/loading.gif")):
+            copyfile("/code/clustering/static/loading.gif",
+                     "/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
         else:
             print("loading image not found")
 
@@ -412,13 +339,13 @@ def add_loading_image(session_id):
 @shared_task(name="remove_loading_image")
 def remove_loading_image(session_id):
     if (session_id == "none"):
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))
+        if (os.path.isfile("/code/clustering/static/loading_1.gif")):
+            os.unlink("/code/clustering/static/loading_1.gif")
     else:
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
+        if (os.path.isfile("/code/clustering/static/loading_1_" + session_id + ".gif")):
+            os.unlink("/code/clustering/static/loading_1_" + session_id + ".gif")
+        if (os.path.isfile("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")):
+            os.unlink("/code/clustering/static/userfiles/loading_1_" + session_id + ".gif")
 
 
 ##################################################################
@@ -462,93 +389,144 @@ def list_metadata_from_file(path):
 
 
 ##################################################################################################
-# Run algorithm and then make plots
+######### running the algorithm - part 1 #########################################################
 ##################################################################################################
-# def run_algorithm(lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-#                   epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups, clinical_str, survival_col_name,
-#
 
-# (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1_algo_id, group1_ids, group2_ids, jac_1,
-# jac_2) = algo_output_task(1, lg_min, lg_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-# epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups, job)
-#
-# (ret_metadata, path_metadata, p_val) = script_output_task(T,
-# row_colors,
-# col_colors,
-# G2,
-# means,
-# genes_all,
-# adj_list,
-# genes1_algo_id,
-# group1_ids,
-# group2_ids,
-# clinical_str,
-# jac_1,
-# jac_2,
-# survival_col_name,
-# clinical_df,
-# session_id,
-# job)
-#
-# job.finished_time = timezone.now()
-# job.status = celery.states.SUCCESS
-# job.save()
-@shared_task(name="run_algorithm")
-def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, log2, size, L_g_min,
-                  L_g_max, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6, clusters=2,
-                  cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False):
-    # ========== Preprocess data and run algorithm ==========
-    # --- Step 1: Parse the strings or files and create StringIO (file object) again
-    expr_str, clinical_df, survival_col_name = parse_expression_data(expr_data_selection, expr_data_str)
-    expression_file = StringIO(expr_str)
-    ppi_file = StringIO(parse_ppi_data(ppi_network_selection, ppi_network_str))
 
-    # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
-    try:
-        expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2, size)
-    except AssertionError:
-        # TODO HANDLE BETTER
-        print('Houston, we have a problem.')
+## method for more than 2 pre-defined clusters, uses session IDs
+@shared_task(name="algo_output_task")
+def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap, epsilon, hi_sig, pher_sig,
+                     session_id, size, clusters_param):
+    col = "disease_type"
+    log2 = True
+    expr_stringio = StringIO(expr_str)
+    exprdf = pd.read_csv(expr_stringio, sep='\t')
+    # check if string contains negative numbers.
+    if ("-" in expr_str.split("\n")[2]):
+        print("expression data are logarithmized")
+        log2_2 = False
+    else:
+        print("expression data not logarithmized")
+        log2_2 = True
+    ### this checks whether the expression data contain negative numbers
+    for i in range(2, 4):
+        if (log2_2 and i > len(exprdf.columns)):
+            # check only first 1000 lines of column 2 and 3
+            for j in range(1, min(len(exprdf.index) - 1, 1000)):
+                if (log2_2 and str(exprdf.columns[i]) != "disease_type"):
+                    # make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
+                    if (exprdf.iloc[[j], [i]].to_string().__contains__('-') and str(exprdf.iloc[j][i]).replace("-", "",
+                                                                                                               1).replace(
+                            ".", "", 1).isdigit()):
+                        print("expression data are logarithmized")
+                        log2_2 = False
+    if (session_id == "none"):
+        with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+            text_file.write("Your files are being processed...")
+        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+            text_file.write("Your files are being processed...")
+    else:
+        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+            text_file.write("Your files are being processed...")
+        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+            text_file.write("Your files are being processed...")
+    # B,G,H,n,m,GE,A_g,group1,group2,labels_B,rev_labels_B,val1,val2 = lib.aco_preprocessing(fh, prot_fh, col,log2 = True, gene_list = None, size = size, sample= None)
+    if (clusters_param == 2):
+        B, G, H, n, m, GE, A_g, group1, group2, labels_B, rev_labels_B, val1, val2, group1_ids, group2_ids = lib.aco_preprocessing_strings(
+            expr_str, ppi_str, col, log2=log2_2, gene_list=None, size=int(size), sample=None)
+    else:
+        B, G, H, n, m, GE, A_g, labels_B, rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,
+                                                                                         log2=log2_2, gene_list=None,
+                                                                                         size=size, sample=None)
+    if (session_id == "none"):
+        with open(("/code/clustering/static/userfiles/output_console.txt"), "w") as text_file:
+            text_file.write("Starting model run...")
+    else:
+        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+            text_file.write("Starting model run...")
+    print("How many genes you want per cluster (minimum):")
+    # L_g_min = int(input())
+    print("How many genes you want per cluster (maximum):")
+    # L_g_max = int(input())
+    imp.reload(lib)
 
-    # --- Step 2: Run the clustering algorithm (BiGAnts)
-    model = BiGAnts(expr, G, L_g_min, L_g_max)
+    # =============================================================================
+    # #GENERAL PARAMETERS:
+    # =============================================================================
+    clusters = clusters_param  # other options are currently unavailable
+    K = int(nbr_ants)  # number of ants
+    eps = float(epsilon)  # stopping criteria: score_max-score_av<eps
+    b = float(hi_sig)  # HI significance
+    evaporation = float(evap)
+    a = float(pher_sig)  # pheramone significance
+    times = int(nbr_iter)  # max amount of iterations
+    # =============================================================================
+    # #NETWORK SIZE PARAMETERS:
+    # =============================================================================
+    cost_limit = 20  # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
 
-    print(f'Execute model.run')
-    # solution, score = model.run_search(max_iter=1)
-    max_iter = 1  # TODO REMOVE LATER
-    solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
-                                max_iter, opt, show_pher, show_plot, save, show_nets)
+    th = 1  # the coefficient to define the search radipus which is supposed to be bigger than
+    # mean(heruistic_information[patient]+th*std(heruistic_information[patient])
+    # bigger th - less genes are considered (can lead to empty paths if th is too high)
+    # will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
 
+    if (session_id == "none"):
+        with open(("/code/clustering/static/output_console.txt"), "w") as text_file:
+            text_file.write("Progress of the algorithm is shown below...")
+    else:
+        with open(("/code/clustering/static/userfiles/output_console_" + session_id + ".txt"), "w") as text_file:
+            text_file.write("Progress of the algorithm is shown below...")
+    start = time.time()
+    # session id is "none" if it is not given
+    solution, t_best, sc, conv = lib.ants_new(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max,
+                                              eps, times, session_id, opt=None, pts=False, show_pher=False,
+                                              show_plot=True, print_runs=False, save=None, show_nets=False)
+    end = time.time()
+    n_proc = os.getenv("NBR_PROCESSES", '4')
+    lib.ants_manager(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max, eps, times, session_id,
+                     n_proc, opt=None, pts=False, show_pher=True, show_plot=True, save=None, show_nets=False)
+    print("######################################################################")
+    print("RESULTS ANALYSIS")
+    print("total time " + str(round((end - start) / 60, 2)) + " minutes")
+    print("jaccard indexes:")
+    jac_1_ret = ""
+    jac_2_ret = ""
+    if (clusters_param == 2):
+        jacindices = lib.jac_matrix(solution[1], [group1, group2])
+        print(jacindices)
+        jac_1_ret = jacindices[0]
+        jac_2_ret = jacindices[1]
+        if lib.jac(group1, solution[1][0]) > lib.jac(group1, solution[1][1]):
+            values = [val1, val2]
+        else:
+            values = [val2, val1]
     # mapping to gene names (for now with API)
     mg = mygene.MyGeneInfo()
     new_genes = solution[0][0] + solution[0][1]
-    new_genes_entrez = [labels[x] for x in new_genes]
+    new_genes_entrez = [labels_B[x] for x in new_genes]
     out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
     mapping = dict()
     for line in out:
         if ("symbol" in line):
-            mapping[rev_labels[line["query"]]] = line["symbol"]
-
-    # ========== Plotting networks ==========
+            mapping[rev_labels_B[line["query"]]] = line["symbol"]
+    ###m plotting networks
     new_genes1 = [mapping[key] for key in mapping if key in solution[0][0]]
     new_genes2 = [mapping[key] for key in mapping if key in solution[0][1]]
 
-    genes1_algo_id, genes2_algo_id = solution[0]
-    patients1_algo_id, patients2_algo_id = solution[1]
+    genes1, genes2 = solution[0]
+    patients1, patients2 = solution[1]
     patients1_ids = []
     patients2_ids = []
-    for elem in patients1_algo_id:
-        if (elem in labels):
-            patients1_ids.append(labels[elem])
-    for elem in patients2_algo_id:
-        if (elem in labels):
-            patients2_ids.append(labels[elem])
-    means1 = [np.mean(expr[patients1_algo_id].loc[gene]) - np.mean(expr[patients2_algo_id].loc[gene]) for gene in
-              genes1_algo_id]
-    means2 = [np.mean(expr[patients1_algo_id].loc[gene]) - np.mean(expr[patients2_algo_id].loc[gene]) for gene in
-              genes2_algo_id]
+    for elem in patients1:
+        if (elem in labels_B):
+            patients1_ids.append(labels_B[elem])
+    for elem in patients2:
+        if (elem in labels_B):
+            patients2_ids.append(labels_B[elem])
+    means1 = [np.mean(GE[patients1].loc[gene]) - np.mean(GE[patients2].loc[gene]) for gene in genes1]
+    means2 = [np.mean(GE[patients1].loc[gene]) - np.mean(GE[patients2].loc[gene]) for gene in genes2]
 
-    G_small = nx.subgraph(G, genes1_algo_id + genes2_algo_id)
+    G_small = nx.subgraph(G, genes1 + genes2)
     G_small = nx.relabel_nodes(G_small, mapping)
 
     plt.figure(figsize=(15, 15))
@@ -557,12 +535,16 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     vmax = 2
     pos = nx.spring_layout(G_small)
     ec = nx.draw_networkx_edges(G_small, pos)
-
-    nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
-                                 vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap)
-    nc2 = nx.draw_networkx_nodes(G_small, nodelist=new_genes2, pos=pos, node_color=means2, node_size=600, alpha=1.0,
-                                 vmin=vmin, vmax=vmax, node_shape="o", cmap=cmap)
-
+    if (clusters_param == 2):
+        nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
+                                     vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap, label=values[0])
+        nc2 = nx.draw_networkx_nodes(G_small, nodelist=new_genes2, pos=pos, node_color=means2, node_size=600, alpha=1.0,
+                                     vmin=vmin, vmax=vmax, node_shape="o", cmap=cmap, label=values[1])
+    else:
+        nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
+                                     vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap)
+        nc2 = nx.draw_networkx_nodes(G_small, nodelist=new_genes2, pos=pos, node_color=means2, node_size=600, alpha=1.0,
+                                     vmin=vmin, vmax=vmax, node_shape="o", cmap=cmap)
     nx.draw_networkx_labels(G_small, pos, font_size=15, font_weight='bold')
     ret2 = means1 + means2
     ret3 = new_genes1 + new_genes2
@@ -587,324 +569,62 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     grouping_p = []
     grouping_g = []
-    p_num = list(expr.columns)
-    expr_small = expr.T[genes1_algo_id + genes2_algo_id]
-    expr_small.rename(columns=mapping, inplace=True)
-    expr_small = expr_small.T
-    g_num = list(expr_small.index)
-
-    col_colors = ""
-    row_colors = ""
-    for g in g_num:
-        if g in new_genes1:
-            grouping_g.append("cluster1")
-        elif g in new_genes2:
-            grouping_g.append("cluster2")
-        else:
-            grouping_g.append(3)
-    grouping_g = pd.DataFrame(grouping_g, index=g_num)
-    species = grouping_g[grouping_g[0] != 3][0]
-    lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
-    col_colors = species.map(lut)
-
-    with BytesIO() as output:
-        plt.savefig(output)
-        job.ppi_png.save(f'ntw_{job.job_id}.png', File(output))
-
+    p_num = list(GE.columns)
+    GE_small = GE.T[genes1 + genes2]
+    GE_small.rename(columns=mapping, inplace=True)
+    GE_small = GE_small.T
+    g_num = list(GE_small.index)
+    if (clusters_param == 2):
+        for g in g_num:
+            if g in new_genes1:
+                grouping_g.append(values[0])
+            elif g in new_genes2:
+                grouping_g.append(values[1])
+            else:
+                grouping_g.append(3)
+        for p in p_num:
+            if p in solution[1][0]:
+                grouping_p.append(values[0])
+            else:
+                grouping_p.append(values[1])
+        grouping_p = pd.DataFrame(grouping_p, index=p_num)
+        grouping_g = pd.DataFrame(grouping_g, index=g_num)
+        species = grouping_g[grouping_g[0] != 3][0]
+        lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
+        col_colors = species.map(lut)
+        species = grouping_p[0]
+        lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
+        row_colors = species.map(lut)
+    else:
+        col_colors = ""
+        row_colors = ""
+        for g in g_num:
+            if g in new_genes1:
+                grouping_g.append("cluster1")
+            elif g in new_genes2:
+                grouping_g.append("cluster2")
+            else:
+                grouping_g.append(3)
+        grouping_g = pd.DataFrame(grouping_g, index=g_num)
+        species = grouping_g[grouping_g[0] != 3][0]
+        lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
+        col_colors = species.map(lut)
+    if (session_id == "none"):
+        plt.savefig("/code/clustering/static/userfiles/ntw.png")
+        plt.savefig("/code/clustering/static/ntw.png")
+    else:
+        plt.savefig("/code/clustering/static/userfiles/ntw_" + session_id + ".png")
     plt.clf()
-
-    script_output_task(expr_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids,
-                       patients2_ids, clinical_df, survival_col_name, job)
-
-    job.finished_time = timezone.now()
-    job.status = celery.states.SUCCESS
-    job.save()
-
-
-#
-
-##################################################################################################
-######### running the algorithm - part 1 #########################################################
-##################################################################################################
-
-# @shared_task(name="algo_output_task")
-# TODO Add log2
-
-#
-# def algo_output_task(s, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap, epsilon, hi_sig, pher_sig,
-#                      session_id, size, clusters_param, job, log2):
-#     """
-#     method for more than 2 pre-defined clusters, uses session IDs
-#     :param s:
-#     :param L_g_min:
-#     :param L_g_max:
-#     :param expr_str:
-#     :param ppi_str:
-#     :param nbr_iter:
-#     :param nbr_ants:
-#     :param evap:
-#     :param epsilon:
-#     :param hi_sig:
-#     :param pher_sig:
-#     :param session_id:
-#     :param size:
-#     :param clusters_param:
-#     :return:
-#     """
-#
-#     col = "disease_type"
-#     not_log = True
-#     expr_stringio = StringIO(expr_str)
-#     expr_df = pd.read_csv(expr_stringio, sep='\t')
-#
-#     # check if string contains negative numbers.
-#     # USED FOR: setting not_log (contains negative numbers => numbers are logarithmic
-#     if ("-" in expr_str.split("\n")[2]):
-#         print("expression data are logarithmized")
-#         not_log = False
-#     else:
-#         print("expression data not logarithmized")
-#
-#     # this checks whether the expression data contain negative numbers
-#     # USED FOR: setting not_log (contains negative numbers => numbers are logarithmic
-#     for i in range(2, 4):
-#         if (not_log and i > len(expr_df.columns)):
-#             # check only first 1000 lines of column 2 and 3
-#             for j in range(1, min(len(expr_df.index) - 1, 1000)):
-#                 if (not_log and str(expr_df.columns[i]) != "disease_type"):
-#                     # make integer from negative number (e.g. -1.0 -> 10), check if it is a number and check if number is negative
-#                     if (expr_df.iloc[[j], [i]].to_string().__contains__('-') and str(expr_df.iloc[j][i]).replace("-",
-#                                                                                                                  "",
-#                                                                                                                  1).replace(
-#                         ".", "", 1).isdigit()):
-#                         print("expression data are logarithmized")
-#                         not_log = False
-#
-#     # USED FOR: don't know, remove?
-#     """
-#     if (session_id == "none"):
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt"), "w')) as text_file:
-#             text_file.write("Your files are being processed...")
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt"), "w')) as text_file:
-#             text_file.write("Your files are being processed...")
-#     else:
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
-#             text_file.write("Your files are being processed...")
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt"), "w')) as text_file:
-#             text_file.write("Your files are being processed...")
-#     """
-#
-#     # Preprocess everything?
-#     # RUN THE ACTUAL TASK
-#     if (clusters_param == 2):
-#         # B, G, H, n, m, GE, A_g, group1, group2, labels_B, rev_labels_B, val1, val2, group1_ids, group2_ids = lib.aco_preprocessing_strings(
-#         #     expr_str, ppi_str, col, log2=not_log, gene_list=None, size=int(size), sample=None)
-#
-#         expression_file = StringIO(expr_str)
-#         ppi_file = StringIO(ppi_str)
-#
-#         expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_str, log2, int(size))
-#     else:
-#         B, G, H, n, m, GE, A_g, labels_B, rev_labels_B = lib.aco_preprocessing_strings_2(expr_str, ppi_str, col,
-#                                                                                          log2=not_log, gene_list=None,
-#                                                                                          size=size, sample=None)
-#
-#     # USED FOR: don't know? remove?
-#     """
-#     if (session_id == "none"):
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt"), "w')) as text_file:
-#             text_file.write("Starting model run...")
-#     else:
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
-#             text_file.write("Starting model run...")
-#     """
-#     print("How many genes you want per cluster (minimum):")
-#     # L_g_min = int(input())
-#     print("How many genes you want per cluster (maximum):")
-#     # L_g_max = int(input())
-#     imp.reload(lib)
-#
-#     # =============================================================================
-#     # GENERAL PARAMETERS:
-#     # =============================================================================
-#     clusters = clusters_param  # other options are currently unavailable
-#     K = int(nbr_ants)  # number of ants
-#     eps = float(epsilon)  # stopping criteria: score_max-score_av<eps
-#     b = float(hi_sig)  # HI significance
-#     evaporation = float(evap)
-#     a = float(pher_sig)  # pheramone significance
-#     times = int(nbr_iter)  # max amount of iterations
-#     # =============================================================================
-#     # NETWORK SIZE PARAMETERS:
-#     # =============================================================================
-#     cost_limit = 20  # will be determined authmatically soon. Aproximately the rule is that cost_limit = (geneset size)/100 but minimum  3
-#
-#     th = 1  # the coefficient to define the search radipus which is supposed to be bigger than
-#     # mean(heruistic_information[patient]+th*std(heruistic_information[patient])
-#     # bigger th - less genes are considered (can lead to empty paths if th is too high)
-#     # will be also etermined authmatically soon. Right now the rule is such that th = 1 for genesets >1000
-#
-#     # USED FOR: don't know? remove?
-#     """
-#     if (session_id == "none"):
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt"), "w')) as text_file:
-#             text_file.write("Progress of the algorithm is shown below...")
-#     else:
-#         with open((path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt"), "w')) as text_file:
-#             text_file.write("Progress of the algorithm is shown below...")
-#     """
-#
-#     start = time.time()
-#
-#     # session id is "none" if it is not given
-#     solution, t_best, sc, conv = lib.ants_new(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max,
-#                                               eps, times, session_id, opt=None, pts=False, show_pher=False,
-#                                               show_plot=True, print_runs=False, save=None, show_nets=False)
-#     end = time.time()
-#     n_proc = os.getenv("NBR_PROCESSES", '4')
-#     lib.ants_manager(a, b, n, m, H, GE, G, 2, cost_limit, K, evaporation, th, L_g_min, L_g_max, eps, times, session_id,
-#                      n_proc, opt=None, pts=False, show_pher=True, show_plot=True, save=None, show_nets=False)
-#
-#     print("######################################################################")
-#     print("RESULTS ANALYSIS")
-#     print("total time " + str(round((end - start) / 60, 2)) + " minutes")
-#     print("jaccard indexes:")
-#     jac_1_ret = ""
-#     jac_2_ret = ""
-#     if (clusters_param == 2):
-#         jacindices = lib.jac_matrix(solution[1], [group1, group2])
-#         print(jacindices)
-#         jac_1_ret = jacindices[0]
-#         jac_2_ret = jacindices[1]
-#         if lib.jac(group1, solution[1][0]) > lib.jac(group1, solution[1][1]):
-#             values = [val1, val2]
-#         else:
-#             values = [val2, val1]
-#     # mapping to gene names (for now with API)
-#     mg = mygene.MyGeneInfo()
-#     new_genes = solution[0][0] + solution[0][1]
-#     new_genes_entrez = [labels_B[x] for x in new_genes]
-#     out = mg.querymany(new_genes_entrez, scopes='entrezgene', fields='symbol', species='human')
-#     mapping = dict()
-#     for line in out:
-#         if ("symbol" in line):
-#             mapping[rev_labels_B[line["query"]]] = line["symbol"]
-#     ###m plotting networks
-#     new_genes1 = [mapping[key] for key in mapping if key in solution[0][0]]
-#     new_genes2 = [mapping[key] for key in mapping if key in solution[0][1]]
-#
-#     genes1, genes2 = solution[0]
-#     patients1, patients2 = solution[1]
-#     patients1_ids = []
-#     patients2_ids = []
-#     for elem in patients1:
-#         if (elem in labels_B):
-#             patients1_ids.append(labels_B[elem])
-#     for elem in patients2:
-#         if (elem in labels_B):
-#             patients2_ids.append(labels_B[elem])
-#     means1 = [np.mean(GE[patients1].loc[gene]) - np.mean(GE[patients2].loc[gene]) for gene in genes1]
-#     means2 = [np.mean(GE[patients1].loc[gene]) - np.mean(GE[patients2].loc[gene]) for gene in genes2]
-#
-#     G_small = nx.subgraph(G, genes1 + genes2)
-#     G_small = nx.relabel_nodes(G_small, mapping)
-#
-#     plt.figure(figsize=(15, 15))
-#     cmap = plt.cm.RdYlGn
-#     vmin = -2
-#     vmax = 2
-#     pos = nx.spring_layout(G_small)
-#     ec = nx.draw_networkx_edges(G_small, pos)
-#     if (clusters_param == 2):
-#         nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
-#                                      vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap, label=values[0])
-#         nc2 = nx.draw_networkx_nodes(G_small, nodelist=new_genes2, pos=pos, node_color=means2, node_size=600, alpha=1.0,
-#                                      vmin=vmin, vmax=vmax, node_shape="o", cmap=cmap, label=values[1])
-#     else:
-#         nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
-#                                      vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap)
-#         nc2 = nx.draw_networkx_nodes(G_small, nodelist=new_genes2, pos=pos, node_color=means2, node_size=600, alpha=1.0,
-#                                      vmin=vmin, vmax=vmax, node_shape="o", cmap=cmap)
-#     nx.draw_networkx_labels(G_small, pos, font_size=15, font_weight='bold')
-#     ret2 = means1 + means2
-#     ret3 = new_genes1 + new_genes2
-#     adjlist = []
-#     for line in nx.generate_edgelist(G_small, data=False):
-#         lineSplit = line.split()
-#         adjlist.append([lineSplit[0], lineSplit[1]])
-#
-#     plt.legend(frameon=True)
-#     try:
-#         plt.colorbar(nc1)
-#     except:
-#         print("no colorbar found")
-#     plt.axis('off')
-#     ### plotting expression data
-#     plt.rc('font', size=30)  # controls default text sizes
-#     plt.rc('axes', titlesize=20)  # fontsize of the axes title
-#     plt.rc('axes', labelsize=20)  # fontsize of the x and y labels
-#     plt.rc('xtick', labelsize=15)  # fontsize of the tick labels
-#     plt.rc('ytick', labelsize=10)  # fontsize of the tick labels
-#     plt.rc('legend', fontsize=30)
-#
-#     grouping_p = []
-#     grouping_g = []
-#     p_num = list(GE.columns)
-#     GE_small = GE.T[genes1 + genes2]
-#     GE_small.rename(columns=mapping, inplace=True)
-#     GE_small = GE_small.T
-#     g_num = list(GE_small.index)
-#     if (clusters_param == 2):
-#         for g in g_num:
-#             if g in new_genes1:
-#                 grouping_g.append(values[0])
-#             elif g in new_genes2:
-#                 grouping_g.append(values[1])
-#             else:
-#                 grouping_g.append(3)
-#         for p in p_num:
-#             if p in solution[1][0]:
-#                 grouping_p.append(values[0])
-#             else:
-#                 grouping_p.append(values[1])
-#         grouping_p = pd.DataFrame(grouping_p, index=p_num)
-#         grouping_g = pd.DataFrame(grouping_g, index=g_num)
-#         species = grouping_g[grouping_g[0] != 3][0]
-#         lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
-#         col_colors = species.map(lut)
-#         species = grouping_p[0]
-#         lut = {values[0]: '#4FB6D3', values[1]: '#22863E'}
-#         row_colors = species.map(lut)
-#     else:
-#         col_colors = ""
-#         row_colors = ""
-#         for g in g_num:
-#             if g in new_genes1:
-#                 grouping_g.append("cluster1")
-#             elif g in new_genes2:
-#                 grouping_g.append("cluster2")
-#             else:
-#                 grouping_g.append(3)
-#         grouping_g = pd.DataFrame(grouping_g, index=g_num)
-#         species = grouping_g[grouping_g[0] != 3][0]
-#         lut = {"cluster1": '#4FB6D3', "cluster2": '#22863E'}
-#         col_colors = species.map(lut)
-#
-#     with BytesIO() as output:
-#         plt.savefig(output)
-#         job.ppi_png.save(f'ntw_{session_id}.png', File(output))
-#
-#     plt.clf()
-#     plt.boxplot(conv / 2, vert=True, patch_artist=True)  # vertical box alignment  # will be used to label x-ticks
-#     plt.xlabel("iterations")
-#     plt.ylabel("score per subnetwork")
-#
-#     with BytesIO() as output:
-#         plt.savefig(output)
-#         job.convergence_png.save(f'conv_{session_id}.png', File(output))
-#
-#     return (GE_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids, patients2_ids,
-#             jac_1_ret, jac_2_ret)
+    plt.boxplot(conv / 2, vert=True, patch_artist=True)  # vertical box alignment  # will be used to label x-ticks
+    plt.xlabel("iterations")
+    plt.ylabel("score per subnetwork")
+    if (session_id == "none"):
+        plt.savefig("/code/clustering/static/userfiles/conv.png")
+        plt.savefig("/code/clustering/static/conv.png")
+    else:
+        plt.savefig("/code/clustering/static/userfiles/conv_" + session_id + ".png")
+    return (GE_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids, patients2_ids,
+            jac_1_ret, jac_2_ret)
 
 
 ##########################################################
@@ -913,11 +633,9 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
 
 ### Processing of algorithm output with using session ID
-# @shared_task(name="script_output_task")
+@shared_task(name="script_output_task")
 def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlist, genes1, group1_ids, group2_ids,
-                       clinical_df, survival_col, job):
-    session_id = str(job.job_id)
-
+                       clinicalstr, jac_1_ret, jac_2_ret, survival_col, clinicaldf, session_id):
     # define colors depending on z-score differences of genes in graph
     def color_for_graph(v):
         cmap_custom = {-4: 'rgb(255, 0, 0)', -3: 'rgb(255, 153, 51)', -2: 'rgb(255, 204, 0)', -1: 'rgb(255, 255, 0)',
@@ -928,14 +646,13 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             v_int = -4
         if (v > 3):
             v_int = 3
-        return cmap_custom[v_int]
+        return (cmap_custom[v_int])
 
     nodecolors = []
     genes = {}
     G_list = list(G2.nodes())
     ctr = 0
     G = nx.Graph()
-
     # make node objects for genes
     for G_tmp in genes_all:
         genes.update({G_tmp: 0})
@@ -971,14 +688,12 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     jsn44 = jsn33.replace('Label', 'label')
     jsn55 = jsn44.replace('bels', 'bel')
     jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},', '')
-
-    # json_path = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/ppi_' + session_id + '.json')
-    # with open(json_path, "w") as text_file:
-    #     text_file.write(jsn3)
-    with StringIO() as output:
-        output.write(jsn3)
-        job.ppi_json.save(f'ppi_{session_id}.json', File(output))
-
+    if (session_id == "none"):
+        json_path = "/code/clustering/static/userfiles/ppi.json"
+    else:
+        json_path = "/code/clustering/static/userfiles/ppi_" + session_id + ".json"
+    with open(json_path, "w") as text_file:
+        text_file.write(jsn3)
     colordict = {0: '#BB0000', 1: '#0000BB'}
     # make heatmap (include pre-defined clusters if they were given)
     if (isinstance(col_colors1, str)):
@@ -991,24 +706,25 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     ax = g.ax_heatmap
     ax.set_xlabel("Genes")
     ax.set_ylabel("Patients")
-
-    with BytesIO() as output:
-        plt.savefig(output)
-        job.heatmap_png.save(f'heatmap_{session_id}.png', File(output))
-
+    # do not include session ID in path if no session ID was given
+    if (session_id == "none"):
+        path_heatmap = "/code/clustering/static/userfiles/heatmap.png"
+    else:
+        path_heatmap = "/code/clustering/static/userfiles/heatmap_" + session_id + ".png"
+    plt.savefig(path_heatmap)
     plt.clf()
     # Array PatientData is for storing survival information
     patientData = {}
     # write lists of genes in files, needed for enrichment analysis
     if (session_id == "none"):
-        path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist.txt')
-        path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1.txt')
-        path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2.txt')
+        path_genelist = "/code/clustering/static/userfiles/genelist.txt"
+        path_genelist_1 = "/code/clustering/static/userfiles/genelist_1.txt"
+        path_genelist_2 = "/code/clustering/static/userfiles/genelist_2.txt"
     else:
 
-        path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_' + session_id + '.txt')
-        path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1_' + session_id + '.txt')
-        path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2_' + session_id + '.txt')
+        path_genelist = "/code/clustering/static/userfiles/genelist_" + session_id + ".txt"
+        path_genelist_1 = "/code/clustering/static/userfiles/genelist_1_" + session_id + ".txt"
+        path_genelist_2 = "/code/clustering/static/userfiles/genelist_2_" + session_id + ".txt"
     with open(path_genelist, "w") as text_file_4:
         for i in G_list:
             text_file_4.write(str(i) + "\n")
@@ -1024,51 +740,65 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                 text_file_6.write(str(i) + "\n")
     text_file_6.close()
     if (session_id == "none"):
-        path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata.txt')
+        path_metadata = "/code/clustering/static/userfiles/metadata.txt"
     else:
-        path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata_' + session_id + '.txt')
+        path_metadata = "/code/clustering/static/userfiles/metadata_" + session_id + ".txt"
     # if no metadata given, write an empty metadata file
     p_val = ""
-
-    # fill empty metadata arrays
-    ret_metadata = []
-    ret_metadata_1 = {}
-    ret_metadata_2 = {}
-    ret_metadata_3 = {}
-    ret_metadata.append(ret_metadata_1)
-    ret_metadata.append(ret_metadata_2)
-    ret_metadata.append(ret_metadata_3)
-    patientids_metadata = []
-
-    if not clinical_df.empty:
+    if (clinicalstr == "empty"):
+        print("no clinical data")
+        ret_metadata = []
+        text_file_3 = open(path_metadata, "w")
+        text_file_3.write("NA")
+        text_file_3.close()
+        plot_div = ""
+        if (session_id == "none"):
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+        else:
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+        with open(output_plot_path, "w") as text_file_2:
+            text_file_2.write("")
+        output_plot_path = "empty"
+        # fill empty metadata arrays
+        ret_metadata = []
+        ret_metadata_1 = {}
+        ret_metadata_2 = {}
+        ret_metadata_3 = {}
+        ret_metadata.append(ret_metadata_1)
+        ret_metadata.append(ret_metadata_2)
+        ret_metadata.append(ret_metadata_3)
+        patientids_metadata = []
+    else:
+        # read clinical data line by line, read title column in separate array
+        clinicalLines = clinicalstr.split("\n")
+        title_col = clinicalLines[0].split(",")
         # assign some default value to survival col nbr (for the case that no survival column exists)
         survival_col_nbr = 64
         # replace all type of NA in dataframe by standard pandas-NA
-        clinical_df.replace(['NaN', 'nan', '?', '--'], ['NA', 'NA', 'NA', 'NA'], inplace=True)
-        clinical_df.replace(['NTL'], ['NA'], inplace=True)
-        clinical_df.replace(['na'], ['NA'], inplace=True)
-        clinicaldf_col_names = list(clinical_df.columns)
-        patientids_metadata = [str(i) for i in clinical_df.iloc[:, 0].values.tolist()]
+        clinicaldf.replace(['NaN', 'nan', '?', '--'], ['NA', 'NA', 'NA', 'NA'], inplace=True)
+        clinicaldf.replace(['NTL'], ['NA'], inplace=True)
+        clinicaldf.replace(['na'], ['NA'], inplace=True)
+        clinicaldf_col_names = list(clinicaldf.columns)
+        patientids_metadata = [str(i) for i in clinicaldf.iloc[:, 0].values.tolist()]
         # get patient ids either from first column or from index, add one empty element at the beginning of the column names
-        if ("Unnamed" in "\t".join(list(clinical_df.columns))):
+        if ("Unnamed" in "\t".join(list(clinicaldf.columns))):
             clinicaldf_col_names_temp = ['empty']
             clinicaldf_col_names_new = clinicaldf_col_names_temp + clinicaldf_col_names
-            clinical_df.columns = list(clinicaldf_col_names_new[:-1])
+            clinicaldf.columns = list(clinicaldf_col_names_new[:-1])
         if ("GSM" not in patientids_metadata[0]):
-            patientids_metadata = list(clinical_df.index)
+            patientids_metadata = list(clinicaldf.index)
         param_names = []
         param_values = []
         param_cols = []
-
     # if clinical data were uploaded, more than 1 patient exists and patient IDs from metadata and expression data overlap
-    if not (((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(
+    if not (clinicalstr == "empty" or ((len(group1_ids) + len(group2_ids)) < 1) or set(patientids_metadata).isdisjoint(
             group1_ids)):
         patients_0 = []
         patients_1 = []
         group1_has = []
         group2_has = []
         # iterate over columns of metadata, get all unique entries
-        for column_name, column in clinical_df.transpose().iterrows():
+        for column_name, column in clinicaldf.transpose().iterrows():
             column.fillna("NA", inplace=True)
             coluniq = column.unique()
             # replace all instances of NA by pandas-standard NA
@@ -1189,18 +919,18 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                     jaccards_1.append(lib.jac(group1_has[i], patients_0[i]))
                     jaccards_2.append(lib.jac(group2_has[i], patients_1[i]))
         # get list of patient ids
-        if ("GSM" not in list(clinical_df.iloc[:, 0])[1]):
-            patient_id_list = list(clinical_df.index)
+        if ("GSM" not in list(clinicaldf.iloc[:, 0])[1]):
+            patient_id_list = list(clinicaldf.index)
         else:
-            patient_id_list = list(clinical_df.iloc[:, 0])
+            patient_id_list = list(clinicaldf.iloc[:, 0])
         # check if there is a column with survival data
-        if (survival_col in list(clinical_df.columns)):
-            survival_col_nbr = list(clinical_df.columns).index(survival_col)
+        if (survival_col in list(clinicaldf.columns)):
+            survival_col_nbr = list(clinicaldf.columns).index(survival_col)
             print("column with survival data found")
-            clinical_df.iloc[:, survival_col_nbr].fillna("NA", inplace=True)
-            survivalcol_list = list(clinical_df.iloc[:, survival_col_nbr])
-            clinical_df.iloc[:, survival_col_nbr].fillna("NA", inplace=True)
-            survivalcol_list = list(clinical_df.iloc[:, survival_col_nbr])
+            clinicaldf.iloc[:, survival_col_nbr].fillna("NA", inplace=True)
+            survivalcol_list = list(clinicaldf.iloc[:, survival_col_nbr])
+            clinicaldf.iloc[:, survival_col_nbr].fillna("NA", inplace=True)
+            survivalcol_list = list(clinicaldf.iloc[:, survival_col_nbr])
         # give empty survival lists if no data given
         else:
             survivalcol_list = []
@@ -1231,7 +961,7 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             elif key in group2_ids:
                 survival_2.append(float(patientData[key]))
         # calculate p-value for survival times
-        if (survival_col in list(clinical_df.columns) and len(survival_1) > 0 and len(survival_2) > 0):
+        if (survival_col in list(clinicaldf.columns) and len(survival_1) > 0 and len(survival_2) > 0):
             surv_results = logrank_test(survival_1, survival_2)
             p_val = surv_results.p_value
         else:
@@ -1319,13 +1049,50 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                           title='percentage of patients'))
         fig = dict(data=surv_data_for_graph, layout=layout)
         plot_div = plotly.offline.plot(fig, auto_open=False, output_type='div')
-
-        if survival_col in list(clinical_df.columns) and len(survival_1) != 0 and errstr == "":
-            with StringIO() as output:
-                output.write(plot_div)
-                job.survival_plotly.save(f'plotly_{session_id}.html', File(output))
-
-    return ret_metadata, path_metadata, p_val
+        if (session_id == "none"):
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+        else:
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+        if (survival_col not in list(clinicaldf.columns) or (len(survival_1) == 0)):
+            with open(output_plot_path, "w") as text_file_2:
+                text_file_2.write("")
+            output_plot_path = "empty"
+        elif (errstr == ""):
+            with open(output_plot_path, "w") as text_file_2:
+                text_file_2.write(plot_div)
+        else:
+            with open(output_plot_path, "w") as text_file_2:
+                text_file_2.write(errstr)
+            output_plot_path = "empty"
+    else:
+        # return empty arrays for metadata / empty file for survival plot  if no metadata were found
+        ret_metadata = []
+        text_file_3 = open(path_metadata, "w")
+        text_file_3.write("NA")
+        text_file_3.close()
+        plot_div = ""
+        if (session_id == "none"):
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly.html"
+        else:
+            output_plot_path = "/code/clustering/static/userfiles/output_plotly_" + session_id + ".html"
+        with open(output_plot_path, "w") as text_file_2:
+            text_file_2.write("")
+        output_plot_path = "empty"
+        # fill empty metadata arrays
+        ret_metadata = []
+        ret_metadata_1 = {}
+        ret_metadata_2 = {}
+        ret_metadata_3 = {}
+        ret_metadata.append(ret_metadata_1)
+        ret_metadata.append(ret_metadata_2)
+        ret_metadata.append(ret_metadata_3)
+    if (session_id == "none"):
+        with open("/code/clustering/static/output_console.txt", "w") as text_file:
+            text_file.write("Done!")
+    else:
+        with open("/code/clustering/static/userfiles/output_console_" + session_id + ".txt", "w") as text_file:
+            text_file.write("Done!")
+    return (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val)
 
 
 ## enrichment stuff ##
@@ -1498,9 +1265,8 @@ def read_ndex_file_4(fn):
             if ("nodeAttributes" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[
                 1] and "UniprotName" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1]):
                 lines6_temp = \
-                    lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split(
-                        "{\"nodeAttributes\":[")[
-                        1]
+                lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split("{\"nodeAttributes\":[")[
+                    1]
                 lines6 = lines6_temp.split("{\"edgeAttributes\":[")[0]
         else:
             lines4 = lines5[1].split("{\"edges\":[")[1]
@@ -1655,4 +1421,4 @@ def import_ndex(name):
             edgelist.append([node_dict[source], node_dict[target]])
             ret = ret + curr_edge_str
     # return tab separated string
-    return ret
+    return (ret)

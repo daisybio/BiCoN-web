@@ -49,80 +49,33 @@ def submit_analysis(request):
     # ========== Parse algorithm parameters from post request ==========
     session_id = None
 
+    # --- Step 0: Populate session_id
     if request.user.is_authenticated:
-        pass
+        pass  # Add user auth here and set session_id to user
     else:
         session_id = request.session.session_key
 
     # --- Step 1: Expression Data
-    # Get selected option
-    option = request.POST['expression-data']
-    dataset_path = 'apps/clustering/datasets'
+    expr_data_selection = request.POST['expression-data']
+    expr_data_str = None
 
-    # Parse predefined data
-    if option == 'lung-cancer':
-        with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
-            expr_str = expr_file.read()
-
-        # This is for METADATA, recheck at it later
-        clinical_df = pd.read_csv(path.join(dataset_path, 'lung_cancer_clinical.csv'))
-        with open(path.join(dataset_path, 'lung_cancer_clinical.csv')) as clinical_file:
-            clinical_str = clinical_file.read()
-
-        survival_col_name = "disease free survival in months:ch1"
-        nbr_groups = 2
-
-    # Parse predefined data
-    elif option == 'brest-cancer':
-        with open(path.join(dataset_path, 'breast_cancer_expr.csv')) as expr_file:
-            expr_str = expr_file.read()
-
-        # This is for METADATA look at it later
-        clinical_df = pd.read_csv(path.join(dataset_path, 'breast_cancer_clinical.csv'))
-        with open(path.join(dataset_path, 'breast_cancer_clinical.csv')) as clinical_file:
-            clinical_str = clinical_file.read()
-
-        survival_col_name = "mfs (yr):ch1"
-        nbr_groups = 2
-
-    # Parse expression network from uploaded file
-    elif option == 'custom':  # TODO refractor?!
+    # Parse expression network from uploaded file into string (easier to serialize than file object)
+    if expr_data_selection == 'custom':
         expr_data_str = request.FILES['expression-data-file'].read().decode('utf-8')
-        (expr_str, nbr_groups) = preprocess_file_2.delay(expr_data_str).get()
-
-    # If no option could be parsed, stop!
-    else:
-        return HttpResponse(f"No option found. Provided expression data option was '{option}'")
 
     # --- Step 2: PPI Network
     ppi_network_selection = request.POST['ppi-network']
+    ppi_network_str = None
 
-    if ppi_network_selection == "apid":
-        ppi_str = import_ndex.delay("9c38ce6e-c564-11e8-aaa6-0ac135e8bacf").get()
-    elif ppi_network_selection == "string":
-        ppi_str = import_ndex.delay("275bd84e-3d18-11e8-a935-0ac135e8bacf").get()
-    elif ppi_network_selection == "biogrid":
-        ppi_str = import_ndex.delay("becec556-86d4-11e7-a10d-0ac135e8bacf").get()
-    elif ppi_network_selection == "hprd":
-        ppi_str = import_ndex.delay("1093e665-86da-11e7-a10d-0ac135e8bacf").get()
-    elif ppi_network_selection == 'custom':
-        ppi_str = request.FILES['ppi-network-file'].read().decode('utf-8')
-        # ppi_str = preprocess_ppi_file.delay(ppi_str).get()
-        err_str = check_input_files.delay(ppi_str, expr_str).get()
-        if err_str:
-            request.session['errors'] = err_str
-            # Todo change error page to redirect to analysis? or results?
-            # return render(request, 'clustering/errorpage.html', {'errors': err_str})
-            return HttpResponseBadRequest(err_str)
-    else:
-        return HttpResponseBadRequest(f"No option found. Provided ppi network option was '{ppi_network_selection}'")
+    # Parse ppi network from uploaded file into string (easier to serialize than file object)
+    if ppi_network_selection == 'custom':
+        ppi_network_str = request.FILES['ppi-network-file'].read().decode('utf-8')
 
     # --- Step 3: Meta data
     if 'analyse-metadata' in request.POST:  # Set parameter for metadata analysis if desired
         if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
             survival_col_name = request.POST['survival_col']
             clinical_df = pd.read_csv(request.FILES['survival-metadata-file'])
-
     else:  # Set the variables to empy, default checkbox for example data
         pass
 
@@ -135,11 +88,11 @@ def submit_analysis(request):
     save_data = request.POST.get("save_data", None)
     # gene_set_size = request.POST.get("gene_set_size", 2000)
     gene_set_size = 2000
-    nbr_ants = request.POST.get("nbr_ants", 30)
-    evap = request.POST.get("evap", 0.3)
-    pher_sig = request.POST.get("pher", 1)
-    hi_sig = request.POST.get("hisig", 1)
-    epsilon = request.POST.get("stopcr", 0.02)
+    nbr_ants = int(request.POST.get("nbr_ants", 30))
+    evap = float(request.POST.get("evap", 0.3))
+    pher_sig = float(request.POST.get("pher", 1))
+    hi_sig = float(request.POST.get("hisig", 1))
+    epsilon = float(request.POST.get("stopcr", 0.02))
 
     print('All the given data was parsed: Starting clustering')
 
@@ -153,36 +106,18 @@ def submit_analysis(request):
         pass
 
     # ========== Run the clustering algorithm ==========
-    # result1 = algo_output_task.delay(1, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-    #                                  epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
-    # (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
-    #  jac_2) = result1.get()
-    # result1 = algo_output_task.delay(1, L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-    #                                  epsilon, hi_sig, pher_sig, session_id, gene_set_size, nbr_groups)
-    # (T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1, group1_ids, group2_ids, jac_1,
-    #  jac_2) = result1.get()
-    # make plots and process results
-
     print('Running algorithm started')
-    # started_algorithm_id = run_algorithm.delay(L_g_min, L_g_max, expr_str, ppi_str, nbr_iter, nbr_ants, evap,
-    #                                            epsilon, hi_sig, pher_sig, str(task_id), gene_set_size, nbr_groups,
-    #                                            clinical_str, survival_col_name,
-    #                                            clinical_df, job).id
-    # TODO connect survial
-    started_algorithm_id = run_algorithm.delay(job, expr_str, ppi_str, False, gene_set_size, L_g_min, L_g_max,
-                  n_proc=1, a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon, times=6, clusters=2, cost_limit=5,
-                  max_iter=nbr_iter, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False).id
-
-    # result2 = script_output_task.delay(T, row_colors, col_colors, G2, means, genes_all, adj_list, genes1,
-    #                                    group1_ids, group2_ids, clinical_str, jac_1, jac_2,
-    #                                    survival_col_name, clinical_df, session_id)
-    # (ret_metadata, path_heatmap, path_metadata, output_plot_path, json_path, p_val) = result2.get()
+    started_algorithm_id = run_algorithm.delay(job, expr_data_selection, expr_data_str, ppi_network_selection,
+                                               ppi_network_str, False, gene_set_size, L_g_min, L_g_max, n_proc=1,
+                                               a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon,
+                                               times=6, clusters=2, cost_limit=5, max_iter=nbr_iter, opt=None,
+                                               show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     # ToDo create task with given ID
     started_algorithm_id = str(task_id)
 
     print(f'redicreting to analysis_status')
-    return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': started_algorithm_id}))
+    # return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': started_algorithm_id}))
 
 
 def test(request):
@@ -210,7 +145,7 @@ def analysis_status(request, analysis_id):
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
     return render(request, 'clustering/result_single.html', context={
-        'ppi_png' : job.ppi_png.name,
+        'ppi_png': job.ppi_png.name,
         'ppi_json': job.ppi_json.name,
         'heatmap_png': job.heatmap_png.name,
         'survival_plotly': job.survival_plotly.name,
@@ -223,7 +158,7 @@ def results(request):
 
     previous_jobs = Job.objects.filter(session_id__exact=session_id).order_by('-submit_time')
     return render(request, 'clustering/results.html', context={
-        'previous_jobs' : previous_jobs
+        'previous_jobs': previous_jobs
     })
 
 

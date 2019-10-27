@@ -16,10 +16,10 @@ from os.path import abspath, basename, dirname, join, normpath
 
 # ##### PATH CONFIGURATION ################################
 
-# fetch Django's project directory
+# fetch Django's project directory (BiGAnts-web/BiGAnts_web)
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
 
-# fetch the project_root
+# fetch the project_root (BiGAnts-web)
 PROJECT_ROOT = dirname(DJANGO_ROOT)
 
 # the name of the whole site

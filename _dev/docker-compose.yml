@@ -4,6 +4,8 @@ version: '3'
 services:
   db:
     image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
   # rabbitmq, needed for executing celery tasks.
@@ -15,3 +17,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=mypass
     ports:
       - "5672:5672"
+
+volumes:
+  postgres_data:
