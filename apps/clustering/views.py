@@ -19,6 +19,11 @@ from .tasks import preprocess_file_2, import_ndex, preprocess_ppi_file, \
 class IndexView(TemplateView):
     template_name = "clustering/index.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['navbar'] = 'home'
+        return context
+
 
 class AnalysisSetupView(TemplateView):
     template_name = "clustering/analysis_setup.html"
@@ -28,8 +33,10 @@ class AnalysisSetupView(TemplateView):
         if not self.request.session.session_key:
             self.request.session.create()
 
-        # Just return the same context data
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context['navbar'] = 'analysis'
+        context['groupbar'] = 'setup_analysis'
+        return context
 
 
 @csrf_exempt  # TODO IMPORTANT REMOVE FOR PRODUCTION!!!!
@@ -145,6 +152,8 @@ def analysis_status(request, analysis_id):
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
     return render(request, 'clustering/result_single.html', context={
+        'navbar' : 'analysis',
+        'groupbar': 'results',
         'ppi_png': job.ppi_png.name,
         'ppi_json': job.ppi_json.name,
         'heatmap_png': job.heatmap_png.name,
@@ -158,6 +167,8 @@ def results(request):
 
     previous_jobs = Job.objects.filter(session_id__exact=session_id).order_by('-submit_time')
     return render(request, 'clustering/results.html', context={
+        'navbar': 'analysis',
+        'groupbar': 'all_results',
         'previous_jobs': previous_jobs
     })
 
@@ -165,6 +176,16 @@ def results(request):
 class DocumentationView(TemplateView):
     template_name = 'clustering/documentation.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['navbar'] = 'documentation'
+        return context
 
-class SourceView(TemplateView):
-    template_name = 'clustering/source.html'
+
+class SourcesView(TemplateView):
+    template_name = 'clustering/sources.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['navbar'] = 'sources'
+        return context
