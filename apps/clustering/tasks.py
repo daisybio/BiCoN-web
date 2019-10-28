@@ -29,7 +29,7 @@ from pybiomart import Dataset
 from bigants import data_preprocessing
 from bigants import BiGAnts
 
-import apps.clustering.weighted_aco_lib as lib
+# import apps.clustering.weighted_aco_lib as lib
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 sns.set(color_codes=True)
@@ -1187,10 +1187,10 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         # calculate fractions of patients for which metadata variables are 0 or 1
         for i in range(0, len(param_names) - 1):
             if ((float(len(patients_0[i]) + len(patients_1[i])) / nbr_patients) > 0.8):
-                if not (lib.jac(group1_has[i], patients_0[i]) == 0.0 and lib.jac(group2_has[i], patients_1[i]) == 0.0):
+                if not (jac(group1_has[i], patients_0[i]) == 0.0 and jac(group2_has[i], patients_1[i]) == 0.0):
                     param_names_final.append(param_names[i])
-                    jaccards_1.append(lib.jac(group1_has[i], patients_0[i]))
-                    jaccards_2.append(lib.jac(group2_has[i], patients_1[i]))
+                    jaccards_1.append(jac(group1_has[i], patients_0[i]))
+                    jaccards_2.append(jac(group2_has[i], patients_1[i]))
         # get list of patient ids
         if ("GSM" not in list(clinical_df.iloc[:, 0])[1]):
             patient_id_list = list(clinical_df.index)
@@ -1254,14 +1254,14 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         errstr = ""
         if (len(survival_1) == 0):
             errstr = "Unfortunately, no survival data could be computed."
-        text_file_4 = open((path_metadata), "w")
-        text_file_4.write("\t".join(param_names) + "\n")
-        jaccards_1_str = [str(i)[:4] for i in jaccards_1]
-        jaccards_2_str = [str(i)[:4] for i in jaccards_2]
-        text_file_4.write("\t".join(jaccards_1_str) + "\n")
-        text_file_4.write("\t".join(jaccards_2_str) + "\n")
-        text_file_4.write("")
-        text_file_4.close()
+        # text_file_4 = open((path_metadata), "w")      # READD FOR ENRICHMENT
+        # text_file_4.write("\t".join(param_names) + "\n")
+        # jaccards_1_str = [str(i)[:4] for i in jaccards_1]
+        # jaccards_2_str = [str(i)[:4] for i in jaccards_2]
+        # text_file_4.write("\t".join(jaccards_1_str) + "\n")
+        # text_file_4.write("\t".join(jaccards_2_str) + "\n")
+        # text_file_4.write("")
+        # text_file_4.close()
         # write metadata to dicts
         ret_metadata = []
         ret_metadata_1 = {}
@@ -1328,7 +1328,7 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                 output.write(plot_div)
                 job.survival_plotly.save(f'plotly_{session_id}.html', File(output))
 
-    return ret_metadata, path_metadata, p_val
+    return ret_metadata, p_val
 
 
 ## enrichment stuff ##
@@ -1659,3 +1659,9 @@ def import_ndex(name):
             ret = ret + curr_edge_str
     # return tab separated string
     return ret
+
+def jac(x, y):
+    if len(x) > 0 and len(y) > 0:
+        return len(set(x).intersection(set(y))) / len((set(x).union(set(y))))
+    else:
+        return (0)
