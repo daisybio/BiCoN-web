@@ -75,7 +75,8 @@ def parse_expression_data(option, expr_raw_str=None):
 
     # Parse predefined data
     if option == 'lung-cancer':
-        with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
+        # with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
+        with open(path.join(dataset_path, 'gse30219_lung.csv')) as expr_file:
             expr_str = expr_file.read()
 
         # This is for METADATA, recheck at it later

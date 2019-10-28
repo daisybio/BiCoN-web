@@ -55,6 +55,7 @@ def submit_analysis(request):
 
     # ========== Parse algorithm parameters from post request ==========
     session_id = None
+    algorithm_parameters = dict()
 
     # --- Step 0: Populate session_id
     if request.user.is_authenticated:
@@ -79,6 +80,8 @@ def submit_analysis(request):
         ppi_network_str = request.FILES['ppi-network-file'].read().decode('utf-8')
 
     # --- Step 3: Meta data
+    survival_col_name = ''
+    clinical_df = pd.DataFrame()
     if 'analyse-metadata' in request.POST:  # Set parameter for metadata analysis if desired
         if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
             survival_col_name = request.POST['survival_col']
@@ -86,13 +89,17 @@ def submit_analysis(request):
     else:  # Set the variables to empy, default checkbox for example data
         pass
 
+    algorithm_parameters['survival_col'] = survival_col_name
+    algorithm_parameters['clinical_df'] = clinical_df
+
     # --- Step 4 (Required)
-    nbr_iter = request.POST.get("nbr_iter")  # Todo check with Olga if defaults should be set (45?)
     L_g_min = int(request.POST['L_g_min'])
     L_g_max = int(request.POST['L_g_max'])
+    nbr_iter = int(request.POST.get("nbr_iter"))  # Todo check with Olga if defaults should be set (45?)
+
+    algorithm_parameters['max_iter'] = nbr_iter
 
     # --- Step 4 (Optional)
-    save_data = request.POST.get("save_data", None)
     # gene_set_size = request.POST.get("gene_set_size", 2000)
     gene_set_size = 2000
     nbr_ants = int(request.POST.get("nbr_ants", 30))
@@ -100,6 +107,12 @@ def submit_analysis(request):
     pher_sig = float(request.POST.get("pher", 1))
     hi_sig = float(request.POST.get("hisig", 1))
     epsilon = float(request.POST.get("stopcr", 0.02))
+
+    algorithm_parameters['K'] = nbr_ants
+    algorithm_parameters['evaporation'] = evap
+    algorithm_parameters['b'] = pher_sig
+    algorithm_parameters['a'] = hi_sig
+    algorithm_parameters['eps'] = epsilon
 
     print('All the given data was parsed: Starting clustering')
 
@@ -114,17 +127,17 @@ def submit_analysis(request):
 
     # ========== Run the clustering algorithm ==========
     print('Running algorithm started')
-    started_algorithm_id = run_algorithm.delay(job, expr_data_selection, expr_data_str, ppi_network_selection,
-                                               ppi_network_str, False, gene_set_size, L_g_min, L_g_max, n_proc=1,
-                                               a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon,
-                                               times=6, clusters=2, cost_limit=5, max_iter=nbr_iter, opt=None,
-                                               show_pher=False, show_plot=False, save=None, show_nets=False).id
+    # started_algorithm_id = run_algorithm.delay(job, expr_data_selection, expr_data_str, ppi_network_selection,
+    #                                            ppi_network_str, False, gene_set_size, L_g_min, L_g_max, n_proc=1,
+    #                                            a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon,
+    #                                            times=6, clusters=2, cost_limit=5, max_iter=nbr_iter, opt=None,
+    #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
-    # ToDo create task with given ID
-    started_algorithm_id = str(task_id)
+    run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
+                              False, gene_set_size, L_g_min, L_g_max], kw_args=algorithm_parameters, task_id=str(task_id))
 
     print(f'redicreting to analysis_status')
-    # return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': started_algorithm_id}))
+    # return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
 
 
 def test(request):
@@ -152,7 +165,7 @@ def analysis_status(request, analysis_id):
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
     return render(request, 'clustering/result_single.html', context={
-        'navbar' : 'analysis',
+        'navbar': 'analysis',
         'groupbar': 'results',
         'ppi_png': job.ppi_png.name,
         'ppi_json': job.ppi_json.name,
