@@ -82,7 +82,8 @@ def submit_analysis(request):
     # --- Step 3: Meta data
     survival_col_name = ''
     clinical_df = pd.DataFrame()
-    if 'analyse-metadata' in request.POST:  # Set parameter for metadata analysis if desired
+    if request.POST['use_metadata'] == 'yes':  # Set parameter for metadata analysis if desired
+        print("USING METADATA")
         if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
             survival_col_name = request.POST['survival_col']
             clinical_df = pd.read_csv(request.FILES['survival-metadata-file'])
@@ -100,8 +101,7 @@ def submit_analysis(request):
     algorithm_parameters['max_iter'] = nbr_iter
 
     # --- Step 4 (Optional)
-    # gene_set_size = request.POST.get("gene_set_size", 2000)
-    gene_set_size = 2000
+    gene_set_size = int(request.POST.get("gene_set_size", 2000))
     nbr_ants = int(request.POST.get("nbr_ants", 30))
     evap = float(request.POST.get("evap", 0.3))
     pher_sig = float(request.POST.get("pher", 1))
