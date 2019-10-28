@@ -1000,34 +1000,36 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     plt.clf()
     # Array PatientData is for storing survival information
     patientData = {}
-    # write lists of genes in files, needed for enrichment analysis
-    if (session_id == "none"):
-        path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist.txt')
-        path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1.txt')
-        path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2.txt')
-    else:
 
-        path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_' + session_id + '.txt')
-        path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1_' + session_id + '.txt')
-        path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2_' + session_id + '.txt')
-    with open(path_genelist, "w") as text_file_4:
-        for i in G_list:
-            text_file_4.write(str(i) + "\n")
-    text_file_4.close()
-    with open(path_genelist_1, "w") as text_file_5:
-        for i in G_list:
-            if (i in genes1):
-                text_file_5.write(str(i) + "\n")
-    text_file_5.close()
-    with open(path_genelist_2, "w") as text_file_6:
-        for i in G_list:
-            if (i not in genes1):
-                text_file_6.write(str(i) + "\n")
-    text_file_6.close()
-    if (session_id == "none"):
-        path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata.txt')
-    else:
-        path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata_' + session_id + '.txt')
+    # TODO reimplement for enrichment analysis
+    # # write lists of genes in files, needed for enrichment analysis
+    # if (session_id == "none"):
+    #     path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist.txt')
+    #     path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1.txt')
+    #     path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2.txt')
+    # else:
+    #
+    #     path_genelist = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_' + session_id + '.txt')
+    #     path_genelist_1 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_1_' + session_id + '.txt')
+    #     path_genelist_2 = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/genelist_2_' + session_id + '.txt')
+    # with open(path_genelist, "w") as text_file_4:
+    #     for i in G_list:
+    #         text_file_4.write(str(i) + "\n")
+    # text_file_4.close()
+    # with open(path_genelist_1, "w") as text_file_5:
+    #     for i in G_list:
+    #         if (i in genes1):
+    #             text_file_5.write(str(i) + "\n")
+    # text_file_5.close()
+    # with open(path_genelist_2, "w") as text_file_6:
+    #     for i in G_list:
+    #         if (i not in genes1):
+    #             text_file_6.write(str(i) + "\n")
+    # text_file_6.close()
+    # if (session_id == "none"):
+    #     path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata.txt')
+    # else:
+    #     path_metadata = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/metadata_' + session_id + '.txt')
     # if no metadata given, write an empty metadata file
     p_val = ""
 
