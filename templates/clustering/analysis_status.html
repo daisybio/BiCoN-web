@@ -1,0 +1,33 @@
+{% extends "clustering/base_analysis.html" %}
+
+{% block title %}BiGAnts-Web analysis status{% endblock %}
+
+{% block custom_css %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Analysis Status</h1>
+            {% if task.status == 'SUCCESS' %}
+                <div class="alert alert-success">
+                    <strong>Success!</strong> Your analysis finished successfully.
+                    <a href="{% url 'clustering:analysis_result' task.task_id %}" class="alert-link">Click here</a> to
+                    view the results
+                </div>
+            {% elif task.status == 'FAILURE' %}
+                <div class="alert alert-danger">
+                    <strong>FAILURE!</strong> Your analysis failed!
+                    Check the progress bar below and the printed error messages and try to rerun you analysis
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                <strong>{{ task.status }}!</strong> Your analysis is running or in queue. Check the progressbar
+                below for more information
+            {% endif %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

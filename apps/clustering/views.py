@@ -137,7 +137,7 @@ def submit_analysis(request):
                               False, gene_set_size, L_g_min, L_g_max], kw_args=algorithm_parameters, task_id=str(task_id))
 
     print(f'redicreting to analysis_status')
-    # return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
+    return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
 
 
 def test(request):
@@ -158,8 +158,11 @@ def test_result(request):
 
 def analysis_status(request, analysis_id):
     analysis_task = AsyncResult(str(analysis_id))
-    print(analysis_task.status)
-    return HttpResponse(analysis_task.status)
+    return render(request, 'clustering/analysis_status.html', context={
+        'navbar': 'analysis',
+        'groupbar': 'results',
+        'task': analysis_task,
+    })
 
 
 def analysis_result(request, analysis_id):
