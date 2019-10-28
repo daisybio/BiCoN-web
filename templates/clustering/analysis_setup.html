@@ -133,36 +133,49 @@
                 <div class="tab tab-metadata form-group"><h3>Metadata (optional)</h3>
                     <p class="card-text">If you do not want to upload metadata, you can go to the next step.<br/></p>
 
-                    <!-- Ask to use metadatada-->
-                    <div class="form-group">
-                        <label class="radio-inline control-label">Use additional Metadata</label>
+                    <div id="metadata_options">
+                        <!-- Ask to use metadatada-->
+                        <div class="form-group">
+                            <label class="radio-inline control-label">Use additional Metadata</label>
 
-                        <div class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" id="use_metadata1" name="use_metadata"
-                                   class="custom-control-input" value="no"
-                                   onclick="hideElement('additional-metadata');" checked>
-                            <label class="custom-control-label" for="use_metadata1">No</label>
-                        </div>
-                        <div class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" id="use_metadata2" name="use_metadata"
-                                   class="custom-control-input" value="yes"
-                                   onclick="showElement('additional-metadata');">
-                            <label class="custom-control-label" for="use_metadata2">Yes</label>
-                        </div>
-                    </div><!-- form-group -->
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="use_metadata1" name="use_metadata"
+                                       class="custom-control-input" value="no"
+                                       onclick="hideElement('additional-metadata');" checked>
+                                <label class="custom-control-label" for="use_metadata1">No</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="use_metadata2" name="use_metadata"
+                                       class="custom-control-input" value="yes"
+                                       onclick="showElement('additional-metadata');">
+                                <label class="custom-control-label" for="use_metadata2">Yes</label>
+                            </div>
+                            <div id="use_metadata_info" class="valid-feedback">
+                                Predefined expression datasets use metadata per default
+                            </div>
+                        </div><!-- form-group -->
 
-                    <div id="additional-metadata" style="display: none" class="form-group">
-                        <div id="column-metadata" class="form-group">
-                            <label class="form-control-label" for="survival-col">Metadata column name</label>
-                            <input class="form-control" type="text" name="survival-col" id="survival-col"
-                                   placeholder="Exact name of your metadata column name">
-                        </div>
-                        <div id="upload-metadata" class="custom-file form-group">
-                            <input type="file" class="custom-file-input" name="survival-metadata">
-                            <label class="custom-file-label" for="survival-metadata">Upload metadata file</label>
-                        </div>
+                        <div id="additional-metadata" style="display: none" class="form-group">
+                            <div id="column-metadata" class="form-group">
+                                <label class="form-control-label" for="survival-col">Metadata column name</label>
+                                <input class="form-control" type="text" name="survival-col" id="survival-col"
+                                       placeholder="Exact name of your metadata column name">
+                                <div id="survival-col_err" class="invalid-feedback">
+                                    The column name cannot be empty
+                                </div>
+                            </div>
 
-                    </div><!-- form-group -->
+                            <div id="upload-metadata" class="custom-file form-group">
+                                <input type="file" class="custom-file-input" name="survival-metadata"
+                                       id="survival-metadata">
+                                <label class="custom-file-label" for="survival-metadata">Upload metadata file</label>
+                                <div id="survival-metadata_err" class="invalid-feedback">
+                                    You must upload a file for this option
+                                </div>
+                            </div>
+
+                        </div><!-- form-group -->
+                    </div>
                 </div>
 
                 <!-- Tab: Algorithm parameters -->
@@ -176,13 +189,22 @@
                                 <label class="form-control-label" for="L_g_min">Minimal number of clusters</label>
                                 <input class="form-control" type="text" name="L_g_min" id="L_g_min"
                                        placeholder="Integer Number">
+                                <div id="L_g_min_err" class="invalid-feedback">
+                                    This field cannot be empty or contain any strings. Integer only
+                                </div>
                             </div><!-- form-group -->
 
                             <div class="form-group col">
                                 <label class="form-control-label" for="ownername">Maximal number of clusters</label>
                                 <input class="form-control" type="text" name="L_g_max" id="L_g_max"
                                        placeholder="Integer Number">
+                                <div id="L_g_max_err" class="invalid-feedback">
+                                    This field cannot be empty or contain any strings. Integer only
+                                </div>
                             </div><!-- form-group -->
+                        </div>
+                        <div id="cluster_param_error" class="invalid-feedback form-group">
+                            Minimal number of clusters must be less or equal than the maximum number of cluster
                         </div>
 
                         <!-- Ask for advanced options-->
@@ -190,13 +212,13 @@
                             <label class="radio-inline control-label">Use advanced parameters: </label>
                             <div class="custom-control custom-radio custom-control-inline">
                                 <input type="radio" id="clustering_advanced1" name="clustering_advanced"
-                                       class="custom-control-input"
+                                       class="custom-control-input" value="no"
                                        onclick="hideElement('clustering_advanced_options');" checked>
                                 <label class="custom-control-label" for="clustering_advanced1">No</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline">
                                 <input type="radio" id="clustering_advanced2" name="clustering_advanced"
-                                       class="custom-control-input"
+                                       class="custom-control-input" value="yes"
                                        onclick="showElement('clustering_advanced_options');">
                                 <label class="custom-control-label" for="clustering_advanced2">Yes</label>
                             </div>
@@ -210,13 +232,20 @@
                         <div class="form-group ">
                             <label class="form-control-label" for="gene_set_size">Gene set size</label>
                             <input class="form-control" type="text" name="gene_set_size" id="gene_set_size"
-                                   value="2000">
+                                   value="2000" placeholder="E.g 2000">
+                            <div id="gene_set_size_err" class="invalid-feedback">
+                                This field cannot be empty or contain any strings. Integer only
+                            </div>
                         </div><!-- form-group -->
 
                         <div class="form-group ">
-                            <label class="form-control-label" for="nbr_iter">Maximum number of iterations</label>
+                            <label class="form-control-label" for="nbr_iter">Maximum number of iterations (value should
+                                not exceed 200)</label>
                             <input class="form-control" type="text" name="nbr_iter" id="nbr_iter"
-                                   value="2000">
+                                   value="200" placeholder="E.g. 200">
+                            <div id="nbr_iter_err" class="invalid-feedback">
+                                This field cannot be empty or contain any strings. Integer only
+                            </div>
                         </div><!-- form-group -->
 
                         <div class="form-group">
