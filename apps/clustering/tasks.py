@@ -495,8 +495,8 @@ def list_metadata_from_file(path):
 # job.status = celery.states.SUCCESS
 # job.save()
 @shared_task(name="run_algorithm")
-def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, log2, size, L_g_min,
-                  L_g_max, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6, clusters=2,
+def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min,
+                  L_g_max, log2, size=2000, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6, clusters=2,
                   cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False):
     # ========== Preprocess data and run algorithm ==========
     # --- Step 1: Parse the strings or files and create StringIO (file object) again

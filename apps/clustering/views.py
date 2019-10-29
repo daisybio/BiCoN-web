@@ -82,37 +82,43 @@ def submit_analysis(request):
     # --- Step 3: Meta data
     survival_col_name = ''
     clinical_df = pd.DataFrame()
-    if request.POST['use_metadata'] == 'yes':  # Set parameter for metadata analysis if desired
-        print("USING METADATA")
-        if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
-            survival_col_name = request.POST['survival_col']
-            clinical_df = pd.read_csv(request.FILES['survival-metadata-file'])
-    else:  # Set the variables to empy, default checkbox for example data
-        pass
+    use_metadata = True
 
+    if 'use_metadata' in request.POST:
+        if request.POST['use_metadata'] == 'yes':  # Set parameter for metadata analysis if desired
+            print("USING METADATA")
+            if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
+                survival_col_name = request.POST['survival_col']
+                clinical_df = pd.read_csv(request.FILES['survival-metadata-file'])
+        else:  # Set the variables to empy, default checkbox for example data
+            use_metadata = False
+            pass
+
+    algorithm_parameters['use_metadata'] = use_metadata
     algorithm_parameters['survival_col'] = survival_col_name
     algorithm_parameters['clinical_df'] = clinical_df
 
     # --- Step 4 (Required)
     L_g_min = int(request.POST['L_g_min'])
     L_g_max = int(request.POST['L_g_max'])
-    nbr_iter = int(request.POST.get("nbr_iter"))  # Todo check with Olga if defaults should be set (45?)
-
-    algorithm_parameters['max_iter'] = nbr_iter
 
     # --- Step 4 (Optional)
-    gene_set_size = int(request.POST.get("gene_set_size", 2000))
-    nbr_ants = int(request.POST.get("nbr_ants", 30))
-    evap = float(request.POST.get("evap", 0.3))
-    pher_sig = float(request.POST.get("pher", 1))
-    hi_sig = float(request.POST.get("hisig", 1))
-    epsilon = float(request.POST.get("stopcr", 0.02))
+    if request.POST['clustering_advanced'] == 'yes':
+        nbr_iter = int(request.POST.get("nbr_iter"))  # Todo check with Olga if defaults should be set (45?)
+        gene_set_size = int(request.POST.get("gene_set_size", 2000))
+        nbr_ants = int(request.POST.get("nbr_ants", 30))
+        evap = float(request.POST.get("evap", 0.3))
+        pher_sig = float(request.POST.get("pher", 1))
+        hi_sig = float(request.POST.get("hisig", 1))
+        epsilon = float(request.POST.get("stopcr", 0.02))
 
-    algorithm_parameters['K'] = nbr_ants
-    algorithm_parameters['evaporation'] = evap
-    algorithm_parameters['b'] = pher_sig
-    algorithm_parameters['a'] = hi_sig
-    algorithm_parameters['eps'] = epsilon
+        algorithm_parameters['size'] = gene_set_size
+        algorithm_parameters['max_iter'] = nbr_iter
+        algorithm_parameters['K'] = nbr_ants
+        algorithm_parameters['evaporation'] = evap
+        algorithm_parameters['b'] = pher_sig
+        algorithm_parameters['a'] = hi_sig
+        algorithm_parameters['eps'] = epsilon
 
     print('All the given data was parsed: Starting clustering')
 
@@ -123,7 +129,7 @@ def submit_analysis(request):
         job = Job(job_id=task_id, session_id=session_id, submit_time=timezone.now(), status=Job.SUBMITTED)
         job.save()
     else:
-        pass
+        raise KeyError('session_id not found')
 
     # ========== Run the clustering algorithm ==========
     print('Running algorithm started')
@@ -134,7 +140,7 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                              False, gene_set_size, L_g_min, L_g_max], kw_args=algorithm_parameters, task_id=str(task_id))
+                                    L_g_min, L_g_max, False], kw_args=algorithm_parameters, task_id=str(task_id))
 
     print(f'redicreting to analysis_status')
     return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))

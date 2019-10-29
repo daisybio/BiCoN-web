@@ -33,6 +33,12 @@ function nextPrev(n) {
     if (currentTab >= x.length) {
         //...the form gets submitted:
         document.getElementById("regForm").submit();
+
+        // Disable buttons and display waiting page
+        document.getElementById("tab-submit").style.display = "block";
+        document.getElementById("prevBtn").style.display = "none";
+        document.getElementById("nextBtn").style.display = "none";
+
         return false;
     }
     // Otherwise, display the correct tab:
