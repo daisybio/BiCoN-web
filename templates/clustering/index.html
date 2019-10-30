@@ -10,7 +10,7 @@
             possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam
             repellat.</p>
         <div class="btn-group">
-            <a href="#" class="btn btn-outline-secondary btn-lg">Read more</a>
+            <a href="#about" class="btn btn-outline-secondary btn-lg">Read more</a>
             <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary btn-lg">Start analysis!</a>
         </div>
     </header>
@@ -18,7 +18,7 @@
     <!-- Page Features -->
     <div class="row text-center">
 
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100">
                 <img class="card-img-top" src="http://placehold.it/500x325" alt="">
                 <div class="card-body">
@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100">
                 <img class="card-img-top" src="http://placehold.it/500x325" alt="">
                 <div class="card-body">
@@ -45,12 +45,12 @@
                     </p>
                 </div>
                 <div class="card-footer">
-                    <a href="#" class="btn btn-primary">Find Out More!</a>
+                    <a href="{% url 'clustering:documentation' %}" class="btn btn-primary">Find Out More!</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100">
                 <img class="card-img-top" src="http://placehold.it/500x325" alt="">
                 <div class="card-body">
@@ -59,26 +59,33 @@
                         necessitatibus neque.</p>
                 </div>
                 <div class="card-footer">
-                    <a href="#" class="btn btn-primary">Find Out More!</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card h-100">
-                <img class="card-img-top" src="http://placehold.it/500x325" alt="">
-                <div class="card-body">
-                    <h4 class="card-title">Card title</h4>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni
-                        sapiente, tempore debitis beatae culpa natus architecto.</p>
-                </div>
-                <div class="card-footer">
-                    <a href="#" class="btn btn-primary">Find Out More!</a>
+                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">Find Out More!</a>
                 </div>
             </div>
         </div>
 
     </div>
     <!-- /.row -->
-    </header>
+
+    <section id="about">
+        <div class="card mt-4">
+            <div class="card-body">
+                <h1 class="card-title">About BiGAnts</h1>
+
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut
+                laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation
+                ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor
+                in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at
+                vero et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore
+                te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy
+                nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis
+                nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
+                vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu
+                feugiat nulla facilisis at vero et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
+                delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option
+                congue nihil imperdiet doming id quod mazim placerat facer possim assum.
+            </div>
+        </div>
+    </section>
+
 {% endblock %}
