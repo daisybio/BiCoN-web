@@ -4,11 +4,11 @@
 
 {% block empty_content %}
     <!-- Jumbotron Header -->
+    {% load static %}
     <header class="jumbotron my-4">
-        <h1 class="display-3">BiGAnts-Web</h1>
-        <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, ipsam, eligendi, in quo sunt
-            possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam
-            repellat.</p>
+        <h1 class="display-3">BiGAnts</h1>
+        <p class="lead">BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the
+            responsible disease mechanisms.</p>
         <div class="btn-group">
             <a href="#about" class="btn btn-outline-secondary btn-lg">Read more</a>
             <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary btn-lg">Start analysis!</a>
@@ -20,12 +20,13 @@
 
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100">
-                <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+                <img class="card-img-top" src="{% static 'clustering/img/index/logo.svg' %}" alt=""
+                     style="width: 100%; height: 18vw; object-fit: cover;">
                 <div class="card-body">
                     <h4 class="card-title">Analysis</h4>
                     <p class="card-text">
                         Submit a new analysis either from given sample data or upload your own. Get the status of
-                        already running analysises or view already finished analysis.
+                        submitted analyses or view the results of already finished ones.
                     </p>
                 </div>
                 <div class="card-footer">
@@ -41,7 +42,7 @@
                     <h4 class="card-title">Documentation</h4>
                     <p class="card-text">
                         Get to know the web tool and all of its features. A comprehensive list of the different
-                        parameters used by the application
+                        parameters used by the application with explanations can be found here.
                     </p>
                 </div>
                 <div class="card-footer">
@@ -72,18 +73,10 @@
             <div class="card-body">
                 <h1 class="card-title">About BiGAnts</h1>
 
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut
-                laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation
-                ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor
-                in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at
-                vero et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore
-                te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy
-                nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis
-                nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
-                vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu
-                feugiat nulla facilisis at vero et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
-                delenit augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend option
-                congue nihil imperdiet doming id quod mazim placerat facer possim assum.
+                BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the responsible
+                disease mechanisms. BiGAnts is a network-constrained biclustering approach which restricts biclusters to
+                functionally related genes connected in molecular interaction networks and maximizes the expression
+                difference between two subgroups of patients.
             </div>
         </div>
     </section>
