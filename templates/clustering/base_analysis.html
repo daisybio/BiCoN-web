@@ -8,8 +8,8 @@
             <h1 class="my-4">Analysis Menu</h1>
             <div class="list-group">
                 <a href="{% url 'clustering:analysis_setup' %}" class="list-group-item {% if groupbar == 'setup_analysis' %}active{% endif %}">Setup new analysis</a>
-                <a href="#" class="list-group-item {% if groupbar == 'submitted_analysis' %}active{% endif %}">Submitted analysis</a>
-                <a href="{% url 'clustering:analysis_results' %}" class="list-group-item {% if groupbar == 'all_results' %}active{% endif %}">All results</a>
+                <a href="#" class="list-group-item {% if groupbar == 'submitted_analysis' %}active{% endif %}">Analysis status</a>
+                <a href="{% url 'clustering:analysis_results' %}" class="list-group-item {% if groupbar == 'all_results' %}active{% endif %}">Results overview</a>
             </div>
         </div>
         <!-- /.col-lg-3 -->

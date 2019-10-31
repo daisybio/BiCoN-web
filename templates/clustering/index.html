@@ -7,10 +7,12 @@
     {% load static %}
     <header class="jumbotron my-4">
         <h1 class="display-3">BiGAnts</h1>
-        <p class="lead">BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the
-            responsible disease mechanisms.</p>
+        <p class="lead"> BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the
+            responsible disease mechanisms. BiGAnts is a network-constrained biclustering approach which restricts
+            biclusters to functionally related genes connected in molecular interaction networks and maximizes the
+            expression difference between two subgroups of patients.</p>
         <div class="btn-group">
-            <a href="#about" class="btn btn-outline-secondary btn-lg">Read more</a>
+            <a href="{% url 'clustering:sources' %}" class="btn btn-outline-secondary btn-lg">Read more</a>
             <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary btn-lg">Start analysis!</a>
         </div>
     </header>
@@ -29,7 +31,7 @@
                     </p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary">Find Out More!</a>
+                    <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary">Start analysis</a>
                 </div>
             </div>
         </div>
@@ -38,13 +40,13 @@
             <div class="card h-100">
                 <img class="card-img-top" src="http://placehold.it/500x325" alt="">
                 <div class="card-body">
-                    <h4 class="card-title">How to</h4>
+                    <h4 class="card-title">Documentation</h4>
                     <p class="card-text">
                         Learn how to use BiGAnts: Upload your data, set the parameters and visualize the results.
                     </p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'clustering:documentation' %}" class="btn btn-primary">Find Out More!</a>
+                    <a href="{% url 'clustering:documentation' %}" class="btn btn-primary">Learn how to</a>
                 </div>
             </div>
         </div>
@@ -53,30 +55,17 @@
             <div class="card h-100">
                 <img class="card-img-top" src="http://placehold.it/500x325" alt="">
                 <div class="card-body">
-                    <h4 class="card-title">References</h4>
+                    <h4 class="card-title">About</h4>
                     <p class="card-text">Read about the tool, learn how to cite it or contact us.</p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">Find Out More!</a>
+                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">About this tool</a>
                 </div>
             </div>
         </div>
 
     </div>
     <!-- /.row -->
-
-    <section id="about">
-        <div class="card mt-4">
-            <div class="card-body">
-                <h1 class="card-title">About BiGAnts</h1>
-
-                BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the responsible
-                disease mechanisms. BiGAnts is a network-constrained biclustering approach which restricts biclusters to
-                functionally related genes connected in molecular interaction networks and maximizes the expression
-                difference between two subgroups of patients.
-            </div>
-        </div>
-    </section>
 
     <style type="text/css">
         .card-img-top {
