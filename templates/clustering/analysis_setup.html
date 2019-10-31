@@ -13,11 +13,10 @@
     <div class="card mt-4">
         <div class="card-body">
             <h1 class="card-title">Analysis overview</h1>
-            <p class="card-text"> To start a new analysis fill out the form below. If you are unsure about some of the
-                options, you can look them up in the documentations<br/>
-                If you want to know the status of you recently submittet and running analysis click on "submitted
-                analysis" <br/>
-                If you want to see results of previous run and finished analysis, click on "all results"
+            <p class="card-text">To start a new analysis fill out the form below. If you are unsure about some of the
+                options, you can look them up in the "Documentation" section.
+                If you want to know the status of you recently submitted analysis click on "Submitted analysis".
+                If you want to see results of previous runs, click on "All results".
             </p>
         </div>
     </div>
@@ -27,10 +26,15 @@
     <div class="card mt-4">
         <div class="card-body">
             <h1 class="card-title">Setup new analysis</h1>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente dicta
-                fugit
-                fugiat hic aliquam itaque facere, soluta. Totam id dolores, sint aperiam sequi pariatur
-                praesentium animi perspiciatis molestias iure, ducimus!</p>
+
+
+            {% if error_messages %}
+                <div class="alert alert-danger">
+                    <strong>Wrong parameters!</strong> Please check your input and submit again.
+                    The following errors occured:<br>
+                    Check the progress bar below and the printed error messages and try to rerun you analysis
+                </div>
+            {% endif %}
 
             <!-- Multi part analysis setup form -->
             <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post" enctype="multipart/form-data">
@@ -38,11 +42,10 @@
                 <!-- One "tab" for each step in the form: -->
 
                 <!-- Tab: Expression Data -->
-                <div class="tab tab-expression form-group"><h3> Expression Data </h3>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente dicta
-                        fugit
-                        fugiat hic aliquam itaque facere, soluta. Totam id dolores, sint aperiam sequi pariatur
-                        praesentium animi perspiciatis molestias iure, ducimus!</p>
+                <div class="tab tab-expression form-group"><h3>Gene Expression Data</h3>
+                    <p class="card-text"> Upload your own data or use our test data. <br/>
+                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format</span>
+                    </p>
 
                     <div class="form-group">
                         <div class="custom-control custom-radio">
@@ -84,8 +87,10 @@
 
                 <!-- Tab: PPI -->
                 <div class="tab tab-ppi form-group"><h3>PPI</h3>
-                    <p class="card-text">Parse Ndex file: <br/>
-                        Human interactome extracted from APID, only human proteins, no inter-species interactions. </p>
+                    <p class="card-text">Choose an protein–protein interaction network from NDEx or upload your own
+                        network data.<br>
+                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format</span>
+                    </p>
 
                     <div class="form-group">
                         <div class="custom-control custom-radio">
@@ -130,8 +135,11 @@
                 </div>
 
                 <!-- Tab: Metadata -->
-                <div class="tab tab-metadata form-group"><h3>Metadata (optional)</h3>
-                    <p class="card-text">If you do not want to upload metadata, you can go to the next step.<br/></p>
+                <div class="tab tab-metadata form-group"><h3>Clinical data / Survival data (optional)</h3>
+                    <p class="card-text">Add clinical data / survial data to enable further analysis. If you do not want
+                        to upload additional metadata, you can go to the next step.<br/>
+                        <span class="text-muted">Select "Yes" and upload the clinical data if you have additional metadata.</span>
+                    </p>
 
                     <div id="metadata_options">
                         <!-- Ask to use metadatada-->
@@ -186,7 +194,7 @@
                         <div class="form-row">
 
                             <div class="form-group col">
-                                <label class="form-control-label" for="L_g_min">Minimal number of clusters</label>
+                                <label class="form-control-label" for="L_g_min">Minimal number of genes</label>
                                 <input class="form-control" type="text" name="L_g_min" id="L_g_min"
                                        placeholder="Integer Number">
                                 <div id="L_g_min_err" class="invalid-feedback">
@@ -195,7 +203,7 @@
                             </div><!-- form-group -->
 
                             <div class="form-group col">
-                                <label class="form-control-label" for="ownername">Maximal number of clusters</label>
+                                <label class="form-control-label" for="ownername">Maximal number of genes</label>
                                 <input class="form-control" type="text" name="L_g_max" id="L_g_max"
                                        placeholder="Integer Number">
                                 <div id="L_g_max_err" class="invalid-feedback">
@@ -239,8 +247,7 @@
                         </div><!-- form-group -->
 
                         <div class="form-group ">
-                            <label class="form-control-label" for="nbr_iter">Maximum number of iterations (value should
-                                not exceed 200)</label>
+                            <label class="form-control-label" for="nbr_iter">Maximum number of iterations</label>
                             <input class="form-control" type="text" name="nbr_iter" id="nbr_iter"
                                    value="200" placeholder="E.g. 200">
                             <div id="nbr_iter_err" class="invalid-feedback">
@@ -282,7 +289,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="hisig">HI significance</label>
+                            <label for="hisig">Heuristic Information significance</label>
                             <select id="hisig" name="hisig" size="1" class="form-control">
                                 <option value="0.5">0.5</option>
                                 <option value="0.75">0.75</option>
@@ -293,7 +300,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="stopcr">Stop criteria: score_max - score_av < this_value</label>
+                            <label for="stopcr">Stop criteria - Epsilon</label>
                             <select id="stopcr" name="stopcr" size="1" class="form-control">
                                 <option value="0.005">0.005</option>
                                 <option value="0.01">0.01</option>
