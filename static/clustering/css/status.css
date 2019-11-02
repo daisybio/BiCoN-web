@@ -1,0 +1,32 @@
+.state {
+    position: absolute;
+    margin-top: -7px;
+    z-index: 1;
+    height: 30px;
+    width: 30px;
+    border-radius: 25px;
+}
+
+.state.one {
+    left: -0.4%;
+}
+
+.state.two {
+    left: 18%;
+}
+
+.state.three {
+    left: 38%;
+}
+
+.state.four {
+    left: 78%;
+}
+
+.state.five {
+    right: -0.5%;
+}
+
+.no-color {
+    background-color: inherit;
+}

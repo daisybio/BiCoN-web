@@ -1,3 +1,4 @@
+import json
 import uuid
 from os import path
 
@@ -147,9 +148,9 @@ def submit_analysis(request):
 
 
 def test(request):
-    job = Job.objects.get(job_id='bfc6f95f-6ac1-4cf1-b032-ad3db0715ddf')
-    job.ppi_png.save('TESTNAME', ContentFile('A string with the file content'))
-    return HttpResponse(request.session.session_key)
+    old_key = request.session.session_key
+    request.session.cycle_key()
+    return HttpResponse(f'old key {old_key} : new key {request.session.session_key}')
 
 
 def test_result(request):
@@ -160,6 +161,27 @@ def test_result(request):
     #     'convergence_png': 'clustering/test/conv.png',
     # })
     pass
+
+@csrf_exempt  # TODO IMPORTANT REMOVE FOR PRODUCTION!!!!
+def poll_status(request):
+    data = 'Internal failure. Please contact your administrator'
+    if request.is_ajax():
+        if 'task_id' in request.POST.keys() and request.POST['task_id']:
+            # Retrieve task and get details
+            task_id = request.POST['task_id']
+            task = AsyncResult(task_id)
+            task_info = task.info
+            task_status = task.status
+            # Create dictionary for response
+            data = task_info if task_info else dict()
+            data['task_status'] = task_status
+        else:
+            data = 'No task_id in the request found'
+    else:
+        data = 'This is not an ajax request'
+    print(f'Response {data}')
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
 
 
 def analysis_status(request, analysis_id):

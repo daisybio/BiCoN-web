@@ -18,7 +18,7 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 import seaborn as sns
-from celery import shared_task
+from celery import shared_task, current_task, states
 from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
@@ -496,13 +496,38 @@ def list_metadata_from_file(path):
 # job.save()
 @shared_task(name="run_algorithm")
 def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min,
-                  L_g_max, log2, size=2000, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6, clusters=2,
+                  L_g_max, log2, size=2000, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6,
+                  clusters=2,
                   cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False):
     # ========== Preprocess data and run algorithm ==========
+    job.status = 'RUNNING'
+    job.save()
+
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'submitted',
+              'progress_percent': '0'
+              }
+    )
+
     # --- Step 1: Parse the strings or files and create StringIO (file object) again
     expr_str, clinical_df, survival_col_name = parse_expression_data(expr_data_selection, expr_data_str)
     expression_file = StringIO(expr_str)
+
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'expression_data',
+              'progress_percent': '10'
+              }
+    )
     ppi_file = StringIO(parse_ppi_data(ppi_network_selection, ppi_network_str))
+
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'ppi_data',
+              'progress_percent': '30'
+              }
+    )
 
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:
@@ -511,14 +536,28 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
         # TODO HANDLE BETTER
         print('Houston, we have a problem.')
 
-    # --- Step 2: Run the clustering algorithm (BiGAnts)
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'validate_preprocess_data',
+              'progress_percent': '40'
+              }
+    )
+
+    # --- Step 3: Run the clustering algorithm (BiGAnts)
     model = BiGAnts(expr, G, L_g_min, L_g_max)
 
     print(f'Execute model.run')
     # solution, score = model.run_search(max_iter=1)
     max_iter = 1  # TODO REMOVE LATER
     solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
-                                max_iter, opt, show_pher, show_plot, save, show_nets)
+                                       max_iter, opt, show_pher, show_plot, save, show_nets)
+
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'run_clustering',
+              'progress_percent': '90'
+              }
+    )
 
     # mapping to gene names (for now with API)
     mg = mygene.MyGeneInfo()
@@ -616,6 +655,13 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     script_output_task(expr_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids,
                        patients2_ids, clinical_df, survival_col_name, job)
+
+    current_task.update_state(
+        state='RUNNING',
+        meta={'progress_step': 'visualize_data',
+              'progress_percent': '100'
+              }
+    )
 
     job.finished_time = timezone.now()
     job.status = celery.states.SUCCESS
@@ -1659,6 +1705,7 @@ def import_ndex(name):
             ret = ret + curr_edge_str
     # return tab separated string
     return ret
+
 
 def jac(x, y):
     if len(x) > 0 and len(y) > 0:
