@@ -1,3 +1,4 @@
+import datetime
 import json
 import uuid
 from os import path
@@ -144,10 +145,11 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, is_log2], kw_args=algorithm_parameters, task_id=str(task_id), ignore_result=True)
+                                    L_g_min, L_g_max, is_log2], kw_args=algorithm_parameters, task_id=str(task_id),
+                              ignore_result=True)
 
     print(f'redicreting to analysis_status')
-    return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
+    return HttpResponseRedirect(reverse('clustering:analysis_status_single', kwargs={'analysis_id': task_id}))
 
 
 def test(request):
@@ -164,6 +166,7 @@ def test_result(request):
     #     'convergence_png': 'clustering/test/conv.png',
     # })
     pass
+
 
 @csrf_exempt  # TODO IMPORTANT REMOVE FOR PRODUCTION!!!!
 def poll_status(request):
@@ -191,11 +194,31 @@ def poll_status(request):
     return HttpResponse(json_data, content_type='application/json')
 
 
-def analysis_status(request, analysis_id):
-    analysis_task = AsyncResult(str(analysis_id))
+def bookmark(request, session_id):
+    if not 'sessionid' in request.session.keys:
+        request.session.create()
+
+    request.session.session_key = session_id
+    return HttpResponse(request.session.session_key)
+
+
+def analysis_status(request):
+    session_id = request.session.session_key
+    running_jobs = Job.objects.filter(session_id__exact=session_id).exclude(
+        finished_time__lt=(timezone.now() - datetime.timedelta(minutes=20))).order_by('-submit_time')
+
     return render(request, 'clustering/analysis_status.html', context={
         'navbar': 'analysis',
-        'groupbar': 'results',
+        'groupbar': 'submitted_analysis',
+        'previous_jobs': running_jobs
+    })
+
+
+def analysis_status_single(request, analysis_id):
+    analysis_task = AsyncResult(str(analysis_id))
+    return render(request, 'clustering/analysis_status_single.html', context={
+        'navbar': 'analysis',
+        'groupbar': 'single_status',
         'task': analysis_task,
     })
 
@@ -204,7 +227,7 @@ def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
     return render(request, 'clustering/result_single.html', context={
         'navbar': 'analysis',
-        'groupbar': 'results',
+        'groupbar': 'single_result',
         'ppi_png': job.ppi_png.name,
         'ppi_json': job.ppi_json.name,
         'heatmap_png': job.heatmap_png.name,
@@ -216,7 +239,10 @@ def analysis_result(request, analysis_id):
 def results(request):
     session_id = request.session.session_key
 
-    previous_jobs = Job.objects.filter(session_id__exact=session_id).order_by('-submit_time')
+    # Get all jobs for this session_id and exclude the running ones
+    previous_jobs = Job.objects.filter(session_id__exact=session_id).exclude(status__exact='RUNNING')\
+        .order_by('-submit_time')
+
     return render(request, 'clustering/results.html', context={
         'navbar': 'analysis',
         'groupbar': 'all_results',

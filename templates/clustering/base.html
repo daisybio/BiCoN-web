@@ -16,6 +16,7 @@
 
     <!-- Custom styles for this template TODO add credits?-->
     <link href="{% static 'clustering/css/shop-item.css' %}" rel="stylesheet">
+    {% block custom_template_css %}{% endblock %}
     {% block custom_css %}{% endblock %}
 
 </head>
@@ -126,6 +127,9 @@
 <!-- Bootstrap core JavaScript -->
 <script src="{% static 'clustering/vendor/jquery/jquery.min.js' %}"></script>
 <script src="{% static 'clustering/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+{% block scripts %}
+{% endblock %}
 
 </body>
 

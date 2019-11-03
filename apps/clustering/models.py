@@ -1,6 +1,9 @@
+import datetime
+
 from celery.states import FAILURE, IGNORED, PENDING, RECEIVED, RETRY, REVOKED, STARTED, SUCCESS
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Job(models.Model):
@@ -35,5 +38,5 @@ class Job(models.Model):
     convergence_png = models.FileField(upload_to=f'clustering/convergence/')
 
     def __str__(self):
-        return f'Job ID: {self.job_id} submitted on {self.submit_time}'
+        return f'Job ID: {self.job_id} submitted on {self.submit_time}, finished on {self.finished_time}'
 

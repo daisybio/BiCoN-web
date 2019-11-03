@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, poll_status, analysis_result, \
-    results, DocumentationView, SourcesView, test, test_result
+from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, analysis_status_single, poll_status, analysis_result, \
+    results, bookmark, DocumentationView, SourcesView, test, test_result
 
 app_name = 'clustering'
 urlpatterns = [
@@ -13,7 +13,7 @@ urlpatterns = [
     # Only for post-requests. If called via head, just redirect to status
     path('analysis/submit', submit_analysis, name='submit_job'),
     # Page to monitor current status of job
-    path('analysis/status/<uuid:analysis_id>', analysis_status, name='analysis_status'),
+    path('analysis/status/<uuid:analysis_id>', analysis_status_single, name='analysis_status_single'),
     # Page to monitor current status of all the recent jobs
     path('analysis/status/', analysis_status, name='analysis_status'),
     # Url for polling the status of one task
@@ -27,6 +27,8 @@ urlpatterns = [
     path('analysis/test_result', test_result, name='test_result'),
     path('analysis/test', test, name='test'),
 
+    # Page to restore a session (bookmark a session)
+    path('bookmark/<uuid:session_id>', bookmark, name='bookmark'),
     # Page for documentation and source
     path('documentation/', DocumentationView.as_view(), name='documentation'),
     path('sources/', SourcesView.as_view(), name='sources'),

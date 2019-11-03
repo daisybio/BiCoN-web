@@ -7,7 +7,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <h1 class="card-title">Results</h1>
-            <p class="card-text">View all the previously submitted jobs</p>
+            <p class="card-text">Overview of all the finished jobs</p>
             <br/>
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -33,7 +33,7 @@
                             {% if job.status == 'SUCCESS' %}
                                 <td><a href="{% url 'clustering:analysis_result' job.job_id %}">Click me</a></td>
                             {% else %}
-                                <td><a href="{% url 'clustering:analysis_status' job.job_id %}">Click me</a></td>
+                                <td><a href="{% url 'clustering:analysis_status_single' job.job_id %}">Click me</a></td>
 
                             {% endif %}
                         </tr>
