@@ -73,16 +73,22 @@
                             You must select one option
                         </div>
                     </div>
-
-                    <div id="upload-expression-data" class="custom-file form-group" style="display: none">
-                        <input type="file" class="custom-file-input form-control" name="expression-data-file"
-                               id="expression-data-filename">
-                        <label class="custom-file-label" for="customFile">Upload expression file</label>
-                        <div id="expression_file_err" class="invalid-feedback">
-                            You must upload a file for this option
+                    <div id="upload-expression-data"  style="display: none">
+                        <div class="custom-file form-group">
+                            <input type="file" class="custom-file-input form-control" name="expression-data-file"
+                                   id="expression-data-filename">
+                            <label class="custom-file-label" for="customFile">Upload expression file</label>
+                            <div id="expression_file_err" class="invalid-feedback">
+                                You must upload a file for this option
+                            </div>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="expression-data-log2"
+                            name="expression-data-log2">
+                            <label class="custom-control-label" for="expression-data-log2">Expression data is log2
+                                transformed</label>
                         </div>
                     </div>
-
                 </div>
 
                 <!-- Tab: PPI -->

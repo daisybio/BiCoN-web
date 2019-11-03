@@ -68,10 +68,12 @@ def submit_analysis(request):
     # --- Step 1: Expression Data
     expr_data_selection = request.POST['expression-data']
     expr_data_str = None
+    is_log2 = False
 
     # Parse expression network from uploaded file into string (easier to serialize than file object)
     if expr_data_selection == 'custom':
         expr_data_str = request.FILES['expression-data-file'].read().decode('utf-8')
+        is_log2 = True if 'expression-data-log2' in request.POST.keys() else False
 
     # --- Step 2: PPI Network
     ppi_network_selection = request.POST['ppi-network']
@@ -142,7 +144,7 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, False], kw_args=algorithm_parameters, task_id=str(task_id), ignore_result=True)
+                                    L_g_min, L_g_max, is_log2], kw_args=algorithm_parameters, task_id=str(task_id), ignore_result=True)
 
     print(f'redicreting to analysis_status')
     return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
