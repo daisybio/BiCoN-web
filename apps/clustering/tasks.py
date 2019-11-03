@@ -587,7 +587,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     print(f'Execute model.run')
     # solution, score = model.run_search(max_iter=1)
-    max_iter = 1  # TODO REMOVE LATER
+    # max_iter = 1  # TODO REMOVE LATER
     try:
         solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
                                            max_iter, opt, show_pher, show_plot, save, show_nets)

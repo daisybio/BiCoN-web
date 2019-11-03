@@ -1,144 +1,209 @@
 {% extends "clustering/base.html" %}
 
-{% block title %}BiGAnts-Web Sources{% endblock %}
+{% block title %}About BiGAnts{% endblock %}
 
 {% block content %}
-    {% load static %}
-    <!-- Heading -->
+    <!-- Page Content -->
     <div class="row">
-        <div class="col-lg-12 text-justify">
-            <h1 class="mt-5">How to run the algorithm:</h1>
-            <small>Detailed description</small>
-
+        <div class="col-lg-10 text-justify">
+            <h1 class="mt-5">Documentation</h1>
             <div class="card mt-4">
                 <div class="card-body">
+                    <h2 class="card-title">Table of contents</h2>
+                    <ul>
+                        <li><a href='#data-format'>Data format</a></li>
+                        <li><a href='#data-processing'>Data processing</a></li>
+                        <li><a href='#parameters'>Algorithm parameters</a></li>
+                        <li><a href='#cite'>Cite</a></li>
+                        <li><a href='#contact'>Contact</a></li>
+                    </ul>
+                </div>
+                <div class="card-body">
 
-
-                    With the <a href="{% url 'clustering:analysis_setup' %}">BiGAnts </a> web application, you can run a
-                    bi-clustering
-                    algorithm to calculate a clustering of patients and genes and vizualise interactions between the
-                    genes, as well
-                    as (optionally) analyze clinical variables of patients and run gene set enrichment analyses.<br>
-                    Start a new
-                    analysis by clicking the button that says "Start new Analysis". You can then upload your data
-                    stepwise through
-                    the input form.<br>
-                    Input consists either of pre-defined datasets (expression data from Lung or Breast Cancer patients,
-                    as well as
-                    pre-compiled PPI networks) or your own uploaded datasets. Registered users can also store their own
-                    uploaded
-                    data and results by clicking "save data" on the first tab of the input form and re-use them. Your
-                    uploaded data
-                    must contain one file with expression data and one with PPI data. Optionally, you can upload a file
-                    with
-                    clinical data to analyze clinical variables for the resulting patient clusters.<br>
-                    <h3><b>Data input</b></h3>
-                    <br><br> <b>The expression data must be in TSV or CSV format with the first column consisting of
-                    patient
-                    identifiers of any kind, and generally have the following format:</b><br><br><img
-                        src={% static 'clustering/img/doc/small_expr_data.png' %}><br><br>
-                    The first row must contain NCBI gene IDs of genes in the data. One column, labeled as 'cancer type'
-                    in the
-                    example above, can contain information about the disease subtype, which separates patients into
-                    pre-defined
-                    groups. It will be recognized automatically. If this column assigns two clusters to patients, the
-                    data from this
-                    column can be vizualised in the heatmap to display the overlap between predefined clusters and the
-                    clusters
-                    calculated by the application.<br>
-                    Each row consists of gene expression values of the list of genes for a specific patient. The
-                    expression values
-                    must be written as numbers with a point as decimal separator (and not comma), e.g. 1.0000. They can,
-                    but do not
-                    have to be, logarithmized (which will be automatically recognized by the application).
-                    <br> You can use pre-defined expression data instead of uploading data, by checking the box that
-                    says "use
-                    pre-defined files" and selecting one of the datasets in the dropdown menu.<br><br>
-                    <b>The PPI data must be in CSV or TSV format have the following format:</b><br><br><img
-                        src={% static 'clustering/img/doc/small_prot_data.png' %}><br><br>Where each row consists of two
-                    NCBI gene
-                    IDs of the
-                    interacting genes.
-                    Instead of uploading a file, can use a pre-defined dataset by clicking on the label that says
-                    "import NDEx" and
-                    selecting a dataset.<br><br>
-                    Optionally, you can upload a file consisting of clinical data for the patients (check the box that
-                    says 'analyze
-                    metadata'). In this case, you can specify a column in your file indicating the survival time for
-                    patients, which
-                    can be used to display the differences in survival time between both calculated patient clusters.
-                    For this, type
-                    the exact name of the column in the field that is labeled "Name of "survival" column", without
-                    quotation marks.
-                    <br><br>
-                    <b>The clinical patient metadata should have a format similar to this:</b> <br><br><img
-                        src={% static 'clustering/img/doc/metadata_small.png' %}><br><br>
-                    Where the first column indicates the patient ID and each row consists of clinical data for a
-                    patient. Only
-                    binary variables (e.g. survival - yes or no) where information is available for at least 80% of
-                    patients will be
-                    analyzed in the application.
-                    <br><br><br><b><p style="font-size:16px">Algorithm parameters</p></b><br>In the last step of the
-                    upload form,
-                    you must specify the minimum and maximum number of genes you want per cluster. Also, you can choose
-                    how many
-                    iterations the algorithm should perform at most; for the settings used in the example runs, the
-                    algorithm
-                    usually converged between run 25 and 45.<br>
-                    If you wish to set more parameters, you can select the target gene set size, number of ants,
-                    evaporation rate,
-                    pheromone significance, HI significance and the stop criteria.<br>
-                    While the algorithm is running, a figure will be shown displaying the algorithm's progress
-                    (convergence
-                    behaviour). If the algorithm run has finished, you will see a message that says "Done" next to the
-                    input form.
-                    Then you can see your results in the lower part of the page.
-                    <br><br><br><b><p style="font-size:16px">How to re-use data</p></b><br> If you are logged in as a
-                    user, you can
-                    display old results again by clicking the button that says "Show old results" on the home page. If
-                    you want to
-                    re-run an analysis with previously uploaded data, click "Start new analysis" and select "Use own
-                    data" on the
-                    first tab of the input form and choose a file based on the date of upload. The corresponding PPI
-                    data will be
-                    used automatically and you can skip the steps for PPI file upload and for patient data analysis. If
-                    your
-                    previously uploaded data have included metadata, they will be included automatically in the new
-                    analysis.
-
-                    <br><br><br>
-                    <h3><b>Results</b></h3><br>After running the analysis, the results are visualized at the bottom part
-                    of the
-                    page. You can click thorugh the grey tab links for viewing all results.<br> The results consist of
-                    the following
-                    parts:<br><br>
-                    <p style="font-size:16px"><b>Heatmap</b></p><br>
-                    <img src={% static 'clustering/img/doc/heatmap_example.png' %}><br>
-                    The heatmap displays patient and gene clusters and gene expression levels. If your expression data
-                    included
-                    information on patient clusters, a colored bar next to the 'patients' axis indicates to which
-                    pre-defined
-                    cluster a patient belongs. By default, the algorithm only includes pre-defined clusters if there are
-                    two
-                    clusters of patients in the data (e.g. two cancer subtypes).<br><br>
-                    <b><p style="font-size:16px">PPI Graph</p></b><br>
-                    <img src={% static 'clustering/img/doc/ppi_graph_example.png' %}><br>
-                    In the PPI graph, you can see all interactions between genes in the result clusters. The node for
-                    each gene is
-                    colorized according to the z-score difference between both calculated patient clusters. Node forms
-                    correspond to
-                    the cluster of a gene. The PPI graph can be downloaded as an image or as a .json file by clicking
-                    the links
-                    below the graph.<br><br>
-                    <br><br><b><p style="font-size:16px">Survival analysis</p></b><br>
-                    If you have included survival time in your data, you can see a graph (Kaplan-Meyer plot) where the
-                    different
-                    survival times for both clusters are seen. The lines in the graph indicate the fraction of patients
-                    alive at
-                    each point of time, with one line for each cluster of patients.<br><br>
+                    <h2 class="card-title"><a name="data-format"></a>Data format</h2>
+                    <p>The algorithm needs as an input one CSV matrix with gene expression/methylation/any other
+                        numerical
+                        data and one CSV file with a network.</p>
+                    <h3>Numerical data</h3>
+                    <p>Numerical data is accepted in the following format:</p>
+                    <ul>
+                        <li>genes as rows.</li>
+                        <li>patients as columns.</li>
+                        <li>first column - genes IDs (can be any IDs).</li>
+                    </ul>
+                    <p>For instance:</p>
+                    <figure>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>GSM748056</th>
+                                <th>GSM748059</th>
+                                <th>...</th>
+                                <th>GSM748278</th>
+                                <th>GSM748279</th>
+                                <th>GSM1465989</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>1454</td>
+                                <td>0.053769</td>
+                                <td>0.117412</td>
+                                <td>...</td>
+                                <td>-0.392363</td>
+                                <td>-1.870838</td>
+                                <td>-1.432554</td>
+                            </tr>
+                            <tr>
+                                <td>201931</td>
+                                <td>-0.618279</td>
+                                <td>0.278637</td>
+                                <td>...</td>
+                                <td>0.803541</td>
+                                <td>-0.514947</td>
+                                <td>2.361925</td>
+                            </tr>
+                            <tr>
+                                <td>8761</td>
+                                <td>0.215820</td>
+                                <td>-0.343865</td>
+                                <td>...</td>
+                                <td>0.700430</td>
+                                <td>0.073281</td>
+                                <td>-0.977656</td>
+                            </tr>
+                            <tr>
+                                <td>2703</td>
+                                <td>-0.504701</td>
+                                <td>1.295049</td>
+                                <td>...</td>
+                                <td>1.861972</td>
+                                <td>0.601808</td>
+                                <td>0.191013</td>
+                            </tr>
+                            <tr>
+                                <td>26207</td>
+                                <td>-0.626415</td>
+                                <td>-0.646977</td>
+                                <td>...</td>
+                                <td>2.331724</td>
+                                <td>2.339122</td>
+                                <td>-0.100924</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </figure>
+                    <p>Our test data can be downloaded <a
+                            href='https://drive.google.com/drive/folders/1J0XRrklwcV_Cgy_9Ay_6yJrN_x28Cosk?usp=sharing'>here</a>
+                        and further used as a reference for the correct format.</p>
+                    <h3>Network</h3>
+                    <p>Even though we support our users with already processed PPI networks, it is still possible to
+                        load a
+                        user-defined network.
+                        An interaction network should be present as a CSV table with two columns that represent two
+                        interacting genes. <strong>Without a header!</strong></p>
+                    <p>For instance:</p>
+                    <figure>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th>6416</th>
+                                <th>2318</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>6416</td>
+                                <td>5371</td>
+                            </tr>
+                            <tr>
+                                <td>6416</td>
+                                <td>351</td>
+                            </tr>
+                            <tr>
+                                <td>6416</td>
+                                <td>409</td>
+                            </tr>
+                            <tr>
+                                <td>6416</td>
+                                <td>5932</td>
+                            </tr>
+                            <tr>
+                                <td>6416</td>
+                                <td>1956</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </figure>
+                    <p>We also provide an example of a PPI <a
+                            href='https://drive.google.com/drive/folders/1J0XRrklwcV_Cgy_9Ay_6yJrN_x28Cosk?usp=sharing'>here</a>.
+                    </p>
+                    <h3>Metadata</h3>
+                    <p>Add clinical data/survival data to enable further analysis. If you do not want to upload
+                        additional
+                        metadata, you can go to the next step.</p>
+                    <h2 class="card-title"><a name="data-processing"></a>Data processing</h2>
+                    <p>For internal calculations, BiGants normalizes the data by applying log2 transformation and then
+                        applying z-scores normalization. If your data was already log2 scaled, please remove a check
+                        from
+                        &quot;Log2 transform&quot;.</p>
+                    <h2 class="card-title">Algorithm parameters</h2>
+                    <p>The main parameters of the algorithm are the sizes of the desired solution.
+                        Please, indicate what is a minimal and maximal number of genes you would like to have in
+                        <strong>each</strong>
+                        subnetwork. </p>
+                    <p>The algorithm works such that in most of the cases default parameters deliver the optimal
+                        performance.
+                        If you want to set advanced parameters, please check &quot;Use advanced parameters: Yes&quot;.
+                        A user can specify the following parameters:</p>
+                    <ul>
+                        <li><strong>Gene set size</strong> - number of genes considered in the analysis. The algorithm
+                            usually preselects 3000 the most variant genes to speed-up the calculation. This is usually
+                            an
+                            optimal choice as genes which can be selected for clustering, are supposed to have a high
+                            variance. Therefore, if needed this parameter can be increased, but we do not recommend to
+                            go
+                            higher than 5000 to guarantee a reasonable run-tyme
+                        </li>
+                        <li><strong>Maximum number of iterations</strong> - we generally do not recommend to terminate
+                            the
+                            algorithm before convergence which is usually reached in 30-60 iterations) and therefore we
+                            remend to change this parameter only for testing purposes
+                        </li>
+                        <li><strong>Number of ants</strong> - more ants can make more search space exploration, but also
+                            increase the run-time
+                        </li>
+                        <li><strong>Evaporation rate</strong> - higher evaporation rate will speed-up convergence, but
+                            also
+                            increase risks to get stuck in a local minima
+                        </li>
+                        <li><strong>Pheromone significance</strong> and <strong>Heuristic Information
+                            significance</strong>
+                            please modify it only if you really well aware of the role of those parameters in Ant Colony
+                            Optimization algorithms convergence.
+                        </li>
+                    </ul>
+                    <h2 class="card-title"><a name="cite"></a>Cite</h2>
+                    <p>BiGants was developed by the <a href='https://biomedical-big-data.de'>Big Data in BioMedicine group</a>
+                        at <a href='https://www.baumbachlab.net/'>Chair of Experimental Bioinformatics</a>.</p>
+                    <p>If you use BiGAnts in your research, we kindly ask you to cite the following manuscript:
+                        <br>
+                        <code>Lazareva, O., Van Do, H., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T., List, M.:
+                            BiGAnts: Network-constrained biclustering of patients and omics data. [Submitted]</code></p>
+                    <h2 class="card-title"><a name="contact" class="md-header-anchor"></a>Contact</h2>
+                    <p>If you want to contact us regarding BiGAnts:</p>
+                    <ul>
+                        <li><a href='mailto:olga.lazareva@wzw.tum.de?subject=[BiGAnts-Web]%20BiGAnts%20WEB'>Olga
+                            Lazareva</a></li>
+                        <li><a href='mailto:markus.list@wzw.tum.de?subject=[BiGAnts-Web]%20BiGAnts%20WEB'>Markus
+                            List</a>
+                        </li>
+                    </ul>
 
                 </div>
             </div>
+
         </div>
     </div>
 {% endblock %}

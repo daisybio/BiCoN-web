@@ -56,15 +56,15 @@
                                    class="custom-control-input"
                                    value="lung-cancer" onclick="hideElement('upload-expression-data');">
                             <label class="custom-control-label" for="expression-data_1">Lung cancer dataset
-                                (predefined)</label>
+                                (demo data)</label>
                         </div>
-                        <div class="custom-control custom-radio">
-                            <input type="radio" id="expression-data_2" name="expression-data"
-                                   class="custom-control-input"
-                                   value="brest-cancer" onclick="hideElement('upload-expression-data');">
-                            <label class="custom-control-label" for="expression-data_2">Breast cancer dataset
-                                (predefined)</label>
-                        </div>
+{#                        <div class="custom-control custom-radio">#}
+{#                            <input type="radio" id="expression-data_2" name="expression-data"#}
+{#                                   class="custom-control-input"#}
+{#                                   value="brest-cancer" onclick="hideElement('upload-expression-data');">#}
+{#                            <label class="custom-control-label" for="expression-data_2">Breast cancer dataset#}
+{#                                (demo data)</label>#}
+{#                        </div>#}
                         <div class="custom-control custom-radio">
                             <input type="radio" id="expression-data_3" name="expression-data"
                                    class="custom-control-input"
@@ -174,7 +174,7 @@
 
                         <div id="additional-metadata" style="display: none" class="form-group">
                             <div id="column-metadata" class="form-group">
-                                <label class="form-control-label" for="survival-col">Metadata column name</label>
+                                <label class="form-control-label" for="survival-col">Survival column-name</label>
                                 <input class="form-control" type="text" name="survival-col" id="survival-col"
                                        placeholder="Exact name of your metadata column name">
                                 <div id="survival-col_err" class="invalid-feedback">
