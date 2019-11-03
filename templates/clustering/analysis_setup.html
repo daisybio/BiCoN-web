@@ -27,12 +27,15 @@
         <div class="card-body">
             <h1 class="card-title">Setup new analysis</h1>
 
-
-            {% if error_messages %}
+            {% if error_list %}
                 <div class="alert alert-danger">
                     <strong>Wrong parameters!</strong> Please check your input and submit again.
                     The following errors occured:<br>
-                    Check the progress bar below and the printed error messages and try to rerun you analysis
+                    <ul>
+                        {% for error in error_list %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             {% endif %}
 
