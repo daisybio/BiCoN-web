@@ -1,14 +1,10 @@
-import imp
 import json
 import math
-import os
-import time
+import traceback
 from io import StringIO, BytesIO
 from os import path
-from shutil import copyfile
 
 import celery.states
-import gseapy as gp
 import matplotlib.pyplot as plt
 import mygene
 import ndex2
@@ -19,6 +15,7 @@ import plotly
 import plotly.graph_objs as go
 import seaborn as sns
 from celery import shared_task, current_task, states
+from celery.exceptions import Ignore
 from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
@@ -30,6 +27,7 @@ from bigants import data_preprocessing
 from bigants import BiGAnts
 
 # import apps.clustering.weighted_aco_lib as lib
+from apps.clustering.models import Job
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 sns.set(color_codes=True)
@@ -60,6 +58,19 @@ this file contains methods for all computationally intensive tasks needed for al
 - read_enrichment - reads results of enrichment analysis for one patient cluster and outputs dictionary with results
 - read_enrichment_2 - the same as read_enrichment, but reads terms that appear only in cluster 1 or only in cluster 2
 """
+
+
+class ClusteringTaskBase(celery.Task):
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        job_finished(task_id, states.FAILURE)
+
+
+def job_finished(task_id, job_status):
+    job = Job.objects.get(job_id=task_id)
+
+    job.status = job_status
+    job.finished_time = timezone.now()
+    job.save()
 
 
 # def check_input_files():
@@ -101,7 +112,6 @@ def parse_expression_data(option, expr_raw_str=None):
         nbr_groups = 2
 
     elif option == 'custom':
-        # expr_str, nbr_groups = preprocess_file_2(expr_raw_str)
         expr_str = expr_raw_str
         clinical_df = pd.DataFrame()
         survival_col_name = None
@@ -123,52 +133,52 @@ def parse_ppi_data(option, ppi_raw_str=None):
     return ppi_str
 
 
-@shared_task(name="make_empty_figure")
-def make_empty_figure(session_id):
-    """
-    Create static picutures of the progress?!
-    TODO Remove? Use bootstrap and js
-    :param session_id:
-    :return:
-    """
-    fig = plt.figure(figsize=(10, 8))
-    if (session_id == "none"):
-        plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress.png'))
-        plt.close(fig)
-    else:
-        plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress_" + session_id + ".png'))
-        plt.close(fig)
+# @shared_task(name="make_empty_figure")
+# def make_empty_figure(session_id):
+#     """
+#     Create static picutures of the progress?!
+#     TODO Remove? Use bootstrap and js
+#     :param session_id:
+#     :return:
+#     """
+#     fig = plt.figure(figsize=(10, 8))
+#     if (session_id == "none"):
+#         plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress.png'))
+#         plt.close(fig)
+#     else:
+#         plt.savefig(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/progress_" + session_id + ".png'))
+#         plt.close(fig)
 
 
-# empty the log file (session ID in path)
-@shared_task(name="empty_log_file")
-def empty_log_file(session_id):
-    """
-    Some logfiles, presumably just to check the status, not detailed logs?!
-    TODO: Remove and use celary to give status?
-    :param session_id:
-    :return:
-    """
-    if (session_id == "none"):
-        text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
-        text_file.write("")
-        text_file.close()
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt'))):
-            text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
-            text_file.write("")
-            text_file.close()
-    else:
-        text_file = open(
-            path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
-        text_file.write("")
-        text_file.close()
-        if (
-                os.path.isfile(
-                    path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt'))):
-            text_file = open(
-                path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
-            text_file.write("")
-            text_file.close()
+# # empty the log file (session ID in path)
+# @shared_task(name="empty_log_file")
+# def empty_log_file(session_id):
+#     """
+#     Some logfiles, presumably just to check the status, not detailed logs?!
+#     TODO: Remove and use celary to give status?
+#     :param session_id:
+#     :return:
+#     """
+#     if (session_id == "none"):
+#         text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
+#         text_file.write("")
+#         text_file.close()
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt'))):
+#             text_file = open(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console.txt", "w'))
+#             text_file.write("")
+#             text_file.close()
+#     else:
+#         text_file = open(
+#             path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
+#         text_file.write("")
+#         text_file.close()
+#         if (
+#                 os.path.isfile(
+#                     path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt'))):
+#             text_file = open(
+#                 path.join(settings.MEDIA_ROOT, 'clustering/userfiles/output_console_" + session_id + ".txt", "w'))
+#             text_file.write("")
+#             text_file.close()
 
 
 ########################################################
@@ -178,288 +188,288 @@ def empty_log_file(session_id):
 #### down the page       ###############################
 ########################################################
 
-@shared_task(name="preprocess_clinical_file")
-def preprocess_clinical_file(clinical_str):
-    """
-    Create TSV from CSV (or do nothing)
-    TODO: MAKE EFFICIENT; REMOVE?!
-    :param clinical_str:
-    :return:
-    """
-    if (len(clinical_str.split("\n")[0].split("\t")) > 2):
-        return (clinical_str)
-    elif ("," in clinical_str):
-        # replace comma by tab if file is CSV and not TSV
-        if ("\t" not in clinical_str.split("\n")[0]):
-            clinical_str = clinical_str.replace(",", "\t")
-    return clinical_str
+# @shared_task(name="preprocess_clinical_file")
+# def preprocess_clinical_file(clinical_str):
+#     """
+#     Create TSV from CSV (or do nothing)
+#     TODO: MAKE EFFICIENT; REMOVE?!
+#     :param clinical_str:
+#     :return:
+#     """
+#     if (len(clinical_str.split("\n")[0].split("\t")) > 2):
+#         return (clinical_str)
+#     elif ("," in clinical_str):
+#         # replace comma by tab if file is CSV and not TSV
+#         if ("\t" not in clinical_str.split("\n")[0]):
+#             clinical_str = clinical_str.replace(",", "\t")
+#     return clinical_str
 
 
-# preprocess PPI file
-@shared_task(name="preprocess_ppi_file")
-def preprocess_ppi_file(ppi_str):
-    """
-    Converts csv into tsv (see above, can be made more efficient)
-    Removes first row if it contains title columns ?!
-    Take only the right two columns
-    Misc??
-    TODO Refractor with pandas
-    :param ppi_str:
-    :return:
-    """
-    ppistr_split = ppi_str.split("\n")
-    # check if file is csv or tsv and convert it to tsv format
-    if ("\t" not in ppistr_split[2]):
-        ppi_str = ppi_str.replace(",", "\t")
-        ppistr_split = ppi_str.split("\n")
-    ppistr_split_new = []
-    len_first_line = 0
-    len_second_line = 0
-    for elem in ppistr_split[0].split("\t"):
-        if (elem != ""):
-            len_first_line = len_first_line + 1
-    for elem in ppistr_split[1].split("\t"):
-        if (elem != ""):
-            len_second_line = len_second_line + 1
-    # delete first row if it contains title columns
-    if (len_second_line > len_first_line):
-        del ppistr_split[0]
-    # take only the right two columns
-    for line in ppistr_split:
-        if (len(line.split("\t")) > 1):
-            if (len(line.split("\t")) > 2):
-                line_length = len(line.split("\t"))
-                line = "\t".join([line.split("\t")[line_length - 2], line.split("\t")[line_length - 1]])
-            # check if line contains two integers with protein IDs
-            if (str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n", "")).isdigit()):
-                ppistr_split_new.append(line)
-    ppi_str = "\n".join(ppistr_split_new)
-    return (ppi_str)
+# # preprocess PPI file
+# @shared_task(name="preprocess_ppi_file")
+# def preprocess_ppi_file(ppi_str):
+#     """
+#     Converts csv into tsv (see above, can be made more efficient)
+#     Removes first row if it contains title columns ?!
+#     Take only the right two columns
+#     Misc??
+#     TODO Refractor with pandas
+#     :param ppi_str:
+#     :return:
+#     """
+#     ppistr_split = ppi_str.split("\n")
+#     # check if file is csv or tsv and convert it to tsv format
+#     if ("\t" not in ppistr_split[2]):
+#         ppi_str = ppi_str.replace(",", "\t")
+#         ppistr_split = ppi_str.split("\n")
+#     ppistr_split_new = []
+#     len_first_line = 0
+#     len_second_line = 0
+#     for elem in ppistr_split[0].split("\t"):
+#         if (elem != ""):
+#             len_first_line = len_first_line + 1
+#     for elem in ppistr_split[1].split("\t"):
+#         if (elem != ""):
+#             len_second_line = len_second_line + 1
+#     # delete first row if it contains title columns
+#     if (len_second_line > len_first_line):
+#         del ppistr_split[0]
+#     # take only the right two columns
+#     for line in ppistr_split:
+#         if (len(line.split("\t")) > 1):
+#             if (len(line.split("\t")) > 2):
+#                 line_length = len(line.split("\t"))
+#                 line = "\t".join([line.split("\t")[line_length - 2], line.split("\t")[line_length - 1]])
+#             # check if line contains two integers with protein IDs
+#             if (str(line.split("\t")[0]).isdigit() and str(line.split("\t")[1].strip().replace("\n", "")).isdigit()):
+#                 ppistr_split_new.append(line)
+#     ppi_str = "\n".join(ppistr_split_new)
+#     return (ppi_str)
 
 
-# Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information	
-@shared_task(name="preprocess_file")
-def preprocess_file(expr_str):
-    expr_str = expr_str.replace("cancer_type", "disease_type")
-    if (len(expr_str.split("\n")[0].split("\t")) > 2):
-        expr_str_split = expr_str.split("\n")
-        # replace column name for disease type
-        if ("disease_type" not in expr_str_split[0]):
-            if ("subtype" in expr_str_split[0]):
-                expr_str = expr_str.replace("subtype", "disease_type")
-        # remove name of first column (left upper corner)
-        expr_str_first_colname = expr_str_split[0].split("\t")[0]
-        expr_str = expr_str.replace(expr_str_first_colname, "", 1)
-        expr_stringio = StringIO(expr_str)
-        exprdf = pd.read_csv(expr_stringio, sep='\t')
-        # check for column with two unique entries (pre-defined clusters)
-        for column_name, column in exprdf.transpose().iterrows():
-            if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
-                if (len(column.unique()) == 2):
-                    expr_str = expr_str.replace(column_name, "disease_type")
-    elif ("," in expr_str):
-        # replace comma by tab if file is CSV and not TSV
-        if ("\t" not in expr_str.split("\n")[0]):
-            expr_str_split = expr_str.split("\n")
-            # replace "subtype" by "cancer type"
-            if ("disease_type" not in expr_str):
-                if ("subtype" in expr_str):
-                    expr_str = expr_str.replace("subtype", "disease_type")
-            expr_str_first_colname = expr_str_split[0].split(",")[0]
-            expr_str = expr_str.replace(expr_str_first_colname, "", 1)
-            expr_str = expr_str.replace(",", "\t")
-            expr_str_split = expr_str.split("\n")
-            # remove entries after given length if expression data file is too big
-            if (len(expr_str_split) > 300):
-                expr_str = "\n".join(expr_str_split[:200])
-            else:
-                expr_str = "\n".join(expr_str_split)
-            expr_stringio = StringIO(expr_str)
-            expr_str = expr_str.replace("MCI", "CTL")
-            exprdf = pd.read_csv(expr_stringio, sep='\t')
-            # find column with two unique entries that represents disease type
-            for column_name, column in exprdf.transpose().iterrows():
-                if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
-                    if (len(column.unique()) == 2):
-                        expr_str = expr_str.replace(column_name, "disease_type")
-            #### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
-            done1 = "false"
-            for column_name, column in exprdf.transpose().iterrows():
-                if (not column_name.isdigit()):
-                    if (len(column.unique()) < 6):
-                        nbr_col = len(column.unique())
-                        expr_str = expr_str.replace(column_name, "disease_type")
-                        expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
-                        if (len(column.unique()) > 2 and done1 == "false"):
-                            expr_str_split_2 = []
-                            expr_str_split_2.append(expr_str_split[0])
-                            type1 = column.value_counts().index.tolist()[0]
-                            type2 = column.value_counts().index.tolist()[1]
-                            for i in range(0, len(list(column)) - 1):
-                                if (list(column)[i] == type1 or list(column)[i] == type2):
-                                    expr_str_split_2.append(expr_str_split[i + 1])
-                            expr_str = "\n".join(expr_str_split_2)
-                            done1 = "true"
-            ########################
-
-            expr_stringio = StringIO(expr_str)
-            exprdf = pd.read_csv(expr_stringio, sep='\t')
-            return (expr_str)
-
-
-# the same as preprocess_file, but returns number of pre-defined clusters
-@shared_task(name="preprocess_file_2")
-def preprocess_file_2(expr_str):
-    expr_str = expr_str.replace("cancer_type", "disease_type")
-    nbr_col = 1
-    if (len(expr_str.split("\n")[0].split("\t")) > 2):
-        expr_str_split = expr_str.split("\n")
-        # replace column name for disease type
-        if ("disease_type" not in expr_str_split[0]):
-            if ("subtype" in expr_str_split[0]):
-                expr_str = expr_str.replace("subtype", "disease_type")
-        # remove name of first column (left upper corner)
-        expr_str_first_colname = expr_str_split[0].split("\t")[0]
-        expr_str = expr_str.replace(expr_str_first_colname, "", 1)
-        expr_stringio = StringIO(expr_str)
-        exprdf = pd.read_csv(expr_stringio, sep='\t')
-        done1 = "false"
-        # check for column with two unique entries (pre-defined clusters)
-        for column_name, column in exprdf.transpose().iterrows():
-            if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
-                if (len(column.unique()) == 2):
-                    expr_str = expr_str.replace(column_name, "disease_type")
-                    nbr_col = 2
-                    done1 = "true"
-        # check for column with less than 6 unique entries (pre-defined clusters)
-        for column_name, column in exprdf.transpose().iterrows():
-            if (not column_name.isdigit()):
-                if (len(column.unique()) < 6):
-                    nbr_col = len(column.unique())
-                    expr_str = expr_str.replace(column_name, "disease_type")
-                    expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
-                    if (len(column.unique()) > 2 and done1 == "false"):
-                        expr_str_split_2 = []
-                        expr_str_split_2.append(expr_str_split[0])
-                        for i in range(0, len(list(column)) - 1):
-                            expr_str_split_2.append(expr_str_split[i + 1])
-                        expr_str = "\n".join(expr_str_split_2)
-                        done1 = "true"
-        return (expr_str, nbr_col)
-    elif ("," in expr_str):
-        # replace comma by tab if file is CSV and not TSV
-        if ("\t" not in expr_str.split("\n")[0]):
-            expr_str_split = expr_str.split("\n")
-            # replace "subtype" by "cancer type"
-            if ("disease_type" not in expr_str):
-                if ("subtype" in expr_str):
-                    expr_str = expr_str.replace("subtype", "disease_type")
-            expr_str_first_colname = expr_str_split[0].split(",")[0]
-            expr_str = expr_str.replace(expr_str_first_colname, "", 1)
-            expr_str = expr_str.replace(",", "\t")
-            expr_str_split = expr_str.split("\n")
-            # remove entries after given length if expression data file is too big
-            if (len(expr_str_split) > 300):
-                expr_str = "\n".join(expr_str_split[:200])
-            else:
-                expr_str = "\n".join(expr_str_split)
-            expr_stringio = StringIO(expr_str)
-            expr_str = expr_str.replace("MCI", "CTL")
-            exprdf = pd.read_csv(expr_stringio, sep='\t')
-            # find column with two unique entries that represents disease type
-            for column_name, column in exprdf.transpose().iterrows():
-                if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
-                    if (len(column.unique()) == 2):
-                        # print(column_name)
-                        expr_str = expr_str.replace(column_name, "disease_type")
-                        nbr_col = 2
-            #### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
-            done1 = "false"
-            for column_name, column in exprdf.transpose().iterrows():
-                if (not column_name.isdigit()):
-                    if (len(column.unique()) < 6):
-                        nbr_col = len(column.unique())
-                        expr_str = expr_str.replace(column_name, "disease_type")
-                        expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
-                        if (len(column.unique()) > 2 and done1 == "false"):
-                            expr_str_split_2 = []
-                            expr_str_split_2.append(expr_str_split[0])
-                            for i in range(0, len(list(column)) - 1):
-                                # if(list(column)[i] == type1 or list(column)[i] == type2):
-                                expr_str_split_2.append(expr_str_split[i + 1])
-                            expr_str = "\n".join(expr_str_split_2)
-                            done1 = "true"
-            ########################
-
-            return expr_str, nbr_col
+# # Method to convert expression data file to TSV format and find and rename (for later recongition) column with disease type information
+# @shared_task(name="preprocess_file")
+# def preprocess_file(expr_str):
+#     expr_str = expr_str.replace("cancer_type", "disease_type")
+#     if (len(expr_str.split("\n")[0].split("\t")) > 2):
+#         expr_str_split = expr_str.split("\n")
+#         # replace column name for disease type
+#         if ("disease_type" not in expr_str_split[0]):
+#             if ("subtype" in expr_str_split[0]):
+#                 expr_str = expr_str.replace("subtype", "disease_type")
+#         # remove name of first column (left upper corner)
+#         expr_str_first_colname = expr_str_split[0].split("\t")[0]
+#         expr_str = expr_str.replace(expr_str_first_colname, "", 1)
+#         expr_stringio = StringIO(expr_str)
+#         exprdf = pd.read_csv(expr_stringio, sep='\t')
+#         # check for column with two unique entries (pre-defined clusters)
+#         for column_name, column in exprdf.transpose().iterrows():
+#             if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+#                 if (len(column.unique()) == 2):
+#                     expr_str = expr_str.replace(column_name, "disease_type")
+#     elif ("," in expr_str):
+#         # replace comma by tab if file is CSV and not TSV
+#         if ("\t" not in expr_str.split("\n")[0]):
+#             expr_str_split = expr_str.split("\n")
+#             # replace "subtype" by "cancer type"
+#             if ("disease_type" not in expr_str):
+#                 if ("subtype" in expr_str):
+#                     expr_str = expr_str.replace("subtype", "disease_type")
+#             expr_str_first_colname = expr_str_split[0].split(",")[0]
+#             expr_str = expr_str.replace(expr_str_first_colname, "", 1)
+#             expr_str = expr_str.replace(",", "\t")
+#             expr_str_split = expr_str.split("\n")
+#             # remove entries after given length if expression data file is too big
+#             if (len(expr_str_split) > 300):
+#                 expr_str = "\n".join(expr_str_split[:200])
+#             else:
+#                 expr_str = "\n".join(expr_str_split)
+#             expr_stringio = StringIO(expr_str)
+#             expr_str = expr_str.replace("MCI", "CTL")
+#             exprdf = pd.read_csv(expr_stringio, sep='\t')
+#             # find column with two unique entries that represents disease type
+#             for column_name, column in exprdf.transpose().iterrows():
+#                 if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+#                     if (len(column.unique()) == 2):
+#                         expr_str = expr_str.replace(column_name, "disease_type")
+#             #### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
+#             done1 = "false"
+#             for column_name, column in exprdf.transpose().iterrows():
+#                 if (not column_name.isdigit()):
+#                     if (len(column.unique()) < 6):
+#                         nbr_col = len(column.unique())
+#                         expr_str = expr_str.replace(column_name, "disease_type")
+#                         expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
+#                         if (len(column.unique()) > 2 and done1 == "false"):
+#                             expr_str_split_2 = []
+#                             expr_str_split_2.append(expr_str_split[0])
+#                             type1 = column.value_counts().index.tolist()[0]
+#                             type2 = column.value_counts().index.tolist()[1]
+#                             for i in range(0, len(list(column)) - 1):
+#                                 if (list(column)[i] == type1 or list(column)[i] == type2):
+#                                     expr_str_split_2.append(expr_str_split[i + 1])
+#                             expr_str = "\n".join(expr_str_split_2)
+#                             done1 = "true"
+#             ########################
+#
+#             expr_stringio = StringIO(expr_str)
+#             exprdf = pd.read_csv(expr_stringio, sep='\t')
+#             return (expr_str)
 
 
-@shared_task(name="add_loading_image")
-def add_loading_image(session_id):
-    if (session_id == "none"):
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
-            copyfile(path.join(settings.MEDIA_ROOT,
-                               'clustering/userfiles/loading.gif", "/code/clustering/static/loading_1.gif'))
-        else:
-            print("loading image not found")
-    else:
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
-            copyfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'),
-                     path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
-        else:
-            print("loading image not found")
-
-
-@shared_task(name="remove_loading_image")
-def remove_loading_image(session_id):
-    if (session_id == "none"):
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))
-    else:
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
-        if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
-            os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
-
-
-##################################################################
-################## used for metadata display #####################
-##################################################################
-
-
-# read metadata from file and return array with data
-@shared_task(name="list_metadata_from_file")
-def list_metadata_from_file(path):
-    # used for reading metadata
-    fh1 = open(path)
-    lines = fh1.read()
-    if (lines == "NA"):
-        return ({}, {}, {})
-    # remove html from metadata file and replace table elements by tab
-    # if no data in file, remove empty dictionaries
-    if (len(lines.split('\n')) < 3):
-        return ({}, {}, {})
-    # read content from lines
-    line0 = lines.split('\n')[0].split('\t')
-    line1 = lines.split('\n')[1].split('\t')
-    line2 = lines.split('\n')[2].split('\t')
-    ret = []
-    dict3 = {}
-    dict1 = {}
-    dict2 = {}
-    dict0 = {}
-    ctr = 0
-    dict3['params'] = line0
-    dict3['gr1'] = line1
-    dict3['gr2'] = line2
-    dict3['all'] = zip(dict3['params'], dict3['gr1'], dict3['gr2'])
-    # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
-    for i in range(0, len(line0) - 1):
-        dict0[i] = line0[i]
-        dict1[dict0[i]] = line1[i]
-        dict2[dict0[i]] = line2[i]
-        ctr = ctr + 1
-    return (dict0, dict1, dict2)
+# # the same as preprocess_file, but returns number of pre-defined clusters
+# @shared_task(name="preprocess_file_2")
+# def preprocess_file_2(expr_str):
+#     expr_str = expr_str.replace("cancer_type", "disease_type")
+#     nbr_col = 1
+#     if (len(expr_str.split("\n")[0].split("\t")) > 2):
+#         expr_str_split = expr_str.split("\n")
+#         # replace column name for disease type
+#         if ("disease_type" not in expr_str_split[0]):
+#             if ("subtype" in expr_str_split[0]):
+#                 expr_str = expr_str.replace("subtype", "disease_type")
+#         # remove name of first column (left upper corner)
+#         expr_str_first_colname = expr_str_split[0].split("\t")[0]
+#         expr_str = expr_str.replace(expr_str_first_colname, "", 1)
+#         expr_stringio = StringIO(expr_str)
+#         exprdf = pd.read_csv(expr_stringio, sep='\t')
+#         done1 = "false"
+#         # check for column with two unique entries (pre-defined clusters)
+#         for column_name, column in exprdf.transpose().iterrows():
+#             if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+#                 if (len(column.unique()) == 2):
+#                     expr_str = expr_str.replace(column_name, "disease_type")
+#                     nbr_col = 2
+#                     done1 = "true"
+#         # check for column with less than 6 unique entries (pre-defined clusters)
+#         for column_name, column in exprdf.transpose().iterrows():
+#             if (not column_name.isdigit()):
+#                 if (len(column.unique()) < 6):
+#                     nbr_col = len(column.unique())
+#                     expr_str = expr_str.replace(column_name, "disease_type")
+#                     expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
+#                     if (len(column.unique()) > 2 and done1 == "false"):
+#                         expr_str_split_2 = []
+#                         expr_str_split_2.append(expr_str_split[0])
+#                         for i in range(0, len(list(column)) - 1):
+#                             expr_str_split_2.append(expr_str_split[i + 1])
+#                         expr_str = "\n".join(expr_str_split_2)
+#                         done1 = "true"
+#         return (expr_str, nbr_col)
+#     elif ("," in expr_str):
+#         # replace comma by tab if file is CSV and not TSV
+#         if ("\t" not in expr_str.split("\n")[0]):
+#             expr_str_split = expr_str.split("\n")
+#             # replace "subtype" by "cancer type"
+#             if ("disease_type" not in expr_str):
+#                 if ("subtype" in expr_str):
+#                     expr_str = expr_str.replace("subtype", "disease_type")
+#             expr_str_first_colname = expr_str_split[0].split(",")[0]
+#             expr_str = expr_str.replace(expr_str_first_colname, "", 1)
+#             expr_str = expr_str.replace(",", "\t")
+#             expr_str_split = expr_str.split("\n")
+#             # remove entries after given length if expression data file is too big
+#             if (len(expr_str_split) > 300):
+#                 expr_str = "\n".join(expr_str_split[:200])
+#             else:
+#                 expr_str = "\n".join(expr_str_split)
+#             expr_stringio = StringIO(expr_str)
+#             expr_str = expr_str.replace("MCI", "CTL")
+#             exprdf = pd.read_csv(expr_stringio, sep='\t')
+#             # find column with two unique entries that represents disease type
+#             for column_name, column in exprdf.transpose().iterrows():
+#                 if ((not column_name.isdigit()) and (not (column_name == "disease_type"))):
+#                     if (len(column.unique()) == 2):
+#                         # print(column_name)
+#                         expr_str = expr_str.replace(column_name, "disease_type")
+#                         nbr_col = 2
+#             #### uncomment the following lines for automatically selecting the two biggest clusters of patients if more than 2 clusters were given
+#             done1 = "false"
+#             for column_name, column in exprdf.transpose().iterrows():
+#                 if (not column_name.isdigit()):
+#                     if (len(column.unique()) < 6):
+#                         nbr_col = len(column.unique())
+#                         expr_str = expr_str.replace(column_name, "disease_type")
+#                         expr_str_split[0] = expr_str_split[0].replace(column_name, "disease_type")
+#                         if (len(column.unique()) > 2 and done1 == "false"):
+#                             expr_str_split_2 = []
+#                             expr_str_split_2.append(expr_str_split[0])
+#                             for i in range(0, len(list(column)) - 1):
+#                                 # if(list(column)[i] == type1 or list(column)[i] == type2):
+#                                 expr_str_split_2.append(expr_str_split[i + 1])
+#                             expr_str = "\n".join(expr_str_split_2)
+#                             done1 = "true"
+#             ########################
+#
+#             return expr_str, nbr_col
+#
+#
+# @shared_task(name="add_loading_image")
+# def add_loading_image(session_id):
+#     if (session_id == "none"):
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
+#             copyfile(path.join(settings.MEDIA_ROOT,
+#                                'clustering/userfiles/loading.gif", "/code/clustering/static/loading_1.gif'))
+#         else:
+#             print("loading image not found")
+#     else:
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'))):
+#             copyfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading.gif'),
+#                      path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
+#         else:
+#             print("loading image not found")
+#
+#
+# @shared_task(name="remove_loading_image")
+# def remove_loading_image(session_id):
+#     if (session_id == "none"):
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))):
+#             os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1.gif'))
+#     else:
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
+#             os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
+#         if (os.path.isfile(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))):
+#             os.unlink(path.join(settings.MEDIA_ROOT, 'clustering/userfiles/loading_1_" + session_id + ".gif'))
+#
+#
+# ##################################################################
+# ################## used for metadata display #####################
+# ##################################################################
+#
+#
+# # read metadata from file and return array with data
+# @shared_task(name="list_metadata_from_file")
+# def list_metadata_from_file(path):
+#     # used for reading metadata
+#     fh1 = open(path)
+#     lines = fh1.read()
+#     if (lines == "NA"):
+#         return ({}, {}, {})
+#     # remove html from metadata file and replace table elements by tab
+#     # if no data in file, remove empty dictionaries
+#     if (len(lines.split('\n')) < 3):
+#         return ({}, {}, {})
+#     # read content from lines
+#     line0 = lines.split('\n')[0].split('\t')
+#     line1 = lines.split('\n')[1].split('\t')
+#     line2 = lines.split('\n')[2].split('\t')
+#     ret = []
+#     dict3 = {}
+#     dict1 = {}
+#     dict2 = {}
+#     dict0 = {}
+#     ctr = 0
+#     dict3['params'] = line0
+#     dict3['gr1'] = line1
+#     dict3['gr2'] = line2
+#     dict3['all'] = zip(dict3['params'], dict3['gr1'], dict3['gr2'])
+#     # dict 0 is parameter names, dict1 is values for group 1, dict2 is values for group 2
+#     for i in range(0, len(line0) - 1):
+#         dict0[i] = line0[i]
+#         dict1[dict0[i]] = line1[i]
+#         dict2[dict0[i]] = line2[i]
+#         ctr = ctr + 1
+#     return (dict0, dict1, dict2)
 
 
 ##################################################################################################
@@ -494,12 +504,15 @@ def list_metadata_from_file(path):
 # job.finished_time = timezone.now()
 # job.status = celery.states.SUCCESS
 # job.save()
-@shared_task(name="run_algorithm")
+@shared_task(name="run_algorithm", base=ClusteringTaskBase)
 def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min,
                   L_g_max, log2, size=2000, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6,
                   clusters=2,
                   cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False):
     # ========== Preprocess data and run algorithm ==========
+
+    task_id = str(job.job_id)
+
     job.status = 'RUNNING'
     job.save()
 
@@ -511,8 +524,18 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     )
 
     # --- Step 1: Parse the strings or files and create StringIO (file object) again
-    expr_str, clinical_df, survival_col_name = parse_expression_data(expr_data_selection, expr_data_str)
-    expression_file = StringIO(expr_str)
+    try:
+        expr_str, clinical_df, survival_col_name = parse_expression_data(expr_data_selection, expr_data_str)
+        expression_file = StringIO(expr_str)
+    except Exception as ex:
+        current_task.update_state(
+            state='ERROR',
+            meta={'progress_step': 'submitted',
+                  'progress_percent': '0',
+                  'error_message': '\n'.join(ex.args)
+                  })
+        job_finished(task_id, states.FAILURE)
+        raise Ignore()
 
     current_task.update_state(
         state='RUNNING',
@@ -520,7 +543,17 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
               'progress_percent': '10'
               }
     )
-    ppi_file = StringIO(parse_ppi_data(ppi_network_selection, ppi_network_str))
+    try:
+        ppi_file = StringIO(parse_ppi_data(ppi_network_selection, ppi_network_str))
+    except Exception as ex:
+        current_task.update_state(
+            state='ERROR',
+            meta={'progress_step': 'expression_data',
+                  'progress_percent': '10',
+                  'error_message': '\n'.join(ex.args)
+                  })
+        job_finished(task_id, states.FAILURE)
+        raise Ignore()
 
     current_task.update_state(
         state='RUNNING',
@@ -532,9 +565,15 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:
         expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2, size)
-    except AssertionError:
-        # TODO HANDLE BETTER
-        print('Houston, we have a problem.')
+    except AssertionError as er:
+        current_task.update_state(
+            state='ERROR',
+            meta={'progress_step': 'ppi_data',
+                  'progress_percent': '30',
+                  'error_message': '\n'.join(er.args)
+                  })
+        job_finished(task_id, states.FAILURE)
+        raise Ignore()
 
     current_task.update_state(
         state='RUNNING',
@@ -549,8 +588,19 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     print(f'Execute model.run')
     # solution, score = model.run_search(max_iter=1)
     max_iter = 1  # TODO REMOVE LATER
-    solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
-                                       max_iter, opt, show_pher, show_plot, save, show_nets)
+    try:
+        solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
+                                           max_iter, opt, show_pher, show_plot, save, show_nets)
+    except AssertionError as er:
+        current_task.update_state(
+            state='ERROR',
+            meta={'progress_step': 'validate_preprocess_data',
+                  'progress_percent': '40',
+                  'error_message': '\n'.join(er.args)
+                  })
+
+        job_finished(task_id, states.FAILURE)
+        raise Ignore()
 
     current_task.update_state(
         state='RUNNING',
@@ -1377,150 +1427,150 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     return ret_metadata, p_val
 
 
-## enrichment stuff ##
-# run enrichment analysis
-@shared_task(name="run_enrichment")
-def run_enrichment(path, pval_enr, out_dir, terms):
-    fh1 = open(path)
-    gene_list = []
-    lines = fh1.readlines()
-    # read gene list line for line from file
-    for line in lines:
-        line.replace("\\n", "")
-        gene_list.append(line)
-    print("running enrichment analysis")
-    enr = gp.enrichr(gene_list=gene_list,
-                     description='test_name',
-                     gene_sets=terms,
-                     outdir=out_dir,
-                     cutoff=float(pval_enr)  # test dataset, use lower value of range(0,1)
-                     )
-    return (enr.results)
-
-
-# read terms in given cluster
-@shared_task(name="read_enrichment")
-def read_enrichment(path, pval_enr):
-    result_file = open(path)
-    ret_dict = []
-    ctr = 0
-    for line in result_file:
-        tmp = {}
-        lineSplit = line.split("\t")
-        if (ctr > 0):
-            # check p-value
-            if (float(lineSplit[3]) < float(pval_enr)):
-                # append genes, enrichment term, p-value etc to list
-                for i in range(0, 5):
-                    tmp[i] = lineSplit[i]
-                tmp[5] = lineSplit[9]
-                ret_dict.append(tmp)
-        ctr = ctr + 1
-    return (ret_dict)
-
-
-# read terms only in cluster 1 / cluster 2
-@shared_task(name="read_enrichment_2")
-def read_enrichment_2(path1, path2, pval_enr):
-    result_file_1 = open(path1)
-    result_file_2 = open(path2)
-    temp_dict = {}
-    temp_dict_2 = {}
-    ret_dict = []
-    ret_dict_2 = []
-    ctr = 0
-    # file 1 and array 1 is results for genes in cluster 1
-    for line in result_file_1:
-        tmp = {}
-        lineSplit = line.split("\t")
-        if (ctr > 0):
-            # check p-value
-            if (float(lineSplit[3]) < float(pval_enr)):
-                # append genes, enrichment term, p-value etc to list
-                for i in range(0, 5):
-                    tmp[i] = lineSplit[i]
-                tmp[5] = lineSplit[9]
-                temp_dict.update({lineSplit[1]: tmp})
-        ctr = ctr + 1
-    # file 2 and array 2 is results for genes in cluster 2
-    ctr2 = 0
-    for line in result_file_2:
-        tmp = {}
-        lineSplit = line.split("\t")
-        if (ctr2 > 0):
-            if (float(lineSplit[3]) < float(pval_enr)):
-                for i in range(0, 5):
-                    tmp[i] = lineSplit[i]
-                tmp[5] = lineSplit[9]
-                temp_dict_2.update({lineSplit[1]: tmp})
-        ctr2 = ctr2 + 1
-    # check terms in list 1 but not in list 2
-    for key in temp_dict:
-        if (key not in temp_dict_2):
-            ret_dict.append(temp_dict[key])
-    # check terms in list 2 but not in list 1
-    for key in temp_dict_2:
-        if (key not in temp_dict):
-            ret_dict_2.append(temp_dict_2[key])
-
-    return (ret_dict, ret_dict_2)
-
-
-############################################################
-#### check input files / convert stuff #####################
-############################################################
-
-@shared_task(name="check_input_files")
-def check_input_files(ppistr, exprstr):
-    errstr = ""
-    ppi_stringio = StringIO(ppistr)
-    ppidf = pd.read_csv(ppi_stringio, sep='\t')
-    expr_stringio = StringIO(exprstr)
-    exprdf = pd.read_csv(expr_stringio, sep='\t')
-    # check if PPI file has at least 2 columns
-    if (len(ppidf.columns) < 2):
-        errstr = errstr + "Input file must contain two columns with interaction partners.\n"
-        # errstr = errstr + "\n \n To avoid this error, go to <a href=\"infopage.html\">the infopage</a> and make sure that your input data has the specified format."
-        return (errstr)
-    contains_numbers = "false"
-    # check if PPI file contains lines with two protein IDs
-    for i in range(len(ppidf.index)):
-        if (contains_numbers == "false"):
-            curr_elem = str(ppidf.iloc[[i], 0].values[0])
-            curr_elem_2 = str(ppidf.iloc[[i], 1].values[0])
-            if (curr_elem.isdigit() and curr_elem_2.isdigit()):
-                contains_numbers = "true"
-    if (contains_numbers == "false"):
-        errstr = errstr + "\n" + "Input file must contain lines with Entrez IDs of interaction partners.\n"
-    for column_name, column in exprdf.iterrows():
-        coluniq = column.unique().tolist()
-        if ("-" in coluniq):
-            errstr = "Expression data contain special characters.\n"
-    return (errstr)
-
-
-@shared_task(name="convert_gene_list")
-def convert_gene_list(adjlist, filename):
-    dataset = Dataset(name='hsapiens_gene_ensembl',
-                      host='http://www.ensembl.org')
-    conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'])
-    # conv is a list of genes with ENSEMBL Id, gene name and Entrez ID
-    conv_genelist = conv['Gene name'].tolist()
-    retstr = ""
-    # convert list of gene IDs from gene names to NCBI ID
-    for elem in adjlist:
-        prot_1 = elem[0]
-        prot_2 = elem[1]
-        # read which element of list the gene is and read NCBI ID
-        gene_nbr_1 = conv.index[conv['Gene name'] == prot_1]
-        gene_nbr_2 = conv.index[conv['Gene name'] == prot_2]
-        if (str(gene_nbr_1).isdigit() and str(gene_nbr_2).isdigit()):
-            gene_nbr_1_2 = conv.loc[gene_nbr_1, 'NCBI gene ID'].values[0]
-            gene_nbr_2_2 = conv.loc[gene_nbr_2, 'NCBI gene ID'].values[0]
-            # write genes into tab separated string
-            retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
-    with open(filename, "w") as text_file:
-        text_file.write(retstr)
+# ## enrichment stuff ##
+# # run enrichment analysis
+# @shared_task(name="run_enrichment")
+# def run_enrichment(path, pval_enr, out_dir, terms):
+#     fh1 = open(path)
+#     gene_list = []
+#     lines = fh1.readlines()
+#     # read gene list line for line from file
+#     for line in lines:
+#         line.replace("\\n", "")
+#         gene_list.append(line)
+#     print("running enrichment analysis")
+#     enr = gp.enrichr(gene_list=gene_list,
+#                      description='test_name',
+#                      gene_sets=terms,
+#                      outdir=out_dir,
+#                      cutoff=float(pval_enr)  # test dataset, use lower value of range(0,1)
+#                      )
+#     return (enr.results)
+#
+#
+# # read terms in given cluster
+# @shared_task(name="read_enrichment")
+# def read_enrichment(path, pval_enr):
+#     result_file = open(path)
+#     ret_dict = []
+#     ctr = 0
+#     for line in result_file:
+#         tmp = {}
+#         lineSplit = line.split("\t")
+#         if (ctr > 0):
+#             # check p-value
+#             if (float(lineSplit[3]) < float(pval_enr)):
+#                 # append genes, enrichment term, p-value etc to list
+#                 for i in range(0, 5):
+#                     tmp[i] = lineSplit[i]
+#                 tmp[5] = lineSplit[9]
+#                 ret_dict.append(tmp)
+#         ctr = ctr + 1
+#     return (ret_dict)
+#
+#
+# # read terms only in cluster 1 / cluster 2
+# @shared_task(name="read_enrichment_2")
+# def read_enrichment_2(path1, path2, pval_enr):
+#     result_file_1 = open(path1)
+#     result_file_2 = open(path2)
+#     temp_dict = {}
+#     temp_dict_2 = {}
+#     ret_dict = []
+#     ret_dict_2 = []
+#     ctr = 0
+#     # file 1 and array 1 is results for genes in cluster 1
+#     for line in result_file_1:
+#         tmp = {}
+#         lineSplit = line.split("\t")
+#         if (ctr > 0):
+#             # check p-value
+#             if (float(lineSplit[3]) < float(pval_enr)):
+#                 # append genes, enrichment term, p-value etc to list
+#                 for i in range(0, 5):
+#                     tmp[i] = lineSplit[i]
+#                 tmp[5] = lineSplit[9]
+#                 temp_dict.update({lineSplit[1]: tmp})
+#         ctr = ctr + 1
+#     # file 2 and array 2 is results for genes in cluster 2
+#     ctr2 = 0
+#     for line in result_file_2:
+#         tmp = {}
+#         lineSplit = line.split("\t")
+#         if (ctr2 > 0):
+#             if (float(lineSplit[3]) < float(pval_enr)):
+#                 for i in range(0, 5):
+#                     tmp[i] = lineSplit[i]
+#                 tmp[5] = lineSplit[9]
+#                 temp_dict_2.update({lineSplit[1]: tmp})
+#         ctr2 = ctr2 + 1
+#     # check terms in list 1 but not in list 2
+#     for key in temp_dict:
+#         if (key not in temp_dict_2):
+#             ret_dict.append(temp_dict[key])
+#     # check terms in list 2 but not in list 1
+#     for key in temp_dict_2:
+#         if (key not in temp_dict):
+#             ret_dict_2.append(temp_dict_2[key])
+#
+#     return (ret_dict, ret_dict_2)
+#
+#
+# ############################################################
+# #### check input files / convert stuff #####################
+# ############################################################
+#
+# @shared_task(name="check_input_files")
+# def check_input_files(ppistr, exprstr):
+#     errstr = ""
+#     ppi_stringio = StringIO(ppistr)
+#     ppidf = pd.read_csv(ppi_stringio, sep='\t')
+#     expr_stringio = StringIO(exprstr)
+#     exprdf = pd.read_csv(expr_stringio, sep='\t')
+#     # check if PPI file has at least 2 columns
+#     if (len(ppidf.columns) < 2):
+#         errstr = errstr + "Input file must contain two columns with interaction partners.\n"
+#         # errstr = errstr + "\n \n To avoid this error, go to <a href=\"infopage.html\">the infopage</a> and make sure that your input data has the specified format."
+#         return (errstr)
+#     contains_numbers = "false"
+#     # check if PPI file contains lines with two protein IDs
+#     for i in range(len(ppidf.index)):
+#         if (contains_numbers == "false"):
+#             curr_elem = str(ppidf.iloc[[i], 0].values[0])
+#             curr_elem_2 = str(ppidf.iloc[[i], 1].values[0])
+#             if (curr_elem.isdigit() and curr_elem_2.isdigit()):
+#                 contains_numbers = "true"
+#     if (contains_numbers == "false"):
+#         errstr = errstr + "\n" + "Input file must contain lines with Entrez IDs of interaction partners.\n"
+#     for column_name, column in exprdf.iterrows():
+#         coluniq = column.unique().tolist()
+#         if ("-" in coluniq):
+#             errstr = "Expression data contain special characters.\n"
+#     return (errstr)
+#
+#
+# @shared_task(name="convert_gene_list")
+# def convert_gene_list(adjlist, filename):
+#     dataset = Dataset(name='hsapiens_gene_ensembl',
+#                       host='http://www.ensembl.org')
+#     conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'])
+#     # conv is a list of genes with ENSEMBL Id, gene name and Entrez ID
+#     conv_genelist = conv['Gene name'].tolist()
+#     retstr = ""
+#     # convert list of gene IDs from gene names to NCBI ID
+#     for elem in adjlist:
+#         prot_1 = elem[0]
+#         prot_2 = elem[1]
+#         # read which element of list the gene is and read NCBI ID
+#         gene_nbr_1 = conv.index[conv['Gene name'] == prot_1]
+#         gene_nbr_2 = conv.index[conv['Gene name'] == prot_2]
+#         if (str(gene_nbr_1).isdigit() and str(gene_nbr_2).isdigit()):
+#             gene_nbr_1_2 = conv.loc[gene_nbr_1, 'NCBI gene ID'].values[0]
+#             gene_nbr_2_2 = conv.loc[gene_nbr_2, 'NCBI gene ID'].values[0]
+#             # write genes into tab separated string
+#             retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
+#     with open(filename, "w") as text_file:
+#         text_file.write(retstr)
 
 
 ##########################################################
@@ -1711,4 +1761,4 @@ def jac(x, y):
     if len(x) > 0 and len(y) > 0:
         return len(set(x).intersection(set(y))) / len((set(x).union(set(y))))
     else:
-        return (0)
+        return 0

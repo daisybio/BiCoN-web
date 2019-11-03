@@ -1,7 +1,0 @@
-prune bigants/data
-
-prune .gitignore
-
-global-exclude *_test.py
-prune bigants/script_main.py
-

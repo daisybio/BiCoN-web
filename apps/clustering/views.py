@@ -3,7 +3,9 @@ import uuid
 from os import path
 
 import pandas as pd
+
 from celery.result import AsyncResult
+from celery.states import SUCCESS, FAILURE
 from django.core.files.base import ContentFile
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
@@ -13,8 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from .models import Job
-from .tasks import preprocess_file_2, import_ndex, preprocess_ppi_file, \
-    check_input_files, run_algorithm
+from .tasks import run_algorithm
 
 
 class IndexView(TemplateView):
@@ -141,7 +142,7 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, False], kw_args=algorithm_parameters, task_id=str(task_id))
+                                    L_g_min, L_g_max, False], kw_args=algorithm_parameters, task_id=str(task_id), ignore_result=True)
 
     print(f'redicreting to analysis_status')
     return HttpResponseRedirect(reverse('clustering:analysis_status', kwargs={'analysis_id': task_id}))
@@ -173,13 +174,17 @@ def poll_status(request):
             task_info = task.info
             task_status = task.status
             # Create dictionary for response
-            data = task_info if task_info else dict()
+            if task_status == FAILURE or task_status == SUCCESS:
+                data = dict()
+            else:
+                data = task_info
+
             data['task_status'] = task_status
         else:
             data = 'No task_id in the request found'
     else:
         data = 'This is not an ajax request'
-    print(f'Response {data}')
+
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
