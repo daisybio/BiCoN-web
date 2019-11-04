@@ -204,7 +204,7 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, apply_log2, apply_z_transformation], kw_args=algorithm_parameters, task_id=str(task_id),
+                                    L_g_min, L_g_max, apply_log2, apply_z_transformation], kwargs=algorithm_parameters, task_id=str(task_id),
                               ignore_result=True)
 
     print(f'redicreting to analysis_status')
