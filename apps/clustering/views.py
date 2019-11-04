@@ -55,8 +55,8 @@ def submit_analysis(request):
     # Check parameters before parsing to gather a complete list of errors
     # error_list contains the error messages if errors are found
     error_list = list()
-    post_keys = request.POST
-    file_keys = request.FILES
+    post_keys = request.POST.keys()
+    file_keys = request.FILES.keys()
     # --- Step 0: Populate session_id
     if not request.session.session_key:
         error_list.append('No session_id found. Please enable cookies in your browser and try again')
@@ -126,12 +126,14 @@ def submit_analysis(request):
     # --- Step 1: Expression Data
     expr_data_selection = request.POST['expression-data']
     expr_data_str = None
-    is_log2 = False
+    apply_log2 = False
+    apply_z_transformation = False
 
     # Parse expression network from uploaded file into string (easier to serialize than file object)
     if expr_data_selection == 'custom':
         expr_data_str = request.FILES['expression-data-file'].read().decode('utf-8')
-        is_log2 = 'expression-data-log2' in request.POST.keys()
+        apply_log2 = 'expression-data-log2' in request.POST.keys()
+        apply_z_transformation = 'z-score-transformation' in request.POST.keys()
 
     # --- Step 2: PPI Network
     ppi_network_selection = request.POST['ppi-network']
@@ -166,7 +168,7 @@ def submit_analysis(request):
 
     # --- Step 4.1: Algorithm parameters (Optional)
     if request.POST['clustering_advanced'] == 'yes':
-        nbr_iter = int(request.POST.get("nbr_iter"))  # Todo check with Olga if defaults should be set (45?)
+        nbr_iter = int(request.POST.get("nbr_iter"))
         gene_set_size = int(request.POST.get("gene_set_size", 2000))
         nbr_ants = int(request.POST.get("nbr_ants", 30))
         evap = float(request.POST.get("evap", 0.3))
@@ -174,9 +176,9 @@ def submit_analysis(request):
         hi_sig = float(request.POST.get("hisig", 1))
         epsilon = float(request.POST.get("stopcr", 0.02))
 
-        algorithm_parameters['size'] = gene_set_size
         algorithm_parameters['max_iter'] = nbr_iter
-        algorithm_parameters['K'] = nbr_ants
+        algorithm_parameters['size'] = gene_set_size
+        algorithm_parameters['k'] = nbr_ants
         algorithm_parameters['evaporation'] = evap
         algorithm_parameters['b'] = pher_sig
         algorithm_parameters['a'] = hi_sig
@@ -202,7 +204,7 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, is_log2], kw_args=algorithm_parameters, task_id=str(task_id),
+                                    L_g_min, L_g_max, apply_log2, apply_z_transformation], kw_args=algorithm_parameters, task_id=str(task_id),
                               ignore_result=True)
 
     print(f'redicreting to analysis_status')

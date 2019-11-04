@@ -505,10 +505,11 @@ def parse_ppi_data(option, ppi_raw_str=None):
 # job.status = celery.states.SUCCESS
 # job.save()
 @shared_task(name="run_algorithm", base=ClusteringTaskBase)
-def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min,
-                  L_g_max, log2, size=2000, n_proc=1, a=1, b=1, K=20, evaporation=0.5, th=0.5, eps=0.02, times=6,
-                  clusters=2,
-                  cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None, show_nets=False):
+def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min, L_g_max,
+                  log2, apply_z_transformation, size=2000, n_proc=1, a=1, b=1, k=20, evaporation=0.5, th=0.5, eps=0.02,
+                  times=6,
+                  clusters=2, cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None,
+                  show_nets=False):
     # ========== Preprocess data and run algorithm ==========
 
     task_id = str(job.job_id)
@@ -564,7 +565,8 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:
-        expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2, size)
+        expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2,
+                                                         zscores=apply_z_transformation, size=size)
     except AssertionError as er:
         current_task.update_state(
             state='ERROR',
@@ -589,7 +591,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # solution, score = model.run_search(max_iter=1)
     # max_iter = 1  # TODO REMOVE LATER
     try:
-        solution, score = model.run_search(n_proc, a, b, K, evaporation, th, eps, times, clusters, cost_limit,
+        solution, score = model.run_search(n_proc, a, b, k, evaporation, th, eps, times, clusters, cost_limit,
                                            max_iter, opt, show_pher, show_plot, save, show_nets)
     except AssertionError as er:
         current_task.update_state(

@@ -19,14 +19,14 @@
                 <a href="{% url 'clustering:analysis_setup' %}"
                    class="list-group-item {% if groupbar == 'setup_analysis' %}active{% endif %}">Setup new analysis</a>
                 <a href="{% url 'clustering:analysis_status' %}" class="list-group-item {% if groupbar == 'submitted_analysis' %}active{% endif %}">Job
-                    status overview</a>
+                    status</a>
                 {% if groupbar == 'single_status' %}
                     <div class="list-group">
                         <a href="#" class="list-group-item active">> Single job status</a>
                     </div>
                 {% endif %}
                 <a href="{% url 'clustering:analysis_results' %}"
-                   class="list-group-item {% if groupbar == 'all_results' %}active{% endif %}">Results overview</a>
+                   class="list-group-item {% if groupbar == 'all_results' %}active{% endif %}">Results</a>
                 {% if groupbar == 'single_result' %}
                     <div class="list-group">
                         <a href="#" class="list-group-item active">> Single result</a>

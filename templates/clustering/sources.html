@@ -3,6 +3,7 @@
 {% block title %}About BiGAnts{% endblock %}
 
 {% block content %}
+    {% load static %}
     <!-- Page Content -->
     <div class="row">
         <div class="col-lg-10 text-justify">
@@ -23,7 +24,7 @@
                 </div>
                 <div id="bigants-algorithm" class="card-body">
                     <h2 class="card-title">BiGAnts algorithm</h2>
-                    Unsupervised learning approaches are frequently employed to identify patient subgroups and
+                    <p>Unsupervised learning approaches are frequently employed to identify patient subgroups and
                     biomarkers such as disease-associated genes. Biclustering is a powerful technique often used with
                     expression data to cluster genes along with patients. However, the genes forming biclusters are
                     often not functionally related, complicating interpretation of the results.
@@ -31,7 +32,12 @@
                     <br>
                     To alleviate this, we developed the network-constrained biclustering approach BiGAnts which <strong>(i)</strong>
                     restricts biclusters to functionally related genes connected in molecular interaction networks and
-                    <strong>(ii)</strong> maximizes the expression difference between two subgroups of patients.
+                        <strong>(ii)</strong> maximizes the expression difference between two subgroups of patients.</p>
+
+                    <img class="img-fluid" src="{% static 'clustering/img/about/BiGAnts-schema.png' %}">
+
+
+
                 </div>
                 <div id="web-application" class="card-body">
                     <h2 class="card-title">Web application</h2>

@@ -58,13 +58,13 @@
                             <label class="custom-control-label" for="expression-data_1">Lung cancer dataset
                                 (demo data)</label>
                         </div>
-{#                        <div class="custom-control custom-radio">#}
-{#                            <input type="radio" id="expression-data_2" name="expression-data"#}
-{#                                   class="custom-control-input"#}
-{#                                   value="brest-cancer" onclick="hideElement('upload-expression-data');">#}
-{#                            <label class="custom-control-label" for="expression-data_2">Breast cancer dataset#}
-{#                                (demo data)</label>#}
-{#                        </div>#}
+                        {#                        <div class="custom-control custom-radio">#}
+                        {#                            <input type="radio" id="expression-data_2" name="expression-data"#}
+                        {#                                   class="custom-control-input"#}
+                        {#                                   value="brest-cancer" onclick="hideElement('upload-expression-data');">#}
+                        {#                            <label class="custom-control-label" for="expression-data_2">Breast cancer dataset#}
+                        {#                                (demo data)</label>#}
+                        {#                        </div>#}
                         <div class="custom-control custom-radio">
                             <input type="radio" id="expression-data_3" name="expression-data"
                                    class="custom-control-input"
@@ -76,7 +76,7 @@
                             You must select one option
                         </div>
                     </div>
-                    <div id="upload-expression-data"  style="display: none">
+                    <div id="upload-expression-data" style="display: none">
                         <div class="custom-file form-group">
                             <input type="file" class="custom-file-input form-control" name="expression-data-file"
                                    id="expression-data-filename">
@@ -87,9 +87,13 @@
                         </div>
                         <div class="custom-control custom-switch mt-2">
                             <input type="checkbox" class="custom-control-input" id="expression-data-log2"
-                            name="expression-data-log2">
-                            <label class="custom-control-label" for="expression-data-log2">Expression data is log2
-                                transformed</label>
+                                   name="expression-data-log2" checked>
+                            <label class="custom-control-label" for="expression-data-log2">Apply log2 transformation to the data</label>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="z-score-transformation"
+                                   name="z-score-transformation" checked>
+                            <label class="custom-control-label" for="z-score-transformation">Apply z-score transformation to the data</label>
                         </div>
                     </div>
                 </div>

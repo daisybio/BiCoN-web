@@ -15,12 +15,10 @@ git clone https://github.com/biomedbigdata/BiGAnts-web.git && cd BiGAnts-web
 # Change the branch to `new_structure`
 git checkout new_structure
 
-# Change the password and username for the databases (maybe leave this out, Markus?)
-
 # Deploy and build the containers
 docker-compose up -d --build
 
-# Apply migrations to the database
+# Apply migrations to the database (make sure the containers are up an running, else you will get an error)
 docker-compose exec web python manage.py migrate --noinput 
 
 # Collect all the static files
