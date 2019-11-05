@@ -48,8 +48,8 @@ def submit_analysis(request):
     and start analysis task with Celery
     """
     # For debugging
-    # print(f'===== POST REQUEST: {request.POST}')
-    # print(f'===== REQUEST FILES: {request.FILES}')
+    print(f'===== POST REQUEST: {request.POST}')
+    print(f'===== REQUEST FILES: {request.FILES}')
 
     # ========== Test if all the parameters are set correctly ==========
     # Check parameters before parsing to gather a complete list of errors
@@ -80,10 +80,10 @@ def submit_analysis(request):
         if 'survival-col' not in post_keys:
             error_list.append('"Survival column name" missing')
         elif request.POST['use_metadata'] == 'yes':
-            if not request.POST['survival-col'].strip:
+            if not request.POST['survival-col'].strip():
                 error_list.append('"Survival column name" is empty')
             if 'survival-metadata-file' not in file_keys:
-                error_list.append('"Use additional metadata" selected but no "Survival metadata file not uploaded"')
+                error_list.append('"Use additional metadata" selected but no "Survival metadata file" not uploaded')
 
     # --- Step 4: Algorithm parameters (Required)
     if 'L_g_min' not in post_keys:
@@ -144,22 +144,22 @@ def submit_analysis(request):
         ppi_network_str = request.FILES['ppi-network-file'].read().decode('utf-8')
 
     # --- Step 3: Meta data
-    survival_col_name = ''
-    clinical_df = pd.DataFrame()
-    use_metadata = True
+    survival_col_name = None
+    clinical_df = None
+    use_metadata = False
 
     if 'use_metadata' in request.POST:
         if request.POST['use_metadata'] == 'yes':  # Set parameter for metadata analysis if desired
             print("USING METADATA")
+            use_metadata = True
             if 'survival-col' in request.POST and 'survival-metadata-file' in request.FILES:
-                survival_col_name = request.POST['survival_col']
+                survival_col_name = request.POST['survival-col'].strip()
                 clinical_df = pd.read_csv(request.FILES['survival-metadata-file'])
-        else:  # Set the variables to empy, default checkbox for example data
-            use_metadata = False
+        else:  # Set the variables to empty, default checkbox for example data
             pass
 
     algorithm_parameters['use_metadata'] = use_metadata
-    algorithm_parameters['survival_col'] = survival_col_name
+    algorithm_parameters['survival_col_name'] = survival_col_name
     algorithm_parameters['clinical_df'] = clinical_df
 
     # --- Step 4: Algorithm parameters (Required)
@@ -204,8 +204,9 @@ def submit_analysis(request):
     #                                            show_pher=False, show_plot=False, save=None, show_nets=False).id
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
-                                    L_g_min, L_g_max, apply_log2, apply_z_transformation], kwargs=algorithm_parameters, task_id=str(task_id),
-                              ignore_result=True)
+                                    L_g_min, L_g_max, apply_log2, apply_z_transformation],
+                              kwargs=algorithm_parameters,
+                              task_id=str(task_id), ignore_result=True)
 
     print(f'redicreting to analysis_status')
     return HttpResponseRedirect(reverse('clustering:analysis_status_single', kwargs={'analysis_id': task_id}))

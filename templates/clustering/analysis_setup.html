@@ -13,10 +13,10 @@
     <div class="card mt-4">
         <div class="card-body">
             <h1 class="card-title">Analysis overview</h1>
-            <p class="card-text">To start a new analysis fill out the form below. If you are unsure about some of the
-                options, you can look them up in the "Documentation" section.
-                If you want to know the status of you recently submitted analysis click on "Submitted analysis".
-                If you want to see results of previous runs, click on "All results".
+            <p class="card-text">To start a new analysis fill out the form below.<br>
+                If you are unsure about some of the options, you can look them up in the <a href="{% url 'clustering:documentation' %}">Documentation</a> section.
+                If you want to know the status of you recently submitted analysis click on <a href="{% url 'clustering:analysis_status' %}" >Job status</a>.
+                If you want to see results of previous runs, click on <a href="{% url 'clustering:analysis_results' %}" >Results</a>.
             </p>
         </div>
     </div>
@@ -88,12 +88,14 @@
                         <div class="custom-control custom-switch mt-2">
                             <input type="checkbox" class="custom-control-input" id="expression-data-log2"
                                    name="expression-data-log2" checked>
-                            <label class="custom-control-label" for="expression-data-log2">Apply log2 transformation to the data</label>
+                            <label class="custom-control-label" for="expression-data-log2">Apply log2 transformation to
+                                the data</label>
                         </div>
                         <div class="custom-control custom-switch mt-2">
                             <input type="checkbox" class="custom-control-input" id="z-score-transformation"
                                    name="z-score-transformation" checked>
-                            <label class="custom-control-label" for="z-score-transformation">Apply z-score transformation to the data</label>
+                            <label class="custom-control-label" for="z-score-transformation">Apply z-score
+                                transformation to the data</label>
                         </div>
                     </div>
                 </div>
@@ -187,8 +189,8 @@
                             </div>
 
                             <div id="upload-metadata" class="custom-file form-group">
-                                <input type="file" class="custom-file-input" name="survival-metadata"
-                                       id="survival-metadata">
+                                <input type="file" class="custom-file-input" name="survival-metadata-file"
+                                       id="survival-metadata-file">
                                 <label class="custom-file-label" for="survival-metadata">Upload metadata file</label>
                                 <div id="survival-metadata_err" class="invalid-feedback">
                                     You must upload a file for this option

@@ -113,7 +113,7 @@ def parse_expression_data(option, expr_raw_str=None):
 
     elif option == 'custom':
         expr_str = expr_raw_str
-        clinical_df = pd.DataFrame()
+        clinical_df = None
         survival_col_name = None
 
     return expr_str, clinical_df, survival_col_name
@@ -507,9 +507,8 @@ def parse_ppi_data(option, ppi_raw_str=None):
 @shared_task(name="run_algorithm", base=ClusteringTaskBase)
 def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min, L_g_max,
                   log2, apply_z_transformation, size=2000, n_proc=1, a=1, b=1, k=20, evaporation=0.5, th=0.5, eps=0.02,
-                  times=6,
-                  clusters=2, cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False, save=None,
-                  show_nets=False):
+                  times=6, clusters=2, cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False,
+                  save=None, show_nets=False, use_metadata=False, survival_col_name=None, clinical_df=None):
     # ========== Preprocess data and run algorithm ==========
 
     task_id = str(job.job_id)
@@ -526,7 +525,8 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     # --- Step 1: Parse the strings or files and create StringIO (file object) again
     try:
-        expr_str, clinical_df, survival_col_name = parse_expression_data(expr_data_selection, expr_data_str)
+        expr_str, clinical_df_demo_data, survival_col_name_demo_data = parse_expression_data(expr_data_selection,
+                                                                                        expr_data_str)
         expression_file = StringIO(expr_str)
     except Exception as ex:
         current_task.update_state(
@@ -562,6 +562,20 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
               'progress_percent': '30'
               }
     )
+
+    # If both demo data variables are populated use them
+    if survival_col_name_demo_data:
+        # Check for DF
+        if isinstance(clinical_df_demo_data, pd.DataFrame):
+            if not clinical_df_demo_data.empty:
+                clinical_df = clinical_df_demo_data
+                survival_col_name = survival_col_name_demo_data
+                use_metadata = True
+
+
+    # Can be removed when other part is refractored. Then clinical_df can stay none
+    if not use_metadata:
+        clinical_df = pd.DataFrame()
 
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:

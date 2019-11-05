@@ -118,7 +118,7 @@ function validateForm() {
             }
 
             // Check if upload file is given
-            if (document.getElementById("survival-metadata").value === "") {
+            if (document.getElementById("survival-metadata-file").value === "") {
                 $('#survival-metadata_err').addClass('d-block')
                 valid = false
             } else {
