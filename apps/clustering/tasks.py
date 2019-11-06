@@ -25,6 +25,7 @@ from pybiomart import Dataset
 
 from bigants import data_preprocessing
 from bigants import BiGAnts
+from bigants import results_analysis
 
 # import apps.clustering.weighted_aco_lib as lib
 from apps.clustering.models import Job
@@ -579,7 +580,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:
-        expr, G, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2,
+        ge, g, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2,
                                                          zscores=apply_z_transformation, size=size)
     except AssertionError as er:
         current_task.update_state(
@@ -599,13 +600,13 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     )
 
     # --- Step 3: Run the clustering algorithm (BiGAnts)
-    model = BiGAnts(expr, G, L_g_min, L_g_max)
+    model = BiGAnts(ge, g, L_g_min, L_g_max)
 
     print(f'Execute model.run')
-    # solution, score = model.run_search(max_iter=1)
+    # solution, scores = model.run_search(max_iter=1)
     # max_iter = 1  # TODO REMOVE LATER
     try:
-        solution, score = model.run_search(n_proc, a, b, k, evaporation, th, eps, times, clusters, cost_limit,
+        solution, scores = model.run_search(n_proc, a, b, k, evaporation, th, eps, times, clusters, cost_limit,
                                            max_iter, opt, show_pher, show_plot, save, show_nets)
     except AssertionError as er:
         current_task.update_state(
@@ -636,6 +637,19 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
             mapping[rev_labels[line["query"]]] = line["symbol"]
 
     # ========== Plotting networks ==========
+    # --- Heatmap
+    results = results_analysis(solution, labels)
+
+    with BytesIO() as output:
+        results.show_clustermap(ge, g, output=output)
+        job.heatmap_png.save(f'heatmap_{task_id}.png', File(output))
+
+    # --- Convergence
+    with BytesIO() as output:
+        results.convergence_plot(scores, output=output)
+        job.convergence_png.save(f'conv_{task_id}.png', File(output))
+
+
     new_genes1 = [mapping[key] for key in mapping if key in solution[0][0]]
     new_genes2 = [mapping[key] for key in mapping if key in solution[0][1]]
 
@@ -649,12 +663,12 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     for elem in patients2_algo_id:
         if (elem in labels):
             patients2_ids.append(labels[elem])
-    means1 = [np.mean(expr[patients1_algo_id].loc[gene]) - np.mean(expr[patients2_algo_id].loc[gene]) for gene in
+    means1 = [np.mean(ge[patients1_algo_id].loc[gene]) - np.mean(ge[patients2_algo_id].loc[gene]) for gene in
               genes1_algo_id]
-    means2 = [np.mean(expr[patients1_algo_id].loc[gene]) - np.mean(expr[patients2_algo_id].loc[gene]) for gene in
+    means2 = [np.mean(ge[patients1_algo_id].loc[gene]) - np.mean(ge[patients2_algo_id].loc[gene]) for gene in
               genes2_algo_id]
 
-    G_small = nx.subgraph(G, genes1_algo_id + genes2_algo_id)
+    G_small = nx.subgraph(g, genes1_algo_id + genes2_algo_id)
     G_small = nx.relabel_nodes(G_small, mapping)
 
     plt.figure(figsize=(15, 15))
@@ -693,8 +707,8 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     grouping_p = []
     grouping_g = []
-    p_num = list(expr.columns)
-    expr_small = expr.T[genes1_algo_id + genes2_algo_id]
+    p_num = list(ge.columns)
+    expr_small = ge.T[genes1_algo_id + genes2_algo_id]
     expr_small.rename(columns=mapping, inplace=True)
     expr_small = expr_small.T
     g_num = list(expr_small.index)
@@ -1093,21 +1107,22 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
         job.ppi_json.save(f'ppi_{session_id}.json', File(output))
 
     colordict = {0: '#BB0000', 1: '#0000BB'}
-    # make heatmap (include pre-defined clusters if they were given)
-    if (isinstance(col_colors1, str)):
-        g = sns.clustermap(T, figsize=(13, 13))
-    else:
-        if (isinstance(row_colors1, str)):
-            g = sns.clustermap(T, figsize=(13, 13), col_colors=col_colors1)
-        else:
-            g = sns.clustermap(T, figsize=(13, 13), col_colors=col_colors1, row_colors=row_colors1)
-    ax = g.ax_heatmap
-    ax.set_xlabel("Genes")
-    ax.set_ylabel("Patients")
 
-    with BytesIO() as output:
-        plt.savefig(output)
-        job.heatmap_png.save(f'heatmap_{session_id}.png', File(output))
+    # # make heatmap (include pre-defined clusters if they were given)
+    # if (isinstance(col_colors1, str)):
+    #     g = sns.clustermap(T, figsize=(13, 13))
+    # else:
+    #     if (isinstance(row_colors1, str)):
+    #         g = sns.clustermap(T, figsize=(13, 13), col_colors=col_colors1)
+    #     else:
+    #         g = sns.clustermap(T, figsize=(13, 13), col_colors=col_colors1, row_colors=row_colors1)
+    # ax = g.ax_heatmap
+    # ax.set_xlabel("Genes")
+    # ax.set_ylabel("Patients")
+    #
+    # with BytesIO() as output:
+    #     plt.savefig(output)
+    #     job.heatmap_png.save(f'heatmap_{session_id}.png', File(output))
 
     plt.clf()
     # Array PatientData is for storing survival information
