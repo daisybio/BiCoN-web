@@ -14,9 +14,11 @@
         <div class="card-body">
             <h1 class="card-title">Analysis overview</h1>
             <p class="card-text">To start a new analysis fill out the form below.<br>
-                If you are unsure about some of the options, you can look them up in the <a href="{% url 'clustering:documentation' %}">Documentation</a> section.
-                If you want to know the status of you recently submitted analysis click on <a href="{% url 'clustering:analysis_status' %}" >Job status</a>.
-                If you want to see results of previous runs, click on <a href="{% url 'clustering:analysis_results' %}" >Results</a>.
+                If you are unsure about some of the options, you can look them up in the <a
+                        href="{% url 'clustering:documentation' %}">Documentation</a> section.
+                If you want to know the status of you recently submitted analysis click on <a
+                        href="{% url 'clustering:analysis_status' %}">Job status</a>.
+                If you want to see results of previous runs, click on <a href="{% url 'clustering:analysis_results' %}">Results</a>.
             </p>
         </div>
     </div>
@@ -42,6 +44,22 @@
             <!-- Multi part analysis setup form -->
             <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+
+                <div class="form-group mb-5">
+                    <h3>Job Name</h3>
+                    <label class="form-control-label" for="job_name">You can optionally give your analysis job a name
+                        for easier identification. <br>
+                        <span class="text-muted">Only letters, numbers, spaces and dashes are allowed in the identifier
+                        </span></label>
+                    <input class="form-control" type="text" name="job_name" id="job_name" maxlength="30" placeholder="Job name">
+                    <div id="job_name_err" class="invalid-feedback">
+                        Your identifier contains not allowed characters.
+                    </div>
+                    <div id="job_name_length_err" class="invalid-feedback">
+                        Your identifier is too long. The maximum number of allowed characters is 30.
+                    </div>
+                </div><!-- form-group -->
+
                 <!-- One "tab" for each step in the form: -->
 
                 <!-- Tab: Expression Data -->

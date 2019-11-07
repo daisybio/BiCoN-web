@@ -16,7 +16,11 @@
             {% for job in previous_jobs %}
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h2 class="card-title">Task Name</h2>
+                        {% if job.job_name %}
+                            <h2 class="card-title">Task Name: {{ job.job_name }}</h2>
+                        {% else %}
+                            <h2 class="card-title">Task ID: {{ job.job_id }}</h2>
+                        {% endif %}
                         <p class="card-text">
                             <strong>Submitted on: </strong>{{ job.submit_time }}<br>
                             <strong>Status: </strong><span id="state-{{ job.job_id }}"></span>
@@ -27,7 +31,7 @@
                         </div>
                         <div class="mt-2 float-right">
                             <a class="btn btn-primary"
-                                    href="{% url 'clustering:analysis_status_single' job.job_id %}">More details</a>
+                               href="{% url 'clustering:analysis_status_single' job.job_id %}">More details</a>
                         </div>
                     </div>
                 </div>

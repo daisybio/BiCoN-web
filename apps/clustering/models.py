@@ -21,6 +21,7 @@ class Job(models.Model):
     ]
 
     job_id = models.UUIDField(primary_key=True, editable=False)
+    job_name = models.CharField(max_length=30, default='', blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     session_id = models.CharField(max_length=33, blank=True)
     submit_time = models.DateTimeField(editable=False)

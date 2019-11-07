@@ -2,7 +2,7 @@
 BiGAnts-web comes in an easy to use `docker-compose` format.
 
 To deploy BiGAnts-web in a production environment, please ensure you have a working docker (and docker-compose) environment running. 
-You find a manual for install docker on your operating system here.
+You find a manual for install docker on your operating system [here](https://docs.docker.com/install/).
 
 Once docker is installed and running, execute the following commands:
 
@@ -11,9 +11,6 @@ To install BiGAnts-web (running it for the first time) follow these steps:
 ```shell script
 # First clone this repository and change into the created directory
 git clone https://github.com/biomedbigdata/BiGAnts-web.git && cd BiGAnts-web
-
-# Change the branch to `new_structure`
-git checkout new_structure
 
 # Deploy and build the containers
 docker-compose up -d --build

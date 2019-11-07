@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import uuid
 from os import path
 
@@ -104,6 +105,19 @@ def submit_analysis(request):
         except (ValueError, TypeError):
             error_list.append('"L_g_max" cannot be empty and must be a number')
 
+    # --- Step 5: Job name (Optional)
+    if 'job_name' not in post_keys:
+        error_list.append('"job_name" not specified')
+
+    else:
+        tmp_var = request.POST['job_name']
+        reg = re.compile(r'^[a-zA-Z0-9-_\s]+$')
+        if not reg.match(tmp_var) and tmp_var:
+            error_list.append('"Job name" contains not allowed characters')
+
+        if len(tmp_var) > 30:
+            error_list.append('""Job name" is longer than 30 characters')
+
     # If the error list is not empty, redirect back to analysis setup and display errors
     # Todo redirect back to analysis setup instead of displaying on submit...
     if error_list:
@@ -186,11 +200,15 @@ def submit_analysis(request):
 
     print('All the given data was parsed: Starting clustering')
 
+    # --- Step 4.2: Job name (Optional)
+    job_name = request.POST['job_name'].strip()
+
     # ========== Save the task into the database (create a job) ==========
     task_id = uuid.uuid4()
 
     if session_id:
-        job = Job(job_id=task_id, session_id=session_id, submit_time=timezone.now(), status=Job.SUBMITTED)
+        job = Job(job_id=task_id, session_id=session_id, submit_time=timezone.now(),
+                  status=Job.SUBMITTED, job_name=job_name)
         job.save()
     else:
         raise KeyError('session_id not found')
@@ -228,7 +246,6 @@ def test_result(request):
     pass
 
 
-@csrf_exempt  # TODO IMPORTANT REMOVE FOR PRODUCTION!!!!
 def poll_status(request):
     data = 'Internal failure. Please contact your administrator'
     if request.is_ajax():
@@ -288,6 +305,7 @@ def analysis_result(request, analysis_id):
     return render(request, 'clustering/result_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_result',
+        'job_identifier': job.job_name if job.job_name else job.job_id,
         'ppi_png': job.ppi_png.name,
         'ppi_json': job.ppi_json.name,
         'heatmap_png': job.heatmap_png.name,
