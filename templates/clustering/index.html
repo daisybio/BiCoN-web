@@ -1,0 +1,74 @@
+{% extends "clustering/base.html" %}
+
+{% block title %}BiGAnts-Web{% endblock %}
+
+{% block empty_content %}
+    <!-- Jumbotron Header -->
+    {% load static %}
+    <header class="jumbotron my-4">
+        <h1 class="display-3">BiGAnts</h1>
+        <p class="lead"> BiGAnts is a powerful new systems medicine tool to stratify patients while elucidating the
+            responsible disease mechanisms. BiGAnts is a network-constrained biclustering approach which restricts
+            biclusters to functionally related genes connected in molecular interaction networks and maximizes the
+            expression difference between two subgroups of patients.</p>
+    </header>
+
+    <!-- Page Features -->
+    <div class="row text-center">
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <img class="card-img-top" src="{% static 'clustering/img/index/logo.svg' %}" alt="">
+                <div class="card-body">
+                    <h4 class="card-title">Analysis</h4>
+                    <p class="card-text">
+                        Submit a new analysis on your own data or use our test data. Check the status of the submitted
+                        jobs and view the result of the finished ones.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'clustering:analysis_setup' %}" class="btn btn-primary">Start analysis</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <img class="card-img-top" src="{% static 'clustering/img/index/Documentation_normal_light.svg' %}" alt="">
+                <div class="card-body">
+                    <h4 class="card-title">Documentation</h4>
+                    <p class="card-text">
+                        Learn how to use BiGAnts: Upload your data, set the parameters and visualize the results.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'clustering:documentation' %}" class="btn btn-primary">Learn how to</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <img class="card-img-top" src="{% static 'clustering/img/index/About.svg' %}" alt="">
+                <div class="card-body">
+                    <h4 class="card-title">About</h4>
+                    <p class="card-text">Read about the tool, learn how to cite it or contact us.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">About this tool</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.row -->
+
+    <style type="text/css">
+        .card-img-top {
+            width: 100%;
+            height: 20vw;
+            object-fit: cover;
+        }
+    </style>
+
+{% endblock %}

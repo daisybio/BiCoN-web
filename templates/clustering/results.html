@@ -1,0 +1,49 @@
+{% extends "clustering/base_analysis.html" %}
+
+{% block title %}BiGAnts-Web analysis results overview{% endblock %}
+
+
+{% block content %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Results</h1>
+            <p class="card-text">Overview of all the finished jobs</p>
+            <br/>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <!--- iterate over tables of metadata and display as table--->
+                        <th scope="col">Submission Date</th>
+                        <th scope="col">Job ID</th>
+                        <th scope="col">Completion Date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">More information</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for job in previous_jobs %}
+
+                        <tr>
+                            <td>{{ job.submit_time }}</td>
+                            <td>{{ job.job_id }}</td>
+                            <td>{{ job.finished_time }}</td>
+                            <td>{{ job.status }}</td>
+                            {% if job.status == 'SUCCESS' %}
+                                <td><a href="{% url 'clustering:analysis_result' job.job_id %}">Click me</a></td>
+                            {% else %}
+                                <td><a href="{% url 'clustering:analysis_status_single' job.job_id %}">Click me</a></td>
+
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        There are currently no submitted jobs.
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

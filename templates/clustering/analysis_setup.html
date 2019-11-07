@@ -1,0 +1,387 @@
+{% extends "clustering/base_analysis.html" %}
+
+{% block title %}BiGAnts-Web analysis setup{% endblock %}
+
+{% block custom_css %}
+    {% load static %}
+    <link href="{% static 'clustering/css/forms.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+    <!-- Analysis info card -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Analysis overview</h1>
+            <p class="card-text">To start a new analysis fill out the form below.<br>
+                If you are unsure about some of the options, you can look them up in the <a href="{% url 'clustering:documentation' %}">Documentation</a> section.
+                If you want to know the status of you recently submitted analysis click on <a href="{% url 'clustering:analysis_status' %}" >Job status</a>.
+                If you want to see results of previous runs, click on <a href="{% url 'clustering:analysis_results' %}" >Results</a>.
+            </p>
+        </div>
+    </div>
+    <!-- /.card -->
+
+    <!-- Analysis submit card -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Setup new analysis</h1>
+
+            {% if error_list %}
+                <div class="alert alert-danger">
+                    <strong>Wrong parameters!</strong> Please check your input and submit again.
+                    The following errors occured:<br>
+                    <ul>
+                        {% for error in error_list %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Multi part analysis setup form -->
+            <form id="regForm" action="{% url 'clustering:submit_job' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- One "tab" for each step in the form: -->
+
+                <!-- Tab: Expression Data -->
+                <div class="tab tab-expression form-group"><h3>Gene Expression Data</h3>
+                    <p class="card-text"> Upload your own data or use our test data. <br/>
+                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format</span>
+                    </p>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="expression-data_1" name="expression-data"
+                                   class="custom-control-input"
+                                   value="lung-cancer" onclick="hideElement('upload-expression-data');">
+                            <label class="custom-control-label" for="expression-data_1">Lung cancer dataset
+                                (demo data)</label>
+                        </div>
+                        {#                        <div class="custom-control custom-radio">#}
+                        {#                            <input type="radio" id="expression-data_2" name="expression-data"#}
+                        {#                                   class="custom-control-input"#}
+                        {#                                   value="brest-cancer" onclick="hideElement('upload-expression-data');">#}
+                        {#                            <label class="custom-control-label" for="expression-data_2">Breast cancer dataset#}
+                        {#                                (demo data)</label>#}
+                        {#                        </div>#}
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="expression-data_3" name="expression-data"
+                                   class="custom-control-input"
+                                   value="custom" onclick="showElement('upload-expression-data');">
+                            <label class="custom-control-label" for="expression-data_3">Upload own expression
+                                dataset</label>
+                        </div>
+                        <div id="expression_err" class="invalid-feedback">
+                            You must select one option
+                        </div>
+                    </div>
+                    <div id="upload-expression-data" style="display: none">
+                        <div class="custom-file form-group">
+                            <input type="file" class="custom-file-input form-control" name="expression-data-file"
+                                   id="expression-data-filename">
+                            <label class="custom-file-label" for="customFile">Upload expression file</label>
+                            <div id="expression_file_err" class="invalid-feedback">
+                                You must upload a file for this option
+                            </div>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="expression-data-log2"
+                                   name="expression-data-log2" checked>
+                            <label class="custom-control-label" for="expression-data-log2">Apply log2 transformation to
+                                the data</label>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="z-score-transformation"
+                                   name="z-score-transformation" checked>
+                            <label class="custom-control-label" for="z-score-transformation">Apply z-score
+                                transformation to the data</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: PPI -->
+                <div class="tab tab-ppi form-group"><h3>PPI</h3>
+                    <p class="card-text">Choose an protein–protein interaction network from NDEx or upload your own
+                        network data.<br>
+                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format</span>
+                    </p>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="ppi-network_1" name="ppi-network" class="custom-control-input"
+                                   value="apid" onclick="hideElement('upload-ppi-network');">
+
+                            <label class="custom-control-label" for="ppi-network_1">APID</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="ppi-network_2" name="ppi-network" class="custom-control-input"
+                                   value="string" onclick="hideElement('upload-ppi-network');">
+                            <label class="custom-control-label" for="ppi-network_2">STRING</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="ppi-network_3" name="ppi-network" class="custom-control-input"
+                                   value="biogrid" onclick="hideElement('upload-ppi-network');">
+                            <label class="custom-control-label" for="ppi-network_3">BioGRID</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="ppi-network_4" name="ppi-network" class="custom-control-input"
+                                   value="hprd" onclick="hideElement('upload-ppi-network');">
+                            <label class="custom-control-label" for="ppi-network_4">HPRD (Human Protein Reference
+                                Database)</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="ppi-network_5" name="ppi-network" class="custom-control-input"
+                                   value="custom" onclick="showElement('upload-ppi-network');">
+                            <label class="custom-control-label" for="ppi-network_5">Upload own PPI network</label>
+                        </div>
+                        <div id="ppi_err" class="invalid-feedback">
+                            You must select one option
+                        </div>
+                    </div>
+                    <div id="upload-ppi-network" class="custom-file form-group" style="display: none">
+                        <input type="file" class="custom-file-input" name="ppi-network-file" id="ppi-network-filename">
+                        <label class="custom-file-label" for="customFile">Upload network file</label>
+                        <div id="ppi_file_err" class="invalid-feedback">
+                            You must upload a file for this option
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tab: Metadata -->
+                <div class="tab tab-metadata form-group"><h3>Clinical data / Survival data (optional)</h3>
+                    <p class="card-text">Add clinical data / survial data to enable further analysis. If you do not want
+                        to upload additional metadata, you can go to the next step.<br/>
+                        <span class="text-muted">Select "Yes" and upload the clinical data if you have additional metadata.</span>
+                    </p>
+
+                    <div id="metadata_options">
+                        <!-- Ask to use metadatada-->
+                        <div class="form-group">
+                            <label class="radio-inline control-label">Use additional Metadata</label>
+
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="use_metadata1" name="use_metadata"
+                                       class="custom-control-input" value="no"
+                                       onclick="hideElement('additional-metadata');" checked>
+                                <label class="custom-control-label" for="use_metadata1">No</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="use_metadata2" name="use_metadata"
+                                       class="custom-control-input" value="yes"
+                                       onclick="showElement('additional-metadata');">
+                                <label class="custom-control-label" for="use_metadata2">Yes</label>
+                            </div>
+                            <div id="use_metadata_info" class="valid-feedback">
+                                Predefined expression datasets use metadata per default
+                            </div>
+                        </div><!-- form-group -->
+
+                        <div id="additional-metadata" style="display: none" class="form-group">
+                            <div id="column-metadata" class="form-group">
+                                <label class="form-control-label" for="survival-col">Survival column-name</label>
+                                <input class="form-control" type="text" name="survival-col" id="survival-col"
+                                       placeholder="Exact name of your metadata column name">
+                                <div id="survival-col_err" class="invalid-feedback">
+                                    The column name cannot be empty
+                                </div>
+                            </div>
+
+                            <div id="upload-metadata" class="custom-file form-group">
+                                <input type="file" class="custom-file-input" name="survival-metadata-file"
+                                       id="survival-metadata-file">
+                                <label class="custom-file-label" for="survival-metadata">Upload metadata file</label>
+                                <div id="survival-metadata_err" class="invalid-feedback">
+                                    You must upload a file for this option
+                                </div>
+                            </div>
+
+                        </div><!-- form-group -->
+                    </div>
+                </div>
+
+                <!-- Tab: Algorithm parameters -->
+                <div class="tab tab-parameters form-group"><h3>Algorithm parameters</h3>
+                    <p class="card-text">Enter minimum and maximum number of genes per cluster and run the
+                        algorithm:</p>
+                    <fieldset class="form-group">
+                        <div class="form-row">
+
+                            <div class="form-group col">
+                                <label class="form-control-label" for="L_g_min">Minimal number of genes</label>
+                                <input class="form-control" type="text" name="L_g_min" id="L_g_min" value="10"
+                                       placeholder="Integer Number">
+                                <div id="L_g_min_err" class="invalid-feedback">
+                                    This field cannot be empty or contain any strings. Integer only
+                                </div>
+                            </div><!-- form-group -->
+
+                            <div class="form-group col">
+                                <label class="form-control-label" for="ownername">Maximal number of genes</label>
+                                <input class="form-control" type="text" name="L_g_max" id="L_g_max" value="20"
+                                       placeholder="Integer Number">
+                                <div id="L_g_max_err" class="invalid-feedback">
+                                    This field cannot be empty or contain any strings. Integer only
+                                </div>
+                            </div><!-- form-group -->
+                        </div>
+                        <div id="cluster_param_error" class="invalid-feedback form-group">
+                            Minimal number of clusters must be less or equal than the maximum number of cluster
+                        </div>
+
+                        <!-- Ask for advanced options-->
+                        <div class="form-group">
+                            <label class="radio-inline control-label">Use advanced parameters: </label>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="clustering_advanced1" name="clustering_advanced"
+                                       class="custom-control-input" value="no"
+                                       onclick="hideElement('clustering_advanced_options');" checked>
+                                <label class="custom-control-label" for="clustering_advanced1">No</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="clustering_advanced2" name="clustering_advanced"
+                                       class="custom-control-input" value="yes"
+                                       onclick="showElement('clustering_advanced_options');">
+                                <label class="custom-control-label" for="clustering_advanced2">Yes</label>
+                            </div>
+                        </div><!-- form-group -->
+                    </fieldset><!-- fieldset -->
+
+                    <!-- Advanced clustering options-->
+                    <fieldset class="form-group" id="clustering_advanced_options" style="display: none">
+                        <legend>Advanced</legend>
+
+                        <div class="form-group ">
+                            <label class="form-control-label" for="gene_set_size">Gene set size</label>
+                            <input class="form-control" type="text" name="gene_set_size" id="gene_set_size"
+                                   value="2000" placeholder="E.g 2000">
+                            <div id="gene_set_size_err" class="invalid-feedback">
+                                This field cannot be empty or contain any strings. Integer only
+                            </div>
+                        </div><!-- form-group -->
+
+                        <div class="form-group ">
+                            <label class="form-control-label" for="nbr_iter">Maximum number of iterations</label>
+                            <input class="form-control" type="text" name="nbr_iter" id="nbr_iter"
+                                   value="200" placeholder="E.g. 200">
+                            <div id="nbr_iter_err" class="invalid-feedback">
+                                This field cannot be empty or contain any strings. Integer only
+                            </div>
+                        </div><!-- form-group -->
+
+                        <div class="form-group">
+                            <label for="nbr_ants">Number of ants:</label>
+                            <select id="nbr_ants" name="nbr_ants" size="1" class="form-control">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30" selected="selected">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="evap">Evaporation rate</label>
+                            <select id="evap" name="evap" size="1" class="form-control">
+                                <option value="0.1">0.1</option>
+                                <option value="0.25">0.25</option>
+                                <option value="0.5" selected="selected">0.5</option>
+                                <option value="0.6">0.6</option>
+                                <option value="0.7">0.7</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pher">Pheromone significance</label>
+                            <select id="pher" name="pher" size="1" class="form-control">
+                                <option value="0.5">0.5</option>
+                                <option value="0.75">0.75</option>
+                                <option value="1" selected="selected">1</option>
+                                <option value="1.5">1.5</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="hisig">Heuristic Information significance</label>
+                            <select id="hisig" name="hisig" size="1" class="form-control">
+                                <option value="0.5">0.5</option>
+                                <option value="0.75">0.75</option>
+                                <option value="1" selected="selected">1</option>
+                                <option value="1.5">1.5</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stopcr">Stop criteria - Epsilon</label>
+                            <select id="stopcr" name="stopcr" size="1" class="form-control">
+                                <option value="0.005">0.005</option>
+                                <option value="0.01">0.01</option>
+                                <option value="0.02" selected="selected">0.02</option>
+                                <option value="0.03">0.03</option>
+                                <option value="0.05">0.05</option>
+                            </select>
+                        </div>
+
+                    </fieldset>
+                </div>
+
+                <div id="tab-submit" style="display: none">
+                    <h3>Submitting Job</h3>
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="margin-top" style="overflow:auto;">
+                    <div class="btn-group btn-primary" style="float:right;">
+                        <button type="button" id="prevBtn" class="btn btn-secondary" onclick="nextPrev(-1)">
+                            Previous
+                        </button>
+                        <button type="button" id="nextBtn" class="btn btn-primary" onclick="nextPrev(1)">Next
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Circles which indicates the steps of the form: -->
+                <div style="text-align:center;margin-top:40px;">
+                    <span class="step"></span>
+                    <span class="step"></span>
+                    <span class="step"></span>
+                    <span class="step"></span>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- /.card -->
+
+    <!-- Import javacript files -->
+    {% load static %}
+    <script src="{% static 'clustering/js/forms.js' %}"></script>
+    <script>
+        function showElement(elementID) {
+            document.getElementById(elementID).style.display = 'block';
+        }
+
+        function hideElement(elementID) {
+            document.getElementById(elementID).style.display = 'none';
+        }
+
+        function toggleElement(elementID) {
+            let style = document.getElementById(elementID).style.display;
+            if (style === 'block') {
+                document.getElementById(elementID).style.display = 'none'
+            } else {
+                document.getElementById(elementID).style.display = 'block'
+            }
+        }
+
+        function toggleAllElements(elementList) {
+            elementList.forEach(toggleElement);
+        }
+    </script>
+
+{% endblock %}

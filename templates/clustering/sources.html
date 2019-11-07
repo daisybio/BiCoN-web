@@ -1,0 +1,87 @@
+{% extends "clustering/base.html" %}
+
+{% block title %}About BiGAnts{% endblock %}
+
+{% block content %}
+    {% load static %}
+    <!-- Page Content -->
+    <div class="row">
+        <div class="col-lg-10 text-justify">
+            <h1 class="mt-5">About BiGAnts</h1>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Table of contents</h2>
+                    <ul>
+                        <li><a href="#bigants-algorithm">BiGAnts
+                            algorithm</a></li>
+                        <li><a href="#web-application">Web
+                            application</a></li>
+                        <li><a href="#pypi-package">PyPI
+                            package</a></li>
+                        <li><a href="#cite">Cite</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div id="bigants-algorithm" class="card-body">
+                    <h2 class="card-title">BiGAnts algorithm</h2>
+                    <p>Unsupervised learning approaches are frequently employed to identify patient subgroups and
+                        biomarkers such as disease-associated genes. Biclustering is a powerful technique often used
+                        with
+                        expression data to cluster genes along with patients. However, the genes forming biclusters are
+                        often not functionally related, complicating interpretation of the results.
+                        <br>
+                        <br>
+                        To alleviate this, we developed the network-constrained biclustering approach BiGAnts which
+                        <strong>(i)</strong>
+                        restricts biclusters to functionally related genes connected in molecular interaction networks
+                        and
+                        <strong>(ii)</strong> maximizes the expression difference between two subgroups of patients.</p>
+
+                    <img class="img-fluid" src="{% static 'clustering/img/about/BiGAnts-schema.png' %}">
+
+
+                </div>
+                <div id="web-application" class="card-body">
+                    <h2 class="card-title">Web application</h2>
+                    BiGAnts-web allows you to use the full power of BiGants analysis provided with an an intuitive
+                    interface. To learn how to use BiGAnts-web please refer to our
+                    <a href="{% url 'clustering:documentation' %}">documentation</a> section.
+                </div>
+                <div id="pypi-package" class="card-body">
+                    <h2 class="card-title">PyPI package</h2>
+                    If you prefer to run BiGAnts locally and in python, then just install BiGAnts from PyPI:
+                    <br>
+                    <code>pip install bigants</code>
+                    <br>
+                    Please check the instruction for the package at our
+                    <a href="https://github.com/biomedbigdata/BiGAnts-PyPI-package">GitHub</a> repository.
+                </div>
+                <div id="cite" class="card-body">
+                    <h2 class="card-title">Cite</h2>
+                    BiGants was developed by the <a href="https://biomedical-big-data.de">Big Data in BioMedicine
+                    group</a> and the <a href="https://compsysmed.de">Computational Systems Medicine group</a> at the
+                    <a href="https://www.baumbachlab.net/">Chair of Experimental Bioinformatics</a>.
+                    <br>
+                    <br>
+                    If you use BiGAnts in your research, we kindly ask you to cite the following manuscript:
+                    <br>
+                    <code>Lazareva,O., Van Do, H., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T.**, List, M.**:
+                        BiGAnts:
+                        Network-constrained biclustering of patients and omics data. [Submitted] </code>
+                    <p>** joint last author</p>
+                </div>
+                <div id="contact" class="card-body">
+                    <h2 class="card-title">Contact</h2>
+                    If you want to contact us regarding BiGAnts:
+                    <li><a href="mailto:olga.lazareva@wzw.tum.de?subject=[BiGAnts-Web]%20BiGAnts%20WEB">Olga
+                        Lazareva</a></li>
+                    <li><a href="mailto:tim.kacprowski@wzw.tum.de?subject=[BiGAnts-Web]%20BiGAnts%20WEB">Tim Kacprowski</a></li>
+                    <li><a href="mailto:markus.list@wzw.tum.de?subject=[BiGAnts-Web]%20BiGAnts%20WEB">Markus List</a>
+                    </li>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

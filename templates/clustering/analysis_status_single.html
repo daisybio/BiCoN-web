@@ -1,0 +1,122 @@
+{% extends "clustering/base_analysis.html" %}
+
+{% block title %}BiGAnts-Web analysis status{% endblock %}
+
+{% block custom_css %}
+    {% load static %}
+    <link href="{% static 'clustering/css/status.css' %}" rel="stylesheet">
+
+    <style>
+        ul.no_bullet {
+            list-style-type: none;
+            padding: 10px;
+        }
+
+        li.process-step {
+            margin: 10px;
+        }
+
+        li.empty-circle {
+            background: url({% static 'clustering/img/icons/empty-circle.svg' %}) no-repeat left top;
+            padding-left: 30px;
+            fill: #999FA4;
+        }
+
+        li.empty-circle-muted {
+            background: url({% static 'clustering/img/icons/empty-circle-muted.svg' %}) no-repeat left top;
+            padding-left: 30px;
+        }
+
+        li.check-circle {
+            background: url({% static 'clustering/img/icons/check-circle.svg' %}) no-repeat left top;
+            padding-left: 30px;
+        }
+
+        li.false-circle {
+            background: url({% static 'clustering/img/icons/false-circle.svg' %}) no-repeat left top;
+            padding-left: 30px;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-title">Analysis Status</h1>
+            <div id="alert_success" class="alert alert-success {% if task.status != 'SUCCESS' %} d-none {% endif %}">
+                <strong>Success!</strong> Your analysis finished successfully.
+                <a href="{% url 'clustering:analysis_result' task.task_id %}" class="alert-link">Click here</a> to
+                view the results.
+            </div>
+            <div id="alert_failure" class="alert alert-danger {% if task.status != 'FAILURE' %} d-none {% endif %}">
+                <strong>FAILURE!</strong> Your analysis failed!
+                Check the progress bar below and the printed error messages for more information and try to rerun
+                you analysis.
+            </div>
+            <div id="alert_running" class="alert alert-info {% if task.status != 'RUNNING' %} d-none {% endif %}">
+                <strong>Running!</strong> Your analysis is running!
+                Check the progress bar below for more information.
+            </div>
+            <div id="alert_pending" class="alert alert-info {% if task.status != 'PENDING' %} d-none {% endif %}">
+                <strong>Pending!</strong> Your job is currently in a queue. The analysis will start
+                in a few moments.
+            </div>
+
+
+            <div class="card" style="border: none;">
+                <div class="card-body mt-1">
+                    <strong>Progress</strong>
+                    <div class="progress">
+                        {#                    <div class="state one bg-primary"></div>#}
+                        {#                    <div class="state two bg-primary"></div>#}
+                        {#                    <div class="state three bg-primary"></div>#}
+                        {#                    <div class="state four bg-primary"></div>#}
+                        {#                    <div class="state five bg-primary"></div>#}
+                        <div id="progress-bar" class="progress-bar" style="width: 0%;">0 &#37;</div>
+                    </div>
+
+                    {#                <div>#}
+                    {#                    <br/><span style="position: absolute; left: -5%;">Submitted</span>#}
+                    {#                    <span style="position: absolute; left: 12%;">Expression data</span>#}
+                    {#                    <span style="position: absolute; left: 35%;">PPI data</span>#}
+                    {#                    <span style="position: absolute; left: 75%;">Clustering</span>#}
+                    {#                    <span style="position: absolute; left: 93%;">Visualize</span>#}
+                    {#                </div>#}
+
+                </div>
+            </div>
+            <div class="card" style="border: none;">
+
+                <ul class="no_bullet">
+                    <li class="process-step empty-circle-muted text-muted">Submitted</li>
+                    <li class="process-step empty-circle-muted text-muted">Parse expression data</li>
+                    <li class="process-step empty-circle-muted text-muted">Parse PPI data</li>
+                    <li class="process-step empty-circle-muted text-muted">Preprocess and check input data</li>
+                    <li class="process-step empty-circle-muted text-muted">Run clustering algorithm</li>
+                    <li class="process-step empty-circle-muted text-muted">Visualize results</li>
+                </ul>
+            </div>
+
+            <div id="error-div" class="card d-none" style="border: none;">
+                <div class="card-body mt-0" style="border: none;">
+                    <strong>Error message:</strong>
+                    <br/>
+                    <pre id="error-message" class="text-danger"></pre>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {% load static %}
+    <script src="{% static 'clustering/js/status_single.js' %}"></script>
+    <script>
+        // Run the update task_status function
+        update_status('{{ csrf_token }}', '{{ task.id }}', '{% url 'clustering:poll_status' %}');
+    </script>
+{% endblock %}
