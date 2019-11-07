@@ -1,1 +1,0 @@
-The log-rank test gives a p-value of: 
