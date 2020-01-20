@@ -3,12 +3,12 @@ FROM python:3.6
 # Unbuffered stdin / out for faster duping of logs
 ENV PYTHONUNBUFFERED 1
 
-# create the bigants user with home directory
-RUN addgroup --system bigants && adduser --home /home/bigants --system bigants --ingroup bigants
+# create the bicon user with home directory
+RUN addgroup --system bicon && adduser --home /home/bicon --system bicon --ingroup bicon
 
 # create the appropriate directories
-ENV HOME=/home/bigants
-ENV APP_HOME=/home/bigants/web
+ENV HOME=/home/bicon
+ENV APP_HOME=/home/bicon/web
 RUN mkdir $APP_HOME
 
 
@@ -19,7 +19,7 @@ WORKDIR $APP_HOME
 COPY requirements/requirements.txt $APP_HOME/requirements/
 RUN pip install -r requirements/requirements.txt
 
-## TEMPORARILY START
+## TEMPORARILY START -- Install BiGAnts package from local source
 #COPY _dev/BiGAnts-PyPI-package $APP_HOME/_dev/BiGAnts-PyPI-package
 #WORKDIR $APP_HOME/_dev/BiGAnts-PyPI-package
 #RUN python setup.py install
@@ -29,11 +29,11 @@ RUN pip install -r requirements/requirements.txt
 # copy project
 COPY . $APP_HOME
 
-# chown all the files to the bigants user
-RUN chown -R bigants:bigants $APP_HOME
+# chown all the files to the bicon user
+RUN chown -R bicon:bicon $APP_HOME
 
-# change to the bigants user
-USER bigants
+# change to the bicon user
+USER bicon
 
 # run entrypoint.prod.sh
 #ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]

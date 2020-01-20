@@ -4,13 +4,13 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/bigants/Dockerfile
+      dockerfile: docker/bicon/Dockerfile
     command: gunicorn BiGAnts_web.wsgi:application --bind 0.0.0.0:8000
     environment:
       - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
     volumes:
-      - static_volume:/home/bigants/web/run/static
-      - media_volume:/home/bigants/web/run/media
+      - static_volume:/home/bicon/web/run/static
+      - media_volume:/home/bicon/web/run/media
     networks:
       - nginx_network
       - database_network
@@ -21,12 +21,12 @@ services:
   celery:
     build:
       context: .
-      dockerfile: docker/bigants/Dockerfile
+      dockerfile: docker/bicon/Dockerfile
     command: celery -A BiGAnts_web worker -l info
     environment:
       - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
     volumes:
-      - media_volume:/home/bigants/web/run/media
+      - media_volume:/home/bicon/web/run/media
     networks:
       - database_network
       - celery_network
@@ -63,8 +63,8 @@ services:
   nginx:
     build: ./docker/nginx
     volumes:
-      - static_volume:/data/bigants/run/static
-      - media_volume:/data/bigants/run/media
+      - static_volume:/data/bicon/run/static
+      - media_volume:/data/bicon/run/media
     # If you want the application to be listening on another port different than port 8000
     # Change the 'published' port number to the port you desire
     ports:
