@@ -23,11 +23,10 @@ from lifelines.statistics import logrank_test
 from networkx.readwrite import json_graph
 from pybiomart import Dataset
 
-from bigants import data_preprocessing
-from bigants import BiGAnts
-from bigants import results_analysis
+from bicon import data_preprocessing
+from bicon import BiCoN
+from bicon import results_analysis
 
-# import apps.clustering.weighted_aco_lib as lib
 from apps.clustering.models import Job
 
 flatten = lambda l: [item for sublist in l for item in sublist]
@@ -599,8 +598,8 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
               }
     )
 
-    # --- Step 3: Run the clustering algorithm (BiGAnts)
-    model = BiGAnts(ge, g, L_g_min, L_g_max)
+    # --- Step 3: Run the clustering algorithm (BiCoN)
+    model = BiCoN(ge, g, L_g_min, L_g_max)
 
     print(f'Execute model.run')
     # solution, scores = model.run_search(max_iter=1)

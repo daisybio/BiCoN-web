@@ -4,7 +4,7 @@ from celery import Celery
 
 # TODO: Add other file? or method to change settings.dev
 # set the default Django settings module for the 'celery' program.
-os.environ.get("DJANGO_SETTINGS_MODULE", "BiGAnts_web.settings.development")
+os.environ.get("DJANGO_SETTINGS_MODULE", "BiCoN_web.settings.development")
 
 app = Celery('BiGAnts-web')
 

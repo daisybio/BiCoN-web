@@ -5,9 +5,9 @@ services:
     build:
       context: .
       dockerfile: docker/bicon/Dockerfile
-    command: gunicorn BiGAnts_web.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn BiCoN_web.wsgi:application --bind 0.0.0.0:8000
     environment:
-      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
+      - DJANGO_SETTINGS_MODULE=BiCoN_web.settings.production
     volumes:
       - static_volume:/home/bicon/web/run/static
       - media_volume:/home/bicon/web/run/media
@@ -22,9 +22,9 @@ services:
     build:
       context: .
       dockerfile: docker/bicon/Dockerfile
-    command: celery -A BiGAnts_web worker -l info
+    command: celery -A BiCoN_web worker -l info
     environment:
-      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
+      - DJANGO_SETTINGS_MODULE=BiCoN_web.settings.production
     volumes:
       - media_volume:/home/bicon/web/run/media
     networks:

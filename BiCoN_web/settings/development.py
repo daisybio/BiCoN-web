@@ -28,7 +28,7 @@ DATABASES = {
 }
 
 # ##### CACHE CONFIGURATION ############################
-# Dummy cache = disable chache
+# Dummy cache = disable cache
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
