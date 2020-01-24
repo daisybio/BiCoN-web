@@ -6,7 +6,7 @@ from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.get("DJANGO_SETTINGS_MODULE", "BiCoN_web.settings.development")
 
-app = Celery('BiGAnts-web')
+app = Celery('BiCoN-web')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

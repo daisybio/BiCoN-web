@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
-# Serve media files during debugging through the django server aswell
+# Serve media files during debugging through the django server as well
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

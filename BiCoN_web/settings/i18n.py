@@ -34,6 +34,5 @@ LOCALE_PATHS = (
 
 # Inject the localization middleware into the right position
 MIDDLEWARE = [y for i, x in enumerate(MIDDLEWARE) for y in (
-    ('django.middleware.locale.LocaleMiddleware', x) if MIDDLEWARE[i - 1] == \
-                                                        'django.contrib.sessions.middleware.SessionMiddleware' else (
-    x,))]
+    ('django.middleware.locale.LocaleMiddleware', x) if MIDDLEWARE[i - 1] == 'django.contrib.sessions.middleware.SessionMiddleware' else (
+        x,))]

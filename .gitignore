@@ -107,7 +107,7 @@ venv.bak/
 # Ignore Intellij / Pycharm project settings
 .idea/
 
-# BiGAnts-web specific files (ToDo remove, legacy)
+# BiCoN-web specific files (ToDo remove, legacy)
 ./test_scripts_3/APID.cx
 ./test_scripts_3/biogrid_sce.cx
 ./polls/data/lung_cancer_expr_raw.csv

@@ -1,19 +1,20 @@
 # project imports
+import os
+
 from .common import *
 
 # ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
-DEBUG = True
-
+DEBUG = False
 
 # ##### DATABASE CONFIGURATION ############################
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST':  'db',
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': 'db',
         'PORT': '5432',
     },
 }
@@ -27,12 +28,12 @@ DATABASES = {
 # }
 
 # ##### CELARY CONFIGURATION ############################
-CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit:5672'
+CELERY_BROKER_URL = f'amqp://{os.environ.get("RABBITMQ_DEFAULT_USER", "admin")}:{os.environ.get("RABBITMQ_DEFAULT_PASS", "mypass")}@rabbit:5672'
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
-CELERY_ACCEPT_CONTENT =['pickle', 'json', 'msgpack', 'yaml']
-
+CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
+print(f'RABBIT USER: {os.environ.get("RABBITMQ_DEFAULT_USER")} --- RABBIT PASSWORD: {os.environ.get("RABBITMQ_DEFAULT_PASS")}')
 # ##### APPLICATION CONFIGURATION #########################
 INSTALLED_APPS = DEFAULT_APPS
 
