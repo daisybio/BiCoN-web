@@ -4,7 +4,7 @@ import sys
 
 if __name__ == "__main__":
     os.environ.get('C_FORCE_ROOT', 'true')
-    os.environ.get("DJANGO_SETTINGS_MODULE", "BiGAnts_web.settings.development")
+    os.environ.get("DJANGO_SETTINGS_MODULE", "BiCoN_web.settings.development")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

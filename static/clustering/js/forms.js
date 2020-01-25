@@ -47,7 +47,7 @@ function nextPrev(n) {
 
 function validateForm() {
     // This function deals with validation of the form fields
-    var x, y, i, valid = true;
+    let x, y, valid = true;
     x = document.getElementsByClassName("tab");
     y = x[currentTab];
 
@@ -129,6 +129,24 @@ function validateForm() {
 
         // Check algorithm parameter tab
     } else if (y.classList.contains("tab-parameters")) {
+        // Check job name
+        let validJobResult = validCharacters($('#job_name').val())
+        if (validJobResult === 1 || validJobResult === 3) {
+            $('#job_name_err').addClass('d-block')
+            valid = false;
+
+        } else {
+            $('#job_name_err').removeClass('d-block')
+        }
+        if (validJobResult === 2 || validJobResult === 3) {
+            $('#job_name_length_err').addClass('d-block')
+            valid = false;
+
+        } else {
+            $('#job_name_length_err').removeClass('d-block')
+        }
+
+        // Now check the parameters
         const L_g_min = $('#L_g_min').val();
         const L_g_max = $('#L_g_max').val();
 
@@ -193,6 +211,25 @@ function validateForm() {
 
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && !isNaN(n - 0)
+}
+
+// Check if string contains valid characters (letters, numbers, spaces, dashes)
+function validCharacters(text) {
+    const allowedCharacters = /^[a-zA-Z0-9\s-_]+$/;
+    let result = 0;
+
+    // invalid characters add 1
+    if (!text.match(allowedCharacters) && text.trim()) {
+        result += 1;
+    }
+
+    // invalid length add 2
+    if (text.length > 30) {
+        result += 2;
+    }
+
+    // 0 = valid, 1 = invalid characters, 2 = invalid length, 3 = too long and invalid length
+    return result;
 }
 
 

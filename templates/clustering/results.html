@@ -1,6 +1,6 @@
 {% extends "clustering/base_analysis.html" %}
 
-{% block title %}BiGAnts-Web analysis results overview{% endblock %}
+{% block title %}BiCoN-Web analysis results overview{% endblock %}
 
 
 {% block content %}
@@ -14,6 +14,7 @@
                     <thead>
                     <tr>
                         <!--- iterate over tables of metadata and display as table--->
+                        <th scope="col">Job Name</th>
                         <th scope="col">Submission Date</th>
                         <th scope="col">Job ID</th>
                         <th scope="col">Completion Date</th>
@@ -26,6 +27,7 @@
                     {% for job in previous_jobs %}
 
                         <tr>
+                            <td>{{ job.job_name}}</td>
                             <td>{{ job.submit_time }}</td>
                             <td>{{ job.job_id }}</td>
                             <td>{{ job.finished_time }}</td>

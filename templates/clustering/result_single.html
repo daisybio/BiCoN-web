@@ -1,15 +1,20 @@
 {% extends "clustering/base_analysis.html" %}
 
-{% block title %}BiGAnts-Web analysis results{% endblock %}
+{% block title %}BiCoN-Web analysis results{% endblock %}
 
 
 {% block content %}
     {% load static %}
+    <div class="card mt-4 ml-2" style="border: none">
+            <h1 class="card-title">Result for: {{ job_identifier }}</h1>
+    </div>
+
     <!-- Analysis PPI Graph -->
     <div class="card mt-4">
         <div class="card-body">
-            <h1 class="card-title">Extracted subnetworks</h1>
-            <p class="card-text">The color of a node corresponds to the mean difference in expression level between two
+            <h2 class="card-title">Extracted subnetworks</h2>
+            <p class="card-text">The color of a node corresponds to the mean difference in expression level
+                between two
                 clusters of patients.
             </p>
 
@@ -21,10 +26,10 @@
             <p>In the above graph, interactions between analysed genes are shown. The color corresponds to
                 the mean difference in expression level between both groups.</p>
             <b>
-            Download the network
-            <a href="{% get_media_prefix %}{{ ppi_png }}" download> as png </a> or
-            <a href="{% get_media_prefix %}{{ ppi_json }}" download> as json file </a>
-        </b>
+                Download the network
+                <a href="{% get_media_prefix %}{{ ppi_png }}" download> as png </a> or
+                <a href="{% get_media_prefix %}{{ ppi_json }}" download> as json file </a>
+            </b>
         </div>
     </div>
 
@@ -32,7 +37,7 @@
     <!-- Heatmap -->
     <div class="card mt-4">
         <div class="card-body">
-            <h1 class="card-title">Heatmap</h1>
+            <h2 class="card-title">Heatmap</h2>
             <p>The heatmap shows resulting biclustering.</p>
             <img src="{% get_media_prefix %}{{ heatmap_png }}" class="img-fluid">
         </div>
@@ -43,7 +48,7 @@
     {% if survival_plotly %}
         <div class="card mt-4">
             <div class="card-body">
-                <h1 class="card-title">Survival Analysis</h1>
+                <h2 class="card-title">Survival Analysis</h2>
                 <object type="text/html" data="{% get_media_prefix %}{{ survival_plotly }}"
                         style="width: 100%; height: 400px">
                 </object>
@@ -56,7 +61,7 @@
 
         <div class="card mt-4">
             <div class="card-body">
-                <h1>Patient Data</h1>
+                <h2>Patient Data</h2>
                 <p>In the below table, the Jaccard Index of correlation between patient clusters (output by the
                     algorithm) and clinical events (e.g. metastasis) is shown. (E.g., which fraction of patients
                     in Cluster 1 has a lung metastasis).</p>
@@ -96,7 +101,7 @@
     <!-- Convergence Behaviour -->
     <div class="card mt-4">
         <div class="card-body">
-            <h1 class="card-title">Convergence Behaviour</h1>
+            <h2 class="card-title">Convergence Behaviour</h2>
             <img src="{% get_media_prefix %}{{ convergence_png }}" class="img-fluid">
 
         </div>

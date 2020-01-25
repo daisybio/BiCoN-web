@@ -4,13 +4,13 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/bigants/Dockerfile
-    command: gunicorn BiGAnts_web.wsgi:application --bind 0.0.0.0:8000
-    environment:
-      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
+      dockerfile: docker/bicon/Dockerfile
+    command: gunicorn BiCoN_web.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - .env
     volumes:
-      - static_volume:/home/bigants/web/run/static
-      - media_volume:/home/bigants/web/run/media
+      - static_volume:/home/bicon/web/run/static
+      - media_volume:/home/bicon/web/run/media
     networks:
       - nginx_network
       - database_network
@@ -21,12 +21,12 @@ services:
   celery:
     build:
       context: .
-      dockerfile: docker/bigants/Dockerfile
-    command: celery -A BiGAnts_web worker -l info
-    environment:
-      - DJANGO_SETTINGS_MODULE=BiGAnts_web.settings.production
+      dockerfile: docker/bicon/Dockerfile
+    command: celery -A BiCoN_web worker -l info
+    env_file:
+      - .env
     volumes:
-      - media_volume:/home/bigants/web/run/media
+      - media_volume:/home/bicon/web/run/media
     networks:
       - database_network
       - celery_network
@@ -37,9 +37,9 @@ services:
   db:
     image: postgres:12.0
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     networks:
       - database_network
     volumes:
@@ -50,8 +50,8 @@ services:
     hostname: rabbit
     image: rabbitmq:3.8
     environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=mypass
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     networks:
       - celery_network
     ports:
@@ -63,16 +63,17 @@ services:
   nginx:
     build: ./docker/nginx
     volumes:
-      - static_volume:/data/bigants/run/static
-      - media_volume:/data/bigants/run/media
+      - static_volume:/data/bicon/run/static
+      - media_volume:/data/bicon/run/media
     # If you want the application to be listening on another port different than port 8000
     # Change the 'published' port number to the port you desire
     ports:
       - target: 80
-        published: 80             # Change this port
+        published: ${NGINX_PUBLISHED_PORT}             # Change this port
         protocol: tcp
         mode: host
-
+    environment:
+      - NGINX_PUBLISHED_PATH=${NGINX_PUBLISHED_PATH}
     networks:
       - nginx_network
     depends_on:
