@@ -26,12 +26,12 @@ server {
     }
 
     # This url has to be the same as in the django config 'STATIC_URL'
-    location /static/ {
+    location ${NGINX_PUBLISHED_PATH}/static/ {
         alias /data/bicon/run/static/;
     }
 
     # This url has to be the same as in the django config 'MEDIA_URL'
-    location /media/ {
+    location ${NGINX_PUBLISHED_PATH}/media/ {
         alias /data/bicon/run/media/;
     }
 

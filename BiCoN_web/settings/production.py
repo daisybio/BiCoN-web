@@ -33,7 +33,7 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_RESULT_BACKEND = "amqp"
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
-print(f'RABBIT USER: {os.environ.get("RABBITMQ_DEFAULT_USER")} --- RABBIT PASSWORD: {os.environ.get("RABBITMQ_DEFAULT_PASS")}')
+
 # ##### APPLICATION CONFIGURATION #########################
 INSTALLED_APPS = DEFAULT_APPS
 

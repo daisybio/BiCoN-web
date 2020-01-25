@@ -11,8 +11,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import sys
+import os
 # Python imports
 from os.path import abspath, basename, dirname, join, normpath
+
 
 # ##### PATH CONFIGURATION ################################
 
@@ -101,10 +103,10 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 ROOT_URLCONF = '%s.urls' % SITE_NAME
 
 # the URL for static files
-STATIC_URL = '/static/'
+STATIC_URL = f'{os.environ.get("NGINX_PUBLISHED_PATH", "")}/static/'
 
 # the URL for media files
-MEDIA_URL = '/media/'
+MEDIA_URL = f'{os.environ.get("NGINX_PUBLISHED_PATH", "")}/media/'
 
 # ##### DEBUG CONFIGURATION ###############################
 DEBUG = False
