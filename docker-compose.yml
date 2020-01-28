@@ -12,9 +12,9 @@ services:
       - static_volume:/home/bicon/web/run/static
       - media_volume:/home/bicon/web/run/media
     networks:
-      - nginx_network
-      - database_network
-      - celery_network
+      - bc_nginx_network
+      - bc_database_network
+      - bc_celery_network
     depends_on:
       - db
 
@@ -28,8 +28,8 @@ services:
     volumes:
       - media_volume:/home/bicon/web/run/media
     networks:
-      - database_network
-      - celery_network
+      - bc_database_network
+      - bc_celery_network
     depends_on:
       - db
       - rabbit
@@ -41,7 +41,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     networks:
-      - database_network
+      - bc_database_network
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
@@ -53,9 +53,9 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     networks:
-      - celery_network
-    ports:
-        - "5672:5672"
+      - bc_celery_network
+    #ports:
+        #- "5672:5672"
     volumes:
       - rabbit_data:/var/lib/rabbitmq
 
@@ -69,23 +69,23 @@ services:
     # Change the 'published' port number to the port you desire
     ports:
       - target: 80
-        published: ${NGINX_PUBLISHED_PORT}             # Change this port
+        published: 8082 #${NGINX_PUBLISHED_PORT}             # Change this port
         protocol: tcp
         mode: host
     environment:
       - NGINX_PUBLISHED_PATH=${NGINX_PUBLISHED_PATH}
     networks:
-      - nginx_network
+      - bc_nginx_network
     depends_on:
       - web
 
 
 networks:
-  nginx_network:
+  bc_nginx_network:
     driver: bridge
-  database_network:
+  bc_database_network:
     driver: bridge
-  celery_network:
+  bc_celery_network:
     driver: bridge
 
 volumes:
