@@ -6,7 +6,7 @@ from os.path import join
 from .common import *
 
 # uncomment the following line to include i18n
-# from .i18n import *
+from .i18n import *
 
 
 # ##### DEBUG CONFIGURATION ###############################
