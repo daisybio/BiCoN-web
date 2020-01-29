@@ -18,8 +18,16 @@
                 clusters of patients.
             </p>
 
-            <div>
-                <div id="ppi-graph-container" style="max-width: available; height: 400px; margin: auto"></div>
+            <div class="container no-gutters">
+                <div class="row">
+                    <div class="col-2" style=" padding-right: 0; padding-left: 0">
+                        <img class="img-fluid" src="{% static 'clustering/img/analysis/ppi_network_legend.png' %}"
+                             style="height: 200px;">
+                    </div>
+                    <div class="col" style=" padding-right: 0; padding-left: 0">
+                        <div id="ppi-graph-container" style="max-width: available; height: 400px; margin: auto"></div>
+                    </div>
+                </div>
 
             </div>
 
