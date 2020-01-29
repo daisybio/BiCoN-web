@@ -637,7 +637,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     # ========== Plotting networks ==========
     # --- Heatmap
-    results = results_analysis(solution, labels)
+    results = results_analysis(solution, labels, convert=True, origID="entrezgene")
 
     with BytesIO() as output:
         results.show_clustermap(ge, g, output=output)
