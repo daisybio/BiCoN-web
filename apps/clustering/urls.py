@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import IndexView, AnalysisSetupView, submit_analysis, analysis_status, analysis_status_single, poll_status, analysis_result, \
-    results, bookmark, DocumentationView, SourcesView, test, test_result
+    results, bookmark, DocumentationView, AboutView, test, test_result
 
 app_name = 'clustering'
 urlpatterns = [
@@ -31,5 +31,5 @@ urlpatterns = [
     path('bookmark/<uuid:session_id>', bookmark, name='bookmark'),
     # Page for documentation and source
     path('documentation/', DocumentationView.as_view(), name='documentation'),
-    path('sources/', SourcesView.as_view(), name='sources'),
+    path('about/', AboutView.as_view(), name='about'),
 ]
