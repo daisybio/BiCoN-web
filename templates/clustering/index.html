@@ -1,4 +1,4 @@
-{% extends "clustering/base.html" %}
+{% extends "clustering/base/base.html" %}
 
 {% block title %}BiCoN-Web{% endblock %}
 
@@ -54,7 +54,7 @@
                     <p class="card-text">Read about the tool, learn how to cite it or contact us.</p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">About this tool</a>
+                    <a href="{% url 'clustering:about' %}" class="btn btn-primary">About this tool</a>
                 </div>
             </div>
         </div>

@@ -30,7 +30,7 @@ class IndexView(TemplateView):
 
 
 class AnalysisSetupView(TemplateView):
-    template_name = "clustering/analysis_setup.html"
+    template_name = "clustering/analysis/analysis_setup.html"
 
     def get_context_data(self, **kwargs):
         # Create new session if none is found
@@ -202,7 +202,7 @@ def submit_analysis(request):
     # Todo redirect back to analysis setup instead of displaying on submit...
     if error_list:
         print("Input was incorrect. Redirecting back to setup page")
-        return render(request, "clustering/analysis_setup.html", context={
+        return render(request, "clustering/analysis/analysis_setup.html", context={
             'navbar': 'analysis',
             'groupbar': 'setup_analysis',
             'error_list': error_list
@@ -294,7 +294,7 @@ def analysis_status(request):
     running_jobs = Job.objects.filter(session_id__exact=session_id).exclude(
         finished_time__lt=(timezone.now() - datetime.timedelta(minutes=20))).order_by('-submit_time')
 
-    return render(request, 'clustering/analysis_status.html', context={
+    return render(request, 'clustering/analysis/analysis_status.html', context={
         'navbar': 'analysis',
         'groupbar': 'submitted_analysis',
         'previous_jobs': running_jobs
@@ -303,7 +303,7 @@ def analysis_status(request):
 
 def analysis_status_single(request, analysis_id):
     analysis_task = AsyncResult(str(analysis_id))
-    return render(request, 'clustering/analysis_status_single.html', context={
+    return render(request, 'clustering/analysis/analysis_status_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_status',
         'task': analysis_task,
@@ -312,7 +312,7 @@ def analysis_status_single(request, analysis_id):
 
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
-    return render(request, 'clustering/result_single.html', context={
+    return render(request, 'clustering/analysis/results/result_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_result',
         'job_identifier': job.job_name if job.job_name else job.job_id,
@@ -331,7 +331,7 @@ def results(request):
     previous_jobs = Job.objects.filter(session_id__exact=session_id).exclude(status__exact='RUNNING') \
         .order_by('-submit_time')
 
-    return render(request, 'clustering/results.html', context={
+    return render(request, 'clustering/analysis/results/results.html', context={
         'navbar': 'analysis',
         'groupbar': 'all_results',
         'previous_jobs': previous_jobs
@@ -347,10 +347,10 @@ class DocumentationView(TemplateView):
         return context
 
 
-class SourcesView(TemplateView):
-    template_name = 'clustering/sources.html'
+class AboutView(TemplateView):
+    template_name = 'clustering/about.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['navbar'] = 'sources'
+        context['navbar'] = 'about'
         return context
