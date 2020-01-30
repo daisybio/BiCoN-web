@@ -51,7 +51,8 @@
                         for easier identification. <br>
                         <span class="text-muted">Only letters, numbers, spaces and dashes are allowed in the identifier
                         </span></label>
-                    <input class="form-control" type="text" name="job_name" id="job_name" maxlength="30" placeholder="Job name">
+                    <input class="form-control" type="text" name="job_name" id="job_name" maxlength="30"
+                           placeholder="Job name">
                     <div id="job_name_err" class="invalid-feedback">
                         Your identifier contains not allowed characters.
                     </div>
@@ -65,7 +66,7 @@
                 <!-- Tab: Expression Data -->
                 <div class="tab tab-expression form-group"><h3>Gene Expression Data</h3>
                     <p class="card-text"> Upload your own data or use our test data. <br/>
-                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format</span>
+                        <span class="text-muted">Please refer to the "Documentation" section for more information about the file format (gene IDs must be Entrez IDs)</span>
                     </p>
 
                     <div class="form-group">
@@ -375,11 +376,25 @@
         </div>
     </div>
     <!-- /.card -->
+{% endblock %}
 
-    <!-- Import javacript files -->
+
+<!-- Import Javascript files -->
+{% block scripts %}
+
     {% load static %}
     <script src="{% static 'clustering/js/forms.js' %}"></script>
     <script>
+
+        // Update the file upload label
+        $('.custom-file input').change(function (e) {
+            var files = [];
+            for (var i = 0; i < $(this)[0].files.length; i++) {
+                files.push($(this)[0].files[i].name);
+            }
+            $(this).next('.custom-file-label').html(files.join(', '));
+        });
+
         function showElement(elementID) {
             document.getElementById(elementID).style.display = 'block';
         }

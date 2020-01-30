@@ -3,6 +3,9 @@ import os
 
 from .common import *
 
+# uncomment the following line to include i18n
+from .i18n import *
+
 # ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
 DEBUG = False
