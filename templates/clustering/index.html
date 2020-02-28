@@ -1,4 +1,4 @@
-{% extends "clustering/base.html" %}
+{% extends "clustering/base/base.html" %}
 
 {% block title %}BiCoN-Web{% endblock %}
 
@@ -7,10 +7,9 @@
     {% load static %}
     <header class="jumbotron my-4">
         <h1 class="display-3">BiCoN</h1>
-        <p class="lead"> BiCoN is a powerful new systems medicine tool to stratify patients while elucidating the
-            responsible disease mechanisms. BiCoN is a network-constrained biclustering approach which restricts
+        <p class="lead">Biclustering constrained by networks (BiCoN) is a powerful new systems medicine tool to stratify patients while elucidating disease mechanisms. BiCoN is a network-constrained biclustering approach which restricts
             biclusters to functionally related genes connected in molecular interaction networks and maximizes the
-            expression difference between two subgroups of patients.</p>
+            expression difference between two groups of patients.</p>
     </header>
 
     <!-- Page Features -->
@@ -55,7 +54,7 @@
                     <p class="card-text">Read about the tool, learn how to cite it or contact us.</p>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'clustering:sources' %}" class="btn btn-primary">About this tool</a>
+                    <a href="{% url 'clustering:about' %}" class="btn btn-primary">About this tool</a>
                 </div>
             </div>
         </div>

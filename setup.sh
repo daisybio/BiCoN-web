@@ -3,7 +3,7 @@
 # ======================================================================================
 # title			:  setup.sh
 # description	:  Setting the .env file up for docker-compose
-# usage			:  bash setup.sh [--configure] [--migrate-db] [--collect-static]
+# usage			:  bash setup.sh [--configure] [--migrate-db] [--collect-static] [--update]
 # author       	:  Kevin Yuan
 # date			:  25.01.2020
 # version		:  1.0
@@ -79,6 +79,13 @@ fi
 # Collect new static files
 if has_param '--collect-static' "$@"; then
   run_all=false
+  collect_static=true
+fi
+
+# Update == Collect new static files && Migrate changes to the database
+if has_param '--update' "$@"; then
+  run_all=false
+  migrate_db=true
   collect_static=true
 fi
 

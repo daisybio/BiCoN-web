@@ -1,4 +1,4 @@
-{% extends "clustering/base.html" %}
+{% extends "clustering/base/base.html" %}
 
 {% block title %}About BiCoN{% endblock %}
 
@@ -45,7 +45,7 @@
                     <h2 class="card-title">Web application</h2>
                     BiCoN-web allows you to use the full power of BiCoN analysis provided with an an intuitive
                     interface. To learn how to use BiCoN-web please refer to our
-                    <a href="{% url 'clustering:documentation' %}">documentation</a> section.
+                    <a href="{% url 'clustering:documentation' %}">Documentation</a>.
                 </div>
                 <div id="pypi-package" class="card-body">
                     <h2 class="card-title">PyPI package</h2>
@@ -54,18 +54,18 @@
                     <code>pip install bicon</code>
                     <br>
                     Please check the instruction for the package at our
-                    <a href="https://github.com/biomedbigdata/BiCoN-PyPI-package">GitHub</a> repository.
+                    <a target="_blank" rel="noopener noreferrer" href="https://github.com/biomedbigdata/BiCoN">GitHub</a> repository.
                 </div>
                 <div id="cite" class="card-body">
                     <h2 class="card-title">Cite</h2>
-                    BiCoN was developed by the <a href="https://biomedical-big-data.de">Big Data in BioMedicine
-                    group</a> and the <a href="https://compsysmed.de">Computational Systems Medicine group</a> at the
-                    <a href="https://www.baumbachlab.net/">Chair of Experimental Bioinformatics</a>.
+                    BiCoN was developed by the <a target="_blank" rel="noopener noreferrer" href="https://biomedical-big-data.de">Big Data in BioMedicine
+                    group</a> and the <a target="_blank" rel="noopener noreferrer" href="https://compsysmed.de">Computational Systems Medicine group</a> at the
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.exbio.de/">Chair of Experimental Bioinformatics</a>.
                     <br>
                     <br>
                     If you use BiCoN in your research, we kindly ask you to cite the following manuscript:
                     <br>
-                    <code>Lazareva,O., Van Do, H., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T.**, List, M.**:
+                    <code>Lazareva,O., Van Do, H., Tieri,P., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T.**, List, M.**:
                         BiCoN:
                         Network-constrained biclustering of patients and omics data. [Submitted] </code>
                     <p>** joint last author</p>

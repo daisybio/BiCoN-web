@@ -1,4 +1,4 @@
-{% extends "clustering/base.html" %}
+{% extends "clustering/base/base.html" %}
 
 {% block title %}About BiCoN{% endblock %}
 
@@ -27,9 +27,9 @@
                     <h3>Numerical data</h3>
                     <p>Numerical data is accepted in the following format:</p>
                     <ul>
-                        <li>genes as rows.</li>
-                        <li>patients as columns.</li>
-                        <li>first column - genes IDs (can be any IDs).</li>
+                        <li>genes as rows</li>
+                        <li>patients as columns</li>
+                        <li>first column - genes IDs (Entrez IDs)</li>
                     </ul>
                     <p>For instance:</p>
                     <figure>
@@ -94,25 +94,19 @@
                             </tbody>
                         </table>
                     </figure>
-                    <p>Our test data can be downloaded <a
+                    <p>Our test data can be downloaded <a target="_blank" rel="noopener noreferrer"
                             href='https://drive.google.com/drive/folders/1J0XRrklwcV_Cgy_9Ay_6yJrN_x28Cosk?usp=sharing'>here</a>
                         and further used as a reference for the correct format.</p>
                     <h3>Network</h3>
-                    <p>Even though we support our users with already processed PPI networks, it is still possible to
-                        load a
-                        user-defined network.
-                        An interaction network should be present as a CSV table with two columns that represent two
-                        interacting genes. <strong>Without a header!</strong></p>
+                    <p>We support both retrieving pre-built networks from NDex as well as uploading custom networks. Custom networks should be defined in a CSV file with two columns representing the interacting genes. The files must not have a header. </p>
                     <p>For instance:</p>
                     <figure>
                         <table class="table table-striped table-bordered">
-                            <thead>
+                            <tbody>
                             <tr>
                                 <th>6416</th>
                                 <th>2318</th>
                             </tr>
-                            </thead>
-                            <tbody>
                             <tr>
                                 <td>6416</td>
                                 <td>5371</td>
@@ -136,7 +130,7 @@
                             </tbody>
                         </table>
                     </figure>
-                    <p>We also provide an example of a PPI <a
+                    <p>We also provide an example of a PPI <a target="_blank" rel="noopener noreferrer"
                             href='https://drive.google.com/drive/folders/1J0XRrklwcV_Cgy_9Ay_6yJrN_x28Cosk?usp=sharing'>here</a>.
                     </p>
                     <h3>Metadata</h3>
@@ -145,54 +139,52 @@
                         metadata, you can go to the next step.</p>
                     <h2 class="card-title"><a name="data-processing"></a>Data processing</h2>
                     <p>For internal calculations, BiCoN normalizes the data by applying log2 transformation and then
-                        applying z-scores normalization. If your data was already log2 scaled, please remove a check
-                        from
+                        applying z-scores normalization. If your data was already log2 scaled, please uncheck
                         &quot;Log2 transform&quot;.</p>
                     <h2 class="card-title">Algorithm parameters</h2>
                     <p>The main parameters of the algorithm are the sizes of the desired solution.
-                        Please, indicate what is a minimal and maximal number of genes you would like to have in
+                        Please, indicate the minimal and maximal number of genes you would like to have in
                         <strong>each</strong>
                         subnetwork. </p>
-                    <p>The algorithm works such that in most of the cases default parameters deliver the optimal
+                    <p>The algorithm works such that in most cases default parameters deliver the optimal
                         performance.
                         If you want to set advanced parameters, please check &quot;Use advanced parameters: Yes&quot;.
-                        A user can specify the following parameters:</p>
+                        You can specify the following parameters:</p>
                     <ul>
                         <li><strong>Gene set size</strong> - number of genes considered in the analysis. The algorithm
-                            usually preselects 3000 the most variant genes to speed-up the calculation. This is usually
+                            usually preselects 2000 the most variant genes to speed-up the calculation. This is usually
                             an
-                            optimal choice as genes which can be selected for clustering, are supposed to have a high
-                            variance. Therefore, if needed this parameter can be increased, but we do not recommend to
+                            optimal choice as genes which can be selected for clustering are supposed to have a high
+                            variance. If needed, this parameter can be increased, but we do not recommend to
                             go
-                            higher than 5000 to guarantee a reasonable run-tyme
+                            higher than 5000 to guarantee a reasonable runtime.
                         </li>
                         <li><strong>Maximum number of iterations</strong> - we generally do not recommend to terminate
                             the
-                            algorithm before convergence which is usually reached in 30-60 iterations) and therefore we
-                            remend to change this parameter only for testing purposes
+                            algorithm before convergence (which is usually reached in 30-60 iterations). Hence, we
+                            recommend to change this parameter only for testing purposes.
                         </li>
-                        <li><strong>Number of ants</strong> - more ants can make more search space exploration, but also
-                            increase the run-time
+                        <li><strong>Number of ants</strong> - more ants can explore a larger search space, but also
+                            increase the runtime.
                         </li>
                         <li><strong>Evaporation rate</strong> - higher evaporation rate will speed-up convergence, but
                             also
-                            increase risks to get stuck in a local minima
+                            increase risks to get stuck in a local optimum.
                         </li>
                         <li><strong>Pheromone significance</strong> and <strong>Heuristic Information
                             significance</strong>
-                            please modify it only if you really well aware of the role of those parameters in Ant Colony
-                            Optimization algorithms convergence.
+                            - please modify these parameters only if you are well aware of their role in Ant Colony Optimization.
                         </li>
                     </ul>
                     <h2 class="card-title"><a name="cite"></a>Cite</h2>
-                    BiCoN was developed by the <a href="https://biomedical-big-data.de">Big Data in BioMedicine
-                    group</a> and the <a href="https://compsysmed.de">Computational Systems Medicine group</a> at the
-                    <a href="https://www.baumbachlab.net/">Chair of Experimental Bioinformatics</a>.
+                    BiCoN was developed by the <a target="_blank" rel="noopener noreferrer" href="https://biomedical-big-data.de">Big Data in BioMedicine
+                    group</a> and the <a target="_blank" rel="noopener noreferrer" href="https://compsysmed.de">Computational Systems Medicine group</a> at the
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.exbio.de/">Chair of Experimental Bioinformatics</a>.
                     <br>
                     <br>
                     If you use BiCoN in your research, we kindly ask you to cite the following manuscript:
                     <br>
-                    <code>Lazareva,O., Van Do, H., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T.**, List, M.**:
+                    <code>Lazareva,O., Van Do, H., Tieri, P., Canzar, S., Yuan, K., Baumbach, J., Kacprowski, T.**, List, M.**:
                         BiCoN:
                         Network-constrained biclustering of patients and omics data. [Submitted] </code>
                     <p>** joint last author</p>
@@ -203,6 +195,8 @@
                             Lazareva</a></li>
                         <li><a href='mailto:markus.list@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB'>Markus
                             List</a>
+                        <li><a href='mailto:tim.kacpro<awski@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB'>Tim
+                            Kacprowski</a>
                         </li>
                     </ul>
 

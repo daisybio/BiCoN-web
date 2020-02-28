@@ -30,7 +30,7 @@ class IndexView(TemplateView):
 
 
 class AnalysisSetupView(TemplateView):
-    template_name = "clustering/analysis_setup.html"
+    template_name = "clustering/analysis/analysis_setup.html"
 
     def get_context_data(self, **kwargs):
         # Create new session if none is found
@@ -118,14 +118,6 @@ def submit_analysis(request):
         if len(tmp_var) > 30:
             error_list.append('""Job name" is longer than 30 characters')
 
-    # If the error list is not empty, redirect back to analysis setup and display errors
-    # Todo redirect back to analysis setup instead of displaying on submit...
-    if error_list:
-        return render(request, "clustering/analysis_setup.html", context={
-            'navbar': 'analysis',
-            'groupbar': 'setup_analysis',
-            'error_list': error_list
-        })
 
     # ========== Parse algorithm parameters from post request ==========
     session_id = None
@@ -145,7 +137,11 @@ def submit_analysis(request):
 
     # Parse expression network from uploaded file into string (easier to serialize than file object)
     if expr_data_selection == 'custom':
-        expr_data_str = request.FILES['expression-data-file'].read().decode('utf-8')
+        try:
+            expr_data_str = request.FILES['expression-data-file'].read().decode('utf-8')
+        except UnicodeDecodeError:
+            error_list.append("The expression data file is not a plain text file (cannot be decoded in utf-8)")
+
         apply_log2 = 'expression-data-log2' in request.POST.keys()
         apply_z_transformation = 'z-score-transformation' in request.POST.keys()
 
@@ -155,7 +151,11 @@ def submit_analysis(request):
 
     # Parse ppi network from uploaded file into string (easier to serialize than file object)
     if ppi_network_selection == 'custom':
-        ppi_network_str = request.FILES['ppi-network-file'].read().decode('utf-8')
+        try:
+            ppi_network_str = request.FILES['ppi-network-file'].read().decode('utf-8')
+
+        except UnicodeDecodeError:
+            error_list.append("The ppi network file is not a plain text file (cannot be decoded in utf-8)")
 
     # --- Step 3: Meta data
     survival_col_name = None
@@ -197,6 +197,16 @@ def submit_analysis(request):
         algorithm_parameters['b'] = pher_sig
         algorithm_parameters['a'] = hi_sig
         algorithm_parameters['eps'] = epsilon
+
+    # If the error list is not empty, redirect back to analysis setup and display errors
+    # Todo redirect back to analysis setup instead of displaying on submit...
+    if error_list:
+        print("Input was incorrect. Redirecting back to setup page")
+        return render(request, "clustering/analysis/analysis_setup.html", context={
+            'navbar': 'analysis',
+            'groupbar': 'setup_analysis',
+            'error_list': error_list
+        })
 
     print('All the given data was parsed: Starting clustering')
 
@@ -284,7 +294,7 @@ def analysis_status(request):
     running_jobs = Job.objects.filter(session_id__exact=session_id).exclude(
         finished_time__lt=(timezone.now() - datetime.timedelta(minutes=20))).order_by('-submit_time')
 
-    return render(request, 'clustering/analysis_status.html', context={
+    return render(request, 'clustering/analysis/analysis_status.html', context={
         'navbar': 'analysis',
         'groupbar': 'submitted_analysis',
         'previous_jobs': running_jobs
@@ -293,7 +303,7 @@ def analysis_status(request):
 
 def analysis_status_single(request, analysis_id):
     analysis_task = AsyncResult(str(analysis_id))
-    return render(request, 'clustering/analysis_status_single.html', context={
+    return render(request, 'clustering/analysis/analysis_status_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_status',
         'task': analysis_task,
@@ -302,7 +312,7 @@ def analysis_status_single(request, analysis_id):
 
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
-    return render(request, 'clustering/result_single.html', context={
+    return render(request, 'clustering/analysis/results/result_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_result',
         'job_identifier': job.job_name if job.job_name else job.job_id,
@@ -321,7 +331,7 @@ def results(request):
     previous_jobs = Job.objects.filter(session_id__exact=session_id).exclude(status__exact='RUNNING') \
         .order_by('-submit_time')
 
-    return render(request, 'clustering/results.html', context={
+    return render(request, 'clustering/analysis/results/results.html', context={
         'navbar': 'analysis',
         'groupbar': 'all_results',
         'previous_jobs': previous_jobs
@@ -337,10 +347,10 @@ class DocumentationView(TemplateView):
         return context
 
 
-class SourcesView(TemplateView):
-    template_name = 'clustering/sources.html'
+class AboutView(TemplateView):
+    template_name = 'clustering/about.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['navbar'] = 'sources'
+        context['navbar'] = 'about'
         return context

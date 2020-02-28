@@ -1,4 +1,4 @@
-{% extends "clustering/base_analysis.html" %}
+{% extends "clustering/base/base_analysis.html" %}
 
 {% block title %}BiCoN-Web analysis results{% endblock %}
 
@@ -6,7 +6,7 @@
 {% block content %}
     {% load static %}
     <div class="card mt-4 ml-2" style="border: none">
-            <h1 class="card-title">Result for: {{ job_identifier }}</h1>
+        <h1 class="card-title">Result for: {{ job_identifier }}</h1>
     </div>
 
     <!-- Analysis PPI Graph -->
@@ -18,8 +18,16 @@
                 clusters of patients.
             </p>
 
-            <div>
-                <div id="ppi-graph-container" style="max-width: available; height: 400px; margin: auto"></div>
+            <div class="container no-gutters">
+                <div class="row">
+                    <div class="col-2" style=" padding-right: 0; padding-left: 0">
+                        <img class="img-fluid" src="{% static 'clustering/img/analysis/ppi_network_legend.png' %}"
+                             style="height: 200px;">
+                    </div>
+                    <div class="col" style=" padding-right: 0; padding-left: 0">
+                        <div id="ppi-graph-container" style="max-width: available; height: 400px; margin: auto"></div>
+                    </div>
+                </div>
 
             </div>
 
@@ -40,6 +48,11 @@
             <h2 class="card-title">Heatmap</h2>
             <p>The heatmap shows resulting biclustering.</p>
             <img src="{% get_media_prefix %}{{ heatmap_png }}" class="img-fluid">
+
+            <b>
+                Download the heatmap
+                <a href="{% get_media_prefix %}{{ heatmap_png }}" download> as png </a>
+            </b>
         </div>
 
     </div>
@@ -104,12 +117,19 @@
             <h2 class="card-title">Convergence Behaviour</h2>
             <img src="{% get_media_prefix %}{{ convergence_png }}" class="img-fluid">
 
+            <b>
+                Download the convergence behaviour
+                <a href="{% get_media_prefix %}{{ convergence_png }}" download> as png </a>
+            </b>
         </div>
     </div>
 
     <!-- Convergence Behaviour -->
 
+{% endblock %}
 
+<!--- Javascript block --->
+{% block scripts %}
     <!-- Import javacript files -->
     <!--- sigma.js imports needed for PPI graph -->
     <script src="{% static 'clustering/js/sigma.js/src/sigma.core.js' %}"></script>
