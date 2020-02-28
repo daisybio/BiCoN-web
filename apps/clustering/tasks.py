@@ -86,8 +86,7 @@ def parse_expression_data(option, expr_raw_str=None):
 
     # Parse predefined data
     if option == 'lung-cancer':
-        # with open(path.join(dataset_path, 'lung_cancer_expr.csv')) as expr_file:
-        with open(path.join(dataset_path, 'gse30219_lung.csv')) as expr_file:
+        with open(path.join(dataset_path, 'lung_cancer_expr_nonorm.csv')) as expr_file:
             expr_str = expr_file.read()
 
         # This is for METADATA, recheck at it later
@@ -506,7 +505,7 @@ def parse_ppi_data(option, ppi_raw_str=None):
 # job.save()
 @shared_task(name="run_algorithm", base=ClusteringTaskBase)
 def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min, L_g_max,
-                  log2, apply_z_transformation, size=2000, n_proc=1, a=1, b=1, k=20, evaporation=0.5, th=0.5, eps=0.02,
+                  log2, apply_z_transformation, size=2000, n_proc=1, a=1, b=1, k=20, evaporation=0.5, th=1, eps=0.02,
                   times=6, clusters=2, cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False,
                   save=None, show_nets=False, use_metadata=False, survival_col_name=None, clinical_df=None):
     # ========== Preprocess data and run algorithm ==========
@@ -526,7 +525,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # --- Step 1: Parse the strings or files and create StringIO (file object) again
     try:
         expr_str, clinical_df_demo_data, survival_col_name_demo_data = parse_expression_data(expr_data_selection,
-                                                                                        expr_data_str)
+                                                                                             expr_data_str)
         expression_file = StringIO(expr_str)
     except Exception as ex:
         current_task.update_state(
@@ -572,7 +571,6 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
                 survival_col_name = survival_col_name_demo_data
                 use_metadata = True
 
-
     # Can be removed when other part is refractored. Then clinical_df can stay none
     if not use_metadata:
         clinical_df = pd.DataFrame()
@@ -580,7 +578,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # --- Step 2: Try and preprocess files. Catch assertions from the preprocessing function
     try:
         ge, g, labels, rev_labels = data_preprocessing(expression_file, ppi_file, log2,
-                                                         zscores=apply_z_transformation, size=size)
+                                                       zscores=apply_z_transformation, size=size)
     except AssertionError as er:
         current_task.update_state(
             state='ERROR',
@@ -605,8 +603,10 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # solution, scores = model.run_search(max_iter=1)
     # max_iter = 1  # TODO REMOVE LATER
     try:
-        solution, scores = model.run_search(n_proc, a, b, k, evaporation, th, eps, times, clusters, cost_limit,
-                                           max_iter, opt, show_pher, show_plot, save, show_nets)
+        solution, scores = model.run_search(n_proc=n_proc, a=a, b=b, K=k, evaporation=evaporation, th=th, eps=eps,
+                                            times=times, clusters=clusters, cost_limit=cost_limit,
+                                            max_iter=max_iter, opt=opt, show_pher=show_pher, show_plot=show_plot,
+                                            save=save, show_nets=show_nets)
     except AssertionError as er:
         current_task.update_state(
             state='ERROR',
@@ -636,9 +636,14 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
             mapping[rev_labels[line["query"]]] = line["symbol"]
 
     # ========== Plotting networks ==========
-    # --- Heatmap
     results = results_analysis(solution, labels, convert=True, origID="entrezgene")
 
+    # --- Save results
+    with BytesIO() as output:
+        results.save(output=output)
+        job.result_csv.save(f'result_{task_id}.csv', File(output))
+
+    # --- Heatmap
     with BytesIO() as output:
         results.show_clustermap(ge, g, output=output)
         job.heatmap_png.save(f'heatmap_{task_id}.png', File(output))
@@ -647,7 +652,6 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     with BytesIO() as output:
         results.convergence_plot(scores, output=output)
         job.convergence_png.save(f'conv_{task_id}.png', File(output))
-
 
     new_genes1 = [mapping[key] for key in mapping if key in solution[0][0]]
     new_genes2 = [mapping[key] for key in mapping if key in solution[0][1]]

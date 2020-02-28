@@ -6,6 +6,7 @@ from os import path
 
 import pandas as pd
 
+from importlib_metadata import version
 from celery.result import AsyncResult
 from celery.states import SUCCESS, FAILURE
 from django.core.files.base import ContentFile
@@ -353,4 +354,6 @@ class AboutView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['navbar'] = 'about'
+        context['bicon_version'] = version('bicon')
+
         return context
