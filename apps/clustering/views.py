@@ -322,6 +322,7 @@ def analysis_result(request, analysis_id):
         'heatmap_png': job.heatmap_png.name,
         'survival_plotly': job.survival_plotly.name,
         'convergence_png': job.convergence_png.name,
+        'result_csv': job.result_csv.name,
     })
 
 

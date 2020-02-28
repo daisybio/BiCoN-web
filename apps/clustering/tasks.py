@@ -639,7 +639,7 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     results = results_analysis(solution, labels, convert=True, origID="entrezgene")
 
     # --- Save results
-    with BytesIO() as output:
+    with StringIO() as output:
         results.save(output=output)
         job.result_csv.save(f'result_{task_id}.csv', File(output))
 

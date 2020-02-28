@@ -31,7 +31,7 @@ class Job(models.Model):
     )
     finished_time = models.DateTimeField(null=True, blank=True)
     # ppi_json = models.TextField(blank=True)
-    result_csv = models.FileField(upload_to=f'clustering/result/')
+    result_csv = models.FileField(upload_to=f'clustering/result/', blank=True)
     ppi_json = models.FileField(upload_to=f'clustering/ppi/')
     # survival_plotly = models.TextField(blank=True)
     survival_plotly = models.FileField(upload_to=f'clustering/survival/')

@@ -123,8 +123,21 @@
             </b>
         </div>
     </div>
-
     <!-- Convergence Behaviour -->
+
+    <!-- Download Results -->
+    {% if result_csv %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="card-title">Download Results</h2>
+            <b>
+                Download the results
+                <a href="{% get_media_prefix %}{{ result_csv }}" download> as csv file </a>
+            </b>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Download Results -->
 
 {% endblock %}
 
