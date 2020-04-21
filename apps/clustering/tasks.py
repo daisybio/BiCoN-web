@@ -1,10 +1,9 @@
 import json
-import math
-import traceback
 from io import StringIO, BytesIO
 from os import path
 
 import celery.states
+import math
 import matplotlib.pyplot as plt
 import mygene
 import ndex2
@@ -14,6 +13,9 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 import seaborn as sns
+from bicon import BiCoN
+from bicon import data_preprocessing
+from bicon import results_analysis
 from celery import shared_task, current_task, states
 from celery.exceptions import Ignore
 from django.conf import settings
@@ -22,10 +24,6 @@ from django.utils import timezone
 from lifelines.statistics import logrank_test
 from networkx.readwrite import json_graph
 from pybiomart import Dataset
-
-from bicon import data_preprocessing
-from bicon import BiCoN
-from bicon import results_analysis
 
 from apps.clustering.models import Job
 

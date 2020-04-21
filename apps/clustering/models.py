@@ -1,9 +1,6 @@
-import datetime
-
 from celery.states import FAILURE, IGNORED, PENDING, RECEIVED, RETRY, REVOKED, STARTED, SUCCESS
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils import timezone
 
 
 class Job(models.Model):
