@@ -1433,7 +1433,8 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             name="'Group 1'",
             hoverinfo='name',
             line=dict(
-                shape='hv'))
+                shape='hv',
+                color='#FF7F0E'))
         trace2 = go.Scatter(
             x=list(survival_perc_2.keys()),
             y=list(survival_perc_2.values()),
@@ -1441,13 +1442,15 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             name="'Group 2'",
             hoverinfo='name',
             line=dict(
-                shape='hv'))
+                shape='hv',
+                color='#1F77B4'))
         surv_data_for_graph = [trace1, trace2]
         layout = dict(showlegend=False,
                       xaxis=dict(
                           title='Time in years'),
                       yaxis=dict(
-                          title='percentage of patients'))
+                          title='percentage of patients'),
+                      template='plotly_white')
         fig = dict(data=surv_data_for_graph, layout=layout)
         plot_div = plotly.offline.plot(fig, auto_open=False, output_type='div')
 
