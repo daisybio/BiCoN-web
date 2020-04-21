@@ -1449,7 +1449,7 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
                       xaxis=dict(
                           title='Time in years'),
                       yaxis=dict(
-                          title='percentage of patients'),
+                          title='Percentage of patients'),
                       template='plotly_white')
         fig = dict(data=surv_data_for_graph, layout=layout)
         plot_div = plotly.offline.plot(fig, auto_open=False, output_type='div')
