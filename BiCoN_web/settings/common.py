@@ -112,6 +112,9 @@ DEBUG = False
 
 # ##### SECURITY CONFIGURATION ############################
 
+# Allow embedding as X-Frame from the same origin (for the survival plotly graph)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 # We store the secret key here
 SECRET_FILE = normpath(join(PROJECT_ROOT, 'run', 'SECRET.key'))
 
