@@ -21,7 +21,7 @@ colorlog==4.0.2
 conda==4.3.16
 cycler==0.10.0
 decorator==4.3.0
-Django==2.2.10
+Django==2.2.13
 docopt==0.6.2
 easydev==0.9.37
 enum34==1.1.6
