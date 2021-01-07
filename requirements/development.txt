@@ -45,7 +45,7 @@ jupyter-core==4.4.0
 kiwisolver==1.1.0
 kombu==4.1.0
 lifelines==0.21.2
-lxml==4.2.5
+lxml==4.6.2
 MarkupSafe==1.1.1
 matplotlib==3.0.3
 more-itertools==4.3.0
