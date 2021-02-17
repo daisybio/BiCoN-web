@@ -2,19 +2,16 @@ import datetime
 import json
 import re
 import uuid
-from os import path
 
 import pandas as pd
-
 from celery.result import AsyncResult
 from celery.states import SUCCESS, FAILURE
-from django.core.files.base import ContentFile
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
+from importlib_metadata import version
 
 from .models import Job
 from .tasks import run_algorithm

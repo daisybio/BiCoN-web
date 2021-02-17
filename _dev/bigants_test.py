@@ -1,9 +1,9 @@
 import inspect
 import os
 
-from bigants import data_preprocessing
-from bigants import BiGAnts
-from bigants import results_analysis
+from bicon import data_preprocessing
+from bicon import BiCoN
+from bicon import results_analysis
 
 # print(inspect.signature(results_analysis.show_clustermap))
 
@@ -15,7 +15,7 @@ L_g_min = 10
 L_g_max = 15
 
 # --- Run model
-model = BiGAnts(GE, G, L_g_min, L_g_max)
+model = BiCoN(GE, G, L_g_min, L_g_max)
 solution, scores = model.run_search()
 
 # --- Vizualize the results

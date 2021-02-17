@@ -1,10 +1,9 @@
 import json
-import math
-import traceback
 from io import StringIO, BytesIO
 from os import path
 
 import celery.states
+import math
 import matplotlib.pyplot as plt
 import mygene
 import ndex2
@@ -14,6 +13,9 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 import seaborn as sns
+from bicon import BiCoN
+from bicon import data_preprocessing
+from bicon import results_analysis
 from celery import shared_task, current_task, states
 from celery.exceptions import Ignore
 from django.conf import settings
@@ -22,10 +24,6 @@ from django.utils import timezone
 from lifelines.statistics import logrank_test
 from networkx.readwrite import json_graph
 from pybiomart import Dataset
-
-from bicon import data_preprocessing
-from bicon import BiCoN
-from bicon import results_analysis
 
 from apps.clustering.models import Job
 
@@ -679,7 +677,6 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     vmin = -2
     vmax = 2
     pos = nx.spring_layout(G_small)
-    ec = nx.draw_networkx_edges(G_small, pos)
 
     nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
                                  vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap)
@@ -1435,7 +1432,8 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             name="'Group 1'",
             hoverinfo='name',
             line=dict(
-                shape='hv'))
+                shape='hv',
+                color='#FF7F0E'))
         trace2 = go.Scatter(
             x=list(survival_perc_2.keys()),
             y=list(survival_perc_2.values()),
@@ -1443,13 +1441,15 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
             name="'Group 2'",
             hoverinfo='name',
             line=dict(
-                shape='hv'))
+                shape='hv',
+                color='#1F77B4'))
         surv_data_for_graph = [trace1, trace2]
         layout = dict(showlegend=False,
                       xaxis=dict(
                           title='Time in years'),
                       yaxis=dict(
-                          title='percentage of patients'))
+                          title='Percentage of patients'),
+                      template='plotly_white')
         fig = dict(data=surv_data_for_graph, layout=layout)
         plot_div = plotly.offline.plot(fig, auto_open=False, output_type='div')
 

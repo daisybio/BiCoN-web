@@ -10,8 +10,8 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-import sys
 import os
+import sys
 
 from os.path import abspath, basename, dirname, join, normpath
 from importlib_metadata import version
@@ -125,6 +125,9 @@ CSRF_COOKIE_PATH = f'{os.environ.get("NGINX_PUBLISHED_PATH")}/'
 DEBUG = False
 
 # ##### SECURITY CONFIGURATION ############################
+
+# Allow embedding as X-Frame from the same origin (for the survival plotly graph)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # We store the secret key here
 SECRET_FILE = normpath(join(PROJECT_ROOT, 'run', 'SECRET.key'))

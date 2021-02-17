@@ -1,10 +1,11 @@
 # project imports
-import os
-
 from .common import *
 
-# uncomment the following line to include i18n
+# include i18n internationalisation
 from .i18n import *
+
+# Dummy variable to import so PyCharm does not remove it while optimizing imports
+__dummy = LANGUAGE_CODE
 
 # ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
