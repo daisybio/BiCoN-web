@@ -1752,37 +1752,36 @@ def import_ndex(name):
     conv_genelist = conv['Gene name'].tolist()
     # iterate over all nodes in network
     for node_id, node in nice_cx_network.get_nodes():
-        current_node = {}
         # node has ID and "name"
-        current_node['id'] = node_id
-        current_node['n'] = node.get('n')
+        current_node = {'id': node_id, 'n': node.get('n')}
         # gene names are stored in the GeneName variable in this network
-        if (name == "9c38ce6e-c564-11e8-aaa6-0ac135e8bacf"):
+        if name == "9c38ce6e-c564-11e8-aaa6-0ac135e8bacf":
             # get GeneName for node
             curr_gene_name = nice_cx_network.get_node_attribute_value(node_id, 'GeneName_A')
-            if (curr_gene_name in conv_genelist):
+            if curr_gene_name in conv_genelist:
                 # get index in gene conversion list, convert Gene Name to NCBI ID
                 gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
-                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene ID'].values[0]
+                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene (formerly Entrezgene) ID'].values[0]
                 # check if NCBI ID was found
                 if not (math.isnan(float(gene_nbr1))):
                     node_dict[node_id] = str(int(gene_nbr1))
+
         else:
             # if gene name is stored in node name
             curr_gene_name = current_node['n']
-            if (curr_gene_name in conv_genelist):
+            if curr_gene_name in conv_genelist:
                 gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
-                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene ID'].values[0]
+                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene (formerly Entrezgene) ID'].values[0]
                 if not (math.isnan(float(gene_nbr1))):
                     node_dict[node_id] = str(int(gene_nbr1))
-        tmp4.append(current_node)
+
     edgelist = []
     ret = ""
     # iterate over edges
     for edge_id, edge in nice_cx_network.get_edges():
         source = edge.get('s')
         target = edge.get('t')
-        if (source in node_dict and target in node_dict and source != target):
+        if source in node_dict and target in node_dict and source != target:
             # convert source and target to NCBI IDs and write into string
             curr_edge_str = str(node_dict[source]) + "\t" + str(node_dict[target]) + "\n"
             edgelist.append([node_dict[source], node_dict[target]])
