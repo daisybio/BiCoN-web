@@ -677,7 +677,6 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     vmin = -2
     vmax = 2
     pos = nx.spring_layout(G_small)
-    ec = nx.draw_networkx_edges(G_small, pos)
 
     nc1 = nx.draw_networkx_nodes(G_small, nodelist=new_genes1, pos=pos, node_color=means1, node_size=600, alpha=1.0,
                                  vmin=vmin, vmax=vmax, node_shape="^", cmap=cmap)
