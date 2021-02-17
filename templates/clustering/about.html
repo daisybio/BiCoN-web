@@ -48,12 +48,26 @@
                     <a href="{% url 'clustering:documentation' %}">Documentation</a>.
                     <br>
                     <br>
-                    <p>This instance of BiCoN-web is running on version <code>{% bicon_web_version %}</code> which itself uses
-                        BiCoN package version <code>{% bicon_version %}</code></p>
+                    The source code fo this exact web application can be found on GitHub under <a target="_blank"
+                                                                                                  rel="noopener noreferrer"
+                                                                                                  href="https://github.com/biomedbigdata/BiCoN-web/">biomedbigdata/BiCoN-web</a>.
+                    <br>
+                    <br>
+                    <p>This instance of BiCoN-web is running on version <code>{% bicon_web_version %}</code> which
+                        itself uses
+                        BiCoN package version <code>{% bicon_version %}</code> and the following key packages:</p>
+                    <ul>
+                        <li>Web tools: <i>Django, Celery, Gunicorn, psycopg2, Docker, PostgreSQL, Nginx</i></li>
+                        <li>Data access packages: <i>ndex2, pybiomart, mygene</i></li>
+                        <li>Analysis tools: <i>pandas, NumPy, NetworkX, lifelines</i></li>
+                        <li>Visualisation tools: <i>Matplotlib, seaborn, Plotly</i></li>
+                    </ul>
+
                 </div>
                 <div id="pypi-package" class="card-body">
                     <h2 class="card-title">PyPI package</h2>
-                    If you prefer to run BiCoN locally and in python, then just install BiCoN from PyPI:
+                    If you prefer to run BiCoN locally and in python, then just install BiCoN from
+                    <a target="_blank" rel="noopener noreferrer" href="https://pypi.org/project/bicon/">PyPI</a>:
                     <br>
                     <code>pip install bicon</code>
                     <br>
@@ -69,7 +83,10 @@
                     <br>
                     If you use BiCoN in your research, we kindly ask you to cite the following manuscript:
                     <br>
-                    <code> Olga Lazareva, Stefan Canzar, Kevin Yuan, Jan Baumbach, David B Blumenthal, Paolo Tieri, Tim Kacprowski*, Markus List*, BiCoN: Network-constrained biclustering of patients and omics data, Bioinformatics, 2020;, btaa1076, https://doi.org/10.1093/bioinformatics/btaa1076 </code>
+                    <code> Olga Lazareva, Stefan Canzar, Kevin Yuan, Jan Baumbach, David B Blumenthal, Paolo Tieri, Tim
+                        Kacprowski*, Markus List*,
+                        BiCoN: Network-constrained biclustering of patients and omics data, Bioinformatics, 2020;,
+                        btaa1076, https://doi.org/10.1093/bioinformatics/btaa1076 </code>
                     <p>** joint last author</p>
                 </div>
                 <div id="contact" class="card-body">
@@ -77,7 +94,8 @@
                     If you want to contact us regarding BiCoN:
                     <li><a href="mailto:olga.lazareva@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB">Olga
                         Lazareva</a></li>
-                    <li><a href="mailto:tim.kacprowski@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB">Tim Kacprowski</a></li>
+                    <li><a href="mailto:tim.kacprowski@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB">Tim Kacprowski</a>
+                    </li>
                     <li><a href="mailto:markus.list@wzw.tum.de?subject=[BiCoN-Web]%20BiCoN%20WEB">Markus List</a>
                     </li>
                 </div>
