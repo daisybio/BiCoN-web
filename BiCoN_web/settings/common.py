@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import sys
 import os
-# Python imports
-from os.path import abspath, basename, dirname, join, normpath
 
+from os.path import abspath, basename, dirname, join, normpath
+from importlib_metadata import version
+
+# ##### BiCoN CONFIGURATION ###############################
+BICON_WEB_VERSION_NUMBER = '1.0.0'  # Manually specify the web version
+BICON_PACKAGE_VERSION_NUMBER = version('bicon')  # Automatically grab the used BiCoN version
 
 # ##### PATH CONFIGURATION ################################
 
@@ -87,6 +91,9 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages'
             ],
+            'builtins': [
+                'apps.clustering.templatetags.version_numbers'
+            ]
         },
     },
 ]
