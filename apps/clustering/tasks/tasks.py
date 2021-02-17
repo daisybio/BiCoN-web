@@ -3,10 +3,8 @@ from io import StringIO, BytesIO
 from os import path
 
 import celery.states
-import math
 import matplotlib.pyplot as plt
 import mygene
-import ndex2
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -23,8 +21,8 @@ from django.core.files import File
 from django.utils import timezone
 from lifelines.statistics import logrank_test
 from networkx.readwrite import json_graph
-from pybiomart import Dataset
 
+from .ndex_processing import import_ndex
 from apps.clustering.models import Job
 
 flatten = lambda l: [item for sublist in l for item in sublist]
@@ -1605,189 +1603,6 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
 #             retstr = retstr + str(gene_nbr_1_2).split(".")[0] + "\t" + str(gene_nbr_2_2).split(".")[0] + "\n"
 #     with open(filename, "w") as text_file:
 #         text_file.write(retstr)
-
-
-##########################################################
-#### ndex import #########################################
-##########################################################
-
-# statically
-# this task takes a NDEx file as a string and converts it to a two-column array with interaction partners
-@shared_task(name="read_ndex_file_4")
-def read_ndex_file_4(fn):
-    lines6 = ""
-    # read edges and nodes into arrays
-    if ("edges" in fn.split("nodes")[1]):
-        lines5 = fn.split("{\"nodes\":[")
-        lines3 = lines5[1].split("{\"edges\":[")[0]
-        # remove "cyTableColumn" from array containing edges
-        if ("cyTableColumn" in lines5[1]):
-            lines4 = lines5[1].split("{\"edges\":[")[1].split("{\"cyTableColumn\":[")[0]
-            lines4 = lines4[:-4]
-        # take protein name from networkAttributes or nodeAttributes if it is defined there.
-        elif ("networkAttributes" in lines5[1]):
-            lines4 = lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[0]
-            lines4 = lines4[:-4]
-            if ("nodeAttributes" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[
-                1] and "UniprotName" in lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1]):
-                lines6_temp = \
-                    lines5[1].split("{\"edges\":[")[1].split("{\"networkAttributes\":[")[1].split(
-                        "{\"nodeAttributes\":[")[
-                        1]
-                lines6 = lines6_temp.split("{\"edgeAttributes\":[")[0]
-        else:
-            lines4 = lines5[1].split("{\"edges\":[")[1]
-    # check if edge-array comes before node-array in file
-    elif ("edges" in fn.split("nodes")[0]):
-        lines5 = fn.split("{\"nodes\":[")
-        lines3 = lines5[1].split("]},")[0] + "]]]"
-        lines4 = lines5[0].split("{\"edges\":[")[1][:-4]
-    # lines3 contains the nodes, lines4 the edges, lines6 contains nodeAttributes (information from the ndex file usable for the conversion from node IDs to gene IDs)
-    # remove signs to allow automatic json to array conversion
-    lines3.replace("@", "")
-    lines3.replace("uniprot:", "uniprot")
-    lines3.replace("signor:", "signor")
-    lines3.replace(" ", "")
-    lines3.replace("ncbigene:", "")
-    lines3.replace("\\n", "")
-    lines33 = lines3[:-3].replace("}]", "")
-    node_line = lines33.replace("ncbigene:", "")
-    nodelinesplit = node_line.split(", ")
-    dictlist = []
-    # node dict is later filled with keys (node IDs) and the values are NCBI gene IDs
-    node_dict = {}
-    if not (node_line.endswith("}")):
-        node_line = node_line + "}"
-    node_line_2 = "[" + node_line + "]"
-    tmp2 = json.loads(node_line_2)
-    node_dict_2 = {}
-    # iterate over lines in nodeAttributes
-    if not (lines6 == ""):
-        lines6 = "[" + lines6
-        # get array with nodeAttributes for current line
-        tmp4 = json.loads(lines6[:-4])
-        # if node element has attribute "GeneName_A", then the NCBI ID is given in the nodeAttributes
-        for item in tmp4:
-            if (item['n'] == "GeneName_A"):
-                # use node ID and NCBI ID
-                node_dict_2[item['po']] = item['v']
-    # print(str(item['po']) + " " + str(item['v']))
-    # print(node_dict_2)
-    dataset = Dataset(name='hsapiens_gene_ensembl',
-                      host='http://www.ensembl.org')
-    conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'])
-    conv_genelist = conv['Gene name'].tolist()
-    for item in tmp2:
-        dictlist.append(item)
-        # write conversion from node ID to gene ID in dictionary, based on nodeAttributes from the data
-        if ('r' in item):
-            if (any(c.islower() for c in item['r'])):
-                gene_name = item['n']
-                if (gene_name in conv_genelist):
-                    gene_nbr = conv.index[conv['Gene name'] == gene_name]
-                    gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene ID'].values[0]
-                    node_dict[item['@id']] = gene_nbr1
-            # print(item)
-            else:
-                node_dict[item['@id']] = item['r']
-        # print(item)
-        else:
-            if (item['n'].isdigit()):
-                # if gene ID is in node attributes
-                # print(item)
-                node_dict[item['@id']] = item['n']
-            elif (item['n'] in node_dict_2):
-                # otherwise use conversion table to convert gene ID to NCBI ID
-                gene_name = node_dict_2[item['n']]
-                # print(gene_name)
-                if (gene_name in conv_genelist):
-                    gene_nbr = conv.index[conv['Gene name'] == gene_name]
-                    gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene ID'].values[0]
-                    node_dict[item['@id']] = gene_nbr1
-        # print(gene_nbr1)
-    # print(node_dict)
-    # remove signs from string to allow json conversion
-    lines4.replace("@", "")
-    lines4.replace("uniprot:", "uniprot")
-    lines4.replace("signor:", "signor")
-    lines4.replace(" ", "")
-    lines4 = lines4.replace("]", "")
-    edge_line = lines4.rstrip()
-    edge_line_2 = "[" + edge_line + "]"
-    edgelinesplit = edge_line.split(", ")
-    edgelist = []
-    tmp4 = json.loads(edge_line_2)
-    # get dictionary with gene names and NCBI IDs (entrezgene_id)
-    dataset = Dataset(name='hsapiens_gene_ensembl',
-                      host='http://www.ensembl.org')
-    conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'])
-    ret = []
-    # convert node IDs in edges to NCBI IDs
-    for item in tmp4:
-        # print(item)
-        if (item['s'] in node_dict and item['t'] in node_dict):
-            source = node_dict[item['s']]
-            target = node_dict[item['t']]
-            # print(source)
-            # print(target)
-            if (source != target and not (math.isnan(float(source))) and not (math.isnan(float(target)))):
-                baz = [str(int(source)), str(int(target))]
-                ret.append("\t".join(baz))
-    # print("\n".join(ret))
-    return ("\n".join(ret))
-
-
-# from the web
-@shared_task(name="import_ndex")
-def import_ndex(name):
-    # import NDEx from server based on UUID (network contains lists with nodes and edges)
-    nice_cx_network = ndex2.create_nice_cx_from_server(server='public.ndexbio.org', uuid=name)
-    tmp4 = []
-    # node_dict is for the conversion from Node ID to NCBI ID
-    node_dict = {}
-    dataset = Dataset(name='hsapiens_gene_ensembl',
-                      host='http://www.ensembl.org')
-    # get list of genes for later conversion
-    conv = dataset.query(attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'])
-    conv_genelist = conv['Gene name'].tolist()
-    # iterate over all nodes in network
-    for node_id, node in nice_cx_network.get_nodes():
-        # node has ID and "name"
-        current_node = {'id': node_id, 'n': node.get('n')}
-        # gene names are stored in the GeneName variable in this network
-        if name == "9c38ce6e-c564-11e8-aaa6-0ac135e8bacf":
-            # get GeneName for node
-            curr_gene_name = nice_cx_network.get_node_attribute_value(node_id, 'GeneName_A')
-            if curr_gene_name in conv_genelist:
-                # get index in gene conversion list, convert Gene Name to NCBI ID
-                gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
-                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene (formerly Entrezgene) ID'].values[0]
-                # check if NCBI ID was found
-                if not (math.isnan(float(gene_nbr1))):
-                    node_dict[node_id] = str(int(gene_nbr1))
-
-        else:
-            # if gene name is stored in node name
-            curr_gene_name = current_node['n']
-            if curr_gene_name in conv_genelist:
-                gene_nbr = conv.index[conv['Gene name'] == curr_gene_name]
-                gene_nbr1 = conv.loc[gene_nbr, 'NCBI gene (formerly Entrezgene) ID'].values[0]
-                if not (math.isnan(float(gene_nbr1))):
-                    node_dict[node_id] = str(int(gene_nbr1))
-
-    edgelist = []
-    ret = ""
-    # iterate over edges
-    for edge_id, edge in nice_cx_network.get_edges():
-        source = edge.get('s')
-        target = edge.get('t')
-        if source in node_dict and target in node_dict and source != target:
-            # convert source and target to NCBI IDs and write into string
-            curr_edge_str = str(node_dict[source]) + "\t" + str(node_dict[target]) + "\n"
-            edgelist.append([node_dict[source], node_dict[target]])
-            ret = ret + curr_edge_str
-    # return tab separated string
-    return ret
 
 
 def jac(x, y):
