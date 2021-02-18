@@ -161,7 +161,7 @@ if [ $configure = "true" ]; then
   echo -e "     + Django allowed hosts: \c"
 
   if [[ "$DJANGO_ALLOWED_HOSTS" =~ ^\[(\"|\').*(\"|\')\]$ ]]; then
-    echo "DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}" >>.env
+    echo "DJANGO_ALLOWED_HOSTS=\"${DJANGO_ALLOWED_HOSTS}\"" >>.env
     echo -e "${green}${DJANGO_ALLOWED_HOSTS}${reset}"
   else
     echo -e "${red}Error! Your input: ${DJANGO_ALLOWED_HOSTS} is not valid. Please check if your input is wrapped in quotes"
