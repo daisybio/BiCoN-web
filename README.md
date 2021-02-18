@@ -4,6 +4,19 @@ Web tool of the [BiCoN](https://github.com/biomedbigdata/BiCoN) package for _net
 
 A hosted version and demo of BiCoN-web can be found under: https://exbio.wzw.tum.de/bicon/
 
+## Table of Contents
+
+* [Installing BiCoN-web](#installing-bicon-web)
+  + [Configuration of BiCoN-web](#configuration-of-bicon-web)
+    - [Configuration options](#configuration-options-)
+  + [Deploying (automatically)](#deploying--automatically-)
+  + [Deploying (manually)](#deploying--manually-)
+* [Updating and maintaining BiCoN-web (`setup.sh`)](#updating-and-maintaining-bicon-web---setupsh--)
+* [Starting and stoping BiCoN-web](#starting-and-stoping-bicon-web)
+* [Managing volumes and data](#managing-volumes-and-data)
+* [Cite](#cite)
+* [Contact](#contact)
+
 ## Installing BiCoN-web
 BiCoN-web comes in an easy to use `docker-compose` format.
 
@@ -146,4 +159,4 @@ If you use BiCoN in your research, we kindly ask you to cite the following manus
 
 ## Contact
 
-If you have difficulties using BiCoN-web, please open an issue at out [GitHub](https://github.com/biomedbigdata/BiCoN-web/issues/new) repository and/or tag @kevihiiin.
+If you have difficulties using BiCoN-web, please open an issue at out [GitHub](https://github.com/biomedbigdata/BiCoN-web/issues/new) repository and/or tag @kevihiiin.ypo
