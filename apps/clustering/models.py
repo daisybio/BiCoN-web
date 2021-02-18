@@ -39,3 +39,16 @@ class Job(models.Model):
     def __str__(self):
         return f'Job ID: {self.job_id} submitted on {self.submit_time}, finished on {self.finished_time}'
 
+
+class PpiNetworkCache(models.Model):
+    # Network id (same as NDEx UUID)
+    network_id = models.CharField(editable=False, max_length=50, primary_key=True, serialize=False)
+    # Date and time this cached version has been last modified/updated
+    last_modified = models.DateTimeField(auto_now=True)
+    # Date and time the NDEx PPI network has been modified
+    data_last_modified = models.DateTimeField()
+    # The actual cached network data as string
+    network_string = models.TextField()
+
+    def __str__(self):
+        return f'Network: {self.network_id} last modified on {self.last_modified}. NDEx last modified on {self.data_last_modified}'

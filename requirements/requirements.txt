@@ -1,9 +1,9 @@
 # Additional requirements that would need to be installed during development
-Django==3.1.6
-celery==4.4.7
-bicon==1.2.14
-gunicorn==20.0.4
-psycopg2==2.8.6
+Django~=3.1.6
+celery~=4.4.7
+bicon~=1.2.14
+gunicorn~=20.0.4
+psycopg2~=2.8.6
 pandas>=1.0.1
 numpy>=1.18.1
 networkx>=2.3
@@ -14,9 +14,10 @@ seaborn>=0.9.0
 # networkx==2.3
 # matplotlib==3.1.0
 # seaborn==0.9.0
-mygene==3.1.0
-lifelines==0.25.9
-ndex2==3.3.1
-plotly==4.14.3
-pybiomart==0.2.0
-importlib_metadata==3.4.0
+mygene~=3.1.0
+lifelines~=0.25.9
+ndex2~=3.3.1
+plotly~=4.14.3
+pybiomart~=0.2.0
+importlib_metadata~=3.4.0
+tqdm~=4.56.2
