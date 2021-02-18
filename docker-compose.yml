@@ -68,10 +68,7 @@ services:
     # If you want the application to be listening on another port different than port 8000
     # Change the 'published' port number to the port you desire
     ports:
-      - target: 80
-        published: 8082 #${NGINX_PUBLISHED_PORT}             # Change this port
-        protocol: tcp
-        mode: host
+      - "${NGINX_PUBLISHED_PORT}:80"
     environment:
       - NGINX_PUBLISHED_PATH=${NGINX_PUBLISHED_PATH}
     networks:
