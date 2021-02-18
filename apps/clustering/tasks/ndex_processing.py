@@ -1,9 +1,13 @@
 import json
 import math
+from datetime import datetime, timedelta
+
 import ndex2
 import pandas as pd
-
+from django.utils import timezone
 from pybiomart import Dataset
+
+from apps.clustering.models import PpiNetworkCache
 
 
 # TODO: Rewrite
@@ -135,24 +139,45 @@ def read_ndex_file_4(fn):
     return ("\n".join(ret))
 
 
-def import_ndex(name):
+def import_ndex(network_id, force_update=False):
     """
     Download and process the PPI network directly from ndexbio.org
-    :param name: String, UUID of the network to download
+    :param network_id: String, UUID of the network to download
+    :param force_update: Boolean, if true the cached version will be ignored and updated
     :return: String, one line per interaction, seperated by tabs
     """
-    # Check when the network was last modified and use local cached version if nothing has changed
-    # using the ndex client
+    ndex_server = 'public.ndexbio.org'
+
+    # --- Check if we can use a cached version
+    # Connect to NDEx server anonymously, download metadata and get modification time
+    network_metadata = ndex2.client.Ndex2(ndex_server) \
+        .get_network_summary(network_id)
+    network_modification_time = datetime.fromtimestamp(network_metadata['modificationTime'] / 1000.0, tz=timezone.utc)
+
+    # Try and retrieve a cached version. Check if the modification date is within spec, return the cached network
+    if not force_update:
+        try:
+            ppi_network_cache = PpiNetworkCache.objects.get(network_id=network_id)
+            datetime_now = timezone.now()
+            # The network data modification date must be the same as the one just retrieved,
+            # the network cache must have been created within the last 24h
+            if ppi_network_cache.data_last_modified == network_modification_time and \
+                    datetime_now - timedelta(hours=24) <= ppi_network_cache.last_modified:
+                print(f'Network cached on {ppi_network_cache.last_modified.isoformat()}')
+                return ppi_network_cache.network_string
+        except PpiNetworkCache.DoesNotExist:
+            # Download and generate network if no cache exists
+            pass
 
     # Import NDEx from server based on UUID
-    nice_cx_network = ndex2.create_nice_cx_from_server(server='public.ndexbio.org', uuid=name)
+    nice_cx_network = ndex2.create_nice_cx_from_server(server=ndex_server, uuid=network_id)
 
     # --- Create a node_id to gene_id dict which maps from the node_id to the gene_id
     node_to_gene_df = pd.DataFrame([x[1] for x in nice_cx_network.get_nodes()]) \
         .rename({'@id': 'Node ID', 'n': 'Gene name'}, axis='columns')
 
     # If we are using APID, then we need to use another attribute
-    if name == '9c38ce6e-c564-11e8-aaa6-0ac135e8bacf':
+    if network_id == '9c38ce6e-c564-11e8-aaa6-0ac135e8bacf':
         node_to_gene_df['Gene name'] = node_to_gene_df['Node ID'].map(
             lambda x: nice_cx_network.get_node_attribute_value(x, 'GeneName_A'))
 
@@ -191,5 +216,10 @@ def import_ndex(name):
                 # If no mapping can be found, skip this node
                 continue
 
-    # return tab separated string with linebreaks
-    return '\n'.join(result_list)
+    # --- Save version to cache (db) and return result network string
+    result_string = '\n'.join(result_list)
+    PpiNetworkCache.objects.update_or_create(
+        network_id=network_id,
+        defaults={'data_last_modified': network_modification_time, 'network_string': result_string}
+    )
+    return result_string
