@@ -2,7 +2,7 @@
 DJANGO_PRODUCTION=true
 # For production you have to supply a list of allowed hosts e.g ['127.0.0.1','localhost']. This should be the ip
 # of the server you are running this application from.
-# You have to wrap the hostnames / ip into quotes. Please escape them using \ or wrap the list into quotes
+# You have to wrap the hostnames / ip into quotes. Please escape the quotes using \ or wrap the list into double quotes
 DJANGO_ALLOWED_HOSTS="['localhost']"
 
 # Postgres User, Password and Database (if none are supplied, the default values are used)
@@ -16,4 +16,4 @@ RABBITMQ_DEFAULT_PASS=mypass
 
 # nginx (if none are supplied, the default values are used)
 NGINX_PUBLISHED_PATH=       # e.g bicon or application/bicon
-NGINX_PUBLISHED_PORT=8081   # e.g 8081
+NGINX_PUBLISHED_PORT=80   # e.g 8081
