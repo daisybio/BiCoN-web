@@ -9,7 +9,7 @@ __dummy = LANGUAGE_CODE
 
 # ##### DEBUG CONFIGURATION ###############################
 # turn off all debugging
-DEBUG = False
+DEBUG = True
 
 # ##### DATABASE CONFIGURATION ############################
 DATABASES = {

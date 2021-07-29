@@ -14,10 +14,40 @@
     <!-- Bootstrap core CSS -->
     <link href="{% static 'clustering/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
 
+    <!-- FOR DEV: BACKEND == V-Server UHH  -->
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.7.7/uhh/drugsTone.js"></script> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.7.7/uhh/styles.css"> -->
+    
+    <!-- FOR DEV: BACKEND == ALFRED  -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.8.1-rc3/uhh/drugsTone.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.8.1-rc3/uhh/styles.css">
+    
+    <!-- FOR PROD: BACKEND == EXBIO  -->
+    <!-- <script src="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.7.7-rc1/releases/drugsTone.js"></script> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/AndiMajore/drugstone-releases@0.7.7-rc1/releases/styles.css"> -->
+    
     <!-- Custom styles for this template TODO add credits?-->
     <link href="{% static 'clustering/css/shop-item.css' %}" rel="stylesheet">
     {% block custom_template_css %}{% endblock %}
     {% block custom_css %}{% endblock %}
+
+    <style>
+    :root {
+        --drgstn-primary:#347eee;
+        --drgstn-secondary:#2e42f2;
+        --drgstn-success:#48C774;
+        --drgstn-warning:#ffdd00;
+        --drgstn-danger:#ff2744;
+        --drgstn-background:#ffffff;
+        --drgstn-panel:#f8f8f8;
+        --drgstn-info:#61c43d;
+        --drgstn-text-primary:#151515;
+        --drgstn-text-secondary:#eeeeee;
+        --drgstn-border:rgba(0, 0, 0, 0.2);
+        --drgstn-tooltip:rgba(74,74,74,0.9);
+        --drgstn-panel-secondary:#FFFFFF;
+    }
+    </style>
 
 </head>
 

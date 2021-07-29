@@ -66,6 +66,86 @@ class ClusteringTaskBase(celery.Task):
         job_finished(task_id, states.FAILURE)
 
 
+class NetexConfig():
+    NODE_TYPE = 'gene'
+    IDENTIFIER = 'hugo'
+    NODE_SHAPE = 'circle'
+    COLOR_MAP = {-4: 'rgb(255, 0, 0)', -3: 'rgb(255, 153, 51)', -2: 'rgb(255, 204, 0)', -1: 'rgb(255, 255, 0)',
+                       0: 'rgb(204, 255, 51)', 1: 'rgb(153, 255, 51)', 2: 'rgb(102, 255, 51)', 3: 'rgb(51, 204, 51)'}
+    EDGE_GROUP = 'custom'
+    EDGE_GROUP_NAME = 'Custom Group'
+    EDGE_COLOR = 'black'
+    
+
+def convert_json_to_netex(json_data) -> dict:
+    """Netex expects minimal input format like:
+    
+    for nodeGroups like 
+    {"genes": {"type": "gene", "color": "blue", "name": "Genes", "shape": "circle"} }
+
+    for edgeGroups like
+    {"custom": {"color": "grey", "name": "Default Edge Group"} }
+    
+    for nodes like 
+    [{'label':'xxx', 'id':'unique_y', 'group': 'genes'}]
+
+    for edges like
+    [{'from': '2', 'to': '3', 'group': 'custom'}]
+
+    Args:
+        json_data ([str]): 
+            { "nodes": 
+                [{"Name": "CFI", "d": 1.1, "color": "rgb(51, 204, 51)", "type": "square", "label": "CFI", "x": -0.2, "y": -0.8, "size": 10, "id": "CFI"}, ...]
+
+            "edges": 
+                [{"id": 0, "color": "rgb(0,0,0)", "source": "CFI", "target": "C4BPA"}, ...]
+            }     
+
+    Returns:
+        dict: [netex input data]
+    """
+
+    def _crop_bicon_value(v):
+        v = v * 2
+        v_int = int(v)
+        if (v < -4):
+            v_int = -4
+        if (v > 3):
+            v_int = 3
+        return v_int/2
+
+    def _update_bicon_node(node):
+        update_data = {
+            'group': str(_crop_bicon_value(node['d'])),
+            'name': node['label'],
+        }
+        node.update(update_data)
+        return node
+    
+    def _update_bicon_edge(edge):
+        update_data = {
+            'from': edge['source'],
+            'to': edge['target'],
+            'group': NetexConfig.EDGE_GROUP
+        }
+        return update_data
+
+    netex_config = {}
+    netex_network = {}
+    netex_network['nodes'] = [_update_bicon_node(node) for node in json_data['nodes']]
+    netex_network['edges'] = [_update_bicon_edge(edge) for edge in json_data['edges']]
+    # generate node group for each occuring color
+    unique_color_values = {float(node['group']) for node in netex_network['nodes']}
+    netex_config['nodeGroups'] = {
+        str(color_v): {'type': NetexConfig.NODE_TYPE, 'color': NetexConfig.COLOR_MAP[color_v*2], 'groupName': str(color_v), 'shape': NetexConfig.NODE_SHAPE} for color_v in unique_color_values
+        }
+    # just one edge group needed
+    netex_config['edgeGroups'] = {NetexConfig.EDGE_GROUP: {"color": NetexConfig.EDGE_COLOR, "groupName": NetexConfig.EDGE_GROUP_NAME} }
+    # additional configuration
+    netex_config['idientifier'] = NetexConfig.IDENTIFIER
+    return netex_config, netex_network
+
+
 def job_finished(task_id, job_status):
     job = Job.objects.get(job_id=task_id)
 
@@ -402,8 +482,11 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
 
     plt.clf()
 
-    script_output_task(expr_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids,
-                       patients2_ids, clinical_df, survival_col_name, job)
+    try:
+        script_output_task(expr_small.T, row_colors, col_colors, G_small, ret2, ret3, adjlist, new_genes1, patients1_ids,
+                        patients2_ids, clinical_df, survival_col_name, job)
+    except Exception as e:
+        print(e)
 
     current_task.update_state(
         state='RUNNING',
@@ -481,12 +564,20 @@ def script_output_task(T, row_colors1, col_colors1, G2, means, genes_all, adjlis
     jsn55 = jsn44.replace('bels', 'bel')
     jsn3 = jsn55.replace('\"directed\": false, \"multigraph\": false, \"graph\": {},', '')
 
+
     # json_path = path.join(settings.MEDIA_ROOT, 'clustering/userfiles/ppi_' + session_id + '.json')
     # with open(json_path, "w") as text_file:
     #     text_file.write(jsn3)
     with StringIO() as output:
         output.write(jsn3)
         job.ppi_json.save(f'ppi_{session_id}.json', File(output))
+
+    # convert data to netex input format
+    netex_config, netex_network = convert_json_to_netex(json.loads(jsn3))
+
+    with StringIO() as output:
+        output.write(json.dumps({'config': netex_config, 'network': netex_network}))
+        job.netex_json.save(f'netex_{session_id}.json', File(output))
 
     colordict = {0: '#BB0000', 1: '#0000BB'}
 

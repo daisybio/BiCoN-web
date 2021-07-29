@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: docker/bicon/Dockerfile
-    command: celery -A BiCoN_web worker -l info
+    command: celery -A BiCoN_web worker -l debug
     env_file:
       - .env
     volumes:
@@ -54,8 +54,8 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     networks:
       - bc_celery_network
-    #ports:
-        #- "5672:5672"
+    # ports:
+    #     - "5672:5672"
     volumes:
       - rabbit_data:/var/lib/rabbitmq
 

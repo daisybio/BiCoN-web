@@ -12,6 +12,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from importlib_metadata import version
+from django.templatetags.static import static
+
 
 from .models import Job
 from .tasks import run_algorithm
@@ -221,7 +223,7 @@ def submit_analysis(request):
         raise KeyError('session_id not found')
 
     # ========== Run the clustering algorithm ==========
-    print('Running algorithm started')
+    print('Running algorithm starteddd')
     # started_algorithm_id = run_algorithm.delay(job, expr_data_selection, expr_data_str, ppi_network_selection,
     #                                            ppi_network_str, False, gene_set_size, L_g_min, L_g_max, n_proc=1,
     #                                            a=hi_sig, b=pher_sig, K=nbr_ants, evaporation=evap, th=0.5, eps=epsilon,
@@ -230,8 +232,9 @@ def submit_analysis(request):
 
     run_algorithm.apply_async(args=[job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str,
                                     L_g_min, L_g_max, apply_log2, apply_z_transformation],
-                              kwargs=algorithm_parameters,
-                              task_id=str(task_id), ignore_result=True)
+                            kwargs=algorithm_parameters,
+                            task_id=str(task_id), ignore_result=True)
+
 
     print(f'redicreting to analysis_status')
     return HttpResponseRedirect(reverse('clustering:analysis_status_single', kwargs={'analysis_id': task_id}))
@@ -309,6 +312,12 @@ def analysis_status_single(request, analysis_id):
 
 def analysis_result(request, analysis_id):
     job = Job.objects.get(job_id=analysis_id)
+
+    netex_json = json.loads(job.netex_json.read().decode("utf-8"))
+    netex_json['config']['legendUrl'] = static('clustering/img/analysis/ppi_network_legend.png')
+    netex_json['config']['legendClass'] = 'w-50 img-fluid'
+    netex_json['config']['showLeftSidebar'] = False
+    
     return render(request, 'clustering/analysis/results/result_single.html', context={
         'navbar': 'analysis',
         'groupbar': 'single_result',
@@ -319,6 +328,8 @@ def analysis_result(request, analysis_id):
         'survival_plotly': job.survival_plotly.name,
         'convergence_png': job.convergence_png.name,
         'result_csv': job.result_csv.name,
+        'netex_config': json.dumps(netex_json['config']),
+        'netex_network': json.dumps(netex_json['network'])
     })
 
 

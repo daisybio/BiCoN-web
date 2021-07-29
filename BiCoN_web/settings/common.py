@@ -48,6 +48,8 @@ PROJECT_TEMPLATES = [
     join(PROJECT_ROOT, 'templates'),
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 # add apps/ to the Python path
 sys.path.append(normpath(join(PROJECT_ROOT, 'apps')))
 
@@ -92,7 +94,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages'
             ],
             'builtins': [
-                'apps.clustering.templatetags.version_numbers'
+                'apps.clustering.templatetags.version_numbers',
+                'apps.clustering.templatetags.dictionary'
             ]
         },
     },

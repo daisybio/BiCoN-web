@@ -35,6 +35,7 @@ class Job(models.Model):
     ppi_png = models.FileField(upload_to=f'clustering/ppi/')
     heatmap_png = models.FileField(upload_to=f'clustering/heatmap/')
     convergence_png = models.FileField(upload_to=f'clustering/convergence/')
+    netex_json = models.FileField(upload_to=f'clustering/netex/', null=True)
 
     def __str__(self):
         return f'Job ID: {self.job_id} submitted on {self.submit_time}, finished on {self.finished_time}'
