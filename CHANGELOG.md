@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+### Changed
+- Switched the Docker image from Python 3.6 (EOL) to Python 3.10
+- Fixed the default settings file so `manage.py` can be called without setting environmental variables
+### Removed
+### Deploy Notes
 
 ## [1.1.0] - 2021-02-21
 Based on BiCoN version 1.2.14
