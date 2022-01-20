@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Switched the Docker image from Python 3.6 (EOL) to Python 3.10
 - Fixed the default settings file so `manage.py` can be called without setting environmental variables
+- Upgraded Celery to version 5
+- Result backend switched from AMQP rabbitmq to the same database as used for Django
 ### Removed
 ### Deploy Notes
+Due to a new result backend, a "migrate" command for the database is necessary
 
 ## [1.1.0] - 2021-02-21
 Based on BiCoN version 1.2.14
