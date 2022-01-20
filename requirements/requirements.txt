@@ -19,5 +19,5 @@ lifelines~=0.25.9
 ndex2~=3.3.1
 plotly~=4.14.3
 pybiomart~=0.2.0
-importlib_metadata~=3.4.0
+importlib_metadata==4.10.1
 tqdm~=4.56.2
