@@ -169,3 +169,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# ##### CELERY CONFIGURATION ############################
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = 'amqp'
+CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
