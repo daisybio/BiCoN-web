@@ -416,6 +416,10 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     job.status = celery.states.SUCCESS
     job.save()
 
+    current_task.update_state(
+        state='SUCCESS'
+    )
+
 
 ##########################################################
 #### running the algorithm - part 2 ######################
