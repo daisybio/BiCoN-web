@@ -172,8 +172,8 @@ def parse_ppi_data(option, ppi_raw_str=None):
 @shared_task(name="run_algorithm", base=ClusteringTaskBase)
 def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection, ppi_network_str, L_g_min, L_g_max,
                   log2, apply_z_transformation, size=2000, n_proc=1, a=1, b=1, k=20, evaporation=0.5, th=1, eps=0.02,
-                  times=6, clusters=2, cost_limit=5, max_iter=200, opt=None, show_pher=False, show_plot=False,
-                  save=None, show_nets=False, use_metadata=False, survival_col_name=None, clinical_df=None):
+                  times=6, cost_limit=5, max_iter=200, opt=None, show_plot=False,
+                  save=None, verbose=False, use_metadata=False, survival_col_name=None, clinical_df=None):
     # ========== Preprocess data and run algorithm ==========
 
     task_id = str(job.job_id)
@@ -270,9 +270,9 @@ def run_algorithm(job, expr_data_selection, expr_data_str, ppi_network_selection
     # max_iter = 1  # TODO REMOVE LATER
     try:
         solution, scores = model.run_search(n_proc=n_proc, a=a, b=b, K=k, evaporation=evaporation, th=th, eps=eps,
-                                            times=times, clusters=clusters, cost_limit=cost_limit,
-                                            max_iter=max_iter, opt=opt, show_pher=show_pher, show_plot=show_plot,
-                                            save=save, show_nets=show_nets)
+                                            times=times, cost_limit=cost_limit,
+                                            max_iter=max_iter, opt=opt, show_plot=show_plot,
+                                            save=save, verbose=verbose, logging=False)
     except AssertionError as er:
         current_task.update_state(
             state='ERROR',
