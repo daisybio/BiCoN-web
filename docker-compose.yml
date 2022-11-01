@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: docker/bicon/Dockerfile
-    command: celery -A BiCoN_web worker -l debug
+    command: celery --app BiCoN_web worker --loglevel=INFO
     env_file:
       - .env
     volumes:

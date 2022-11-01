@@ -17,7 +17,7 @@ from os.path import abspath, basename, dirname, join, normpath
 from importlib_metadata import version
 
 # ##### BiCoN CONFIGURATION ###############################
-BICON_WEB_VERSION_NUMBER = '1.1.0'  # Manually specify the web version
+BICON_WEB_VERSION_NUMBER = '1.2.1'  # Manually specify the web version
 BICON_PACKAGE_VERSION_NUMBER = version('bicon')  # Automatically grab the used BiCoN version
 
 # ##### PATH CONFIGURATION ################################
@@ -63,6 +63,7 @@ DEFAULT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
     'apps.clustering.apps.Clustering',
 ]
 
@@ -172,3 +173,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# ##### CELERY CONFIGURATION ############################
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
