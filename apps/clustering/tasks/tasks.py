@@ -135,6 +135,7 @@ def convert_json_to_netex(json_data) -> dict:
     netex_network['nodes'] = [_update_bicon_node(node) for node in json_data['nodes']]
     netex_network['edges'] = [_update_bicon_edge(edge) for edge in json_data['edges']]
     # generate node group for each occuring color
+    print(netex_network['nodes'])
     unique_color_values = {float(node['group']) for node in netex_network['nodes']}
     netex_config['nodeGroups'] = {
         str(color_v): {'type': NetexConfig.NODE_TYPE, 'color': NetexConfig.COLOR_MAP[color_v*2], 'groupName': str(color_v), 'shape': NetexConfig.NODE_SHAPE} for color_v in unique_color_values

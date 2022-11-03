@@ -42,10 +42,10 @@
     <div class="card mt-4">
         <div class="card-body">
             <h2 class="card-title">Drugst.One</h2>
-            <p>Find drugs and drug-targets based on the extracted subnetworks.</p>
+            <p>Find drug-targets and repurpose drugs based on the extracted subnetworks. <a href="https://drugst.one">More information</a></p>
             <div class="container">
-                <div class="row" style="height: 800px; display: block;">
-                    <network-expander id="netexp" config='{{ netex_config }}' network='{{ netex_network }}'></network-expander>
+                <div class="row">
+                    <drugst-one id="netexp" config='{{ netex_config }}' network='{{ netex_network }}' style="width: 100%;"></drugst-one >
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <h2 class="card-title">Heatmap</h2>
-            <p>.</p>
+            <p>The heatmap shows resulting biclustering.</p>
             <img src="{% get_media_prefix %}{{ heatmap_png }}" class="img-fluid">
 
             <b>
