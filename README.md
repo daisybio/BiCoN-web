@@ -8,10 +8,10 @@ A hosted version and demo of BiCoN-web can be found under: https://exbio.wzw.tum
 
 * [Installing BiCoN-web](#installing-bicon-web)
   + [Configuration of BiCoN-web](#configuration-of-bicon-web)
-    - [Configuration options](#configuration-options-)
-  + [Deploying (automatically)](#deploying--automatically-)
-  + [Deploying (manually)](#deploying--manually-)
-* [Updating and maintaining BiCoN-web (`setup.sh`)](#updating-and-maintaining-bicon-web---setupsh--)
+    - [Configuration options](#configuration-options)
+  + [Deploying (automatically)](#deploying-automatically)
+  + [Deploying (manually)](#deploying-manually)
+* [Updating and maintaining BiCoN-web (`setup.sh`)](#updating-and-maintaining-bicon-web-setupsh)
 * [Starting and stoping BiCoN-web](#starting-and-stoping-bicon-web)
 * [Managing volumes and data](#managing-volumes-and-data)
 * [Cite](#cite)
@@ -151,7 +151,7 @@ docker-compose down --volumes  # THIS COMMAND DELETES ALL THE STORED DATA
 
 ## Cite
 
-BiCoN was developed by the [Big Data in BioMedicine group](https://github.com/biomedbigdata/BiCoN/blob/master/biomedical-big-data.de) and [Computational Systems Medicine group](https://compsysmed.de/) at [Chair of Experimental Bioinformatics](https://www.baumbachlab.net/).
+BiCoN was developed by the [Big Data in BioMedicine group](https://biomedical-big-data.de/) and [Computational Systems Medicine group](https://compsysmed.de/) at [Chair of Experimental Bioinformatics](https://www.baumbachlab.net/).
 
 If you use BiCoN in your research, we kindly ask you to cite the following manuscript: `Olga Lazareva, Stefan Canzar, Kevin Yuan, Jan Baumbach, David B Blumenthal, Paolo Tieri, Tim Kacprowski*, Markus List*, BiCoN: Network-constrained biclustering of patients and omics data, Bioinformatics, 2020;, btaa1076, https://doi.org/10.1093/bioinformatics/btaa1076`
 
